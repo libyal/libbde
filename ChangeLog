@@ -1,0 +1,26 @@
+TODO
+* use openssl and MS Crypto AES encryption instead of local implementation
+  - create separate crypto library with fallback local implementation
+
+20110529
+* renamed to library to libbde
+* updated configure.ac
+* updated common, libcstring, liberror, libnotify, libsystem, libbfio, libuna
+* added encryption method debug function
+
+20110527
+* worked on initial version
+
+20110323
+* worked on initial version
+
+20110322
+* renamed library to libvblde
+* worked on initial version
+
+20110321
+* worked on initial version
+
+20110316
+* initial version
+

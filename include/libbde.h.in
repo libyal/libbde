@@ -1,0 +1,272 @@
+/*
+ * Library to support the Windows NT BitLocker (FVE) format
+ *
+ * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
+ *
+ * Refer to AUTHORS for acknowledgements.
+ *
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#if !defined( _LIBBDE_H )
+#define _LIBBDE_H
+
+#include <libbde/definitions.h>
+#include <libbde/error.h>
+#include <libbde/extern.h>
+#include <libbde/features.h>
+#include <libbde/types.h>
+
+#include <stdio.h>
+
+#if defined( LIBBDE_HAVE_BFIO )
+#include <libbfio.h>
+#endif
+
+#if defined( __cplusplus )
+extern "C" {
+#endif
+
+/* -------------------------------------------------------------------------
+ * Support functions
+ * ------------------------------------------------------------------------- */
+
+/* Returns the library version
+ */
+LIBBDE_EXTERN \
+const char *libbde_get_version(
+             void );
+
+/* Determines if a volume is a VSS volume (check for the VSS identifier)
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_check_volume_signature(
+     const char *filename,
+     libbde_error_t **error );
+
+/* Determines if a volume is a VSS volume (check for the VSS identifier)
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_check_volume_signature_wide(
+     const wchar_t *filename,
+     libbde_error_t **error );
+
+#if defined( LIBBDE_HAVE_BFIO )
+/* Determines if a volume is a VSS volume (check for the VSS identifier) using a Basic File IO (bfio) handle
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_check_volume_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libbde_error_t **error );
+#endif
+
+/* -------------------------------------------------------------------------
+ * Notify functions
+ * ------------------------------------------------------------------------- */
+
+/* Sets the verbose notification
+ */
+LIBBDE_EXTERN \
+void libbde_notify_set_verbose(
+      int verbose );
+
+/* Sets the notification stream
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_notify_set_stream(
+     FILE *stream,
+     libbde_error_t **error );
+
+/* Opens the notification stream using a filename
+ * The stream is opened in append mode
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_notify_stream_open(
+     const char *filename,
+     libbde_error_t **error );
+
+/* Closes the notification stream if opened using a filename
+ * Returns 0 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_notify_stream_close(
+     libbde_error_t **error );
+
+/* -------------------------------------------------------------------------
+ * Error functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees the error including elements
+ */
+LIBBDE_EXTERN \
+void libbde_error_free(
+      libbde_error_t **error );
+
+/* Prints a descriptive string of the error to the stream
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_error_fprint(
+     libbde_error_t *error,
+     FILE *stream );
+
+/* Prints a descriptive string of the error to the string
+ * The end-of-string character is not included in the return value
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_error_sprint(
+     libbde_error_t *error,
+     char *string,
+     size_t size );
+
+/* Prints a backtrace of the error to the stream
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_error_backtrace_fprint(
+     libbde_error_t *error,
+     FILE *stream );
+
+/* Prints a backtrace of the error to the string
+ * The end-of-string character is not included in the return value
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_error_backtrace_sprint(
+     libbde_error_t *error,
+     char *string,
+     size_t size );
+
+/* -------------------------------------------------------------------------
+ * Volume functions
+ * ------------------------------------------------------------------------- */
+
+/* Initializes the volume
+ * Make sure the value volume is pointing to is set to NULL
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_initialize(
+     libbde_volume_t **volume,
+     libbde_error_t **error );
+
+/* Frees a volume
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_free(
+     libbde_volume_t **volume,
+     libbde_error_t **error );
+
+/* Signals the volume to abort its current activity
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_signal_abort(
+     libbde_volume_t *volume,
+     libbde_error_t **error );
+
+/* Opens a volume
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_open(
+     libbde_volume_t *volume,
+     const char *filename,
+     int access_flags,
+     libbde_error_t **error );
+
+#if defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE )
+/* Opens a volume
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_open_wide(
+     libbde_volume_t *volume,
+     const wchar_t *filename,
+     int access_flags,
+     libbde_error_t **error );
+#endif
+
+#if defined( LIBBDE_HAVE_BFIO )
+/* Opens a volume using a Basic File IO (bfio) handle
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_open_file_io_handle(
+     libbde_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
+     int access_flags,
+     libbde_error_t **error );
+#endif
+
+/* Closes a volume
+ * Returns 0 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_close(
+     libbde_volume_t *volume,
+     libbde_error_t **error );
+
+/* Reads data at the current offset into a buffer
+ * Returns the number of bytes read or -1 on error
+ */
+LIBBDE_EXTERN \
+ssize_t libbde_volume_read_buffer(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         libbde_error_t **error );
+
+/* Reads (media) data at a specific offset
+ * Returns the number of bytes read or -1 on error
+ */
+LIBBDE_EXTERN \
+ssize_t libbde_volume_read_random(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libbde_error_t **error );
+
+/* Seeks a certain offset of the data
+ * Returns the offset if seek is successful or -1 on error
+ */
+LIBBDE_EXTERN \
+off64_t libbde_volume_seek_offset(
+         libbde_volume_t *volume,
+         off64_t offset,
+         int whence,
+         libbde_error_t **error );
+
+/* Retrieves the size
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_size(
+     libbde_volume_t *volume,
+     size64_t *size,
+     libbde_error_t **error );
+
+#if defined( __cplusplus )
+}
+#endif
+
+#endif
