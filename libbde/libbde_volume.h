@@ -44,6 +44,14 @@ struct libbde_internal_volume
 	 */
 	size64_t size;
 
+	/* The (binary) recovery password
+	 */
+	uint16_t recovery_password[ 8 ];
+
+	/* Value to indicate the recovery password is set
+	 */
+	uint8_t recovery_password_is_set;
+
 	/* The file IO handle
 	 */
 	libbfio_handle_t *file_io_handle;
@@ -108,6 +116,20 @@ LIBBDE_EXTERN \
 int libbde_volume_get_size(
      libbde_volume_t *volume,
      size64_t *size,
+     liberror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_set_utf8_recovery_password(
+     libbde_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_size,
+     liberror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_set_utf16_recovery_password(
+     libbde_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_size,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

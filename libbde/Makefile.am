@@ -8,6 +8,7 @@ AM_CPPFLAGS = \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
+	@LIBFVALUE_CPPFLAGS@ \
 	@MEMWATCH_CPPFLAGS@
 
 lib_LTLIBRARIES = libbde.la
@@ -23,8 +24,11 @@ libbde_la_SOURCES = \
 	libbde_libbfio.h \
 	libbde_libfdatetime.h \
 	libbde_libfguid.h \
+	libbde_libfvalue.h \
 	libbde_libuna.h \
 	libbde_notify.c libbde_notify.h \
+	libbde_recovery.c libbde_recovery.h \
+	libbde_sha.c libbde_sha.h \
 	libbde_support.c libbde_support.h \
 	libbde_types.h \
 	libbde_unused.h \
@@ -39,7 +43,10 @@ libbde_la_LIBADD = \
 	@LIBUNA_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
-	@LIBFGUID_LIBADD@
+	@LIBFGUID_LIBADD@ \
+	@LIBFVALUE_LIBADD@ \
+	@LIBCRYPTO_LIBADD@ \
+	@LIBDL_LIBADD@
 
 libbde_la_LDFLAGS = -no-undefined -version-info 1:0:0
 

@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110529],
+ [20110531],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -794,6 +794,194 @@ AM_CONDITIONAL(
  [HAVE_LOCAL_LIBFGUID],
  [test "x$ac_libbde_have_libfguid" = xlocal])
 
+dnl Check for enabling libfvalue for file value support
+LIBBDE_CHECK_LIBFVALUE
+
+AS_IF(
+[test "x$ac_libbde_have_libfvalue" = xyes],
+ [dnl libfvalue is available
+ AC_SUBST(
+  [libbde_pc_libs_private_libfvalue],
+  [-lfvalue])
+ AC_SUBST(
+  [libbde_spec_requires_libfvalue],
+  [libfvalue])
+ AC_SUBST(
+  [libbde_spec_build_requires_libfvalue],
+  [libfvalue-devel])
+ AC_SUBST(
+  [LIBFVALUE_CPPFLAGS],
+  [])
+ AC_SUBST(
+  [LIBFVALUE_LIBADD],
+  []) ],
+ [dnl libfvalue is not available, using the (local) version that came with the source package
+ AC_DEFINE(
+  [HAVE_LOCAL_LIBFVALUE],
+  [1],
+  [Define to 1 if the local version of libfvalue is used.])
+ AC_SUBST(
+  [HAVE_LOCAL_LIBFVALUE],
+  [1])
+ AC_SUBST(
+  [libbde_pc_libs_private_libfvalue],
+  [])
+ AC_SUBST(
+  [libbde_spec_requires_libfvalue],
+  [])
+ AC_SUBST(
+  [libbde_spec_build_requires_libfvalue],
+  [])
+ AC_SUBST(
+  [LIBFVALUE_CPPFLAGS],
+  [-I../libfvalue])
+ AC_SUBST(
+  [LIBFVALUE_LIBADD],
+  [../libfvalue/libfvalue.la])
+ ac_libbde_have_libfvalue=local])
+
+AM_CONDITIONAL(
+ [HAVE_LOCAL_LIBFVALUE],
+ [test "x$ac_libbde_have_libfvalue" = xlocal])
+
+dnl Check for enabling crypographic digest hash support
+ac_libbde_have_libcrypto=no
+
+AS_IF(
+ [test "x$ac_cv_libbde_enable_winapi" = xyes],
+ [AC_SUBST(
+  [LIBCRYPTO_LIBADD],
+  [-ladvapi32])
+  ac_libbde_have_libcrypto=libadvapi32])
+
+dnl Check for libcrypto openssl EVP support
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xno],
+ [AC_CHECK_HEADERS([openssl/evp.h openssl/opensslv.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_openssl_evp_h" = xyes],
+  [AC_LANG_PUSH(C)
+  AC_MSG_CHECKING(
+   [if openssl/evp.h can be used in combination with zlib.h])
+  AC_LINK_IFELSE(
+   AC_LANG_PROGRAM(
+    [[#include <zlib.h>
+#include <openssl/evp.h>]],
+    [[ ]]),
+    [AC_MSG_RESULT(
+     [yes])
+    AC_DEFINE(
+     [HAVE_OPENSSL_EVP_H],
+     [1],
+     [Define to 1 if you have the <openssl/evp.h> header file.])
+    AC_SUBST(
+     [HAVE_OPENSSL_EVP_H],
+     [1])
+    ac_libbde_have_libcrypto=libcrypto_evp],
+   [AC_MSG_RESULT(
+    [no])
+   ac_libbde_have_libcrypto=no])
+  AC_LANG_POP(C)],
+  [ac_libbde_have_libcrypto=no])
+ ])
+
+dnl Check if all required libcrypto openssl EVP functions are available
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
+ [AC_CHECK_LIB(
+  crypto,
+  EVP_sha256,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_MD_CTX_init,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_MD_CTX_cleanup,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_DigestInit_ex,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_DigestUpdate,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_DigestFinal_ex,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xlibadvapi32],
+ [ac_libbde_have_libcrypto_sha256=libadvapi32])
+
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
+ [ac_libbde_have_libcrypto_sha256=libcrypto_evp],
+ [AC_SUBST(
+  [HAVE_OPENSSL_EVP_H],
+  [0])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xno],
+ [ac_libbde_have_libcrypto_sha256=no])
+
+dnl Check for libcrypto SHA256 support
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto_sha256" = xno],
+ [AC_CHECK_HEADERS([openssl/sha.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_openssl_sha256_h" = xyes],
+  [ac_libbde_have_libcrypto_sha256=libcrypto
+  AC_CHECK_LIB(
+   crypto,
+   SHA256_Init,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_libcrypto_sha256=no])
+  AC_CHECK_LIB(
+   crypto,
+   SHA256_Update,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_libcrypto_sha256=no])
+  AC_CHECK_LIB(
+   crypto,
+   SHA256_Final,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_libcrypto_sha256=no])
+  ])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto_sha256" = xlibcrypto_evp || test "x$ac_libbde_have_libcrypto_sha256" = xlibcrypto],
+ [AC_SUBST(
+  [LIBCRYPTO_LIBADD],
+  ["-lcrypto"])
+ AC_DEFINE(
+  [HAVE_LIBCRYPTO],
+  [1],
+  [Define to 1 if you have the 'crypto' library (-lcrypto).])
+ dnl Enforce the dynamic loader library to be included if available
+ AC_CHECK_LIB(
+  dl,
+  dlopen,
+  [AC_SUBST(
+   [LIBDL_LIBADD],
+   ["-ldl"])],
+  [])
+ ])
+
 dnl Check if libbde should be build with wide character type support
 AS_IF(
  [test "x$ac_cv_libbde_enable_winapi" = xyes],
@@ -978,7 +1166,7 @@ AS_IF(
 
 dnl Check if requires and build requires should be set in spec file
 AS_IF(
- [test "x$ac_libbde_have_libuna" = xyes || test "x$ac_libbde_have_libbfio" = xyes || test "x$ac_libbde_have_libfdatetime" = xyes],
+ [test "x$ac_libbde_have_libuna" = xyes || test "x$ac_libbde_have_libbfio" = xyes || test "x$ac_libbde_have_libfdatetime" = xyes || test "x$ac_libbde_have_libfguid" = xyes || test "x$ac_libbde_have_libfvalue" = xyes],
  [AC_SUBST(
   [libbde_spec_requires],
   [Requires:])
@@ -1035,6 +1223,7 @@ AC_CONFIG_FILES([libuna/Makefile])
 AC_CONFIG_FILES([libbfio/Makefile])
 AC_CONFIG_FILES([libfdatetime/Makefile])
 AC_CONFIG_FILES([libfguid/Makefile])
+AC_CONFIG_FILES([libfvalue/Makefile])
 AC_CONFIG_FILES([libbde/Makefile])
 AC_CONFIG_FILES([libsystem/Makefile])
 AC_CONFIG_FILES([bdetools/Makefile])
@@ -1064,6 +1253,8 @@ Building:
    libbfio support:                          $ac_libbde_have_libbfio
    libfdatetime support:                     $ac_libbde_have_libfdatetime
    libfguid support:                         $ac_libbde_have_libfguid
+   libfvalue support:                        $ac_libbde_have_libfvalue
+   SHA256 support:                           $ac_libbde_have_libcrypto_sha256
 
 Features:
    Wide character type support:              $ac_cv_libbde_enable_wide_character_type

@@ -310,7 +310,7 @@ int libbde_io_handle_read_volume_header(
 		 3 );
 
 		libnotify_printf(
-		 "%s: signature\t\t\t: %c%c%c%c%c%c%c%c\n",
+		 "%s: signature\t\t\t\t: %c%c%c%c%c%c%c%c\n",
 		 function,
 		 volume_header_data[ 3 ],
 		 volume_header_data[ 4 ],
@@ -487,6 +487,7 @@ int libbde_io_handle_read_metadata(
 	libfguid_identifier_t *guid                 = NULL;
 	size_t value_string_size                    = 0;
 	uint64_t value_64bit                        = 0;
+	uint32_t property_size                      = 0;
 	uint32_t value_32bit                        = 0;
 	uint16_t value_16bit                        = 0;
 	int result                                  = 0;
@@ -627,7 +628,7 @@ int libbde_io_handle_read_metadata(
 		 value_16bit );
 
 		libnotify_printf(
-		 "%s: version\t\t\t\t: %" PRIu32 "\n",
+		 "%s: version\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 version );
 
@@ -678,7 +679,7 @@ int libbde_io_handle_read_metadata(
 			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_size,
 			 value_32bit );
 			libnotify_printf(
-			 "%s: number of volume header sectors\t: %" PRIu32 "\n",
+			 "%s: number of volume header sectors\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
 		}
@@ -694,7 +695,7 @@ int libbde_io_handle_read_metadata(
 		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->second_metadata_offset,
 		 value_64bit );
 		libnotify_printf(
-		 "%s: second metadata offset\t\t: 0x%08" PRIx64 "\n",
+		 "%s: second metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -785,7 +786,7 @@ int libbde_io_handle_read_metadata(
 		 metadata_size );
 
 		libnotify_printf(
-		 "%s: version\t\t\t\t: %" PRIu32 "\n",
+		 "%s: version\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 version );
 
@@ -879,7 +880,7 @@ int libbde_io_handle_read_metadata(
 		 value_32bit );
 
 		libnotify_printf(
-		 "%s: encryption method\t\t: 0x%08" PRIx32 " (%s)\n",
+		 "%s: encryption method\t\t\t: 0x%08" PRIx32 " (%s)\n",
 		 function,
 		 io_handle->encryption_method,
 		 libbde_debug_print_encryption_method(
@@ -1060,7 +1061,7 @@ int libbde_io_handle_read_metadata(
 			 value_type );
 
 			libnotify_printf(
-			 "%s: version\t\t\t\t: %" PRIu16 "\n",
+			 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
 			 function,
 			 version );
 		}
@@ -1098,6 +1099,206 @@ int libbde_io_handle_read_metadata(
 		{
 			switch( entry_type )
 			{
+				case 0x0002:
+					if( value_type == 0x0008 )
+					{
+						if( entry_size < 28 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+							 "%s: entry size value out of bounds.",
+							 function );
+
+							goto on_error;
+						}
+						if( libfguid_identifier_initialize(
+						     &guid,
+						     error ) != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+							 "%s: unable to create GUID.",
+							 function );
+
+							goto on_error;
+						}
+						if( libfguid_identifier_copy_from_byte_stream(
+						     guid,
+						     &( fve_metadata[ 0 ] ),
+						     16,
+						     LIBFGUID_ENDIAN_LITTLE,
+						     error ) != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+							 "%s: unable to copy byte stream to GUID.",
+							 function );
+
+							goto on_error;
+						}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+						result = libfguid_identifier_copy_to_utf16_string(
+							  guid,
+							  (uint16_t *) guid_string,
+							  LIBFGUID_IDENTIFIER_STRING_SIZE,
+							  error );
+#else
+						result = libfguid_identifier_copy_to_utf8_string(
+							  guid,
+							  (uint8_t *) guid_string,
+							  LIBFGUID_IDENTIFIER_STRING_SIZE,
+							  error );
+#endif
+						if( result != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+							 "%s: unable to copy GUID to string.",
+							 function );
+
+							goto on_error;
+						}
+						libnotify_printf(
+						 "%s: key identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+						 function,
+						 guid_string );
+
+						if( libfguid_identifier_free(
+						     &guid,
+						     error ) != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+							 "%s: unable to free GUID.",
+							 function );
+
+							goto on_error;
+						}
+						if( libfdatetime_filetime_initialize(
+						     &filetime,
+						     error ) != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+							 "%s: unable to create filetime.",
+							 function );
+
+							goto on_error;
+						}
+						if( libfdatetime_filetime_copy_from_byte_stream(
+						     filetime,
+						     &( fve_metadata[ 16 ] ),
+						     8,
+						     LIBFDATETIME_ENDIAN_LITTLE,
+						     error ) != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+							 "%s: unable to copy filetime from byte stream.",
+							 function );
+
+							goto on_error;
+						}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+						result = libfdatetime_filetime_copy_to_utf16_string(
+							  filetime,
+							  (uint16_t *) filetime_string,
+							  24,
+							  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+							  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+							  error );
+#else
+						result = libfdatetime_filetime_copy_to_utf8_string(
+							  filetime,
+							  (uint8_t *) filetime_string,
+							  24,
+							  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+							  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+							  error );
+#endif
+						if( result != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+							 "%s: unable to copy filetime to string.",
+							 function );
+
+							goto on_error;
+						}
+						libnotify_printf(
+						 "%s: unknown time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+						 function,
+						 filetime_string );
+
+						if( libfdatetime_filetime_free(
+						     &filetime,
+						     error ) != 1 )
+						{
+							liberror_error_set(
+							 error,
+							 LIBERROR_ERROR_DOMAIN_RUNTIME,
+							 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+							 "%s: unable to free filetime.",
+							 function );
+
+							goto on_error;
+						}
+						byte_stream_copy_to_uint32_little_endian(
+						 &( fve_metadata[ 24 ] ),
+						 value_32bit );
+						libnotify_printf(
+						 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
+						 function,
+						 value_32bit );
+
+						fve_metadata += 28;
+						entry_size   -= 28;
+
+						/* TODO check if entry size is multitude of 4 */
+
+						while( entry_size >= 4 )
+						{
+							byte_stream_copy_to_uint32_little_endian(
+							 fve_metadata,
+							 property_size );
+							libnotify_printf(
+							 "%s: property size\t\t\t\t: %" PRIu32 "\n",
+							 function,
+							 property_size );
+
+							/* TODO check if property size is in bounds */
+
+							libnotify_printf(
+							 "%s: property data:\n",
+							 function );
+							libnotify_print_data(
+							 &( fve_metadata[ 4 ] ),
+							 property_size - 4 );
+
+							fve_metadata += property_size;
+							entry_size   -= property_size;
+						}
+						libnotify_printf(
+						 "\n" );
+					}
+					break;
+
 				case 0x0007:
 					if( value_type == 0x0002 )
 					{
@@ -1173,7 +1374,7 @@ int libbde_io_handle_read_metadata(
 							return( -1 );
 						}
 						libnotify_printf(
-						 "%s: volume name\t\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+						 "%s: volume name\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 						 function,
 						 value_string );
 

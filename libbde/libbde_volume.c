@@ -31,6 +31,7 @@
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_recovery.h"
 #include "libbde_volume.h"
 
 /* Initialize a volume
@@ -513,6 +514,17 @@ int libbde_volume_open_file_io_handle(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
+	if( internal_volume->file_io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
 	if( file_io_handle == NULL )
 	{
 		liberror_error_set(
@@ -856,6 +868,120 @@ int libbde_volume_get_size(
 		return( -1 );
 	}
 	*size = internal_volume->size;
+
+	return( 1 );
+}
+
+/* Sets an UTF-8 formatted recovery password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
+ */
+int libbde_volume_set_utf8_recovery_password(
+     libbde_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_size,
+     liberror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_set_utf8_recovery_password";
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->file_io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_recovery_password_copy_utf8_to_binary(
+	     utf8_string,
+	     utf8_string_size,
+	     internal_volume->recovery_password,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set recovery password.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume->recovery_password_is_set = 1;
+
+	return( 1 );
+}
+
+/* Sets an UTF-16 formatted recovery password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
+ */
+int libbde_volume_set_utf16_recovery_password(
+     libbde_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_size,
+     liberror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_set_utf16_recovery_password";
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->file_io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_recovery_password_copy_utf16_to_binary(
+	     utf16_string,
+	     utf16_string_size,
+	     internal_volume->recovery_password,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set recovery password.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume->recovery_password_is_set = 1;
 
 	return( 1 );
 }
