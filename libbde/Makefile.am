@@ -6,6 +6,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/libnotify \
 	@LIBUNA_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
+	@LIBFDATA_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFVALUE_CPPFLAGS@ \
@@ -22,6 +23,7 @@ libbde_la_SOURCES = \
 	libbde_extern.h \
 	libbde_io_handle.c libbde_io_handle.h \
 	libbde_libbfio.h \
+	libbde_libfdata.h \
 	libbde_libfdatetime.h \
 	libbde_libfguid.h \
 	libbde_libfvalue.h \
@@ -45,6 +47,7 @@ libbde_la_LIBADD = \
 	../libnotify/libnotify.la \
 	@LIBUNA_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
+	@LIBFDATA_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
 	@LIBFVALUE_LIBADD@ \

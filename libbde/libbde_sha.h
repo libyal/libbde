@@ -66,11 +66,11 @@ typedef struct libbde_sha256_context libbde_sha256_context_t;
 
 struct libbde_sha256_context
 {
-/* TODO code clean up for fallback */
-
 	/* The block index
 	 */
 	size_t block_index;
+
+/* TODO code clean up for fallback */
 
 	size_t size;
 	size_t total_size;

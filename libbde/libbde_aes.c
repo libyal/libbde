@@ -1,5 +1,5 @@
 /*
- * FIPS-197 compliant AES encryption functions
+ * AES encryption functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -19,25 +19,45 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- *  The AES block cipher was designed by Vincent Rijmen and Joan Daemen.
- *
- *  http://csrc.nist.gov/encryption/aes/rijndael/Rijndael.pdf
- *  http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
- */
-
 #include <common.h>
 #include <memory.h>
 #include <types.h>
 
 #include <liberror.h>
 
+#if defined( WINAPI )
+#include <wincrypt.h>
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+#include <openssl/evp.h>
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+#include <openssl/sha.h>
+
+#endif
+
 #include "libbde_aes.h"
 
-/* TODO replace by openssl and MS crypto API */
+#if defined( WINAPI )
+
+#if !defined( PROV_RSA_AES )
+#define PROV_RSA_AES		24
+#endif
+
+#endif /* defined( WINAPI ) */
+
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+
+/* FIPS-197 compliant AES encryption functions
+ *
+ * The AES block cipher was designed by Vincent Rijmen and Joan Daemen.
+ *
+ * http://csrc.nist.gov/encryption/aes/rijndael/Rijndael.pdf
+ * http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+ */
 
 #define PADLOCK_ALIGN16(x) \
-	(unsigned long *) (16 + ((long) x & ~15))
+	(uint32_t *) (16 + ((intptr_t) x & ~15))
 
 #include <string.h>
 
@@ -61,39 +81,85 @@
 }
 #endif /* PUT_ULONG_LE */
 
+#define AES_FROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
+{                                               \
+    X0 = *RK++ ^ FT0[ ( Y0       ) & 0xff ] ^   \
+                 FT1[ ( Y1 >>  8 ) & 0xff ] ^   \
+                 FT2[ ( Y2 >> 16 ) & 0xff ] ^   \
+                 FT3[ ( Y3 >> 24 ) & 0xff ];    \
+                                                \
+    X1 = *RK++ ^ FT0[ ( Y1       ) & 0xff ] ^   \
+                 FT1[ ( Y2 >>  8 ) & 0xff ] ^   \
+                 FT2[ ( Y3 >> 16 ) & 0xff ] ^   \
+                 FT3[ ( Y0 >> 24 ) & 0xff ];    \
+                                                \
+    X2 = *RK++ ^ FT0[ ( Y2       ) & 0xff ] ^   \
+                 FT1[ ( Y3 >>  8 ) & 0xff ] ^   \
+                 FT2[ ( Y0 >> 16 ) & 0xff ] ^   \
+                 FT3[ ( Y1 >> 24 ) & 0xff ];    \
+                                                \
+    X3 = *RK++ ^ FT0[ ( Y3       ) & 0xff ] ^   \
+                 FT1[ ( Y0 >>  8 ) & 0xff ] ^   \
+                 FT2[ ( Y1 >> 16 ) & 0xff ] ^   \
+                 FT3[ ( Y2 >> 24 ) & 0xff ];    \
+}
+
+#define AES_RROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
+{                                               \
+    X0 = *RK++ ^ RT0[ ( Y0       ) & 0xff ] ^   \
+                 RT1[ ( Y3 >>  8 ) & 0xff ] ^   \
+                 RT2[ ( Y2 >> 16 ) & 0xff ] ^   \
+                 RT3[ ( Y1 >> 24 ) & 0xff ];    \
+                                                \
+    X1 = *RK++ ^ RT0[ ( Y1       ) & 0xff ] ^   \
+                 RT1[ ( Y0 >>  8 ) & 0xff ] ^   \
+                 RT2[ ( Y3 >> 16 ) & 0xff ] ^   \
+                 RT3[ ( Y2 >> 24 ) & 0xff ];    \
+                                                \
+    X2 = *RK++ ^ RT0[ ( Y2       ) & 0xff ] ^   \
+                 RT1[ ( Y1 >>  8 ) & 0xff ] ^   \
+                 RT2[ ( Y0 >> 16 ) & 0xff ] ^   \
+                 RT3[ ( Y3 >> 24 ) & 0xff ];    \
+                                                \
+    X3 = *RK++ ^ RT0[ ( Y3       ) & 0xff ] ^   \
+                 RT1[ ( Y2 >>  8 ) & 0xff ] ^   \
+                 RT2[ ( Y1 >> 16 ) & 0xff ] ^   \
+                 RT3[ ( Y0 >> 24 ) & 0xff ];    \
+}
+
 /*
  * Forward S-box & tables
  */
 static unsigned char FSb[256];
-static unsigned long FT0[256]; 
-static unsigned long FT1[256]; 
-static unsigned long FT2[256]; 
-static unsigned long FT3[256]; 
+static uint32_t FT0[256]; 
+static uint32_t FT1[256]; 
+static uint32_t FT2[256]; 
+static uint32_t FT3[256]; 
 
 /*
  * Reverse S-box & tables
  */
 static unsigned char RSb[256];
-static unsigned long RT0[256];
-static unsigned long RT1[256];
-static unsigned long RT2[256];
-static unsigned long RT3[256];
+static uint32_t RT0[256];
+static uint32_t RT1[256];
+static uint32_t RT2[256];
+static uint32_t RT3[256];
 
 /*
  * Round constants
  */
-static unsigned long RCON[10];
+static uint32_t libbde_aes_round_constants[ 10 ];
 
 /*
  * Tables generation code
  */
-#define ROTL8(x) ( ( x << 8 ) & 0xFFFFFFFF ) | ( x >> 24 )
+#define ROTL8(x) ( ( x << 8 ) & 0xffffffff ) | ( x >> 24 )
 #define XTIME(x) ( ( x << 1 ) ^ ( ( x & 0x80 ) ? 0x1B : 0x00 ) )
 #define MUL(x,y) ( ( x && y ) ? pow[(log[x]+log[y]) % 255] : 0 )
 
-static int aes_init_done = 0;
+static int libbde_aes_tables_initialized = 0;
 
-static void aes_gen_tables( void )
+static void libbde_aes_tables_generate( void )
 {
     int i, x, y, z;
     int pow[256];
@@ -106,7 +172,7 @@ static void aes_gen_tables( void )
     {
         pow[i] = x;
         log[x] = i;
-        x = ( x ^ XTIME( x ) ) & 0xFF;
+        x = ( x ^ XTIME( x ) ) & 0xff;
     }
 
     /*
@@ -114,8 +180,8 @@ static void aes_gen_tables( void )
      */
     for( i = 0, x = 1; i < 10; i++ )
     {
-        RCON[i] = (unsigned long) x;
-        x = XTIME( x ) & 0xFF;
+        libbde_aes_round_constants[i] = (unsigned long) x;
+        x = XTIME( x ) & 0xff;
     }
 
     /*
@@ -128,10 +194,10 @@ static void aes_gen_tables( void )
     {
         x = pow[255 - log[i]];
 
-        y  = x; y = ( (y << 1) | (y >> 7) ) & 0xFF;
-        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xFF;
-        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xFF;
-        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xFF;
+        y  = x; y = ( (y << 1) | (y >> 7) ) & 0xff;
+        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
+        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
+        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
         x ^= y ^ 0x63;
 
         FSb[i] = (unsigned char) x;
@@ -144,8 +210,8 @@ static void aes_gen_tables( void )
     for( i = 0; i < 256; i++ )
     {
         x = FSb[i];
-        y = XTIME( x ) & 0xFF;
-        z =  ( y ^ x ) & 0xFF;
+        y = XTIME( x ) & 0xff;
+        z =  ( y ^ x ) & 0xff;
 
         FT0[i] = ( (unsigned long) y       ) ^
                  ( (unsigned long) x <<  8 ) ^
@@ -169,219 +235,582 @@ static void aes_gen_tables( void )
     }
 }
 
-/*
- * AES key schedule (encryption)
+#endif /* !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) ) */
+
+/* Initializes the AES context
+ * Returns 1 if successful or -1 on error
  */
-void aes_setkey_enc(
-      aes_context *ctx,
-      unsigned char *key,
-      int keysize )
+int libbde_aes_initialize(
+     libbde_aes_context_t *context,
+     liberror_error_t **error )
 {
-    int i;
-    unsigned long *RK;
+	static char *function = "libbde_aes_initialize";
 
-    if( aes_init_done == 0 )
-    {
-        aes_gen_tables();
-        aes_init_done = 1;
-    }
-    switch( keysize )
-    {
-        case 128: ctx->nr = 10; break;
-        case 192: ctx->nr = 12; break;
-        case 256: ctx->nr = 14; break;
-        default : return;
-    }
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
 
-    ctx->rk = RK = PADLOCK_ALIGN16( ctx->buf );
-
-    for( i = 0; i < (keysize >> 5); i++ )
-    {
-        GET_ULONG_LE( RK[i], key, i << 2 );
-    }
-
-    switch( ctx->nr )
-    {
-        case 10:
-
-            for( i = 0; i < 10; i++, RK += 4 )
-            {
-                RK[4]  = RK[0] ^ RCON[i] ^
-                    ( FSb[ ( RK[3] >>  8 ) & 0xFF ]       ) ^
-                    ( FSb[ ( RK[3] >> 16 ) & 0xFF ] <<  8 ) ^
-                    ( FSb[ ( RK[3] >> 24 ) & 0xFF ] << 16 ) ^
-                    ( FSb[ ( RK[3]       ) & 0xFF ] << 24 );
-
-                RK[5]  = RK[1] ^ RK[4];
-                RK[6]  = RK[2] ^ RK[5];
-                RK[7]  = RK[3] ^ RK[6];
-            }
-            break;
-
-        case 12:
-
-            for( i = 0; i < 8; i++, RK += 6 )
-            {
-                RK[6]  = RK[0] ^ RCON[i] ^
-                    ( FSb[ ( RK[5] >>  8 ) & 0xFF ]       ) ^
-                    ( FSb[ ( RK[5] >> 16 ) & 0xFF ] <<  8 ) ^
-                    ( FSb[ ( RK[5] >> 24 ) & 0xFF ] << 16 ) ^
-                    ( FSb[ ( RK[5]       ) & 0xFF ] << 24 );
-
-                RK[7]  = RK[1] ^ RK[6];
-                RK[8]  = RK[2] ^ RK[7];
-                RK[9]  = RK[3] ^ RK[8];
-                RK[10] = RK[4] ^ RK[9];
-                RK[11] = RK[5] ^ RK[10];
-            }
-            break;
-
-        case 14:
-
-            for( i = 0; i < 7; i++, RK += 8 )
-            {
-                RK[8]  = RK[0] ^ RCON[i] ^
-                    ( FSb[ ( RK[7] >>  8 ) & 0xFF ]       ) ^
-                    ( FSb[ ( RK[7] >> 16 ) & 0xFF ] <<  8 ) ^
-                    ( FSb[ ( RK[7] >> 24 ) & 0xFF ] << 16 ) ^
-                    ( FSb[ ( RK[7]       ) & 0xFF ] << 24 );
-
-                RK[9]  = RK[1] ^ RK[8];
-                RK[10] = RK[2] ^ RK[9];
-                RK[11] = RK[3] ^ RK[10];
-
-                RK[12] = RK[4] ^
-                    ( FSb[ ( RK[11]       ) & 0xFF ]       ) ^
-                    ( FSb[ ( RK[11] >>  8 ) & 0xFF ] <<  8 ) ^
-                    ( FSb[ ( RK[11] >> 16 ) & 0xFF ] << 16 ) ^
-                    ( FSb[ ( RK[11] >> 24 ) & 0xFF ] << 24 );
-
-                RK[13] = RK[5] ^ RK[12];
-                RK[14] = RK[6] ^ RK[13];
-                RK[15] = RK[7] ^ RK[14];
-            }
-            break;
-
-        default:
-
-            break;
-    }
+		return( -1 );
+	}
+/* TODO */
+	return( 1 );
 }
 
-/*
- * AES key schedule (decryption)
+/* Finalizes the AES context
+ * Returns 1 if successful or -1 on error
  */
-void aes_setkey_dec( aes_context *ctx, unsigned char *key, int keysize )
+int libbde_aes_finalize(
+     libbde_aes_context_t *context,
+     liberror_error_t **error )
 {
+	static char *function = "libbde_aes_finalize";
+
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO */
+	return( 1 );
+}
+
+/* Sets the AES decryption key
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_set_decyption_key(
+     libbde_aes_context_t *context,
+     const uint8_t *key,
+     size_t bit_size,
+     liberror_error_t **error )
+{
+	static char *function    = "libbde_aes_set_decyption_key";
+
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+	libbde_aes_context encryption_context;
+
+	uint32_t *round_keys     = NULL;
+	size_t key_index         = 0;
+	int round_constant_index = 0;
+#endif
+
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( bit_size != 128 )
+	 && ( bit_size != 192 )
+	 && ( bit_size != 256 ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported key bit size.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( WINAPI )
+	/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+	/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	if( AES_set_decrypt_key(
+	     (unsigned char *) key,
+	     (int) bit_size,
+	     &( context->key ) ) != 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set decryption key in context.",
+		 function );
+
+		return( -1 );
+	}
+#else
+	if( bit_size == 128 )
+	{
+		context->number_of_round_keys = 10;
+	}
+	else if( bit_size == 192 )
+	{
+		context->number_of_round_keys = 12;
+	}
+	else if( bit_size == 256 )
+	{
+		context->number_of_round_keys = 14;
+	}
+	/* Align the buffer to next 16-byte blocks
+	 */
+	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) )
+
+	round_keys = context->round_keys;
+
+	if( libbde_aes_set_encryption_key(
+	     &encryption_context,
+	     key,
+	     bit_size,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set encryption key in context.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO */
     int i, j;
-    aes_context cty;
-    unsigned long *RK;
-    unsigned long *SK;
+    uint32_t *SK;
 
-    switch( keysize )
-    {
-        case 128: ctx->nr = 10; break;
-        case 192: ctx->nr = 12; break;
-        case 256: ctx->nr = 14; break;
-        default : return;
-    }
-
-    ctx->rk = RK = PADLOCK_ALIGN16( ctx->buf );
-
-    aes_setkey_enc( &cty, key, keysize );
     SK = cty.rk + cty.nr * 4;
 
-    *RK++ = *SK++;
-    *RK++ = *SK++;
-    *RK++ = *SK++;
-    *RK++ = *SK++;
+    *round_keys++ = *SK++;
+    *round_keys++ = *SK++;
+    *round_keys++ = *SK++;
+    *round_keys++ = *SK++;
 
-    for( i = ctx->nr, SK -= 8; i > 1; i--, SK -= 8 )
+    for( i = context->number_of_round_keys, SK -= 8;
+         i > 1;
+         i--, SK -= 8 )
     {
         for( j = 0; j < 4; j++, SK++ )
         {
-            *RK++ = RT0[ FSb[ ( *SK       ) & 0xFF ] ] ^
-                    RT1[ FSb[ ( *SK >>  8 ) & 0xFF ] ] ^
-                    RT2[ FSb[ ( *SK >> 16 ) & 0xFF ] ] ^
-                    RT3[ FSb[ ( *SK >> 24 ) & 0xFF ] ];
+            *round_keys++ = RT0[ FSb[ ( *SK       ) & 0xff ] ] ^
+                    RT1[ FSb[ ( *SK >>  8 ) & 0xff ] ] ^
+                    RT2[ FSb[ ( *SK >> 16 ) & 0xff ] ] ^
+                    RT3[ FSb[ ( *SK >> 24 ) & 0xff ] ];
         }
     }
 
-    *RK++ = *SK++;
-    *RK++ = *SK++;
-    *RK++ = *SK++;
-    *RK++ = *SK++;
+    *round_keys++ = *SK++;
+    *round_keys++ = *SK++;
+    *round_keys++ = *SK++;
+    *round_keys++ = *SK++;
 
     memset( &cty, 0, sizeof( aes_context ) );
+#endif
+	return( 1 );
 }
 
-#define AES_FROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
-{                                               \
-    X0 = *RK++ ^ FT0[ ( Y0       ) & 0xFF ] ^   \
-                 FT1[ ( Y1 >>  8 ) & 0xFF ] ^   \
-                 FT2[ ( Y2 >> 16 ) & 0xFF ] ^   \
-                 FT3[ ( Y3 >> 24 ) & 0xFF ];    \
-                                                \
-    X1 = *RK++ ^ FT0[ ( Y1       ) & 0xFF ] ^   \
-                 FT1[ ( Y2 >>  8 ) & 0xFF ] ^   \
-                 FT2[ ( Y3 >> 16 ) & 0xFF ] ^   \
-                 FT3[ ( Y0 >> 24 ) & 0xFF ];    \
-                                                \
-    X2 = *RK++ ^ FT0[ ( Y2       ) & 0xFF ] ^   \
-                 FT1[ ( Y3 >>  8 ) & 0xFF ] ^   \
-                 FT2[ ( Y0 >> 16 ) & 0xFF ] ^   \
-                 FT3[ ( Y1 >> 24 ) & 0xFF ];    \
-                                                \
-    X3 = *RK++ ^ FT0[ ( Y3       ) & 0xFF ] ^   \
-                 FT1[ ( Y0 >>  8 ) & 0xFF ] ^   \
-                 FT2[ ( Y1 >> 16 ) & 0xFF ] ^   \
-                 FT3[ ( Y2 >> 24 ) & 0xFF ];    \
-}
-
-#define AES_RROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
-{                                               \
-    X0 = *RK++ ^ RT0[ ( Y0       ) & 0xFF ] ^   \
-                 RT1[ ( Y3 >>  8 ) & 0xFF ] ^   \
-                 RT2[ ( Y2 >> 16 ) & 0xFF ] ^   \
-                 RT3[ ( Y1 >> 24 ) & 0xFF ];    \
-                                                \
-    X1 = *RK++ ^ RT0[ ( Y1       ) & 0xFF ] ^   \
-                 RT1[ ( Y0 >>  8 ) & 0xFF ] ^   \
-                 RT2[ ( Y3 >> 16 ) & 0xFF ] ^   \
-                 RT3[ ( Y2 >> 24 ) & 0xFF ];    \
-                                                \
-    X2 = *RK++ ^ RT0[ ( Y2       ) & 0xFF ] ^   \
-                 RT1[ ( Y1 >>  8 ) & 0xFF ] ^   \
-                 RT2[ ( Y0 >> 16 ) & 0xFF ] ^   \
-                 RT3[ ( Y3 >> 24 ) & 0xFF ];    \
-                                                \
-    X3 = *RK++ ^ RT0[ ( Y3       ) & 0xFF ] ^   \
-                 RT1[ ( Y2 >>  8 ) & 0xFF ] ^   \
-                 RT2[ ( Y1 >> 16 ) & 0xFF ] ^   \
-                 RT3[ ( Y0 >> 24 ) & 0xFF ];    \
-}
-
-/*
- * AES-ECB block encryption/decryption
+/* Sets the AES encryption key
+ * Returns 1 if successful or -1 on error
  */
-void aes_crypt_ecb( aes_context *ctx,
-                    int mode,
-                    unsigned char input[16],
-                    unsigned char output[16] )
+int libbde_aes_set_encryption_key(
+     libbde_aes_context_t *context,
+     const uint8_t *key,
+     size_t bit_size,
+     liberror_error_t **error )
 {
-    int i;
-    unsigned long *RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3;
+	static char *function    = "libbde_aes_set_encryption_key";
 
-    RK = ctx->rk;
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+	uint32_t *round_keys     = NULL;
+	size_t key_index         = 0;
+	int round_constant_index = 0;
+#endif
+
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( bit_size != 128 )
+	 && ( bit_size != 192 )
+	 && ( bit_size != 256 ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported key bit size.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( WINAPI )
+/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	if( AES_set_encrypt_key(
+	     (unsigned char *) key,
+	     (int) bit_size,
+	     &( context->key ) ) != 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set encryption key in context.",
+		 function );
+
+		return( -1 );
+	}
+#else
+	if( libbde_aes_tables_initialized == 0 )
+	{
+/* TODO */
+		libbde_aes_tables_generate();
+	}
+	/* Align the buffer to next 16-byte blocks
+	 */
+	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) )
+
+	round_keys = context->round_keys;
+
+	for( key_index = 0;
+	     key_index < bit_size;
+	     key_index += 4 )
+	{
+		byte_stream_copy_to_uint32_little_endian(
+	         &( key[ key_index ] ),
+	         round_keys[ round_constant_index ] );
+
+		round_constant_index++;
+	}
+	if( bit_size == 128 )
+	{
+		context->number_of_round_keys = 10;
+
+		for( round_constant_index = 0;
+		     round_constant_index < 10;
+		     round_constant_index++ )
+		{
+			round_keys[ 4 ] = libbde_aes_round_constants[ round_constant_index ]
+			                ^ round_keys[ 0 ]
+			                ^ ( FSb[ ( round_keys[ 3 ] >> 8 ) & 0xff ] )
+		        	        ^ ( FSb[ ( round_keys[ 3 ] >> 16 ) & 0xff ] << 8 )
+			                ^ ( FSb[ ( round_keys[ 3 ] >> 24 ) & 0xff ] << 16 )
+			                ^ ( FSb[ ( round_keys[ 3 ] ) & 0xff ] << 24 );
+
+			round_keys[ 5 ] = round_keys[ 1 ] ^ round_keys[ 4 ];
+			round_keys[ 6 ] = round_keys[ 2 ] ^ round_keys[ 5 ];
+			round_keys[ 7 ] = round_keys[ 3 ] ^ round_keys[ 6 ];
+
+			round_keys += 4;
+		}
+	}
+	else if( bit_size == 192 )
+	{
+		context->number_of_round_keys = 12;
+
+		for( round_constant_index = 0;
+		     round_constant_index < 8;
+		     round_constant_index++ )
+		{
+			round_keys[ 6 ] = libbde_aes_round_constants[ round_constant_index ]
+			                ^ round_keys[ 0 ]
+			                ^ ( FSb[ ( round_keys[ 5 ] >> 8 ) & 0xff ] )
+			                ^ ( FSb[ ( round_keys[ 5 ] >> 16 ) & 0xff ] << 8 )
+			                ^ ( FSb[ ( round_keys[ 5 ] >> 24 ) & 0xff ] << 16 )
+			                ^ ( FSb[ ( round_keys[ 5 ] ) & 0xff ] << 24 );
+
+			round_keys[ 7 ]  = round_keys[ 1 ] ^ round_keys[ 6 ];
+			round_keys[ 8 ]  = round_keys[ 2 ] ^ round_keys[ 7 ];
+			round_keys[ 9 ]  = round_keys[ 3 ] ^ round_keys[ 8 ];
+			round_keys[ 10 ] = round_keys[ 4 ] ^ round_keys[ 9 ];
+			round_keys[ 11 ] = round_keys[ 5 ] ^ round_keys[ 10 ];
+
+			round_keys += 6;
+		}
+	}
+	else if( bit_size == 256 )
+	{
+		context->number_of_round_keys = 14;
+
+		for( round_constant_index = 0;
+		     round_constant_index < 7;
+		     round_constant_index++ )
+		{
+			round_keys[ 8 ] = libbde_aes_round_constants[ round_constant_index ]
+			                ^ round_keys[ 0 ]
+			                ^ ( FSb[ ( round_keys[ 7 ] >> 8 ) & 0xff ] )
+			                ^ ( FSb[ ( round_keys[ 7 ] >> 16 ) & 0xff ] << 8 )
+			                ^ ( FSb[ ( round_keys[ 7 ] >> 24 ) & 0xff ] << 16 )
+			                ^ ( FSb[ ( round_keys[ 7 ] ) & 0xff ] << 24 );
+
+			round_keys[ 9 ]  = round_keys[ 1 ] ^ round_keys[ 8 ];
+			round_keys[ 10 ] = round_keys[ 2 ] ^ round_keys[ 9 ];
+			round_keys[ 11 ] = round_keys[ 3 ] ^ round_keys[ 10 ];
+
+			round_keys[ 12 ] = round_keys[ 4 ]
+			                 ^ ( FSb[ ( round_keys[ 11 ] ) & 0xff ] )
+			                 ^ ( FSb[ ( round_keys[ 11 ] >> 8 ) & 0xff ] << 8 )
+			                 ^ ( FSb[ ( round_keys[ 11 ] >> 16 ) & 0xff ] << 16 )
+			                 ^ ( FSb[ ( round_keys[ 11 ] >> 24 ) & 0xff ] << 24 );
+
+			round_keys[ 13 ] = round_keys[ 5 ] ^ round_keys[ 12 ];
+			round_keys[ 14 ] = round_keys[ 6 ] ^ round_keys[ 13 ];
+			round_keys[ 15 ] = round_keys[ 7 ] ^ round_keys[ 14 ];
+
+			round_keys += 8;
+		}
+	}
+#endif
+	return( 1 );
+}
+
+/* Decrypts AES encrypted data
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_ccm_crypt(
+     libbde_aes_context_t *context,
+     int mode,
+     const uint8_t *initialization_vector,
+     size_t initialization_vector_size,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
+{
+	uint8_t internal_initialization_vector[ 20 ];
+	uint8_t block_data[ 16 ];
+
+	static char *function    = "libbde_aes_ccm_crypt";
+	size_t data_index        = 0;
+	uint8_t block_data_index = 0;
+
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported mode.",
+		 function );
+
+		return( -1 );
+	}
+	if( initialization_vector == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid initialization vector.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO size check max of 15 bytes */
+	if( input_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid input data.",
+		 function );
+
+		return( -1 );
+	}
+	if( input_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO size check, multitude of 16 ? */
+	if( output_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid output data.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+
+	/* The internal IV consists of:
+	 * 1 byte size value formatted as: 15 - IV size - 1
+	 * a maximum of 14 bytes containing IV bytes
+	 * 1 byte counter
+	 */
+	if( memory_set(
+	     internal_initialization_vector,
+	     0,
+	     20 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear internal initialization vector.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_copy(
+	     &( internal_initialization_vector[ 1 ] ),
+	     initialization_vector,
+	     initialization_vector_size ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy initialization vector.",
+		 function );
+
+		return( -1 );
+	}
+	internal_initialization_vector[ 0 ] = 15 - initialization_vector_size - 1;
+
+	while( data_index < input_data_size )
+	{
+		if( libbde_aes_ecb_crypt(
+		     context,
+		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     internal_initialization_vector,
+		     20,
+		     block_data,
+		     16,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+			 "%s: unable to encrypt initialization vector.",
+			 function );
+
+			return( -1 );
+		}
+		for( block_data_index = 0;
+		     block_data_index < 16;
+		     block_data_index++ )
+		{
+			output_data[ data_index ] = input_data[ data_index ]
+			                          ^ block_data[ block_data_index ];
+
+			data_index++;
+
+			if( data_index >= input_data_size )
+			{
+				break;
+			}
+		}
+		internal_initialization_vector[ 15 ] += 1;
+	}
+	return( 1 );
+}
+
+/* TODO */
+
+/* De- or encrypts a 16-byte block using AES-ECB
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_ecb_crypt(
+     libbde_aes_context_t *context,
+     int mode,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_aes_ecb_crypt";
+
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+    int i;
+    uint32_t *RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3;
+#endif
+
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( WINAPI )
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	AES_ecb_encrypt(
+	 input,
+	 output,
+	 context->key,
+	 mode );
+#else
+    RK = context->rk;
 
     GET_ULONG_LE( X0, input,  0 ); X0 ^= *RK++;
     GET_ULONG_LE( X1, input,  4 ); X1 ^= *RK++;
     GET_ULONG_LE( X2, input,  8 ); X2 ^= *RK++;
     GET_ULONG_LE( X3, input, 12 ); X3 ^= *RK++;
 
-    if( mode == AES_ENCRYPT )
+    if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
     {
-        for( i = (ctx->nr >> 1); i > 1; i-- )
+        for( i = (context->number_of_round_keys >> 1); i > 1; i-- )
         {
             AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
             AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );
@@ -389,29 +818,29 @@ void aes_crypt_ecb( aes_context *ctx,
 
         AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
 
-        X0 = *RK++ ^ ( FSb[ ( Y0       ) & 0xFF ]       ) ^
-                     ( FSb[ ( Y1 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( FSb[ ( Y2 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( FSb[ ( Y3 >> 24 ) & 0xFF ] << 24 );
+        X0 = *RK++ ^ ( FSb[ ( Y0       ) & 0xff ]       ) ^
+                     ( FSb[ ( Y1 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( FSb[ ( Y2 >> 16 ) & 0xff ] << 16 ) ^
+                     ( FSb[ ( Y3 >> 24 ) & 0xff ] << 24 );
 
-        X1 = *RK++ ^ ( FSb[ ( Y1       ) & 0xFF ]       ) ^
-                     ( FSb[ ( Y2 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( FSb[ ( Y3 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( FSb[ ( Y0 >> 24 ) & 0xFF ] << 24 );
+        X1 = *RK++ ^ ( FSb[ ( Y1       ) & 0xff ]       ) ^
+                     ( FSb[ ( Y2 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( FSb[ ( Y3 >> 16 ) & 0xff ] << 16 ) ^
+                     ( FSb[ ( Y0 >> 24 ) & 0xff ] << 24 );
 
-        X2 = *RK++ ^ ( FSb[ ( Y2       ) & 0xFF ]       ) ^
-                     ( FSb[ ( Y3 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( FSb[ ( Y0 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( FSb[ ( Y1 >> 24 ) & 0xFF ] << 24 );
+        X2 = *RK++ ^ ( FSb[ ( Y2       ) & 0xff ]       ) ^
+                     ( FSb[ ( Y3 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( FSb[ ( Y0 >> 16 ) & 0xff ] << 16 ) ^
+                     ( FSb[ ( Y1 >> 24 ) & 0xff ] << 24 );
 
-        X3 = *RK++ ^ ( FSb[ ( Y3       ) & 0xFF ]       ) ^
-                     ( FSb[ ( Y0 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( FSb[ ( Y1 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( FSb[ ( Y2 >> 24 ) & 0xFF ] << 24 );
+        X3 = *RK++ ^ ( FSb[ ( Y3       ) & 0xff ]       ) ^
+                     ( FSb[ ( Y0 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( FSb[ ( Y1 >> 16 ) & 0xff ] << 16 ) ^
+                     ( FSb[ ( Y2 >> 24 ) & 0xff ] << 24 );
     }
-    else /* AES_DECRYPT */
+    else
     {
-        for( i = (ctx->nr >> 1); i > 1; i-- )
+        for( i = (context->number_of_round_keys >> 1); i > 1; i-- )
         {
             AES_RROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
             AES_RROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );
@@ -419,130 +848,248 @@ void aes_crypt_ecb( aes_context *ctx,
 
         AES_RROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
 
-        X0 = *RK++ ^ ( RSb[ ( Y0       ) & 0xFF ]       ) ^
-                     ( RSb[ ( Y3 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( RSb[ ( Y2 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( RSb[ ( Y1 >> 24 ) & 0xFF ] << 24 );
+        X0 = *RK++ ^ ( RSb[ ( Y0       ) & 0xff ]       ) ^
+                     ( RSb[ ( Y3 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( RSb[ ( Y2 >> 16 ) & 0xff ] << 16 ) ^
+                     ( RSb[ ( Y1 >> 24 ) & 0xff ] << 24 );
 
-        X1 = *RK++ ^ ( RSb[ ( Y1       ) & 0xFF ]       ) ^
-                     ( RSb[ ( Y0 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( RSb[ ( Y3 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( RSb[ ( Y2 >> 24 ) & 0xFF ] << 24 );
+        X1 = *RK++ ^ ( RSb[ ( Y1       ) & 0xff ]       ) ^
+                     ( RSb[ ( Y0 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( RSb[ ( Y3 >> 16 ) & 0xff ] << 16 ) ^
+                     ( RSb[ ( Y2 >> 24 ) & 0xff ] << 24 );
 
-        X2 = *RK++ ^ ( RSb[ ( Y2       ) & 0xFF ]       ) ^
-                     ( RSb[ ( Y1 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( RSb[ ( Y0 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( RSb[ ( Y3 >> 24 ) & 0xFF ] << 24 );
+        X2 = *RK++ ^ ( RSb[ ( Y2       ) & 0xff ]       ) ^
+                     ( RSb[ ( Y1 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( RSb[ ( Y0 >> 16 ) & 0xff ] << 16 ) ^
+                     ( RSb[ ( Y3 >> 24 ) & 0xff ] << 24 );
 
-        X3 = *RK++ ^ ( RSb[ ( Y3       ) & 0xFF ]       ) ^
-                     ( RSb[ ( Y2 >>  8 ) & 0xFF ] <<  8 ) ^
-                     ( RSb[ ( Y1 >> 16 ) & 0xFF ] << 16 ) ^
-                     ( RSb[ ( Y0 >> 24 ) & 0xFF ] << 24 );
+        X3 = *RK++ ^ ( RSb[ ( Y3       ) & 0xff ]       ) ^
+                     ( RSb[ ( Y2 >>  8 ) & 0xff ] <<  8 ) ^
+                     ( RSb[ ( Y1 >> 16 ) & 0xff ] << 16 ) ^
+                     ( RSb[ ( Y0 >> 24 ) & 0xff ] << 24 );
     }
 
     PUT_ULONG_LE( X0, output,  0 );
     PUT_ULONG_LE( X1, output,  4 );
     PUT_ULONG_LE( X2, output,  8 );
     PUT_ULONG_LE( X3, output, 12 );
+#endif
+	return( 1 );
 }
 
-/*
- * AES-CBC buffer encryption/decryption
+/* De- or encrypts a block of data using AES-CBC
+ * Returns 1 if successful or -1 on error
  */
-void aes_crypt_cbc( aes_context *ctx,
-                    int mode,
-                    int length,
-                    unsigned char iv[16],
-                    unsigned char *input,
-                    unsigned char *output )
+int libbde_aes_cbc_crypt(
+     libbde_aes_context_t *context,
+     int mode,
+     int length,
+     unsigned char iv[16],
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
 {
+	static char *function = "libbde_aes_cbc_crypt";
+
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
     int i;
     unsigned char temp[16];
+#endif
 
-    if( mode == AES_ENCRYPT )
-    {
-        while( length > 0 )
-        {
-            for( i = 0; i < 16; i++ )
-                output[i] = (unsigned char)( input[i] ^ iv[i] );
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
 
-            aes_crypt_ecb( ctx, mode, output, output );
-            memcpy( iv, output, 16 );
+		return( -1 );
+	}
+#if defined( WINAPI )
 
-            input  += 16;
-            output += 16;
-            length -= 16;
-        }
-    }
-    else
-    {
-        while( length > 0 )
-        {
-            memcpy( temp, input, 16 );
-            aes_crypt_ecb( ctx, mode, input, output );
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 
-            for( i = 0; i < 16; i++ )
-                output[i] = (unsigned char)( output[i] ^ iv[i] );
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 
-            memcpy( iv, temp, 16 );
+#else
+	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+	{
+		while( length > 0 )
+		{
+			for( i = 0; i < 16; i++ )
+			{
+				output[i] = (unsigned char)( input[i] ^ iv[i] );
+			}
+			aes_ecb_crypt( context, mode, output, output );
+			memcpy( iv, output, 16 );
 
-            input  += 16;
-            output += 16;
-            length -= 16;
-        }
-    }
+			input  += 16;
+			output += 16;
+			length -= 16;
+		}
+	}
+	else
+	{
+		while( length > 0 )
+		{
+			memcpy( temp, input, 16 );
+			aes_ecb_crypt( context, mode, input, output );
+
+			for( i = 0; i < 16; i++ )
+			{
+				output[i] = (unsigned char)( output[i] ^ iv[i] );
+			}
+			memcpy( iv, temp, 16 );
+
+			input  += 16;
+			output += 16;
+			length -= 16;
+		}
+  	}
+#endif
+	return( 1 );
 }
 
-/*
- * AES-CFB buffer encryption/decryption
+/* De- or encrypts a block of data using AES-CBF
+ * Returns 1 if successful or -1 on error
  */
-void aes_crypt_cfb( aes_context *ctx,
-                    int mode,
-                    int length,
-                    int *iv_off,
-                    unsigned char iv[16],
-                    unsigned char *input,
-                    unsigned char *output )
+int libbde_aes_cfb_crypt(
+     libbde_aes_context_t *context,
+     int mode,
+     uint8_t initialization_vector[ 16 ],
+     size_t *initialization_vector_index,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
 {
-    int c, n = *iv_off;
+	static char *function = "libbde_aes_cfb_crypt";
+	size_t data_index     = 0;
 
-    if( mode == AES_ENCRYPT )
-    {
-        while( length-- )
-        {
-            if( n == 0 )
-                aes_crypt_ecb( ctx, mode, iv, iv );
+	if( ( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
+	 && ( mode != LIBBDE_AES_CRYPT_MODE_ENCRYPT ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported mode.",
+		 function );
 
-            iv[n] = *output++ = (unsigned char)( iv[n] ^ *input++ );
+		return( -1 );
+	}
+	if( initialization_vector_index == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid initialization vector index.",
+		 function );
 
-            n = (n + 1) & 0x0F;
-        }
-    }
-    else
-    {
-        while( length-- )
-        {
-            if( n == 0 )
-                aes_crypt_ecb( ctx, mode, iv, iv );
+		return( -1 );
+	}
+	if( input_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid input data.",
+		 function );
 
-            c = *input++;
-            *output++ = (unsigned char)( c ^ iv[n] );
-            iv[n] = (unsigned char) c;
+		return( -1 );
+	}
+	if( input_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
 
-            n = (n + 1) & 0x0F;
-        }
-    }
+		return( -1 );
+	}
+	if( output_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid output data.",
+		 function );
 
-    *iv_off = n;
+		return( -1 );
+	}
+	if( output_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO check if output size > input size */
+/* TODO check if iv index >= 16 */
+
+	for( data_index = 0;
+	     data_index < input_data_size;
+	     data_index++ )
+	{
+		if( *initialization_vector_index == 0 )
+		{
+			if( libbde_aes_ecb_crypt(
+			     context,
+			     mode,
+			     initialization_vector,
+			     16,
+			     initialization_vector,
+			     16,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to de/encrypt initialization vector.",
+				 function );
+
+				return( -1 );
+			}
+		}
+		output_data[ data_index ] = input_data[ data_index ]
+		                          ^ initialization_vector[ *initialization_vector_index ];
+
+		if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+		{
+			initialization_vector[ *initialization_vector_index ] = output_data[ data_index ];
+		}
+		else
+		{
+			initialization_vector[ *initialization_vector_index ] = input_data[ data_index ];
+		}
+		*initialization_vector_index = ( *initialization_vector_index + 1 ) & 0x0f;
+	}
+	return( 1 );
 }
 
+#ifdef TODO_REMOVE
 void aes_ccm_decrypt(
-      aes_context *ctxt,
+     libbde_aes_context_t *context,
       int mode,
       unsigned char *iv,
-      unsigned long iv_length,
+      uint32_t iv_length,
       unsigned char *input,
-      unsigned long input_length,
+      uint32_t input_length,
       unsigned char *output);
 
 char datum_data[] = {
@@ -612,4 +1159,6 @@ uint8_t datum_encrypted_testing2[] = {
 	0x7D, 0x10, 0xD7, 0x9F, 0x5F, 0x52, 0xA1, 0xB3,
 	0x20, 0xFE, 0xBE, 0x2C, 0xC8, 0x41, 0xE5, 0x00 
 };
+
+#endif /* TODO_REMOVE */
 
