@@ -27,6 +27,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_recovery.h"

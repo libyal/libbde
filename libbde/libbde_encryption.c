@@ -152,17 +152,18 @@ int libbde_encryption_aes_ccm_decrypt(
 }
 
 int libbde_encryption_decrypt(
-     const uint8_t *key,
-     size_t key_size,
+     const uint8_t key[ 32 ],
+     const uint8_t nonce[ 12 ],
      const uint8_t *encrypted_data,
      size_t encrypted_data_size,
      const uint8_t *unencrypted_data,
      size_t unencrypted_data_size,
      liberror_error_r **error )
 {
+	aes_context context;
+
 	static char *function = "libbde_encryption_decrypt";
 
-  aes_context ctx;
   unsigned char local_input_buffer[1024];
   unsigned char local_output_buffer[1024];
   unsigned long input_size;
@@ -190,12 +191,15 @@ int libbde_encryption_decrypt(
 
 	// set key which is used to decrypt
 
-	aes_setkey_enc( &ctx, key + 12, 256);
+	aes_setkey_enc(
+	 &context,
+	 key,
+	 256 );
 
 	aes_ccm_encrypt_decrypt(
-	 &ctx,
-	 input + 8,
-	 0xc ,   // nounce is hardcode to be 0xc or 12 bytes
+	 &context,
+	 nonce,
+	 12,
 	 local_input_buffer,
 	 input_size,
 	 output );

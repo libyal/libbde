@@ -28,6 +28,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
@@ -151,7 +152,7 @@ int libbde_volume_master_key_read(
 	static char *function                            = "libbde_volume_master_key_read";
 	size_t value_data_size                           = 0;
 	ssize_t read_count                               = 0;
-	uint8_t use_recovery_key                         = 0;
+	uint8_t use_recovery_password                    = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 24 ];
@@ -458,7 +459,7 @@ int libbde_volume_master_key_read(
 			     stretch_key,
 			     io_handle,
 			     property_metadata_entry,
-			     use_recovery_key,
+			     use_recovery_password,
 			     error ) != 1 )
 			{
 				liberror_error_set(
