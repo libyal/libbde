@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <memory.h>
 #include <types.h>
 
@@ -63,85 +64,73 @@
 
 #include <string.h>
 
-#ifndef GET_ULONG_LE
-#define GET_ULONG_LE(n,b,i)                             \
-{                                                       \
-    (n) = ( (unsigned long) (b)[(i)    ]       )        \
-        | ( (unsigned long) (b)[(i) + 1] <<  8 )        \
-        | ( (unsigned long) (b)[(i) + 2] << 16 )        \
-        | ( (unsigned long) (b)[(i) + 3] << 24 );       \
-}
-#endif /* GET_ULONG_LE */
-
-#ifndef PUT_ULONG_LE
-#define PUT_ULONG_LE(n,b,i)                             \
-{                                                       \
-    (b)[(i)    ] = (unsigned char) ( (n)       );       \
-    (b)[(i) + 1] = (unsigned char) ( (n) >>  8 );       \
-    (b)[(i) + 2] = (unsigned char) ( (n) >> 16 );       \
-    (b)[(i) + 3] = (unsigned char) ( (n) >> 24 );       \
-}
-#endif /* PUT_ULONG_LE */
-
-#define AES_FROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
-{                                               \
-    X0 = *RK++ ^ FT0[ ( Y0       ) & 0xff ] ^   \
-                 FT1[ ( Y1 >>  8 ) & 0xff ] ^   \
-                 FT2[ ( Y2 >> 16 ) & 0xff ] ^   \
-                 FT3[ ( Y3 >> 24 ) & 0xff ];    \
-                                                \
-    X1 = *RK++ ^ FT0[ ( Y1       ) & 0xff ] ^   \
-                 FT1[ ( Y2 >>  8 ) & 0xff ] ^   \
-                 FT2[ ( Y3 >> 16 ) & 0xff ] ^   \
-                 FT3[ ( Y0 >> 24 ) & 0xff ];    \
-                                                \
-    X2 = *RK++ ^ FT0[ ( Y2       ) & 0xff ] ^   \
-                 FT1[ ( Y3 >>  8 ) & 0xff ] ^   \
-                 FT2[ ( Y0 >> 16 ) & 0xff ] ^   \
-                 FT3[ ( Y1 >> 24 ) & 0xff ];    \
-                                                \
-    X3 = *RK++ ^ FT0[ ( Y3       ) & 0xff ] ^   \
-                 FT1[ ( Y0 >>  8 ) & 0xff ] ^   \
-                 FT2[ ( Y1 >> 16 ) & 0xff ] ^   \
-                 FT3[ ( Y2 >> 24 ) & 0xff ];    \
+#define libbde_aes_calculate_forward_round( round_keys, X0, X1, X2, X3, Y0, Y1, Y2, Y3 ) \
+{ \
+	X0 = *round_keys++ \
+	   ^ FT0[ ( Y0 ) & 0xff ] \
+	   ^ FT1[ ( Y1 >>  8 ) & 0xff ] \
+	   ^ FT2[ ( Y2 >> 16 ) & 0xff ] \
+	   ^ FT3[ ( Y3 >> 24 ) & 0xff ]; \
+\
+	X1 = *round_keys++ \
+	   ^ FT0[ ( Y1 ) & 0xff ] \
+	   ^ FT1[ ( Y2 >>  8 ) & 0xff ] \
+	   ^ FT2[ ( Y3 >> 16 ) & 0xff ] \
+	   ^ FT3[ ( Y0 >> 24 ) & 0xff ]; \
+\
+	X2 = *round_keys++ \
+	   ^ FT0[ ( Y2 ) & 0xff ] \
+	   ^ FT1[ ( Y3 >>  8 ) & 0xff ] \
+	   ^ FT2[ ( Y0 >> 16 ) & 0xff ] \
+	   ^ FT3[ ( Y1 >> 24 ) & 0xff ]; \
+\
+	X3 = *round_keys++ \
+	   ^ FT0[ ( Y3 ) & 0xff ] \
+	   ^ FT1[ ( Y0 >>  8 ) & 0xff ] \
+	   ^ FT2[ ( Y1 >> 16 ) & 0xff ] \
+	   ^ FT3[ ( Y2 >> 24 ) & 0xff ]; \
 }
 
-#define AES_RROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
-{                                               \
-    X0 = *RK++ ^ RT0[ ( Y0       ) & 0xff ] ^   \
-                 RT1[ ( Y3 >>  8 ) & 0xff ] ^   \
-                 RT2[ ( Y2 >> 16 ) & 0xff ] ^   \
-                 RT3[ ( Y1 >> 24 ) & 0xff ];    \
-                                                \
-    X1 = *RK++ ^ RT0[ ( Y1       ) & 0xff ] ^   \
-                 RT1[ ( Y0 >>  8 ) & 0xff ] ^   \
-                 RT2[ ( Y3 >> 16 ) & 0xff ] ^   \
-                 RT3[ ( Y2 >> 24 ) & 0xff ];    \
-                                                \
-    X2 = *RK++ ^ RT0[ ( Y2       ) & 0xff ] ^   \
-                 RT1[ ( Y1 >>  8 ) & 0xff ] ^   \
-                 RT2[ ( Y0 >> 16 ) & 0xff ] ^   \
-                 RT3[ ( Y3 >> 24 ) & 0xff ];    \
-                                                \
-    X3 = *RK++ ^ RT0[ ( Y3       ) & 0xff ] ^   \
-                 RT1[ ( Y2 >>  8 ) & 0xff ] ^   \
-                 RT2[ ( Y1 >> 16 ) & 0xff ] ^   \
-                 RT3[ ( Y0 >> 24 ) & 0xff ];    \
+#define libbde_aes_calculate_reverse_round( round_keys, X0, X1, X2, X3, Y0, Y1, Y2, Y3 ) \
+{ \
+	X0 = *round_keys++ \
+	   ^ RT0[ ( Y0 ) & 0xff ] \
+	   ^ RT1[ ( Y3 >>  8 ) & 0xff ] \
+	   ^ RT2[ ( Y2 >> 16 ) & 0xff ] \
+	   ^ RT3[ ( Y1 >> 24 ) & 0xff ]; \
+\
+	X1 = *round_keys++ \
+	   ^ RT0[ ( Y1 ) & 0xff ] \
+	   ^ RT1[ ( Y0 >>  8 ) & 0xff ] \
+	   ^ RT2[ ( Y3 >> 16 ) & 0xff ] \
+	   ^ RT3[ ( Y2 >> 24 ) & 0xff ]; \
+\
+	X2 = *round_keys++ \
+	   ^ RT0[ ( Y2 ) & 0xff ] \
+	   ^ RT1[ ( Y1 >>  8 ) & 0xff ] \
+	   ^ RT2[ ( Y0 >> 16 ) & 0xff ] \
+	   ^ RT3[ ( Y3 >> 24 ) & 0xff ]; \
+\
+	X3 = *round_keys++ \
+	   ^ RT0[ ( Y3 ) & 0xff ] \
+	   ^ RT1[ ( Y2 >>  8 ) & 0xff ] \
+	   ^ RT2[ ( Y1 >> 16 ) & 0xff ] \
+	   ^ RT3[ ( Y0 >> 24 ) & 0xff ]; \
 }
 
-/*
- * Forward S-box & tables
+/* Forward S-box & tables
  */
-static unsigned char FSb[256];
+static uint8_t libbde_aes_forward_substitution_box[ 256 ];
+
 static uint32_t FT0[256]; 
 static uint32_t FT1[256]; 
 static uint32_t FT2[256]; 
 static uint32_t FT3[256]; 
 
-/*
- * Reverse S-box & tables
+/* Reverse S-box & tables
  */
-static unsigned char RSb[256];
+static uint8_t libbde_aes_reverse_substitution_box[ 256 ];
+
 static uint32_t RT0[256];
 static uint32_t RT1[256];
 static uint32_t RT2[256];
@@ -189,8 +178,8 @@ static void libbde_aes_tables_generate( void )
     /*
      * generate the forward and reverse S-boxes
      */
-    FSb[0x00] = 0x63;
-    RSb[0x63] = 0x00;
+    libbde_aes_forward_substitution_box[ 0x00 ] = 0x63;
+    libbde_aes_reverse_substitution_box[ 0x63 ] = 0x00;
 
     for( i = 1; i < 256; i++ )
     {
@@ -202,8 +191,8 @@ static void libbde_aes_tables_generate( void )
         x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
         x ^= y ^ 0x63;
 
-        FSb[i] = (unsigned char) x;
-        RSb[x] = (unsigned char) i;
+        libbde_aes_forward_substitution_box[ i ] = (uint8_t) x;
+        libbde_aes_reverse_substitution_box[ x ] = (uint8_t) i;
     }
 
     /*
@@ -211,7 +200,7 @@ static void libbde_aes_tables_generate( void )
      */
     for( i = 0; i < 256; i++ )
     {
-        x = FSb[i];
+        x = libbde_aes_forward_substitution_box[ i ];
         y = XTIME( x ) & 0xff;
         z =  ( y ^ x ) & 0xff;
 
@@ -224,7 +213,7 @@ static void libbde_aes_tables_generate( void )
         FT2[i] = ROTL8( FT1[i] );
         FT3[i] = ROTL8( FT2[i] );
 
-        x = RSb[i];
+        x = libbde_aes_reverse_substitution_box[ i ];
 
         RT0[i] = ( (unsigned long) MUL( 0x0E, x )       ) ^
                  ( (unsigned long) MUL( 0x09, x ) <<  8 ) ^
@@ -318,14 +307,14 @@ int libbde_aes_set_decyption_key(
      size_t bit_size,
      liberror_error_t **error )
 {
-	static char *function    = "libbde_aes_set_decyption_key";
+	static char *function = "libbde_aes_set_decyption_key";
 
 #if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
-	libbde_aes_context encryption_context;
+	libbde_aes_context_t encryption_context;
 
-	uint32_t *round_keys     = NULL;
-	size_t key_index         = 0;
-	int round_constant_index = 0;
+	uint32_t *round_keys  = NULL;
+	int byte_index        = 0;
+	int round_key_index   = 0;
 #endif
 
 	if( context == NULL )
@@ -402,7 +391,7 @@ int libbde_aes_set_decyption_key(
 	}
 	/* Align the buffer to next 16-byte blocks
 	 */
-	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) )
+	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) );
 
 	round_keys = context->round_keys;
 
@@ -422,35 +411,45 @@ int libbde_aes_set_decyption_key(
 		return( -1 );
 	}
 /* TODO */
-    int i, j;
-    uint32_t *SK;
+	uint32_t *SK;
 
-    SK = cty.rk + cty.nr * 4;
+	/* Point to the end of the round keys
+	 */
+	SK = encryption_context.round_keys
+	   + ( encryption_context.number_of_round_keys * sizeof( uint32_t ) );
 
-    *round_keys++ = *SK++;
-    *round_keys++ = *SK++;
-    *round_keys++ = *SK++;
-    *round_keys++ = *SK++;
+/* TODO replace by:
+	SK = &( encryption_context.round_keys[ encryption_context.number_of_round_keys ] );
+ */
 
-    for( i = context->number_of_round_keys, SK -= 8;
-         i > 1;
-         i--, SK -= 8 )
-    {
-        for( j = 0; j < 4; j++, SK++ )
-        {
-            *round_keys++ = RT0[ FSb[ ( *SK       ) & 0xff ] ] ^
-                    RT1[ FSb[ ( *SK >>  8 ) & 0xff ] ] ^
-                    RT2[ FSb[ ( *SK >> 16 ) & 0xff ] ] ^
-                    RT3[ FSb[ ( *SK >> 24 ) & 0xff ] ];
-        }
-    }
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
 
-    *round_keys++ = *SK++;
-    *round_keys++ = *SK++;
-    *round_keys++ = *SK++;
-    *round_keys++ = *SK++;
+	SK -= 8;
 
-    memset( &cty, 0, sizeof( aes_context ) );
+	for( round_key_index = context->number_of_round_keys;
+	     round_key_index > 1;
+	     round_key_index-- )
+	{
+		for( byte_index = 0;
+		     byte_index < 4;
+		     byte_index++ )
+		{
+			*round_keys++ = RT0[ libbde_aes_forward_substitution_box[ ( *SK ) & 0xff ] ]
+			              ^ RT1[ libbde_aes_forward_substitution_box[ ( *SK >>  8 ) & 0xff ] ]
+			              ^ RT2[ libbde_aes_forward_substitution_box[ ( *SK >> 16 ) & 0xff ] ]
+			              ^ RT3[ libbde_aes_forward_substitution_box[ ( *SK >> 24 ) & 0xff ] ];
+
+			SK++;
+		}
+		SK -= 8;
+	}
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
 #endif
 	return( 1 );
 }
@@ -539,7 +538,7 @@ int libbde_aes_set_encryption_key(
 	}
 	/* Align the buffer to next 16-byte blocks
 	 */
-	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) )
+	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) );
 
 	round_keys = context->round_keys;
 
@@ -563,10 +562,10 @@ int libbde_aes_set_encryption_key(
 		{
 			round_keys[ 4 ] = libbde_aes_round_constants[ round_constant_index ]
 			                ^ round_keys[ 0 ]
-			                ^ ( FSb[ ( round_keys[ 3 ] >> 8 ) & 0xff ] )
-		        	        ^ ( FSb[ ( round_keys[ 3 ] >> 16 ) & 0xff ] << 8 )
-			                ^ ( FSb[ ( round_keys[ 3 ] >> 24 ) & 0xff ] << 16 )
-			                ^ ( FSb[ ( round_keys[ 3 ] ) & 0xff ] << 24 );
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 3 ] >> 8 ) & 0xff ] )
+		        	        ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 3 ] >> 16 ) & 0xff ] << 8 )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 3 ] >> 24 ) & 0xff ] << 16 )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 3 ] ) & 0xff ] << 24 );
 
 			round_keys[ 5 ] = round_keys[ 1 ] ^ round_keys[ 4 ];
 			round_keys[ 6 ] = round_keys[ 2 ] ^ round_keys[ 5 ];
@@ -585,10 +584,10 @@ int libbde_aes_set_encryption_key(
 		{
 			round_keys[ 6 ] = libbde_aes_round_constants[ round_constant_index ]
 			                ^ round_keys[ 0 ]
-			                ^ ( FSb[ ( round_keys[ 5 ] >> 8 ) & 0xff ] )
-			                ^ ( FSb[ ( round_keys[ 5 ] >> 16 ) & 0xff ] << 8 )
-			                ^ ( FSb[ ( round_keys[ 5 ] >> 24 ) & 0xff ] << 16 )
-			                ^ ( FSb[ ( round_keys[ 5 ] ) & 0xff ] << 24 );
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 5 ] >> 8 ) & 0xff ] )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 5 ] >> 16 ) & 0xff ] << 8 )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 5 ] >> 24 ) & 0xff ] << 16 )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 5 ] ) & 0xff ] << 24 );
 
 			round_keys[ 7 ]  = round_keys[ 1 ] ^ round_keys[ 6 ];
 			round_keys[ 8 ]  = round_keys[ 2 ] ^ round_keys[ 7 ];
@@ -609,20 +608,20 @@ int libbde_aes_set_encryption_key(
 		{
 			round_keys[ 8 ] = libbde_aes_round_constants[ round_constant_index ]
 			                ^ round_keys[ 0 ]
-			                ^ ( FSb[ ( round_keys[ 7 ] >> 8 ) & 0xff ] )
-			                ^ ( FSb[ ( round_keys[ 7 ] >> 16 ) & 0xff ] << 8 )
-			                ^ ( FSb[ ( round_keys[ 7 ] >> 24 ) & 0xff ] << 16 )
-			                ^ ( FSb[ ( round_keys[ 7 ] ) & 0xff ] << 24 );
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 7 ] >> 8 ) & 0xff ] )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 7 ] >> 16 ) & 0xff ] << 8 )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 7 ] >> 24 ) & 0xff ] << 16 )
+			                ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 7 ] ) & 0xff ] << 24 );
 
 			round_keys[ 9 ]  = round_keys[ 1 ] ^ round_keys[ 8 ];
 			round_keys[ 10 ] = round_keys[ 2 ] ^ round_keys[ 9 ];
 			round_keys[ 11 ] = round_keys[ 3 ] ^ round_keys[ 10 ];
 
 			round_keys[ 12 ] = round_keys[ 4 ]
-			                 ^ ( FSb[ ( round_keys[ 11 ] ) & 0xff ] )
-			                 ^ ( FSb[ ( round_keys[ 11 ] >> 8 ) & 0xff ] << 8 )
-			                 ^ ( FSb[ ( round_keys[ 11 ] >> 16 ) & 0xff ] << 16 )
-			                 ^ ( FSb[ ( round_keys[ 11 ] >> 24 ) & 0xff ] << 24 );
+			                 ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 11 ] ) & 0xff ] )
+			                 ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 11 ] >> 8 ) & 0xff ] << 8 )
+			                 ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 11 ] >> 16 ) & 0xff ] << 16 )
+			                 ^ ( libbde_aes_forward_substitution_box[ ( round_keys[ 11 ] >> 24 ) & 0xff ] << 24 );
 
 			round_keys[ 13 ] = round_keys[ 5 ] ^ round_keys[ 12 ];
 			round_keys[ 14 ] = round_keys[ 6 ] ^ round_keys[ 13 ];
@@ -829,9 +828,11 @@ int libbde_aes_ecb_crypt(
 #endif
 
 #if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+	uint32_t *round_keys      = NULL;
+	int round_key_index       = 0;
+
 /* TODO refactor */
-	uint32_t *RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3;
-	int i;
+	uint32_t X0, X1, X2, X3, Y0, Y1, Y2, Y3;
 #endif
 
 	if( context == NULL )
@@ -920,7 +921,7 @@ int libbde_aes_ecb_crypt(
 		     (unsigned char *) output_data,
 		     &safe_output_data_size,
 		     (unsigned char *) input_data,
-		     (int) input_data_size ) != 0 )
+		     (int) input_data_size ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -935,7 +936,7 @@ int libbde_aes_ecb_crypt(
 		if( EVP_EncryptFinal(
 		     &( context->evp_context ),
 		     (unsigned char *) output_data,
-		     &safe_output_data_size ) != 0 )
+		     &safe_output_data_size ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -954,7 +955,7 @@ int libbde_aes_ecb_crypt(
 		     &( context->evp_context ),
 		     cipher,
 		     (unsigned char *) context->key,
-		     NULL ) != 0 )
+		     NULL ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -970,7 +971,7 @@ int libbde_aes_ecb_crypt(
 		     (unsigned char *) output_data,
 		     &safe_output_data_size,
 		     (unsigned char *) input_data,
-		     (int) input_data_size ) != 0 )
+		     (int) input_data_size ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -985,7 +986,7 @@ int libbde_aes_ecb_crypt(
 		if( EVP_DecryptFinal(
 		     &( context->evp_context ),
 		     (unsigned char *) output_data,
-		     &safe_output_data_size ) != 0 )
+		     &safe_output_data_size ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -1005,78 +1006,134 @@ int libbde_aes_ecb_crypt(
 	 context->key,
 	 mode );
 #else
-    RK = context->rk;
+	round_keys = context->round_keys;
 
-    GET_ULONG_LE( X0, input,  0 ); X0 ^= *RK++;
-    GET_ULONG_LE( X1, input,  4 ); X1 ^= *RK++;
-    GET_ULONG_LE( X2, input,  8 ); X2 ^= *RK++;
-    GET_ULONG_LE( X3, input, 12 ); X3 ^= *RK++;
+	byte_stream_copy_to_uint32_little_endian(
+	 &( input_data[ 0 ] ),
+	 X0 );
 
-    if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
-    {
-        for( i = (context->number_of_round_keys >> 1); i > 1; i-- )
-        {
-            AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
-            AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );
-        }
+	byte_stream_copy_to_uint32_little_endian(
+	 &( input_data[ 4 ] ),
+	 X1 );
 
-        AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
+	byte_stream_copy_to_uint32_little_endian(
+	 &( input_data[ 8 ] ),
+	 X2 );
 
-        X0 = *RK++ ^ ( FSb[ ( Y0       ) & 0xff ]       ) ^
-                     ( FSb[ ( Y1 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( FSb[ ( Y2 >> 16 ) & 0xff ] << 16 ) ^
-                     ( FSb[ ( Y3 >> 24 ) & 0xff ] << 24 );
+	byte_stream_copy_to_uint32_little_endian(
+	 &( input_data[ 12 ] ),
+	 X3 );
 
-        X1 = *RK++ ^ ( FSb[ ( Y1       ) & 0xff ]       ) ^
-                     ( FSb[ ( Y2 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( FSb[ ( Y3 >> 16 ) & 0xff ] << 16 ) ^
-                     ( FSb[ ( Y0 >> 24 ) & 0xff ] << 24 );
+	X0 ^= *round_keys++;
+	X1 ^= *round_keys++;
+	X2 ^= *round_keys++;
+	X3 ^= *round_keys++;
 
-        X2 = *RK++ ^ ( FSb[ ( Y2       ) & 0xff ]       ) ^
-                     ( FSb[ ( Y3 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( FSb[ ( Y0 >> 16 ) & 0xff ] << 16 ) ^
-                     ( FSb[ ( Y1 >> 24 ) & 0xff ] << 24 );
+	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+	{
+		for( round_key_index = ( context->number_of_round_keys >> 1 );
+		     round_key_index > 1;
+		     round_key_index-- )
+		{
+			libbde_aes_calculate_forward_round(
+			 round_keys,
+			 Y0, Y1, Y2, Y3,
+			 X0, X1, X2, X3 );
 
-        X3 = *RK++ ^ ( FSb[ ( Y3       ) & 0xff ]       ) ^
-                     ( FSb[ ( Y0 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( FSb[ ( Y1 >> 16 ) & 0xff ] << 16 ) ^
-                     ( FSb[ ( Y2 >> 24 ) & 0xff ] << 24 );
-    }
-    else
-    {
-        for( i = (context->number_of_round_keys >> 1); i > 1; i-- )
-        {
-            AES_RROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
-            AES_RROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );
-        }
+			libbde_aes_calculate_forward_round(
+			 round_keys,
+			 X0, X1, X2, X3,
+			 Y0, Y1, Y2, Y3 );
+		}
+		libbde_aes_calculate_forward_round(
+		 round_keys,
+		 Y0, Y1, Y2, Y3,
+		 X0, X1, X2, X3 );
 
-        AES_RROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );
+		X0 = *round_keys++
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y0 ) & 0xff ] )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y1 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y2 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y3 >> 24 ) & 0xff ] << 24 );
 
-        X0 = *RK++ ^ ( RSb[ ( Y0       ) & 0xff ]       ) ^
-                     ( RSb[ ( Y3 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( RSb[ ( Y2 >> 16 ) & 0xff ] << 16 ) ^
-                     ( RSb[ ( Y1 >> 24 ) & 0xff ] << 24 );
+		X1 = *round_keys++
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y1 ) & 0xff ] )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y2 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y3 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y0 >> 24 ) & 0xff ] << 24 );
 
-        X1 = *RK++ ^ ( RSb[ ( Y1       ) & 0xff ]       ) ^
-                     ( RSb[ ( Y0 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( RSb[ ( Y3 >> 16 ) & 0xff ] << 16 ) ^
-                     ( RSb[ ( Y2 >> 24 ) & 0xff ] << 24 );
+		X2 = *round_keys++
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y2 ) & 0xff ] )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y3 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y0 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y1 >> 24 ) & 0xff ] << 24 );
 
-        X2 = *RK++ ^ ( RSb[ ( Y2       ) & 0xff ]       ) ^
-                     ( RSb[ ( Y1 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( RSb[ ( Y0 >> 16 ) & 0xff ] << 16 ) ^
-                     ( RSb[ ( Y3 >> 24 ) & 0xff ] << 24 );
+		X3 = *round_keys++
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y3 ) & 0xff ] )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y0 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y1 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_forward_substitution_box[ ( Y2 >> 24 ) & 0xff ] << 24 );
+	}
+	else
+	{
+		for( round_key_index = ( context->number_of_round_keys >> 1 );
+		     round_key_index > 1;
+		     round_key_index-- )
+		{
+			libbde_aes_calculate_reverse_round(
+			 round_keys,
+			 Y0, Y1, Y2, Y3,
+			 X0, X1, X2, X3 );
 
-        X3 = *RK++ ^ ( RSb[ ( Y3       ) & 0xff ]       ) ^
-                     ( RSb[ ( Y2 >>  8 ) & 0xff ] <<  8 ) ^
-                     ( RSb[ ( Y1 >> 16 ) & 0xff ] << 16 ) ^
-                     ( RSb[ ( Y0 >> 24 ) & 0xff ] << 24 );
-    }
+			libbde_aes_calculate_reverse_round(
+			 round_keys,
+			 X0, X1, X2, X3,
+			 Y0, Y1, Y2, Y3 );
+		}
+		libbde_aes_calculate_reverse_round(
+		 round_keys,
+		 Y0, Y1, Y2, Y3,
+		 X0, X1, X2, X3 );
 
-    PUT_ULONG_LE( X0, output,  0 );
-    PUT_ULONG_LE( X1, output,  4 );
-    PUT_ULONG_LE( X2, output,  8 );
-    PUT_ULONG_LE( X3, output, 12 );
+		X0 = *round_keys++
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y0 ) & 0xff ] )
+                   ^ ( libbde_aes_reverse_substitution_box[ ( Y3 >>  8 ) & 0xff ] <<  8 )
+                   ^ ( libbde_aes_reverse_substitution_box[ ( Y2 >> 16 ) & 0xff ] << 16 )
+                   ^ ( libbde_aes_reverse_substitution_box[ ( Y1 >> 24 ) & 0xff ] << 24 );
+
+		X1 = *round_keys++
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y1 ) & 0xff ] )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y0 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y3 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y2 >> 24 ) & 0xff ] << 24 );
+
+		X2 = *round_keys++
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y2 ) & 0xff ] )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y1 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y0 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y3 >> 24 ) & 0xff ] << 24 );
+
+		X3 = *round_keys++
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y3 ) & 0xff ] )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y2 >>  8 ) & 0xff ] <<  8 )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y1 >> 16 ) & 0xff ] << 16 )
+		   ^ ( libbde_aes_reverse_substitution_box[ ( Y0 >> 24 ) & 0xff ] << 24 );
+	}
+	byte_stream_copy_from_uint32_little_endian(
+	 &( output_data[ 0 ] ),
+	 X0 );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( output_data[ 4 ] ),
+	 X1 );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( output_data[ 8 ] ),
+	 X2 );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( output_data[ 12 ] ),
+	 X3 );
 #endif
 	return( 1 );
 }
