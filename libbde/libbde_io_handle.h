@@ -59,6 +59,14 @@ struct libbde_io_handle
 	 */
 	int encryption_method;
 
+	/* The (binary) recovery password
+	 */
+	uint16_t recovery_password[ 8 ];
+
+	/* Value to indicate the recovery password is set
+	 */
+	uint8_t recovery_password_is_set;
+
 	/* Value to indicate if abort was signalled
 	 */
 	int abort;

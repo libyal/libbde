@@ -180,10 +180,10 @@ struct bde_metadata_header_v1
 	 */
 	uint8_t volume_identifier[ 16 ];
 
-	/* The next nonce
+	/* The next nonce counter
 	 * Consists of 4 bytes
 	 */
-	uint8_t next_nonce[ 4 ];
+	uint8_t next_nonce_counter[ 4 ];
 
 	/* The encryption method
 	 * Consists of 4 bytes

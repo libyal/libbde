@@ -898,6 +898,17 @@ int libbde_volume_set_utf8_recovery_password(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	if( internal_volume->file_io_handle != NULL )
 	{
 		liberror_error_set(
@@ -912,7 +923,7 @@ int libbde_volume_set_utf8_recovery_password(
 	if( libbde_recovery_password_copy_utf8_to_binary(
 	     utf8_string,
 	     utf8_string_size,
-	     internal_volume->recovery_password,
+	     internal_volume->io_handle->recovery_password,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -924,7 +935,7 @@ int libbde_volume_set_utf8_recovery_password(
 
 		return( -1 );
 	}
-	internal_volume->recovery_password_is_set = 1;
+	internal_volume->io_handle->recovery_password_is_set = 1;
 
 	return( 1 );
 }
@@ -955,6 +966,17 @@ int libbde_volume_set_utf16_recovery_password(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	if( internal_volume->file_io_handle != NULL )
 	{
 		liberror_error_set(
@@ -969,7 +991,7 @@ int libbde_volume_set_utf16_recovery_password(
 	if( libbde_recovery_password_copy_utf16_to_binary(
 	     utf16_string,
 	     utf16_string_size,
-	     internal_volume->recovery_password,
+	     internal_volume->io_handle->recovery_password,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -981,7 +1003,7 @@ int libbde_volume_set_utf16_recovery_password(
 
 		return( -1 );
 	}
-	internal_volume->recovery_password_is_set = 1;
+	internal_volume->io_handle->recovery_password_is_set = 1;
 
 	return( 1 );
 }

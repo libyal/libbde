@@ -33,8 +33,9 @@
 #include "libbde_libbfio.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
-#include "libbde_libuna.h"
+#include "libbde_metadata_entry.h"
 #include "libbde_unused.h"
+#include "libbde_volume_master_key.h"
 
 #include "bde_metadata.h"
 #include "bde_volume.h"
@@ -465,32 +466,28 @@ int libbde_io_handle_read_metadata(
      off64_t file_offset,
      liberror_error_t **error )
 {
-	uint8_t *fve_metadata                       = NULL;
-	uint8_t *fve_metadata_block                 = NULL;
-	static char *function                       = "libbde_io_handle_read_metadata";
-	size_t read_size                            = 4096;
-	ssize_t read_count                          = 0;
-	uint32_t metadata_header_size               = 0;
-	uint32_t metadata_size                      = 0;
-	uint32_t metadata_size_copy                 = 0;
-	uint32_t version                            = 0;
-	uint16_t entry_size                         = 0;
-	uint16_t entry_type                         = 0;
-	uint16_t value_type                         = 0;
+	libbde_metadata_entry_t *metadata_entry       = NULL;
+	libbde_volume_master_key_t *volume_master_key = NULL;
+	uint8_t *fve_metadata                         = NULL;
+	uint8_t *fve_metadata_block                   = NULL;
+	static char *function                         = "libbde_io_handle_read_metadata";
+	size_t read_size                              = 4096;
+	ssize_t read_count                            = 0;
+	uint32_t metadata_header_size                 = 0;
+	uint32_t metadata_size                        = 0;
+	uint32_t metadata_size_copy                   = 0;
+	uint32_t version                              = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 24 ];
 	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
 
-	libcstring_system_character_t *value_string = NULL;
-	libfdatetime_filetime_t *filetime           = NULL;
-	libfguid_identifier_t *guid                 = NULL;
-	size_t value_string_size                    = 0;
-	uint64_t value_64bit                        = 0;
-	uint32_t property_size                      = 0;
-	uint32_t value_32bit                        = 0;
-	uint16_t value_16bit                        = 0;
-	int result                                  = 0;
+	libfdatetime_filetime_t *filetime             = NULL;
+	libfguid_identifier_t *guid                   = NULL;
+	uint64_t value_64bit                          = 0;
+	uint32_t value_32bit                          = 0;
+	uint16_t value_16bit                          = 0;
+	int result                                    = 0;
 #endif
 
 	if( io_handle == NULL )
@@ -872,10 +869,10 @@ int libbde_io_handle_read_metadata(
 			goto on_error;
 		}
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_header_v1_t *) fve_metadata )->next_nonce,
+		 ( (bde_metadata_header_v1_t *) fve_metadata )->next_nonce_counter,
 		 value_32bit );
 		libnotify_printf(
-		 "%s: next nonce\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: next nonce counter\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -1004,391 +1001,111 @@ int libbde_io_handle_read_metadata(
 
 	while( metadata_size > sizeof( bde_metadata_header_v1_t ) )
 	{
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
-		{
-			libnotify_printf(
-			 "%s: FVE metadata entry:\n",
-			 function );
-			libnotify_print_data(
-			 fve_metadata,
-			 sizeof( bde_metadata_entry_v1_t ) );
-		}
-#endif
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_entry_v1_t *) fve_metadata )->size,
-		 entry_size );
-
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_entry_v1_t *) fve_metadata )->type,
-		 entry_type );
-
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_entry_v1_t *) fve_metadata )->value_type,
-		 value_type );
-
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_entry_v1_t *) fve_metadata )->version,
-		 version );
-
-		if( version != 1 )
+		if( libbde_metadata_entry_initialize(
+		     &metadata_entry,
+		     error ) != 1 )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported metadata entry version.",
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create metadata entry.",
 			 function );
 
 			goto on_error;
 		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
-		{
-			libnotify_printf(
-			 "%s: entry size\t\t\t\t: %" PRIu16 "\n",
-			 function,
-			 entry_size );\
+		read_count = libbde_metadata_entry_read(
+			      metadata_entry,
+			      fve_metadata,
+			      metadata_size,
+			      error );
 
-			libnotify_printf(
-			 "%s: entry type\t\t\t\t: 0x%04" PRIx16 "\n",
-			 function,
-			 entry_type );
-
-			libnotify_printf(
-			 "%s: value type\t\t\t\t: 0x%04" PRIx16 "\n",
-			 function,
-			 value_type );
-
-			libnotify_printf(
-			 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
-			 function,
-			 version );
-		}
-#endif
-		if( ( entry_size < sizeof( bde_metadata_entry_v1_t ) )
-		 || ( entry_size > metadata_size ) )
+		if( read_count == -1 )
 		{
 			liberror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: metadata entry size value out of bounds.",
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read metadata entry.",
 			 function );
 
 			goto on_error;
 		}
-		fve_metadata  += sizeof( bde_metadata_entry_v1_t );
-		metadata_size -= sizeof( bde_metadata_entry_v1_t );
-		entry_size    -= sizeof( bde_metadata_entry_v1_t );
+/* TODO refactor */
 
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
-		{
-			libnotify_printf(
-			 "%s: FVE metadata entry data:\n",
-			 function );
-			libnotify_print_data(
-			 fve_metadata,
-			 (size_t) entry_size );
-		}
-#endif
 		/* TODO */
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libnotify_verbose != 0 )
 		{
-			switch( entry_type )
+			switch( metadata_entry->type )
 			{
 				case 0x0002:
-					if( value_type == 0x0008 )
+					if( libbde_volume_master_key_initialize(
+					     &volume_master_key,
+					     error ) != 1 )
 					{
-						if( entry_size < 28 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-							 "%s: entry size value out of bounds.",
-							 function );
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+						 "%s: unable to create volume master key.",
+						 function );
 
-							goto on_error;
-						}
-						if( libfguid_identifier_initialize(
-						     &guid,
-						     error ) != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-							 "%s: unable to create GUID.",
-							 function );
+						goto on_error;
+					}
+					if( libbde_volume_master_key_read(
+					     volume_master_key,
+					     io_handle,
+					     metadata_entry,
+					     error ) != 1 )
+					{
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_IO,
+						 LIBERROR_IO_ERROR_READ_FAILED,
+						 "%s: unable to read volume master key metadata entry.",
+						 function );
 
-							goto on_error;
-						}
-						if( libfguid_identifier_copy_from_byte_stream(
-						     guid,
-						     &( fve_metadata[ 0 ] ),
-						     16,
-						     LIBFGUID_ENDIAN_LITTLE,
-						     error ) != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
-							 "%s: unable to copy byte stream to GUID.",
-							 function );
+						libbde_volume_master_key_free(
+						 &volume_master_key,
+						 NULL );
 
-							goto on_error;
-						}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-						result = libfguid_identifier_copy_to_utf16_string(
-							  guid,
-							  (uint16_t *) guid_string,
-							  LIBFGUID_IDENTIFIER_STRING_SIZE,
-							  error );
-#else
-						result = libfguid_identifier_copy_to_utf8_string(
-							  guid,
-							  (uint8_t *) guid_string,
-							  LIBFGUID_IDENTIFIER_STRING_SIZE,
-							  error );
-#endif
-						if( result != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
-							 "%s: unable to copy GUID to string.",
-							 function );
+						goto on_error;
+					}
+					if( libbde_volume_master_key_free(
+					     &volume_master_key,
+					     error ) != 1 )
+					{
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+						 "%s: unable to free volume master key.",
+						 function );
 
-							goto on_error;
-						}
-						libnotify_printf(
-						 "%s: key identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
-						 function,
-						 guid_string );
-
-						if( libfguid_identifier_free(
-						     &guid,
-						     error ) != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-							 "%s: unable to free GUID.",
-							 function );
-
-							goto on_error;
-						}
-						if( libfdatetime_filetime_initialize(
-						     &filetime,
-						     error ) != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-							 "%s: unable to create filetime.",
-							 function );
-
-							goto on_error;
-						}
-						if( libfdatetime_filetime_copy_from_byte_stream(
-						     filetime,
-						     &( fve_metadata[ 16 ] ),
-						     8,
-						     LIBFDATETIME_ENDIAN_LITTLE,
-						     error ) != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-							 "%s: unable to copy filetime from byte stream.",
-							 function );
-
-							goto on_error;
-						}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-						result = libfdatetime_filetime_copy_to_utf16_string(
-							  filetime,
-							  (uint16_t *) filetime_string,
-							  24,
-							  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
-							  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
-							  error );
-#else
-						result = libfdatetime_filetime_copy_to_utf8_string(
-							  filetime,
-							  (uint8_t *) filetime_string,
-							  24,
-							  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
-							  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
-							  error );
-#endif
-						if( result != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-							 "%s: unable to copy filetime to string.",
-							 function );
-
-							goto on_error;
-						}
-						libnotify_printf(
-						 "%s: unknown time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
-						 function,
-						 filetime_string );
-
-						if( libfdatetime_filetime_free(
-						     &filetime,
-						     error ) != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-							 "%s: unable to free filetime.",
-							 function );
-
-							goto on_error;
-						}
-						byte_stream_copy_to_uint32_little_endian(
-						 &( fve_metadata[ 24 ] ),
-						 value_32bit );
-						libnotify_printf(
-						 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
-						 function,
-						 value_32bit );
-
-						fve_metadata += 28;
-						entry_size   -= 28;
-
-						/* TODO check if entry size is multitude of 4 */
-
-						while( entry_size >= 4 )
-						{
-							byte_stream_copy_to_uint32_little_endian(
-							 fve_metadata,
-							 property_size );
-							libnotify_printf(
-							 "%s: property size\t\t\t\t: %" PRIu32 "\n",
-							 function,
-							 property_size );
-
-							/* TODO check if property size is in bounds */
-
-							libnotify_printf(
-							 "%s: property data:\n",
-							 function );
-							libnotify_print_data(
-							 &( fve_metadata[ 4 ] ),
-							 property_size - 4 );
-
-							fve_metadata += property_size;
-							entry_size   -= property_size;
-						}
-						libnotify_printf(
-						 "\n" );
+						goto on_error;
 					}
 					break;
 
 				case 0x0007:
-					if( value_type == 0x0002 )
+					if( libbde_metadata_entry_read_string(
+					     metadata_entry,
+					     error ) != 1 )
 					{
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-						result = libuna_utf16_string_size_from_utf16_stream(
-							  fve_metadata,
-							  (size_t) entry_size,
-							  LIBUNA_ENDIAN_LITTLE,
-							  &value_string_size,
-							  error );
-#else
-						result = libuna_utf8_string_size_from_utf16_stream(
-							  fve_metadata,
-							  (size_t) entry_size,
-							  LIBUNA_ENDIAN_LITTLE,
-							  &value_string_size,
-							  error );
-#endif
-						if( result != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-							 "%s: unable to determine size of name string.",
-							 function );
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_IO,
+						 LIBERROR_IO_ERROR_READ_FAILED,
+						 "%s: unable to read string metadata entry.",
+						 function );
 
-							return( -1 );
-						}
-						value_string = libcstring_system_string_allocate(
-								value_string_size );
-
-						if( value_string == NULL )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_MEMORY,
-							 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-							 "%s: unable to create name string.",
-							 function );
-
-							return( -1 );
-						}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-						result = libuna_utf16_string_copy_from_utf16_stream(
-							  (libuna_utf16_character_t *) value_string,
-							  value_string_size,
-							  fve_metadata,
-							  (size_t) entry_size,
-							  LIBUNA_ENDIAN_LITTLE,
-							  error );
-#else
-						result = libuna_utf8_string_copy_from_utf16_stream(
-							  (libuna_utf8_character_t *) value_string,
-							  value_string_size,
-							  fve_metadata,
-							  (size_t) entry_size,
-							  LIBUNA_ENDIAN_LITTLE,
-							  error );
-#endif
-						if( result != 1 )
-						{
-							liberror_error_set(
-							 error,
-							 LIBERROR_ERROR_DOMAIN_RUNTIME,
-							 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-							 "%s: unable to set name string.",
-							 function );
-
-							memory_free(
-							 value_string );
-
-							return( -1 );
-						}
-						libnotify_printf(
-						 "%s: volume name\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
-						 function,
-						 value_string );
-
-						memory_free(
-						 value_string );
-
-						libnotify_printf(
-						 "\n" );
+						goto on_error;
 					}
 					break;
 
 				case 0x000f:
-					if( ( value_type == 0x000f )
-					 && ( entry_size == 16 ) )
+					if( ( metadata_entry->value_type == 0x000f )
+					 && ( metadata_entry->value_data_size == 16 ) )
 					{
 						if( libfguid_identifier_initialize(
 						     &guid,
@@ -1405,7 +1122,7 @@ int libbde_io_handle_read_metadata(
 						}
 						if( libfguid_identifier_copy_from_byte_stream(
 						     guid,
-						     fve_metadata,
+						     metadata_entry->value_data,
 						     16,
 						     LIBFGUID_ENDIAN_LITTLE,
 						     error ) != 1 )
@@ -1471,8 +1188,22 @@ int libbde_io_handle_read_metadata(
 			}
 		}
 #endif
-		fve_metadata  += entry_size;
-		metadata_size -= entry_size;
+		fve_metadata  += read_count;
+		metadata_size -= read_count;
+
+		if( libbde_metadata_entry_free(
+		     &metadata_entry,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free metadata entry.",
+			 function );
+
+			goto on_error;
+		}
 	}
 	memory_free(
 	 fve_metadata_block );
@@ -1496,6 +1227,12 @@ on_error:
 		 NULL );
 	}
 #endif
+	if( metadata_entry != NULL )
+	{
+		libbde_metadata_entry_free(
+		 &metadata_entry,
+		 NULL );
+	}
 	if( fve_metadata_block != NULL )
 	{
 		memory_free(

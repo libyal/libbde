@@ -299,47 +299,13 @@ on_error:
 int libbde_recovery_calculate_key(
      const uint16_t binary_recovery_password[ 8 ],
      const uint8_t salt[ 16 ],
-     uint8_t *key,
-     size_t key_size,
+     uint8_t key[ 32 ],
      liberror_error_t **error )
 {
 	libbde_recovery_key_data_t recovery_key_data;
 
 	static char *function = "libbde_recovery_calculate_key";
 
-	if( key == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid key.",
-		 function );
-
-		return( -1 );
-	}
-	if( key_size > (size_t) SSIZE_MAX )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid key size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-	if( key_size < (size_t) LIBBDE_SHA256_HASH_SIZE )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-		 "%s: invalid key size value too small.",
-		 function );
-
-		return( -1 );
-	}
 	if( memory_set(
 	     &recovery_key_data,
 	     0,
@@ -411,7 +377,7 @@ int libbde_recovery_calculate_key(
 	     (uint8_t *) &recovery_key_data,
 	     sizeof( libbde_recovery_key_data_t ),
 	     key,
-	     key_size,
+	     32,
 	     error ) != 1 )
 	{
 		liberror_error_set(
