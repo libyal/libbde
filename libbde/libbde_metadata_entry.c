@@ -591,7 +591,7 @@ int libbde_metadata_entry_read_aes_ccm_encrypted_key(
 		 "%s: encrypted data:\n",
 		 function );
 		libnotify_print_data(
-		 ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->data,
+		 &( value_data[ 28 ] ),
 		 value_data_size - 28 );
 	}
 #endif
@@ -631,12 +631,17 @@ int libbde_metadata_entry_read_aes_ccm_encrypted_key(
 /* TODO */
 uint8_t test[ 512 ];
 
+	memset(
+	 test,
+	 0,
+	 512 );
+
 	if( libbde_aes_ccm_crypt(
 	     &context,
 	     LIBBDE_AES_CRYPT_MODE_DECRYPT,
-	     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->nonce,
+	     value_data,
 	     12,
-	     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->data,
+	     &( value_data[ 28 ] ),
 	     value_data_size - 28,
 	     test,
 	     512,
@@ -663,7 +668,7 @@ uint8_t test[ 512 ];
 		 function );
 		libnotify_print_data(
 		 test,
-		 512 );
+		 value_data_size - 28 );
 	}
 #endif
 	if( libbde_aes_finalize(

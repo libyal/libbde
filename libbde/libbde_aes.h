@@ -42,11 +42,18 @@
 extern "C" {
 #endif
 
+#if defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+#define LIBBDE_AES_CRYPT_MODE_DECRYPT	AES_DECRYPT
+#define LIBBDE_AES_CRYPT_MODE_ENCRYPT	AES_ENCRYPT
+
+#else
 enum LIBBDE_AES_CRYPT_MODES
 {
-	LIBBDE_AES_CRYPT_MODE_ENCRYPT		= 0,
-	LIBBDE_AES_CRYPT_MODE_DECRYPT		= 1
+	LIBBDE_AES_CRYPT_MODE_DECRYPT	= 0,
+	LIBBDE_AES_CRYPT_MODE_ENCRYPT	= 1
 };
+
+#endif
 
 #if defined( WINAPI )
 typedef struct libbde_aes_context libbde_aes_context_t;
@@ -58,7 +65,14 @@ struct libbde_aes_context
 };
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-typedef EVP_MD_CTX libbde_aes_context_t;
+typedef struct libbde_aes_context libbde_aes_context_t;
+
+struct libbde_aes_context
+{
+	EVP_CIPHER_CTX evp_context;
+        uint8_t key[ 32 ];
+	size_t bit_size;
+};
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 typedef struct libbde_aes_context libbde_aes_context_t;
