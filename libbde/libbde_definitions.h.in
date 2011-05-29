@@ -1,0 +1,103 @@
+/*
+ * The internal definitions
+ *
+ * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
+ *
+ * Refer to AUTHORS for acknowledgements.
+ *
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#if !defined( _LIBBDE_INTERNAL_DEFINITIONS_H )
+#define _LIBBDE_INTERNAL_DEFINITIONS_H
+
+#include <common.h>
+#include <byte_stream.h>
+
+#define LIBBDE_ENDIAN_BIG				_BYTE_STREAM_ENDIAN_BIG
+#define LIBBDE_ENDIAN_LITTLE				_BYTE_STREAM_ENDIAN_LITTLE
+
+/* Define HAVE_LOCAL_LIBBDE for local use of libbde
+ */
+#if !defined( HAVE_LOCAL_LIBBDE )
+#include <libbde/definitions.h>
+
+/* The definitions in <libbde/definitions.h> are copied here
+ * for local use of libbde
+ */
+#else
+#define LIBBDE_VERSION					@VERSION@
+
+/* The version string
+ */
+#define LIBBDE_VERSION_STRING				"@VERSION@"
+
+/* The file access
+ * bit 1        set to 1 for read access
+ * bit 2        set to 1 for write access
+ * bit 3-8      not used
+ */
+enum LIBBDE_ACCESS_FLAGS
+{
+	LIBBDE_ACCESS_FLAG_READ				= 0x01,
+/* Reserved: not supported yet */
+	LIBBDE_ACCESS_FLAG_WRITE			= 0x02
+};
+
+/* The file access macros
+ */
+#define LIBBDE_OPEN_READ				( LIBBDE_ACCESS_FLAG_READ )
+/* Reserved: not supported yet */
+#define LIBBDE_OPEN_WRITE				( LIBBDE_ACCESS_FLAG_WRITE )
+/* Reserved: not supported yet */
+#define LIBBDE_OPEN_READ_WRITE				( LIBBDE_ACCESS_FLAG_READ | LIBBDE_ACCESS_FLAG_WRITE )
+
+/* The encryption methods
+ */
+enum LIBBDE_ENCRYPTION_METHODS
+{
+	LIBBDE_ENCRYPTION_METHOD_AES_CBC_128		= 0x00008000UL,
+	LIBBDE_ENCRYPTION_METHOD_AES_CBC_128_DIFFUSER	= 0x00008001UL,
+	LIBBDE_ENCRYPTION_METHOD_AES_CBC_256		= 0x00008002UL,
+	LIBBDE_ENCRYPTION_METHOD_AES_CBC_256_DIFFUSER	= 0x00008003UL
+};
+
+#endif
+
+enum LIBBDE_RECORD_TYPES
+{
+	LIBBDE_RECORD_TYPE_VOLUME_HEADER		= 0x01,
+	LIBBDE_RECORD_TYPE_CATALOG			= 0x02,
+	LIBBDE_RECORD_TYPE_STORE_INDEX			= 0x03,
+	LIBBDE_RECORD_TYPE_STORE_HEADER			= 0x04,
+
+	LIBBDE_RECORD_TYPE_STORE_BITMAP			= 0x06,
+};
+
+/* The store flags
+ */
+enum LIBBDE_STORE_FLAGS
+{
+	LIBBDE_STORE_FLAG_IO_HANDLE_NON_MANAGED		= 0x00,
+	LIBBDE_STORE_FLAG_IO_HANDLE_MANAGED		= 0x01
+};
+
+#if defined( HAVE_DEBUG_OUTPUT )
+#define LIBBDE_STORE_FLAGS_DEFAULT			LIBBDE_STORE_FLAG_IO_HANDLE_NON_MANAGED
+#else
+#define LIBBDE_STORE_FLAGS_DEFAULT			LIBBDE_STORE_FLAG_IO_HANDLE_MANAGED
+#endif
+
+#endif
+
