@@ -25,8 +25,8 @@
 
 #include <liberror.h>
 
-/* TODO replace by abstracted AES wrapper */
-#include <openssl/aes.h>
+#include "libbde_aes.h"
+#include "libbde_encryption.h"
 
 /* Decrypts AES encrypted data
  * Returns 1 if successful or -1 on error

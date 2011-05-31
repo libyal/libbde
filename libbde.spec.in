@@ -7,8 +7,8 @@ License: LGPL
 Source: %{name}-%{version}.tar.gz
 URL: http://libbde.sourceforge.net
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-@libbde_spec_requires@ @libbde_spec_requires_libbfio@ @libbde_spec_requires_libfdatetime@ @libbde_spec_requires_libuna@
-@libbde_spec_build_requires@ @libbde_spec_build_requires_libbfio@ @libbde_spec_build_requires_libfdatetime@ @libbde_spec_build_requires_libuna@
+@libbde_spec_requires@ @libbde_spec_requires_libbfio@ @libbde_spec_requires_libfdatetime@ @libbde_spec_requires_libfguid@ @libbde_spec_requires_libfvalue@ @libbde_spec_requires_libuna@
+@libbde_spec_build_requires@ @libbde_spec_build_requires_libbfio@ @libbde_spec_build_requires_libfdatetime@ @libbde_spec_build_requires_libfguid@ @libbde_spec_build_requires_libfvalue@ @libbde_spec_build_requires_libuna@
 
 %description
 libbde is a library to support the Windows NT BitLocker Drive Encryption (BDE) format

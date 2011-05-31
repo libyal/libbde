@@ -1,12 +1,34 @@
 TODO
+* put volume metadata into structures
+  - use generic entry structure (tree?)
+* check debug output aligment
+* store the binary recovery password in the volume
+  - separate calc key and gen bin password
+* update .pc and .spec file for openssl and ld dependency
+* complete fallback sha256 routines
 * use openssl and MS Crypto AES encryption instead of local implementation
-  - create separate crypto library with fallback local implementation
+  - create separate fallback implementation
+* debug
+  - print entry type description string
+  - print value type description string
+
+20110531
+* worked on encryption
+  - recovery password support
+* added SHA256 detection to configure
+
+20110530
+* added libfvalue
+* worked on encryption
+  - recovery password support
 
 20110529
 * renamed to library to libbde
 * updated configure.ac
 * updated common, libcstring, liberror, libnotify, libsystem, libbfio, libuna
 * added encryption method debug function
+* worked on encrpyption
+  - basic encryption functions
 
 20110527
 * worked on initial version
