@@ -1,5 +1,5 @@
 /*
- * Recovery functions
+ * Stretch Key metadata entry functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -19,59 +19,43 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_RECOVERY_H )
-#define _LIBBDE_RECOVERY_H
+#if !defined( _LIBBDE_STRETCH_KEY_H )
+#define _LIBBDE_STRETCH_KEY_H
 
 #include <common.h>
 #include <types.h>
 
 #include <liberror.h>
 
-#include "libbde_sha.h"
+#include "libbde_io_handle.h"
+#include "libbde_metadata_entry.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libbde_recovery_key_data libbde_recovery_key_data_t;
+typedef struct libbde_stretch_key libbde_stretch_key_t;
 
-struct libbde_recovery_key_data
+struct libbde_stretch_key
 {
-	/* The last calculated SHA256 hash
-	 * This value contains the SHA256 hash calculated in the previous key iteration
-	 */
-	uint8_t last_sha256_hash[ LIBBDE_SHA256_HASH_SIZE ];
-
-	/* The initial calculated SHA256 hash
-	 * This value contains the SHA256 hash calculated from the recovery password
-	 */
-	uint8_t initial_sha256_hash[ LIBBDE_SHA256_HASH_SIZE ];
-
 	/* The salt
 	 */
 	uint8_t salt[ 16 ];
-
-	/* The key iteration count
-	 */
-	uint64_t iteration_count;
 };
 
-int libbde_recovery_password_copy_utf8_to_binary(
-     const uint8_t *utf8_string,
-     size_t utf8_string_size,
-     uint16_t binary_recovery_password[ 8 ],
+int libbde_stretch_key_initialize(
+     libbde_stretch_key_t **stretch_key,
      liberror_error_t **error );
 
-int libbde_recovery_password_copy_utf16_to_binary(
-     const uint16_t *utf16_string,
-     size_t utf16_string_size,
-     uint16_t binary_recovery_password[ 8 ],
+int libbde_stretch_key_free(
+     libbde_stretch_key_t **stretch_key,
      liberror_error_t **error );
 
-int libbde_recovery_calculate_key(
-     const uint16_t binary_recovery_password[ 8 ],
-     const uint8_t salt[ 16 ],
-     uint8_t key[ 32 ],
+int libbde_stretch_key_read(
+     libbde_stretch_key_t *stretch_key,
+     libbde_io_handle_t *io_handle,
+     libbde_metadata_entry_t *metadata_entry,
+     uint8_t use_recovery_password,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

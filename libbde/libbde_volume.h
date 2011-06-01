@@ -44,14 +44,6 @@ struct libbde_internal_volume
 	 */
 	size64_t size;
 
-	/* The (binary) recovery password
-	 */
-	uint16_t recovery_password[ 8 ];
-
-	/* Value to indicate the recovery password is set
-	 */
-	uint8_t recovery_password_is_set;
-
 	/* The file IO handle
 	 */
 	libbfio_handle_t *file_io_handle;

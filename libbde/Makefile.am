@@ -26,13 +26,16 @@ libbde_la_SOURCES = \
 	libbde_libfguid.h \
 	libbde_libfvalue.h \
 	libbde_libuna.h \
+	libbde_metadata_entry.c libbde_metadata_entry.h \
 	libbde_notify.c libbde_notify.h \
 	libbde_recovery.c libbde_recovery.h \
 	libbde_sha.c libbde_sha.h \
+	libbde_stretch_key.c libbde_stretch_key.h \
 	libbde_support.c libbde_support.h \
 	libbde_types.h \
 	libbde_unused.h \
 	libbde_volume.c libbde_volume.h \
+	libbde_volume_master_key.c libbde_volume_master_key.h \
 	bde_metadata.h \
 	bde_volume.h
 

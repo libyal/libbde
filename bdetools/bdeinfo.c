@@ -110,10 +110,12 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_error_t *error             = NULL;
-	libbde_volume_t *volume           = NULL;
+	libbde_error_t *error                 = NULL;
+	libbde_volume_t *volume               = NULL;
 	libcstring_system_character_t *source = NULL;
 	char *program                         = "bdeinfo";
+	char *recovery_password               = "321519-069498-331287-394592-529177-194425-364452-702240";
+	size_t recovery_password_length       = 0;
 	libcstring_system_integer_t option    = 0;
 	int verbose                           = 0;
 
@@ -141,6 +143,8 @@ int main( int argc, char * const argv[] )
 	bdeoutput_version_fprint(
 	 stdout,
 	 program );
+
+/* TODO add option to pass recovery password */
 
 	while( ( option = libsystem_getopt(
 	                   argc,
@@ -207,6 +211,29 @@ int main( int argc, char * const argv[] )
 		fprintf(
 		 stderr,
 		 "Unable to initialize volume.\n" );
+
+		goto on_error;
+	}
+	recovery_password_length = libcstring_system_string_length(
+	                            recovery_password );
+
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+	if( libbde_volume_set_utf8_recovery_password(
+	     volume,
+	     (uint16_t *) recovery_password,
+	     recovery_password_length + 1,
+	     &error ) != 1 )
+#else
+	if( libbde_volume_set_utf8_recovery_password(
+	     volume,
+	     (uint8_t *) recovery_password,
+	     recovery_password_length + 1,
+	     &error ) != 1 )
+#endif
+	{
+		fprintf(
+		 stderr,
+		 "Unable to set recovery password.\n" );
 
 		goto on_error;
 	}
