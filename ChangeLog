@@ -1,5 +1,6 @@
 TODO
 * add libfdata vector for reading blocks
+  - determine volume key for decrypting sectors
 * put volume metadata into structures
   - use generic entry structure (tree?)
 * check debug output aligment
@@ -14,6 +15,9 @@ TODO
   - print value type description string
 * bdeinfo
   - pass recovery password as commandline argument
+
+20110604
+* worked on initial version
 
 20110601
 * worked on storing metadata runtime

@@ -578,7 +578,7 @@ int libbde_metadata_entry_read_aes_ccm_encrypted_key(
 	value_data_size -= 4;
 
 	libnotify_printf(
-	 "%s: message authenticate code:\n"
+	 "%s: message authenticate code:\n",
 	 function );
 	libnotify_print_data(
 	 value_data,

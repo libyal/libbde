@@ -69,12 +69,16 @@
 	^ byte_stream_bit_rotate_right( value, 19 ) \
 	^ byte_stream_bit_shift_right( value, 10 ) )
 
-uint32_t libbde_sha256_h[ 8 ] = {
+/* The first 32-bits of the fractional parts of the square roots of the first 8 primes 2..19
+ */
+uint32_t libbde_sha256_prime_square_roots[ 8 ] = {
 	0x6a09e667UL, 0xbb67ae85UL, 0x3c6ef372UL, 0xa54ff53aUL,
 	0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
 
-uint32_t libbde_sha256_k[ 64 ] = {
+/* The first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311
+ */
+uint32_t libbde_sha256_prime_cube_roots[ 64 ] = {
 	0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL,
 	0x3956c25bUL, 0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL,
 	0xd807aa98UL, 0x12835b01UL, 0x243185beUL, 0x550c7dc3UL,
@@ -211,15 +215,15 @@ int libbde_sha256_initialize(
 		return( -1 );
 	}
 	if( memory_copy(
-	     context->h,
-	     libbde_sha256_h,
+	     context->hash,
+	     libbde_sha256_prime_square_roots,
 	     sizeof( uint32_t ) * 8 ) == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
 		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to copy initial h values.",
+		 "%s: unable to copy initial hash values.",
 		 function );
 
 		return( -1 );
@@ -323,36 +327,45 @@ int libbde_sha256_update(
 #error TODO implement fallback function
 {
 	const uint8_t *shifted_data = NULL;
+	size_t available_block_size = 0;
 	size_t new_size             = 0;
-	size_t rem_size             = 0;
-	size_t tmp_size             = 0;
 
     unsigned int block_nb;
 
-    tmp_size = SHA256_BLOCK_SIZE - context->size;
-    rem_size = size < tmp_size ? size : tmp_size;
+	available_block_size = SHA256_BLOCK_SIZE - context->block_index;
 
-    memcpy(&context->block[context->size], data, rem_size);
+	if( available_block_size < size )
+	{
+		available_block_size = size;
+	}
+	if( memory_copy(
+	     &( context->block[ context->block_index ] ),
+	     data,
+	     available_block_size ) == NULL )
+	{
+/* TODO */
+	}
+	if( context->block_index + size < SHA256_BLOCK_SIZE )
+	{
+		context->block_index += size;
 
-    if (context->size + size < SHA256_BLOCK_SIZE) {
-        context->size += size;
-        return;
-    }
+		return;
+	}
 
-    new_size = size - rem_size;
+    new_size = size - available_block_size;
     block_nb = new_size / SHA256_BLOCK_SIZE;
 
-    shifted_data = data + rem_size;
+    shifted_data = data + available_block_size;
 
     sha256_transf(context, context->block, 1);
     sha256_transf(context, shifted_data, block_nb);
 
-    rem_size = new_size % SHA256_BLOCK_SIZE;
+    available_block_size = new_size % SHA256_BLOCK_SIZE;
 
     memcpy(context->block, &shifted_data[block_nb << 6],
-           rem_size);
+           available_block_size);
 
-    context->size = rem_size;
+	context->block_index = available_block_size;
     context->total_size += (block_nb + 1) << 6;
 }
 #endif
@@ -520,20 +533,23 @@ int libbde_sha256_finalize(
 	unsigned int pm_len   = 0;
 	unsigned int len_b    = 0;
 
-#ifndef UNROLL_LOOPS
+#if !defined( LIBBDE_SHA_UNROLLED_LOOPS )
 	int i = 0;
 #endif
 
 	block_nb = ( 1 + ( ( SHA256_BLOCK_SIZE - 9 )
-	         < ( context->size % SHA256_BLOCK_SIZE ) ) );
+	         < ( context->block_index % SHA256_BLOCK_SIZE ) ) );
 
-	len_b = (context->total_size + context->size) << 3;
+	len_b = (context->total_size + context->block_index) << 3;
 
 	pm_len = block_nb << 6;
 
-	memset(context->block + context->size, 0, pm_len - context->size);
+	memset(
+	 context->block + context->block_index,
+	 0,
+	 pm_len - context->block_index );
 
-	context->block[context->size] = 0x80;
+	context->block[ context->block_index ] = 0x80;
 
 	UNPACK32(len_b, context->block + pm_len - 4);
 
@@ -542,23 +558,23 @@ int libbde_sha256_finalize(
 	 context->block,
 	 block_nb );
 
-#ifndef UNROLL_LOOPS
+#if !defined( LIBBDE_SHA_UNROLLED_LOOPS )
 	for( i = 0;
 	     i < 8;
 	     i++ )
 	{
-		UNPACK32(context->h[i], &digest[i << 2]);
+		UNPACK32(context->hash[i], &digest[i << 2]);
 	}
 #else
-	UNPACK32(context->h[0], &digest[ 0]);
-	UNPACK32(context->h[1], &digest[ 4]);
-	UNPACK32(context->h[2], &digest[ 8]);
-	UNPACK32(context->h[3], &digest[12]);
-	UNPACK32(context->h[4], &digest[16]);
-	UNPACK32(context->h[5], &digest[20]);
-	UNPACK32(context->h[6], &digest[24]);
-	UNPACK32(context->h[7], &digest[28]);
-#endif /* !UNROLL_LOOPS */
+	UNPACK32(context->hash[ 0 ], &digest[ 0 ]);
+	UNPACK32(context->hash[ 1 ], &digest[ 4 ]);
+	UNPACK32(context->hash[ 2 ], &digest[ 8 ]);
+	UNPACK32(context->hash[ 3 ], &digest[ 12 ]);
+	UNPACK32(context->hash[ 4 ], &digest[ 16 ]);
+	UNPACK32(context->hash[ 5 ], &digest[ 20 ]);
+	UNPACK32(context->hash[ 6 ], &digest[ 24 ]);
+	UNPACK32(context->hash[ 7 ], &digest[ 28 ]);
+#endif /* !defined( LIBBDE_SHA_UNROLLED_LOOPS ) */
 }
 #endif
 	return( 1 );
@@ -682,14 +698,17 @@ void sha256_transf(
 	uint32_t t2              = 0;
 	int i                    = 0;
 
-#ifndef UNROLL_LOOPS
+#if !defined( LIBBDE_SHA_UNROLLED_LOOPS )
 	int j                    = 0;
 #endif
 
-    for (i = 0; i < (int) block_nb; i++) {
-        sub_block = data + (i << 6);
+	for( i = 0;
+	     i < (int) block_nb;
+	     i++ )
+	{
+		sub_block = data + (i << 6);
 
-#ifndef UNROLL_LOOPS
+#if !defined( LIBBDE_SHA_UNROLLED_LOOPS )
         for (j = 0; j < 16; j++) {
             PACK32(&sub_block[j << 2], &w[j]);
         }
@@ -699,7 +718,7 @@ void sha256_transf(
         }
 
         for (j = 0; j < 8; j++) {
-            wv[j] = context->h[j];
+            wv[j] = context->hash[ j ];
         }
 
         for (j = 0; j < 64; j++) {
@@ -717,7 +736,7 @@ void sha256_transf(
         }
 
         for (j = 0; j < 8; j++) {
-            context->h[j] += wv[j];
+            context->hash[ j ] += wv[j];
         }
 #else
         PACK32(&sub_block[ 0], &w[ 0]); PACK32(&sub_block[ 4], &w[ 1]);
@@ -742,10 +761,14 @@ void sha256_transf(
         SHA256_SCR(56); SHA256_SCR(57); SHA256_SCR(58); SHA256_SCR(59);
         SHA256_SCR(60); SHA256_SCR(61); SHA256_SCR(62); SHA256_SCR(63);
 
-        wv[0] = context->h[0]; wv[1] = context->h[1];
-        wv[2] = context->h[2]; wv[3] = context->h[3];
-        wv[4] = context->h[4]; wv[5] = context->h[5];
-        wv[6] = context->h[6]; wv[7] = context->h[7];
+        wv[ 0 ] = context->hash[ 0 ];
+	wv[ 1 ] = context->hash[ 1 ];
+        wv[ 2 ] = context->hash[ 2 ];
+	wv[ 3 ] = context->hash[ 3 ];
+        wv[ 4 ] = context->hash[ 4 ];
+	wv[ 5 ] = context->hash[ 5 ];
+        wv[ 6 ] = context->hash[ 6 ];
+	wv[ 7 ] = context->hash[ 7 ];
 
         SHA256_EXP(0,1,2,3,4,5,6,7, 0); SHA256_EXP(7,0,1,2,3,4,5,6, 1);
         SHA256_EXP(6,7,0,1,2,3,4,5, 2); SHA256_EXP(5,6,7,0,1,2,3,4, 3);
@@ -784,7 +807,7 @@ void sha256_transf(
         context->h[2] += wv[2]; context->h[3] += wv[3];
         context->h[4] += wv[4]; context->h[5] += wv[5];
         context->h[6] += wv[6]; context->h[7] += wv[7];
-#endif /* !UNROLL_LOOPS */
+#endif /* !defined( LIBBDE_SHA_UNROLLED_LOOPS ) */
     }
 }
 
