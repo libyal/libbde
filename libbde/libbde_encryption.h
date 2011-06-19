@@ -31,15 +31,6 @@
 extern "C" {
 #endif
 
-int libbde_encryption_aes_ccm_decrypt(
-     const uint8_t *initialization_vector,
-     size_t initialization_vector_size,
-     const uint8_t *encrypted_data,
-     size_t encrypted_data_size,
-     const uint8_t *unencrypted_data,
-     size_t unencrypted_data_size,
-     liberror_error_t **error );
-
 #if defined( __cplusplus )
 }
 #endif

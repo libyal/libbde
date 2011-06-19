@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110604],
+ [20110619],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -513,6 +513,14 @@ AS_IF(
    [Missing functions: strerror_r and strerror],
    [1]) ]) ])
 
+dnl Date and time functions used in libfdata/libfdata_date_time.h and libsystem/libsystem_date_time.h
+AC_CHECK_FUNCS(
+ [time],
+ [],
+ [AC_MSG_FAILURE(
+  [Missing function: time],
+  [1]) ])
+
 dnl Date and time functions used in libsystem/libsystem_date_time.h
 LIBBDE_CHECK_FUNC_CTIME
 
@@ -525,13 +533,6 @@ AC_CHECK_FUNCS(
   [AC_MSG_FAILURE(
    [Missing functions: gmtime_r and gmtime],
    [1]) ]) ])
-
-AC_CHECK_FUNCS(
- [time],
- [],
- [AC_MSG_FAILURE(
-  [Missing function: time],
-  [1]) ])
 
 dnl Directory functions used in libsystem/libsystem_directory_io.h
 AC_CHECK_FUNCS(
@@ -679,6 +680,70 @@ AS_IF(
 AM_CONDITIONAL(
  [HAVE_LOCAL_LIBBFIO],
  [test "x$ac_libbde_have_libbfio" = xlocal])
+
+dnl Check for enabling libfdata for file and memory data block support
+AC_CHECK_HEADERS(
+ [libfdata.h],
+ [],
+ [ac_libbde_have_libfdata=no])
+
+AS_IF(
+	[test "x$ac_libbde_have_libfdata" != xno],
+	[ac_libbde_have_libfdata=yes
+	AC_CHECK_LIB(
+	 fdata,
+	 libfdata_get_version,
+	 [],
+	 [ac_libbde_have_libfdata=no])
+
+	])
+
+AS_IF(
+[test "x$ac_libbde_have_libfdata" = xyes],
+ [dnl libfdata is available
+ AC_SUBST(
+  [libbde_pc_libs_private_libfdata],
+  [-lfdata])
+ AC_SUBST(
+  [libbde_spec_requires_libfdata],
+  [libfdata])
+ AC_SUBST(
+  [libbde_spec_build_requires_libfdata],
+  [libfdata-devel])
+ AC_SUBST(
+  [LIBFDATA_CPPFLAGS],
+  [])
+ AC_SUBST(
+  [LIBFDATA_LIBADD],
+  []) ],
+ [dnl libfdata is not available, using the (local) version that came with the source package
+ AC_DEFINE(
+  [HAVE_LOCAL_LIBFDATA],
+  [1],
+  [Define to 1 if the local version of libfdata is used.])
+ AC_SUBST(
+  [HAVE_LOCAL_LIBFDATA],
+  [1])
+ AC_SUBST(
+  [libbde_pc_libs_private_libfdata],
+  [])
+ AC_SUBST(
+  [libbde_spec_requires_libfdata],
+  [])
+ AC_SUBST(
+  [libbde_spec_build_requires_libfdata],
+  [])
+ AC_SUBST(
+  [LIBFDATA_CPPFLAGS],
+  [-I../libfdata])
+ AC_SUBST(
+  [LIBFDATA_LIBADD],
+  [../libfdata/libfdata.la])
+ ac_libbde_have_libfdata=local])
+
+AM_CONDITIONAL(
+ [HAVE_LOCAL_LIBFDATA],
+ [test "x$ac_libbde_have_libfdata" = xlocal])
 
 dnl Check for enabling libfdatetime for file date and time support
 LIBBDE_CHECK_LIBFDATETIME
@@ -923,11 +988,11 @@ AS_IF(
 
 AS_IF(
  [test "x$ac_libbde_have_libcrypto" = xlibadvapi32],
- [ac_libbde_have_libcrypto_sha256=libadvapi32])
+ [ac_libbde_have_sha256=libadvapi32])
 
 AS_IF(
  [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
- [ac_libbde_have_libcrypto_sha256=libcrypto_evp],
+ [ac_libbde_have_sha256=libcrypto_evp],
  [AC_SUBST(
   [HAVE_OPENSSL_EVP_H],
   [0])
@@ -935,36 +1000,36 @@ AS_IF(
 
 AS_IF(
  [test "x$ac_libbde_have_libcrypto" = xno],
- [ac_libbde_have_libcrypto_sha256=no])
+ [ac_libbde_have_sha256=no])
 
 dnl Check for libcrypto SHA256 support
 AS_IF(
- [test "x$ac_libbde_have_libcrypto_sha256" = xno],
+ [test "x$ac_libbde_have_sha256" = xno],
  [AC_CHECK_HEADERS([openssl/sha.h])
 
  AS_IF(
   [test "x$ac_cv_header_openssl_sha256_h" = xyes],
-  [ac_libbde_have_libcrypto_sha256=libcrypto
+  [ac_libbde_have_sha256=libcrypto
   AC_CHECK_LIB(
    crypto,
    SHA256_Init,
    [ac_libbde_dummy=yes],
-   [ac_libbde_have_libcrypto_sha256=no])
+   [ac_libbde_have_sha256=no])
   AC_CHECK_LIB(
    crypto,
    SHA256_Update,
    [ac_libbde_dummy=yes],
-   [ac_libbde_have_libcrypto_sha256=no])
+   [ac_libbde_have_sha256=no])
   AC_CHECK_LIB(
    crypto,
    SHA256_Final,
    [ac_libbde_dummy=yes],
-   [ac_libbde_have_libcrypto_sha256=no])
+   [ac_libbde_have_sha256=no])
   ])
  ])
 
 AS_IF(
- [test "x$ac_libbde_have_libcrypto_sha256" = xlibcrypto_evp || test "x$ac_libbde_have_libcrypto_sha256" = xlibcrypto],
+ [test "x$ac_libbde_have_sha256" = xlibcrypto_evp || test "x$ac_libbde_have_sha256" = xlibcrypto],
  [AC_SUBST(
   [LIBCRYPTO_LIBADD],
   ["-lcrypto"])
@@ -1166,7 +1231,7 @@ AS_IF(
 
 dnl Check if requires and build requires should be set in spec file
 AS_IF(
- [test "x$ac_libbde_have_libuna" = xyes || test "x$ac_libbde_have_libbfio" = xyes || test "x$ac_libbde_have_libfdatetime" = xyes || test "x$ac_libbde_have_libfguid" = xyes || test "x$ac_libbde_have_libfvalue" = xyes],
+ [test "x$ac_libbde_have_libuna" = xyes || test "x$ac_libbde_have_libbfio" = xyes || test "x$ac_libbde_have_libfdata" = xyes || test "x$ac_libbde_have_libfdatetime" = xyes || test "x$ac_libbde_have_libfguid" = xyes || test "x$ac_libbde_have_libfvalue" = xyes],
  [AC_SUBST(
   [libbde_spec_requires],
   [Requires:])
@@ -1221,6 +1286,7 @@ AC_CONFIG_FILES([liberror/Makefile])
 AC_CONFIG_FILES([libnotify/Makefile])
 AC_CONFIG_FILES([libuna/Makefile])
 AC_CONFIG_FILES([libbfio/Makefile])
+AC_CONFIG_FILES([libfdata/Makefile])
 AC_CONFIG_FILES([libfdatetime/Makefile])
 AC_CONFIG_FILES([libfguid/Makefile])
 AC_CONFIG_FILES([libfvalue/Makefile])
@@ -1251,10 +1317,12 @@ AC_MSG_NOTICE([
 Building:
    libuna support:                           $ac_libbde_have_libuna
    libbfio support:                          $ac_libbde_have_libbfio
+   libfdata support:                         $ac_libbde_have_libfdata
    libfdatetime support:                     $ac_libbde_have_libfdatetime
    libfguid support:                         $ac_libbde_have_libfguid
    libfvalue support:                        $ac_libbde_have_libfvalue
-   SHA256 support:                           $ac_libbde_have_libcrypto_sha256
+   AES support:                              $ac_libbde_have_aes
+   SHA256 support:                           $ac_libbde_have_sha256
 
 Features:
    Wide character type support:              $ac_cv_libbde_enable_wide_character_type

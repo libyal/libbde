@@ -27,8 +27,8 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_aes.h"
 #include "libbde_debug.h"
-#include "libbde_encryption.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libuna.h"
 #include "libbde_metadata_entry.h"
@@ -438,6 +438,8 @@ int libbde_metadata_entry_read_aes_ccm_encrypted_key(
      const uint8_t key[ 32 ],
      liberror_error_t **error )
 {
+	libbde_aes_context_t context;
+
 	uint8_t *value_data               = NULL;
 	static char *function             = "libbde_metadata_entry_read_aes_ccm_encrypted_key";
 	size_t value_data_size            = 0;
@@ -488,112 +490,195 @@ int libbde_metadata_entry_read_aes_ccm_encrypted_key(
 		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libfdatetime_filetime_initialize(
-	     &filetime,
+	if( libnotify_verbose != 0 )
+	{
+		if( libfdatetime_filetime_initialize(
+		     &filetime,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create filetime.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfdatetime_filetime_copy_from_byte_stream(
+		     filetime,
+		     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->nonce_time,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to copy filetime from byte stream.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfdatetime_filetime_copy_to_utf16_string(
+			  filetime,
+			  (uint16_t *) filetime_string,
+			  24,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+			  error );
+#else
+		result = libfdatetime_filetime_copy_to_utf8_string(
+			  filetime,
+			  (uint8_t *) filetime_string,
+			  24,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+			  error );
+#endif
+		if( result != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to copy filetime to string.",
+			 function );
+
+			goto on_error;
+		}
+		libnotify_printf(
+		 "%s: nonce time\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 function,
+		 filetime_string );
+
+		if( libfdatetime_filetime_free(
+		     &filetime,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free filetime.",
+			 function );
+
+			goto on_error;
+		}
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->nonce_counter,
+		 value_32bit );
+		libnotify_printf(
+		 "%s: nonce counter\t\t: %" PRIu32 "\n",
+		 function,
+		 value_32bit );
+
+		libnotify_printf(
+		 "%s: message authenticate code:\n",
+		 function );
+		libnotify_print_data(
+		 ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->message_authentication_code,
+		 16 );
+	}
+#endif
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: encrypted data:\n",
+		 function );
+		libnotify_print_data(
+		 ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->data,
+		 value_data_size - 28 );
+	}
+#endif
+
+	if( libbde_aes_initialize(
+	     &context,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create filetime.",
+		 "%s: unable initialize context.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfdatetime_filetime_copy_from_byte_stream(
-	     filetime,
-	     value_data,
-	     8,
-	     LIBFDATETIME_ENDIAN_LITTLE,
+	if( libbde_aes_set_encryption_key(
+	     &context,
+	     (uint8_t *) key,
+	     256,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to copy filetime from byte stream.",
+		 "%s: unable to set encryption key in context.",
 		 function );
+
+		libbde_aes_finalize(
+		 &context,
+		 NULL );
 
 		goto on_error;
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libfdatetime_filetime_copy_to_utf16_string(
-		  filetime,
-		  (uint16_t *) filetime_string,
-		  24,
-		  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
-		  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
-		  error );
-#else
-	result = libfdatetime_filetime_copy_to_utf8_string(
-		  filetime,
-		  (uint8_t *) filetime_string,
-		  24,
-		  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
-		  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
-		  error );
-#endif
-	if( result != 1 )
+/* TODO */
+uint8_t test[ 512 ];
+
+	if( libbde_aes_ccm_crypt(
+	     &context,
+	     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+	     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->nonce,
+	     12,
+	     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->data,
+	     value_data_size - 28,
+	     test,
+	     512,
+	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to copy filetime to string.",
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 "%s: unable to decrypt data.",
 		 function );
+
+		libbde_aes_finalize(
+		 &context,
+		 NULL );
 
 		goto on_error;
 	}
-	libnotify_printf(
-	 "%s: nonce time\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
-	 function,
-	 filetime_string );
-
-	if( libfdatetime_filetime_free(
-	     &filetime,
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: unencrypted data:\n",
+		 function );
+		libnotify_print_data(
+		 test,
+		 512 );
+	}
+#endif
+	if( libbde_aes_finalize(
+	     &context,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free filetime.",
+		 "%s: unable finalize context.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
-	value_data      += 8;
-	value_data_size -= 8;
-
-	byte_stream_copy_to_uint32_little_endian(
-	 value_data,
-	 value_32bit );
-	libnotify_printf(
-	 "%s: nonce counter\t\t: %" PRIu32 "\n",
-	 function,
-	 value_32bit );
-
-	value_data      += 4;
-	value_data_size -= 4;
-
-	libnotify_printf(
-	 "%s: message authenticate code:\n",
-	 function );
-	libnotify_print_data(
-	 value_data,
-	 16 );
-
-	value_data      += 16;
-	value_data_size -= 16;
-
-	libnotify_printf(
-	 "%s: encrypted data:\n",
-	 function );
-	libnotify_print_data(
-	 value_data,
-	 value_data_size );
-#endif
 	return( 1 );
 
 on_error:

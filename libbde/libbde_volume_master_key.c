@@ -38,7 +38,10 @@
 
 #include "bde_metadata.h"
 
-uint8_t libbde_volume_master_key_disk_password[ 26 ] = { 'D', 0, 'i', 0, 's', 0, 'k', 0, 'P', 0, 'a', 0, 's', 0, 's', 0, 'w', 0, 'o', 0, 'r', 0, 'd', 0, 0, 0 };
+/* Contains the NUL-terminated UTF-16 little-endian string: DiskPassword
+ */
+uint8_t libbde_volume_master_key_disk_password[ 26 ] = \
+	{ 'D', 0, 'i', 0, 's', 0, 'k', 0, 'P', 0, 'a', 0, 's', 0, 's', 0, 'w', 0, 'o', 0, 'r', 0, 'd', 0, 0, 0 };
 
 /* Initialize a volume master key
  * Make sure the value volume master key is pointing to is set to NULL

@@ -223,6 +223,39 @@ struct bde_metadata_entry_v1
 
 };
 
+typedef struct bde_metadata_entry_aes_cmm_encrypted_data bde_metadata_entry_aes_cmm_encrypted_data_t;
+
+struct bde_metadata_entry_aes_cmm_encrypted_data
+{
+	union
+	{
+		/* Conveniance pointer for the nonce
+		 */
+		uint8_t *nonce;
+
+		/* The nonce date and time
+		 * Consists of 8 bytes
+		 * Contains a filetime
+		 */
+		uint8_t nonce_time[ 8 ];
+	};
+
+	/* The nonce counter
+	 * Consists of 4 bytes
+	 */
+	uint8_t nonce_counter[ 4 ];
+
+	/* The message authentication code (MAC)
+	 * Consists of 16 bytes
+	 */
+	uint8_t message_authentication_code[ 16 ];
+
+	/* Conveniance pointer for the (encrypted) data
+	 */
+	uint8_t *data;
+
+};
+
 #if defined( __cplusplus )
 }
 #endif

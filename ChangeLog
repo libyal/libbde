@@ -7,14 +7,25 @@ TODO
 * store the binary recovery password in the volume
   - separate calc key and gen bin password
 * update .pc and .spec file for openssl and ld dependency
-* complete fallback sha256 routines
-* use openssl and MS Crypto AES encryption instead of local implementation
-  - create separate fallback implementation
+* AES
+  - use openssl and MS Crypto API implementation
+  - clean up fallback routines
+* SHA256
+  - complete fallback routines
 * debug
   - print entry type description string
   - print value type description string
 * bdeinfo
   - pass recovery password as commandline argument
+
+20110619
+* worked on initial version
+
+20110612
+* worked on initial version
+
+20110610
+* worked on initial version
 
 20110604
 * worked on initial version
