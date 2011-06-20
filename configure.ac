@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110619],
+ [20110620],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -951,7 +951,53 @@ AS_IF(
   [ac_libbde_have_libcrypto=no])
  ])
 
-dnl Check if all required libcrypto openssl EVP functions are available
+dnl Check if all required libcrypto openssl EVP de/encryption functions are available
+AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
+ [AC_CHECK_LIB(
+  crypto,
+  EVP_CIPHER_CTX_init,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_CIPHER_CTX_cleanup,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_DecryptInit,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_DecryptUpdate,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_DecryptFinal,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_EncryptInit,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_EncryptUpdate,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_EncryptFinal,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_libcrypto=no])
+ ac_libbde_have_aes=libcrypto_evp
+ ])
+
+dnl Check if all required libcrypto openssl EVP message digest functions are available
 AS_IF(
  [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
  [AC_CHECK_LIB(
@@ -984,23 +1030,25 @@ AS_IF(
   EVP_DigestFinal_ex,
   [ac_libbde_dummy=yes],
   [ac_libbde_have_libcrypto=no])
+ ac_libbde_have_sha256=libcrypto_evp
  ])
 
 AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xlibadvapi32],
- [ac_libbde_have_sha256=libadvapi32])
-
-AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
- [ac_libbde_have_sha256=libcrypto_evp],
+ [test "x$ac_libbde_have_libcrypto" != xlibcrypto_evp],
  [AC_SUBST(
   [HAVE_OPENSSL_EVP_H],
   [0])
  ])
 
 AS_IF(
+ [test "x$ac_libbde_have_libcrypto" = xlibadvapi32],
+ [ac_libbde_have_sha256=libadvapi32
+ ac_libbde_have_aes=libadvapi32])
+
+AS_IF(
  [test "x$ac_libbde_have_libcrypto" = xno],
- [ac_libbde_have_sha256=no])
+ [ac_libbde_have_sha256=no
+ ac_libbde_have_aes=no])
 
 dnl Check for libcrypto SHA256 support
 AS_IF(
@@ -1029,7 +1077,7 @@ AS_IF(
  ])
 
 AS_IF(
- [test "x$ac_libbde_have_sha256" = xlibcrypto_evp || test "x$ac_libbde_have_sha256" = xlibcrypto],
+ [test "x$ac_libbde_have_sha256" = xlibcrypto_evp || test "x$ac_libbde_have_sha256" = xlibcrypto || test "x$ac_libbde_have_aes" = xlibcrypto_evp || test "x$ac_libbde_have_aes" = xlibcrypto],
  [AC_SUBST(
   [LIBCRYPTO_LIBADD],
   ["-lcrypto"])
@@ -1321,8 +1369,8 @@ Building:
    libfdatetime support:                     $ac_libbde_have_libfdatetime
    libfguid support:                         $ac_libbde_have_libfguid
    libfvalue support:                        $ac_libbde_have_libfvalue
-   AES support:                              $ac_libbde_have_aes
    SHA256 support:                           $ac_libbde_have_sha256
+   AES support:                              $ac_libbde_have_aes
 
 Features:
    Wide character type support:              $ac_cv_libbde_enable_wide_character_type

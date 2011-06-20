@@ -216,7 +216,7 @@ int libbde_stretch_key_read(
 	}
 #endif
 	if( memory_copy(
-	     &( stretch_key->salt ),
+	     stretch_key->salt,
 	     value_data,
 	     16 ) == NULL )
 	{
@@ -274,6 +274,17 @@ int libbde_stretch_key_read(
 
 			return( -1 );
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: recovery key:\n",
+			 function );
+			libnotify_print_data(
+			 key,
+			 32 );
+		}
+#endif
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )

@@ -119,10 +119,21 @@ int libbde_sha256_initialize(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	context->crypt_provider = 0;
-	context->hash           = 0;
+	if( memory_set(
+	     context,
+	     0,
+	     sizeof( libbde_sha256_context_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear context.",
+		 function );
 
+		return( -1 );
+	}
+#if defined( WINAPI )
 	/* Request the AES crypt provider, fail back to the RSA crypt provider
 	*/
  	if( CryptAcquireContext(
@@ -200,20 +211,6 @@ int libbde_sha256_initialize(
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_SHA_H )
 	SHA256_Init( context );
 #else
-	if( memory_set(
-	     context,
-	     0,
-	     sizeof( libbde_sha256_context_t ) ) == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear context.",
-		 function );
-
-		return( -1 );
-	}
 	if( memory_copy(
 	     context->hash,
 	     libbde_sha256_prime_square_roots,
