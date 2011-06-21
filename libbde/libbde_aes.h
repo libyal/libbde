@@ -98,11 +98,6 @@ struct libbde_aes_context
 	/* The round keys data
 	 */
 	uint32_t round_keys_data[ 68 ];
-
-/* TODO code clean up for fallback */
-	int nr;
-	unsigned long *rk;
-	unsigned long buf[68];
 };
 
 #endif
