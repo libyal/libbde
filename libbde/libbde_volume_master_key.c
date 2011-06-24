@@ -139,7 +139,7 @@ int libbde_volume_master_key_free(
 }
 
 /* Reads a volume master key from the metadata entry
- * Returns the number of bytes read if successful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libbde_volume_master_key_read(
      libbde_volume_master_key_t *volume_master_key,
@@ -216,171 +216,179 @@ int libbde_volume_master_key_read(
 		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libfguid_identifier_initialize(
-	     &guid,
-	     error ) != 1 )
+	if( libnotify_verbose != 0 )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create GUID.",
-		 function );
+		if( libfguid_identifier_initialize(
+		     &guid,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create GUID.",
+			 function );
 
-		goto on_error;
-	}
-	if( libfguid_identifier_copy_from_byte_stream(
-	     guid,
-	     value_data,
-	     16,
-	     LIBFGUID_ENDIAN_LITTLE,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy byte stream to GUID.",
-		 function );
+			goto on_error;
+		}
+		if( libfguid_identifier_copy_from_byte_stream(
+		     guid,
+		     value_data,
+		     16,
+		     LIBFGUID_ENDIAN_LITTLE,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+			 "%s: unable to copy byte stream to GUID.",
+			 function );
 
-		goto on_error;
-	}
+			goto on_error;
+		}
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libfguid_identifier_copy_to_utf16_string(
-		  guid,
-		  (uint16_t *) guid_string,
-		  LIBFGUID_IDENTIFIER_STRING_SIZE,
-		  error );
+		result = libfguid_identifier_copy_to_utf16_string(
+			  guid,
+			  (uint16_t *) guid_string,
+			  LIBFGUID_IDENTIFIER_STRING_SIZE,
+			  error );
 #else
-	result = libfguid_identifier_copy_to_utf8_string(
-		  guid,
-		  (uint8_t *) guid_string,
-		  LIBFGUID_IDENTIFIER_STRING_SIZE,
-		  error );
+		result = libfguid_identifier_copy_to_utf8_string(
+			  guid,
+			  (uint8_t *) guid_string,
+			  LIBFGUID_IDENTIFIER_STRING_SIZE,
+			  error );
 #endif
-	if( result != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy GUID to string.",
-		 function );
+		if( result != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+			 "%s: unable to copy GUID to string.",
+			 function );
 
-		goto on_error;
-	}
-	libnotify_printf(
-	 "%s: key identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
-	 function,
-	 guid_string );
+			goto on_error;
+		}
+		libnotify_printf(
+		 "%s: key identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+		 function,
+		 guid_string );
 
-	if( libfguid_identifier_free(
-	     &guid,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free GUID.",
-		 function );
+		if( libfguid_identifier_free(
+		     &guid,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free GUID.",
+			 function );
 
-		goto on_error;
-	}
-	value_data      += 16;
-	value_data_size -= 16;
+			goto on_error;
+		}
+		value_data      += 16;
+		value_data_size -= 16;
 
-	if( libfdatetime_filetime_initialize(
-	     &filetime,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create filetime.",
-		 function );
+		if( libfdatetime_filetime_initialize(
+		     &filetime,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create filetime.",
+			 function );
 
-		goto on_error;
-	}
-	if( libfdatetime_filetime_copy_from_byte_stream(
-	     filetime,
-	     value_data,
-	     8,
-	     LIBFDATETIME_ENDIAN_LITTLE,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to copy filetime from byte stream.",
-		 function );
+			goto on_error;
+		}
+		if( libfdatetime_filetime_copy_from_byte_stream(
+		     filetime,
+		     value_data,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to copy filetime from byte stream.",
+			 function );
 
-		goto on_error;
-	}
+			goto on_error;
+		}
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libfdatetime_filetime_copy_to_utf16_string(
-		  filetime,
-		  (uint16_t *) filetime_string,
-		  24,
-		  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
-		  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
-		  error );
+		result = libfdatetime_filetime_copy_to_utf16_string(
+			  filetime,
+			  (uint16_t *) filetime_string,
+			  24,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+			  error );
 #else
-	result = libfdatetime_filetime_copy_to_utf8_string(
-		  filetime,
-		  (uint8_t *) filetime_string,
-		  24,
-		  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
-		  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
-		  error );
+		result = libfdatetime_filetime_copy_to_utf8_string(
+			  filetime,
+			  (uint8_t *) filetime_string,
+			  24,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+			  error );
 #endif
-	if( result != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to copy filetime to string.",
-		 function );
+		if( result != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to copy filetime to string.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		libnotify_printf(
+		 "%s: unknown time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 function,
+		 filetime_string );
+
+		if( libfdatetime_filetime_free(
+		     &filetime,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free filetime.",
+			 function );
+
+			goto on_error;
+		}
+		value_data      += 8;
+		value_data_size -= 8;
+
+		byte_stream_copy_to_uint32_little_endian(
+		 value_data,
+		 value_32bit );
+		libnotify_printf(
+		 "%s: unknown1\t\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		value_data      += 4;
+		value_data_size -= 4;
+
+		libnotify_printf(
+		 "\n" );
 	}
-	libnotify_printf(
-	 "%s: unknown time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
-	 function,
-	 filetime_string );
-
-	if( libfdatetime_filetime_free(
-	     &filetime,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free filetime.",
-		 function );
-
-		goto on_error;
-	}
-	value_data      += 8;
-	value_data_size -= 8;
-
-	byte_stream_copy_to_uint32_little_endian(
-	 value_data,
-	 value_32bit );
-	libnotify_printf(
-	 "%s: unknown1\t\t\t\t\t: 0x%08" PRIx32 "\n",
-	 function,
-	 value_32bit );
-
-	value_data      += 4;
-	value_data_size -= 4;
-
-	libnotify_printf(
-	 "\n" );
+#else
+/* TODO */
+	value_data      += 28;
+	value_data_size -= 28;
+#endif
 
 	while( value_data_size >= sizeof( bde_metadata_entry_v1_t ) )
 	{
@@ -523,7 +531,6 @@ int libbde_volume_master_key_read(
 			goto on_error;
 		}
 	}
-#endif
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{

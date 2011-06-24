@@ -131,7 +131,7 @@ int libbde_stretch_key_free(
 }
 
 /* Reads a stretch key from the metadata entry
- * Returns the number of bytes read if successful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libbde_stretch_key_read(
      libbde_stretch_key_t *stretch_key,
@@ -146,7 +146,6 @@ int libbde_stretch_key_read(
 	uint8_t *value_data                              = NULL;
 	static char *function                            = "libbde_stretch_key_read";
 	size_t value_data_size                           = 0;
-	ssize_t read_count                               = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint32_t value_32bit                             = 0;
