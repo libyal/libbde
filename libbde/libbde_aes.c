@@ -49,8 +49,6 @@
 
 #if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
 
-/* TODO */
-
 /* FIPS-197 compliant AES encryption functions
  *
  * The AES block cipher was designed by Vincent Rijmen and Joan Daemen.
@@ -59,171 +57,252 @@
  * http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
  */
 
-#define PADLOCK_ALIGN16(x) \
-	(uint32_t *) (16 + ((intptr_t) x & ~15))
-
-#include <string.h>
-
 #define libbde_aes_calculate_forward_round( round_keys, X0, X1, X2, X3, Y0, Y1, Y2, Y3 ) \
 { \
 	X0 = *round_keys++ \
-	   ^ FT0[ ( Y0 ) & 0xff ] \
-	   ^ FT1[ ( Y1 >>  8 ) & 0xff ] \
-	   ^ FT2[ ( Y2 >> 16 ) & 0xff ] \
-	   ^ FT3[ ( Y3 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_forward_table0[ ( Y0 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y1 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y2 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y3 >> 24 ) & 0xff ]; \
 \
 	X1 = *round_keys++ \
-	   ^ FT0[ ( Y1 ) & 0xff ] \
-	   ^ FT1[ ( Y2 >>  8 ) & 0xff ] \
-	   ^ FT2[ ( Y3 >> 16 ) & 0xff ] \
-	   ^ FT3[ ( Y0 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_forward_table0[ ( Y1 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y2 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y3 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y0 >> 24 ) & 0xff ]; \
 \
 	X2 = *round_keys++ \
-	   ^ FT0[ ( Y2 ) & 0xff ] \
-	   ^ FT1[ ( Y3 >>  8 ) & 0xff ] \
-	   ^ FT2[ ( Y0 >> 16 ) & 0xff ] \
-	   ^ FT3[ ( Y1 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_forward_table0[ ( Y2 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y3 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y0 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y1 >> 24 ) & 0xff ]; \
 \
 	X3 = *round_keys++ \
-	   ^ FT0[ ( Y3 ) & 0xff ] \
-	   ^ FT1[ ( Y0 >>  8 ) & 0xff ] \
-	   ^ FT2[ ( Y1 >> 16 ) & 0xff ] \
-	   ^ FT3[ ( Y2 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_forward_table0[ ( Y3 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y0 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y1 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y2 >> 24 ) & 0xff ]; \
 }
 
 #define libbde_aes_calculate_reverse_round( round_keys, X0, X1, X2, X3, Y0, Y1, Y2, Y3 ) \
 { \
 	X0 = *round_keys++ \
-	   ^ RT0[ ( Y0 ) & 0xff ] \
-	   ^ RT1[ ( Y3 >>  8 ) & 0xff ] \
-	   ^ RT2[ ( Y2 >> 16 ) & 0xff ] \
-	   ^ RT3[ ( Y1 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_reverse_table0[ ( Y0 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y3 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y2 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y1 >> 24 ) & 0xff ]; \
 \
 	X1 = *round_keys++ \
-	   ^ RT0[ ( Y1 ) & 0xff ] \
-	   ^ RT1[ ( Y0 >>  8 ) & 0xff ] \
-	   ^ RT2[ ( Y3 >> 16 ) & 0xff ] \
-	   ^ RT3[ ( Y2 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_reverse_table0[ ( Y1 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y0 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y3 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y2 >> 24 ) & 0xff ]; \
 \
 	X2 = *round_keys++ \
-	   ^ RT0[ ( Y2 ) & 0xff ] \
-	   ^ RT1[ ( Y1 >>  8 ) & 0xff ] \
-	   ^ RT2[ ( Y0 >> 16 ) & 0xff ] \
-	   ^ RT3[ ( Y3 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_reverse_table0[ ( Y2 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y1 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y0 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y3 >> 24 ) & 0xff ]; \
 \
 	X3 = *round_keys++ \
-	   ^ RT0[ ( Y3 ) & 0xff ] \
-	   ^ RT1[ ( Y2 >>  8 ) & 0xff ] \
-	   ^ RT2[ ( Y1 >> 16 ) & 0xff ] \
-	   ^ RT3[ ( Y0 >> 24 ) & 0xff ]; \
+	   ^ libbde_aes_reverse_table0[ ( Y3 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y2 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y1 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y0 >> 24 ) & 0xff ]; \
 }
 
 /* Forward S-box & tables
  */
 static uint8_t libbde_aes_forward_substitution_box[ 256 ];
 
-static uint32_t FT0[256]; 
-static uint32_t FT1[256]; 
-static uint32_t FT2[256]; 
-static uint32_t FT3[256]; 
+static uint32_t libbde_aes_forward_table0[ 256 ]; 
+static uint32_t libbde_aes_forward_table1[ 256 ]; 
+static uint32_t libbde_aes_forward_table2[ 256 ]; 
+static uint32_t libbde_aes_forward_table3[ 256 ]; 
 
 /* Reverse S-box & tables
  */
 static uint8_t libbde_aes_reverse_substitution_box[ 256 ];
 
-static uint32_t RT0[256];
-static uint32_t RT1[256];
-static uint32_t RT2[256];
-static uint32_t RT3[256];
+static uint32_t libbde_aes_reverse_table0[ 256 ];
+static uint32_t libbde_aes_reverse_table1[ 256 ];
+static uint32_t libbde_aes_reverse_table2[ 256 ];
+static uint32_t libbde_aes_reverse_table3[ 256 ];
 
-/*
- * Round constants
+/* Round constants
  */
 static uint32_t libbde_aes_round_constants[ 10 ];
 
-/*
- * Tables generation code
- */
-#define ROTL8(x) ( ( x << 8 ) & 0xffffffff ) | ( x >> 24 )
-#define XTIME(x) ( ( x << 1 ) ^ ( ( x & 0x80 ) ? 0x1B : 0x00 ) )
-#define MUL(x,y) ( ( x && y ) ? pow[(log[x]+log[y]) % 255] : 0 )
-
 static int libbde_aes_tables_initialized = 0;
 
-static void libbde_aes_tables_generate( void )
+void libbde_aes_initialize_tables(
+      void )
 {
-    int i, x, y, z;
-    int pow[256];
-    int log[256];
+	uint8_t logs_table[ 256 ];
+	uint8_t powers_table[ 256 ];
 
-    /*
-     * compute pow and log tables over GF(2^8)
-     */
-    for( i = 0, x = 1; i < 256; i++ )
-    {
-        pow[i] = x;
-        log[x] = i;
-        x = ( x ^ XTIME( x ) ) & 0xff;
-    }
+	uint16_t table_index         = 0;
+	uint8_t byte_index           = 0;
+	uint8_t byte_value           = 0;
+	uint8_t round_constant_index = 0;
+	uint8_t substitution_value   = 0;
 
-    /*
-     * calculate the round constants
-     */
-    for( i = 0, x = 1; i < 10; i++ )
-    {
-        libbde_aes_round_constants[i] = (unsigned long) x;
-        x = XTIME( x ) & 0xff;
-    }
+	/* Fill the powers and logs tables over GF( 2^8 )
+	 */
+	byte_value = 1;
 
-    /*
-     * generate the forward and reverse S-boxes
-     */
-    libbde_aes_forward_substitution_box[ 0x00 ] = 0x63;
-    libbde_aes_reverse_substitution_box[ 0x63 ] = 0x00;
+	for( byte_index = 0;
+	     byte_index < 256;
+	     byte_index++ )
+	{
+		powers_table[ byte_index ] = byte_value;
+		logs_table[ byte_value ]   = byte_index;
 
-    for( i = 1; i < 256; i++ )
-    {
-        x = pow[255 - log[i]];
+		if( ( byte_value & 0x80 ) == 0 )
+		{
+			byte_value ^= byte_value << 1;
+		}
+		else
+		{
+			byte_value ^= ( byte_value << 1 ) ^ 0x1b;
+		}
+	}
+	/* Fill the round constants
+	 */
+	byte_value = 1;
 
-        y  = x; y = ( (y << 1) | (y >> 7) ) & 0xff;
-        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
-        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
-        x ^= y; y = ( (y << 1) | (y >> 7) ) & 0xff;
-        x ^= y ^ 0x63;
+	for( round_constant_index = 0;
+	     round_constant_index < 10;
+	     round_constant_index++ )
+	{
+		libbde_aes_round_constants[ round_constant_index ] = (uint32_t) byte_value;
 
-        libbde_aes_forward_substitution_box[ i ] = (uint8_t) x;
-        libbde_aes_reverse_substitution_box[ x ] = (uint8_t) i;
-    }
+		if( ( byte_value & 0x80 ) == 0 )
+		{
+			byte_value ^= byte_value << 1;
+		}
+		else
+		{
+			byte_value ^= ( byte_value << 1 ) ^ 0x1b;
+		}
+	}
+	/* Fill the forward and reverse S-boxes
+	 */
+	libbde_aes_forward_substitution_box[ 0x00 ] = 0x63;
+	libbde_aes_reverse_substitution_box[ 0x63 ] = 0x00;
 
-    /*
-     * generate the forward and reverse tables
-     */
-    for( i = 0; i < 256; i++ )
-    {
-        x = libbde_aes_forward_substitution_box[ i ];
-        y = XTIME( x ) & 0xff;
-        z =  ( y ^ x ) & 0xff;
+	for( byte_index = 0;
+	     byte_index < 256;
+	     byte_index++ )
+	{
+		table_index = 255 - logs_table[ byte_index ];
+		byte_value  = powers_table[ table_index ];
 
-        FT0[i] = ( (unsigned long) y       ) ^
-                 ( (unsigned long) x <<  8 ) ^
-                 ( (unsigned long) x << 16 ) ^
-                 ( (unsigned long) z << 24 );
+		substitution_value = ( byte_value << 1 )
+		                   | ( byte_value >> 7 );
 
-        FT1[i] = ROTL8( FT0[i] );
-        FT2[i] = ROTL8( FT1[i] );
-        FT3[i] = ROTL8( FT2[i] );
+		byte_value ^= substitution_value;
 
-        x = libbde_aes_reverse_substitution_box[ i ];
+		substitution_value = ( substitution_value << 1 )
+		                   | ( substitution_value >> 7 );
 
-        RT0[i] = ( (unsigned long) MUL( 0x0E, x )       ) ^
-                 ( (unsigned long) MUL( 0x09, x ) <<  8 ) ^
-                 ( (unsigned long) MUL( 0x0D, x ) << 16 ) ^
-                 ( (unsigned long) MUL( 0x0B, x ) << 24 );
+		byte_value ^= substitution_value;
 
-        RT1[i] = ROTL8( RT0[i] );
-        RT2[i] = ROTL8( RT1[i] );
-        RT3[i] = ROTL8( RT2[i] );
-    }
+		substitution_value = ( substitution_value << 1 )
+		                   | ( substitution_value >> 7 );
+
+		byte_value ^= substitution_value;
+
+		substitution_value = ( substitution_value << 1 )
+		                   | ( substitution_value >> 7 );
+
+		substitution_value ^= byte_value ^ 0x63;
+
+		libbde_aes_forward_substitution_box[ byte_index ]         = substitution_value;
+		libbde_aes_reverse_substitution_box[ substitution_value ] = byte_index;
+	}
+	/* Fill the forward and reverse tables
+	 */
+	for( byte_index = 0;
+	     byte_index < 256;
+	     byte_index++ )
+	{
+		substitution_value = libbde_aes_forward_substitution_box[ byte_index ];
+
+		if( ( substitution_value & 0x80 ) == 0 )
+		{
+			byte_value = substitution_value ^ ( substitution_value << 1 );
+		}
+		else
+		{
+			byte_value = substitution_value ^ ( substitution_value << 1 ) ^ 0x1b;
+		}
+		libbde_aes_forward_table0[ byte_index ]   = byte_value ^ substitution_value;
+		libbde_aes_forward_table0[ byte_index ] <<= 8;
+		libbde_aes_forward_table0[ byte_index ]  ^= byte_value;
+		libbde_aes_forward_table0[ byte_index ] <<= 8;
+		libbde_aes_forward_table0[ byte_index ]  ^= byte_value;
+		libbde_aes_forward_table0[ byte_index ] <<= 8;
+		libbde_aes_forward_table0[ byte_index ]  ^= substitution_value;
+
+		libbde_aes_forward_table1[ byte_index ] = byte_stream_bit_rotate_left(
+		                                           libbde_aes_forward_table0[ byte_index ],
+		                                           8 );
+
+		libbde_aes_forward_table2[ byte_index ] = byte_stream_bit_rotate_left(
+		                                           libbde_aes_forward_table1[ byte_index ],
+		                                           8 );
+
+		libbde_aes_forward_table3[ byte_index ] = byte_stream_bit_rotate_left(
+		                                           libbde_aes_forward_table2[ byte_index ],
+		                                           8 );
+
+		substitution_value = libbde_aes_reverse_substitution_box[ byte_index ];
+
+		libbde_aes_reverse_table0[ byte_index ] = 0;
+
+		if( substitution_value != 0 )
+		{
+			table_index  = logs_table[ 0x0b ];
+			table_index += logs_table[ substitution_value ];
+			table_index %= 255;
+
+			libbde_aes_reverse_table0[ byte_index ] ^= powers_table[ table_index ];
+			libbde_aes_reverse_table0[ byte_index ] <<= 8;
+
+			table_index  = logs_table[ 0x0d ];
+			table_index += logs_table[ substitution_value ];
+			table_index %= 255;
+
+			libbde_aes_reverse_table0[ byte_index ] ^= powers_table[ table_index ];
+			libbde_aes_reverse_table0[ byte_index ] <<= 8;
+
+			table_index  = logs_table[ 0x09 ];
+			table_index += logs_table[ substitution_value ];
+			table_index %= 255;
+
+			libbde_aes_reverse_table0[ byte_index ] ^= powers_table[ table_index ];
+			libbde_aes_reverse_table0[ byte_index ] <<= 8;
+
+			table_index  = logs_table[ 0x0e ];
+			table_index += logs_table[ substitution_value ];
+			table_index %= 255;
+
+			libbde_aes_reverse_table0[ byte_index ] ^= powers_table[ table_index ];
+		}
+		libbde_aes_reverse_table1[ byte_index ] = byte_stream_bit_rotate_left(
+		                                           libbde_aes_reverse_table0[ byte_index ],
+		                                           8 );
+
+		libbde_aes_reverse_table2[ byte_index ] = byte_stream_bit_rotate_left(
+		                                           libbde_aes_reverse_table1[ byte_index ],
+		                                           8 );
+
+		libbde_aes_reverse_table3[ byte_index ] = byte_stream_bit_rotate_left(
+		                                           libbde_aes_reverse_table2[ byte_index ],
+		                                           8 );
+	}
+	libbde_aes_tables_initialized = 1;
 }
 
 #endif /* !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) ) */
@@ -258,7 +337,10 @@ int libbde_aes_initialize(
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 	/* TODO */
 #else
-	/* TODO */
+	if( libbde_aes_tables_initialized == 0 )
+	{
+		libbde_aes_initialize_tables();
+	}
 #endif
 	return( 1 );
 }
@@ -437,10 +519,10 @@ int libbde_aes_set_decyption_key(
 		     byte_index < 4;
 		     byte_index++ )
 		{
-			*round_keys++ = RT0[ libbde_aes_forward_substitution_box[ ( *SK ) & 0xff ] ]
-			              ^ RT1[ libbde_aes_forward_substitution_box[ ( *SK >>  8 ) & 0xff ] ]
-			              ^ RT2[ libbde_aes_forward_substitution_box[ ( *SK >> 16 ) & 0xff ] ]
-			              ^ RT3[ libbde_aes_forward_substitution_box[ ( *SK >> 24 ) & 0xff ] ];
+			*round_keys++ = libbde_aes_reverse_table0[ libbde_aes_forward_substitution_box[ ( *SK ) & 0xff ] ]
+			              ^ libbde_aes_reverse_table1[ libbde_aes_forward_substitution_box[ ( *SK >>  8 ) & 0xff ] ]
+			              ^ libbde_aes_reverse_table2[ libbde_aes_forward_substitution_box[ ( *SK >> 16 ) & 0xff ] ]
+			              ^ libbde_aes_reverse_table3[ libbde_aes_forward_substitution_box[ ( *SK >> 24 ) & 0xff ] ];
 
 			SK++;
 		}
@@ -531,11 +613,6 @@ int libbde_aes_set_encryption_key(
 		return( -1 );
 	}
 #else
-	if( libbde_aes_tables_initialized == 0 )
-	{
-/* TODO */
-		libbde_aes_tables_generate();
-	}
 	/* Align the buffer to next 16-byte blocks
 	 */
 	context->round_keys = (uint32_t *) ( 16 + ( (intptr_t) context->round_keys_data & ~15 ) );
@@ -1139,13 +1216,13 @@ int libbde_aes_ecb_crypt(
 }
 
 /* De- or encrypts a block of data using AES-CBC
+ * This function expects the input to be a multitude of 16 bytes
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_cbc_crypt(
      libbde_aes_context_t *context,
      int mode,
-     int length,
-     unsigned char iv[16],
+     uint8_t initialization_vector[ 16 ],
      const uint8_t *input_data,
      size_t input_data_size,
      uint8_t *output_data,
@@ -1155,85 +1232,9 @@ int libbde_aes_cbc_crypt(
 	static char *function = "libbde_aes_cbc_crypt";
 
 #if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
-    int i;
-    unsigned char temp[16];
-#endif
-
-	if( context == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid context.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( WINAPI )
-/* TODO */
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-/* TODO */
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-/* TODO */
-
-#else
-	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
-	{
-		while( length > 0 )
-		{
-			for( i = 0; i < 16; i++ )
-			{
-				output[i] = (unsigned char)( input[i] ^ iv[i] );
-			}
-			aes_ecb_crypt( context, mode, output, output );
-			memcpy( iv, output, 16 );
-
-			input  += 16;
-			output += 16;
-			length -= 16;
-		}
-	}
-	else
-	{
-		while( length > 0 )
-		{
-			memcpy( temp, input, 16 );
-			aes_ecb_crypt( context, mode, input, output );
-
-			for( i = 0; i < 16; i++ )
-			{
-				output[i] = (unsigned char)( output[i] ^ iv[i] );
-			}
-			memcpy( iv, temp, 16 );
-
-			input  += 16;
-			output += 16;
-			length -= 16;
-		}
-  	}
-#endif
-	return( 1 );
-}
-
-/* De- or encrypts a block of data using AES-CBF
- * Returns 1 if successful or -1 on error
- */
-int libbde_aes_cfb_crypt(
-     libbde_aes_context_t *context,
-     int mode,
-     uint8_t initialization_vector[ 16 ],
-     size_t *initialization_vector_index,
-     const uint8_t *input_data,
-     size_t input_data_size,
-     uint8_t *output_data,
-     size_t output_data_size,
-     liberror_error_t **error )
-{
-	static char *function = "libbde_aes_cfb_crypt";
 	size_t data_index     = 0;
+	uint8_t block_index   = 0;
+#endif
 
 	if( ( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
 	 && ( mode != LIBBDE_AES_CRYPT_MODE_ENCRYPT ) )
@@ -1243,17 +1244,6 @@ int libbde_aes_cfb_crypt(
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported mode.",
-		 function );
-
-		return( -1 );
-	}
-	if( initialization_vector_index == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid initialization vector index.",
 		 function );
 
 		return( -1 );
@@ -1302,9 +1292,237 @@ int libbde_aes_cfb_crypt(
 
 		return( -1 );
 	}
-/* TODO check if output size > input size */
-/* TODO check if iv index >= 16 */
+	if( output_data_size > input_data_size )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid ouput data size value exceeds input data size.",
+		 function );
 
+		return( -1 );
+	}
+#if defined( WINAPI )
+/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+/* TODO */
+
+#else
+	while( ( data_index + 16 ) < input_data_size )
+	{
+		if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+		{
+			if( memory_copy(
+			     &( output_data[ data_index ] ),
+			     &( input_data[ data_index ] ),
+			     16 ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy input data to output data.",
+				 function );
+
+				return( -1 );
+			}
+			for( block_index = 0;
+			     block_index < 16;
+			     block_index++ )
+			{
+				output_data[ data_index + block_index ] ^= initialization_vector[ block_index ];
+			}
+			if( libbde_aes_ecb_crypt(
+			     context,
+			     mode,
+			     &( output_data[ data_index ] ),
+			     16,
+			     &( output_data[ data_index ] ),
+			     16,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to encrypt output data.",
+				 function );
+
+				return( -1 );
+			}
+			if( memory_copy(
+			     initialization_vector,
+			     &( output_data[ data_index ] ),
+			     16 ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy enrypted output data to initialization vector.",
+				 function );
+
+				return( -1 );
+			}
+		}
+		else
+		{
+			if( libbde_aes_ecb_crypt(
+			     context,
+			     mode,
+			     &( input_data[ data_index ] ),
+			     16,
+			     &( output_data[ data_index ] ),
+			     16,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to decrypt output data.",
+				 function );
+
+				return( -1 );
+			}
+			for( block_index = 0;
+			     block_index < 16;
+			     block_index++ )
+			{
+				output_data[ data_index + block_index ] ^= initialization_vector[ block_index ];
+			}
+			if( memory_copy(
+			     initialization_vector,
+			     &( input_data[ data_index ] ),
+			     16 ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy enrypted input data to initialization vector.",
+				 function );
+
+				return( -1 );
+			}
+		}
+		data_index += 16;
+  	}
+#endif
+	return( 1 );
+}
+
+/* De- or encrypts a block of data using AES-CBF
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_cfb_crypt(
+     libbde_aes_context_t *context,
+     int mode,
+     uint8_t initialization_vector[ 16 ],
+     size_t *initialization_vector_index,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_aes_cfb_crypt";
+	size_t data_index     = 0;
+
+	if( ( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
+	 && ( mode != LIBBDE_AES_CRYPT_MODE_ENCRYPT ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported mode.",
+		 function );
+
+		return( -1 );
+	}
+	if( initialization_vector_index == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid initialization vector index.",
+		 function );
+
+		return( -1 );
+	}
+	if( *initialization_vector_index >= 16 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid initialization vector index .",
+		 function );
+
+		return( -1 );
+	}
+	if( input_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid input data.",
+		 function );
+
+		return( -1 );
+	}
+	if( input_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid output data.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data_size > input_data_size )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid ouput data size value exceeds input data size.",
+		 function );
+
+		return( -1 );
+	}
 	for( data_index = 0;
 	     data_index < input_data_size;
 	     data_index++ )
