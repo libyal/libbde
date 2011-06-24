@@ -52,48 +52,6 @@
 /* FIPS 180-2 compliant SHA-256 functions
  */
 
-#define libbde_sha256_f1( value ) \
-	( byte_stream_bit_rotate_right( value, 2 ) \
-	^ byte_stream_bit_rotate_right( value, 13 ) \
-	^ byte_stream_bit_rotate_right( value, 22 ) )
-
-#define libbde_sha256_f2( value ) \
-	( byte_stream_bit_rotate_right( value, 6 ) \
-	^ byte_stream_bit_rotate_right( value, 11 ) \
-	^ byte_stream_bit_rotate_right( value, 25 ) )
-
-#define libbde_sha256_f3( value ) \
-	( byte_stream_bit_rotate_right( value, 7 ) \
-	^ byte_stream_bit_rotate_right( value, 18 ) \
-	^ byte_stream_bit_shift_right( value, 3 ) )
-
-#define libbde_sha256_f4( value ) \
-	( byte_stream_bit_rotate_right( value, 17 ) \
-	^ byte_stream_bit_rotate_right( value, 19 ) \
-	^ byte_stream_bit_shift_right( value, 10 ) )
-
-/* TODO */
-
-#define CH(x, y, z)  ((x & y) ^ (~x & z))
-#define MAJ(x, y, z) ((x & y) ^ (x & z) ^ (y & z))
-
-#define SHA256_SCR(i) \
-{ \
-	w[ index ] = libbde_sha256_f4( w[ index - 2 ] ) \
-	           + w[ index - 7 ] \
-	           + libbde_sha256_f3( w[ index - 15 ] ) \
-	           + w[ index - 16 ]; \
-}
-
-#define SHA256_EXP(a, b, c, d, e, f, g, h, j) \
-{ \
-    t1 = wv[h] + libbde_sha256_f2(wv[e]) + CH(wv[e], wv[f], wv[g]) \
-         + sha256_k[j] + w[j];                              \
-    t2 = libbde_sha256_f1(wv[a]) + MAJ(wv[a], wv[b], wv[c]);       \
-    wv[d] += t1;                                            \
-    wv[h] = t1 + t2;                                        \
-}
-
 /* The first 32-bits of the fractional parts of the square roots of the first 8 primes 2..19
  */
 uint32_t libbde_sha256_prime_square_roots[ 8 ] = {
@@ -122,16 +80,325 @@ uint32_t libbde_sha256_prime_cube_roots[ 64 ] = {
 	0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
 };
 
+#define libbde_sha256_transform_unfolded_copy_data_to_32bit_values( data, values_32bit ) \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 0 ] ), \
+		 values_32bit[ 0 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 4 ] ), \
+		 values_32bit[ 1 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 8 ] ), \
+		 values_32bit[ 2 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 12 ] ), \
+		 values_32bit[ 3 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 16 ] ), \
+		 values_32bit[ 4 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 20 ] ), \
+		 values_32bit[ 5 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 24 ] ), \
+		 values_32bit[ 6 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 28 ] ), \
+		 values_32bit[ 7 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 32 ] ), \
+		 values_32bit[ 8 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 36 ] ), \
+		 values_32bit[ 9 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 40 ] ), \
+		 values_32bit[ 10 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 44 ] ), \
+		 values_32bit[ 11 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 48 ] ), \
+		 values_32bit[ 12 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 52 ] ), \
+		 values_32bit[ 13 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( ( data )[ 56 ] ), \
+		 values_32bit[ 14 ] ); \
+ \
+		byte_stream_copy_to_uint32_little_endian( \
+		 &( data[ 60 ] ), \
+		 values_32bit[ 15 ] );
+
+#define libbde_sha256_f1( value ) \
+	( byte_stream_bit_rotate_right( value, 2 ) \
+	^ byte_stream_bit_rotate_right( value, 13 ) \
+	^ byte_stream_bit_rotate_right( value, 22 ) )
+
+#define libbde_sha256_f2( value ) \
+	( byte_stream_bit_rotate_right( value, 6 ) \
+	^ byte_stream_bit_rotate_right( value, 11 ) \
+	^ byte_stream_bit_rotate_right( value, 25 ) )
+
+#define libbde_sha256_transform_extend_32bit_value( values_32bit, value_32bit_index ) \
+{ \
+	values_32bit[ value_32bit_index ] = \
+	( ( byte_stream_bit_rotate_right( \
+	     values_32bit[ value_32bit_index - 2 ], \
+	     17 ) \
+	  ^ byte_stream_bit_rotate_right( \
+	     values_32bit[ value_32bit_index - 2 ], \
+	     19 ) \
+	  ^ byte_stream_bit_shift_right( \
+	     values_32bit[ value_32bit_index - 2 ], \
+	     10 ) ) ) \
+	+ values_32bit[ value_32bit_index - 7 ] \
+	+ ( ( byte_stream_bit_rotate_right( \
+	       values_32bit[ value_32bit_index - 15 ], \
+	       7 ) \
+	    ^ byte_stream_bit_rotate_right( \
+	       values_32bit[ value_32bit_index - 15 ], \
+	       18 ) \
+	    ^ byte_stream_bit_shift_right( \
+	       values_32bit[ value_32bit_index - 15 ], \
+	       3 ) ) ) \
+	+ values_32bit[ value_32bit_index - 16 ]; \
+}
+
+#define libbde_sha256_transform_unfolded_extend_32bit_values( values_32bit ) \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 16 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 17 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 18 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 19 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 20 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 21 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 22 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 23 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 24 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 25 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 26 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 27 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 28 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 29 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 30 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 31 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 32 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 33 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 34 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 35 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 36 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 37 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 38 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 39 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 40 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 41 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 42 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 43 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 44 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 45 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 46 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 47 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 48 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 49 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 50 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 51 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 52 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 53 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 54 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 55 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 56 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 57 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 58 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 59 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 60 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 61 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 62 ); \
+ \
+		libbde_sha256_transform_extend_32bit_value( \
+		 values_32bit, \
+		 63 );
+
+/* TODO refactor */
+
+#define CH(x, y, z)  ((x & y) ^ (~x & z))
+#define MAJ(x, y, z) ((x & y) ^ (x & z) ^ (y & z))
+
+#define SHA256_EXP(a, b, c, d, e, f, g, h, j) \
+{ \
+    t1 = hash_values[h] + libbde_sha256_f2(hash_values[e]) + CH(hash_values[e], hash_values[f], hash_values[g]) \
+         + sha256_k[j] + w[j];                              \
+    t2 = libbde_sha256_f1(hash_values[a]) + MAJ(hash_values[a], hash_values[b], hash_values[c]);       \
+    hash_values[d] += t1;                                            \
+    hash_values[h] = t1 + t2;                                        \
+}
+
 int libbde_sha256_transform(
      libbde_sha256_context_t *context,
      const uint8_t *data,
      size_t number_of_blocks,
      liberror_error_t **error )
 {
-	uint32_t w[64];
-	uint32_t wv[8];
+	uint32_t hash_values[ 8 ];
+	uint32_t values_32bit[ 64 ];
 
 	const uint8_t *sub_block  = NULL;
+	uint32_t s0               = 0;
+	uint32_t s1               = 0;
 	uint32_t t1               = 0;
 	uint32_t t2               = 0;
 	size_t data_offset        = 0;
@@ -162,176 +429,58 @@ int libbde_sha256_transform(
 	{
 		data_offset = block_index * LIBBDE_SHA256_BLOCK_SIZE;
 
-#if !defined( LIBBDE_SHA_UNFOLLED_LOOPS )
+		if( memory_copy(
+		     hash_values,
+		     context->hash_values,
+		     sizeof( uint32_t ) * 8 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to copy hash values.",
+			 function );
+
+			return( -1 );
+		}
+		/* Break the data into 16 x 32-bit values
+		 */
+#if defined( LIBBDE_SHA_UNFOLLED_LOOPS )
+		libbde_sha256_transform_unfolded_copy_data_to_32bit_values(
+		 &( data[ data_offset ] ),
+		 values_32bit );
+#else
 		for( value_32bit_index = 0;
 		     value_32bit_index < 16;
 		     value_32bit_index++ )
 		{
 			byte_stream_copy_to_uint32_little_endian(
 			 &( data[ data_offset ] ),
-			 w[ value_32bit_index ] );
+			 values_32bit[ value_32bit_index ] );
 
 			data_offset += sizeof( uint32_t );
 		}
+#endif /* defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
+
+		/* Extend to 64 x 32-bit values
+		 */
+#if defined( LIBBDE_SHA_UNFOLLED_LOOPS )
+		libbde_sha256_transform_unfolded_extend_32bit_values(
+		 values_32bit );
 #else
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 0 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 1 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 2 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 3 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 4 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 5 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 6 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 7 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 8 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 9 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 10 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 11 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 12 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 13 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 14 ] );
-
-		data_offset += sizeof( uint32_t );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 &( data[ data_offset ] ),
-		 w[ 15 ] );
-
-		data_offset += sizeof( uint32_t );
-
-#endif /* !defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
-
-#if !defined( LIBBDE_SHA_UNFOLLED_LOOPS )
 		for( value_32bit_index = 16;
 		     value_32bit_index < 64;
 		     value_32bit_index++ )
 		{
-			libbde_sha256_scr(
+			libbde_sha256_transform_extend_32bit_value(
+			 values_32bit,
 			 value_32bit_index );
 		}
-#else
-		SHA256_SCR(16); SHA256_SCR(17); SHA256_SCR(18); SHA256_SCR(19);
-		SHA256_SCR(20); SHA256_SCR(21); SHA256_SCR(22); SHA256_SCR(23);
-		SHA256_SCR(24); SHA256_SCR(25); SHA256_SCR(26); SHA256_SCR(27);
-		SHA256_SCR(28); SHA256_SCR(29); SHA256_SCR(30); SHA256_SCR(31);
-		SHA256_SCR(32); SHA256_SCR(33); SHA256_SCR(34); SHA256_SCR(35);
-		SHA256_SCR(36); SHA256_SCR(37); SHA256_SCR(38); SHA256_SCR(39);
-		SHA256_SCR(40); SHA256_SCR(41); SHA256_SCR(42); SHA256_SCR(43);
-		SHA256_SCR(44); SHA256_SCR(45); SHA256_SCR(46); SHA256_SCR(47);
-		SHA256_SCR(48); SHA256_SCR(49); SHA256_SCR(50); SHA256_SCR(51);
-		SHA256_SCR(52); SHA256_SCR(53); SHA256_SCR(54); SHA256_SCR(55);
-		SHA256_SCR(56); SHA256_SCR(57); SHA256_SCR(58); SHA256_SCR(59);
-		SHA256_SCR(60); SHA256_SCR(61); SHA256_SCR(62); SHA256_SCR(63);
-#endif /* !defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
+#endif /* defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
 
-#if !defined( LIBBDE_SHA_UNFOLLED_LOOPS )
-		for( hash_value_index = 0;
-		     hash_value_index < 8;
-		     hash_value_index++ )
-		{
-			wv[ hash_value_index ] = context->hash_values[ hash_value_index ];
-		}
-#else
-		wv[ 0 ] = context->hash[ 0 ];
-		wv[ 1 ] = context->hash[ 1 ];
-		wv[ 2 ] = context->hash[ 2 ];
-		wv[ 3 ] = context->hash[ 3 ];
-		wv[ 4 ] = context->hash[ 4 ];
-		wv[ 5 ] = context->hash[ 5 ];
-		wv[ 6 ] = context->hash[ 6 ];
-		wv[ 7 ] = context->hash[ 7 ];
-
-#endif /* !defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
-
-#if !defined( LIBBDE_SHA_UNFOLLED_LOOPS )
-		for (j = 0; j < 64; j++) {
-			t1 = wv[7]
-			   + libbde_sha256_f2(wv[4])
-			   + CH(wv[4], wv[5], wv[6])
-			   + sha256_k[j]
-			   + w[j];
-		    t2 = libbde_sha256_f1(wv[0]) + MAJ(wv[0], wv[1], wv[2]);
-		    wv[7] = wv[6];
-		    wv[6] = wv[5];
-		    wv[5] = wv[4];
-		    wv[4] = wv[3] + t1;
-		    wv[3] = wv[2];
-		    wv[2] = wv[1];
-		    wv[1] = wv[0];
-		    wv[0] = t1 + t2;
-		}
-#else
+		/* Calculate the hash values for the 32-bit values
+		 */
+#if defined( LIBBDE_SHA_UNFOLLED_LOOPS )
 		SHA256_EXP(0,1,2,3,4,5,6,7, 0); SHA256_EXP(7,0,1,2,3,4,5,6, 1);
 		SHA256_EXP(6,7,0,1,2,3,4,5, 2); SHA256_EXP(5,6,7,0,1,2,3,4, 3);
 		SHA256_EXP(4,5,6,7,0,1,2,3, 4); SHA256_EXP(3,4,5,6,7,0,1,2, 5);
@@ -364,27 +513,45 @@ int libbde_sha256_transform(
 		SHA256_EXP(6,7,0,1,2,3,4,5,58); SHA256_EXP(5,6,7,0,1,2,3,4,59);
 		SHA256_EXP(4,5,6,7,0,1,2,3,60); SHA256_EXP(3,4,5,6,7,0,1,2,61);
 		SHA256_EXP(2,3,4,5,6,7,0,1,62); SHA256_EXP(1,2,3,4,5,6,7,0,63);
-
-#endif /* !defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
-
-#if !defined( LIBBDE_SHA_UNFOLLED_LOOPS )
-		for( hash_value_index = 0;
-		     hash_value_index < 8;
-		     hash_value_index++ )
-		{
-			context->hash[ hash_value_index ] += wv[ hash_value_index ];
-		}
 #else
-		context->h[ 0 ] += wv[ 0 ];
-		context->h[ 1 ] += wv[ 1 ];
-		context->h[ 2 ] += wv[ 2 ];
-		context->h[ 3 ] += wv[ 3 ];
-		context->h[ 4 ] += wv[ 4 ];
-		context->h[ 5 ] += wv[ 5 ];
-		context->h[ 6 ] += wv[ 6 ];
-		context->h[ 7 ] += wv[ 7 ];
+		for( value_32bit_index = 0;
+		     value_32bit_index < 64;
+		     value_32bit_index++ )
+		{
+			t1 = hash_values[7]
+			   + libbde_sha256_f2(hash_values[4])
+			   + CH(hash_values[4], hash_values[5], hash_values[6])
+			   + sha256_k[ value_32bit_index ]
+			   + values_32bit[  value_32bit_index  ];
 
-#endif /* !defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
+			t2 = libbde_sha256_f1(hash_values[0])
+			   + MAJ(hash_values[0], hash_values[1], hash_values[2]);
+
+			hash_values[ 7 ] = hash_values[ 6 ];
+			hash_values[ 6 ] = hash_values[ 5 ];
+			hash_values[ 5 ] = hash_values[ 4 ];
+			hash_values[ 4 ] = hash_values[ 3 ] + t1;
+			hash_values[ 3 ] = hash_values[ 2 ];
+			hash_values[ 2 ] = hash_values[ 1 ];
+			hash_values[ 1 ] = hash_values[ 0 ];
+			hash_values[ 0 ] = t1 + t2;
+		}
+#endif /* defined( LIBBDE_SHA_UNFOLLED_LOOPS ) */
+
+		if( memory_copy(
+		     context->hash_values,
+		     hash_values,
+		     sizeof( uint32_t ) * 8 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to copy hash values.",
+			 function );
+
+			return( -1 );
+		}
 	}
 	return( 1 );
 }

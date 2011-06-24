@@ -18,8 +18,18 @@ TODO
 * bdeinfo
   - pass recovery password as commandline argument
 
+20110623
+* worked on initial version
+  - AES fallback
+  - SHA fallback
+
+20110622
+* worked on initial version
+  - AES fallback
+
 20110620
 * worked on initial version
+  - AES fallback
 
 20110619
 * worked on initial version
