@@ -145,8 +145,7 @@ int libbde_aes_ecb_crypt(
 int libbde_aes_cbc_crypt(
      libbde_aes_context_t *context,
      int mode,
-     int length,
-     unsigned char iv[16],
+     uint8_t initialization_vector[ 16 ],
      const uint8_t *input_data,
      size_t input_data_size,
      uint8_t *output_data,

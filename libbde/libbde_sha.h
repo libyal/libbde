@@ -66,19 +66,25 @@ typedef struct libbde_sha256_context libbde_sha256_context_t;
 
 struct libbde_sha256_context
 {
-	/* The block index
+	/* The block offset
 	 */
-	size_t block_index;
+	size_t block_offset;
+
+	/* The number of bytes hashed
+	 */
+	size_t hash_count;
+
+	/* The 32-bit hash values
+	 */
+	uint32_t hash_values[ 8 ];
+
+	/* The data block
+	 */
+	uint8_t block[ 128 ];
 
 /* TODO code clean up for fallback */
 
 	size_t size;
-	size_t total_size;
-	uint8_t block[ 128 ];
-
-	/* The last calculated h-values
-	 */
-	uint32_t h[ 8 ];
 };
 
 #endif

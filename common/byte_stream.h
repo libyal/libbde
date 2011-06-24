@@ -214,17 +214,17 @@ typedef union byte_stream_float64
 	( byte_stream )[ 1 ] = (uint8_t) ( ( value >> 8 ) & 0x0ff ); \
 	( byte_stream )[ 0 ] = (uint8_t) ( value & 0x0ff )
 
-#define byte_stream_bit_rotate_left( value, number_of_bits ) \
-	( ( value << number_of_bits ) | ( value >> ( ( sizeof( value ) << 3 ) - number_of_bits ) ) )
+#define byte_stream_bit_rotate_left( byte_stream, number_of_bits ) \
+	( ( byte_stream << number_of_bits ) | ( byte_stream >> ( ( sizeof( byte_stream ) << 3 ) - number_of_bits ) ) )
 
-#define byte_stream_bit_rotate_right( value, number_of_bits ) \
-	( ( value >> number_of_bits ) | ( value << ( ( sizeof( value ) << 3 ) - number_of_bits ) ) )
+#define byte_stream_bit_rotate_right( byte_stream, number_of_bits ) \
+	( ( byte_stream >> number_of_bits ) | ( byte_stream << ( ( sizeof( byte_stream ) << 3 ) - number_of_bits ) ) )
 
-#define byte_stream_bit_shift_left( value, number_of_bits ) \
-	( value << number_of_bits )
+#define byte_stream_bit_shift_left( byte_stream, number_of_bits ) \
+	( byte_stream << number_of_bits )
 
-#define byte_stream_bit_shift_right( value, number_of_bits ) \
-	( value >> number_of_bits )
+#define byte_stream_bit_shift_right( byte_stream, number_of_bits ) \
+	( byte_stream >> number_of_bits )
 
 #if defined( __cplusplus )
 }
