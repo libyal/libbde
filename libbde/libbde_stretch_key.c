@@ -146,6 +146,7 @@ int libbde_stretch_key_read(
 	uint8_t *value_data                              = NULL;
 	static char *function                            = "libbde_stretch_key_read";
 	size_t value_data_size                           = 0;
+	ssize_t read_count                               = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint32_t value_32bit                             = 0;
