@@ -145,8 +145,8 @@ void libbde_aes_initialize_tables(
 	uint8_t logs_table[ 256 ];
 	uint8_t powers_table[ 256 ];
 
+	uint16_t byte_index          = 0;
 	uint16_t table_index         = 0;
-	uint8_t byte_index           = 0;
 	uint8_t byte_value           = 0;
 	uint8_t round_constant_index = 0;
 	uint8_t substitution_value   = 0;
