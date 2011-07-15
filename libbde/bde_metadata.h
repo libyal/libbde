@@ -223,7 +223,7 @@ struct bde_metadata_entry_v1
 
 };
 
-typedef struct bde_metadata_entry_aes_ccccmncrypted_data bde_metadata_entry_aes_ccm_encrypted_data_t;
+typedef struct bde_metadata_entry_aes_ccm_encrypted_data bde_metadata_entry_aes_ccm_encrypted_data_t;
 
 struct bde_metadata_entry_aes_ccm_encrypted_data
 {

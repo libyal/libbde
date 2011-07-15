@@ -18,6 +18,9 @@ TODO
 * bdeinfo
   - pass recovery password as commandline argument
 
+20110715
+* worked on initial version
+
 20110627
 * added libhmac
 * updated configure.ac to support libhmac

@@ -28,11 +28,14 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_aes.h"
+#include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_metadata_entry.h"
+#include "libbde_recovery.h"
 #include "libbde_stretch_key.h"
 #include "libbde_volume_master_key.h"
 
@@ -149,22 +152,26 @@ int libbde_volume_master_key_read(
 {
 	uint8_t key[ 32 ];
 
-	libbde_metadata_entry_t *property_metadata_entry = NULL;
-	libbde_stretch_key_t *stretch_key                = NULL;
-	uint8_t *value_data                              = NULL;
-	static char *function                            = "libbde_volume_master_key_read";
-	size_t value_data_size                           = 0;
-	ssize_t read_count                               = 0;
-	uint8_t use_recovery_password                    = 0;
+	/* TODO */
+	libbde_aes_context_t aes_context;
+
+	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
+	libbde_metadata_entry_t *property_metadata_entry      = NULL;
+	libbde_stretch_key_t *stretch_key                     = NULL;
+	uint8_t *value_data                                   = NULL;
+	static char *function                                 = "libbde_volume_master_key_read";
+	size_t value_data_size                                = 0;
+	ssize_t read_count                                    = 0;
+	uint8_t use_recovery_password                         = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 24 ];
 	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
 
-	libfdatetime_filetime_t *filetime                = NULL;
-	libfguid_identifier_t *guid                      = NULL;
-	uint32_t value_32bit                             = 0;
-	int result                                       = 0;
+	libfdatetime_filetime_t *filetime                     = NULL;
+	libfguid_identifier_t *guid                           = NULL;
+	uint32_t value_32bit                                  = 0;
+	int result                                            = 0;
 #endif
 
 	if( volume_master_key == NULL )
@@ -468,9 +475,7 @@ int libbde_volume_master_key_read(
 			}
 			if( libbde_stretch_key_read(
 			     stretch_key,
-			     io_handle,
 			     property_metadata_entry,
-			     use_recovery_password,
 			     error ) != 1 )
 			{
 				liberror_error_set(
@@ -480,38 +485,34 @@ int libbde_volume_master_key_read(
 				 "%s: unable to read stretch key metadata entry.",
 				 function );
 
-				libbde_stretch_key_free(
-				 &stretch_key,
-				 NULL );
-
 				goto on_error;
 			}
-			if( libbde_stretch_key_free(
-			     &stretch_key,
+		}
+		else if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_AES_CCM_ENCRYPTED_KEY )
+		{
+			if( libbde_aes_ccm_encrypted_key_initialize(
+			     &aes_ccm_encrypted_key,
 			     error ) != 1 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free stretch key.",
+				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create AES-CCM encrypted key.",
 				 function );
 
 				goto on_error;
 			}
-		}
-		else if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_AES_CMM_ENCRYPTED_KEY )
-		{
-			if( libbde_metadata_entry_read_aes_ccm_encrypted_key(
+			if( libbde_aes_ccm_encrypted_key_read(
+			     aes_ccm_encrypted_key,
 			     property_metadata_entry,
-			     key,
 			     error ) != 1 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_IO,
 				 LIBERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read AES-CMM encrypted key from property metadata entry.",
+				 "%s: unable to read AES-CCM encrypted key from property metadata entry.",
 				 function );
 
 				goto on_error;
@@ -545,6 +546,177 @@ int libbde_volume_master_key_read(
 		}
 	}
 #endif
+/* TODO */
+	if( ( aes_ccm_encrypted_key != NULL )
+	 && ( stretch_key != NULL ) )
+	{
+		if( memory_set(
+		     key,
+		     0,
+		     32 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear key.",
+			 function );
+
+			goto on_error;
+		}
+		if( use_recovery_password != 0 )
+		{
+			if( io_handle->recovery_password_is_set == 0 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing recovery password.",
+				 function );
+
+				goto on_error;
+			}
+			if( libbde_recovery_calculate_key(
+			     io_handle->recovery_password,
+			     stretch_key->salt,
+			     key,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine recovery key.",
+				 function );
+
+				goto on_error;
+			}
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libnotify_verbose != 0 )
+			{
+				libnotify_printf(
+				 "%s: recovery key:\n",
+				 function );
+				libnotify_print_data(
+				 key,
+				 32 );
+			}
+#endif
+		}
+		if( libbde_aes_initialize(
+		     &aes_context,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable initialize AES context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_set_encryption_key(
+		     &aes_context,
+		     (uint8_t *) key,
+		     256,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set encryption key in AES context.",
+			 function );
+
+			goto on_error;
+		}
+/* TODO */
+		uint8_t test[ 512 ];
+
+		memset(
+		 test,
+		 0,
+		 512 );
+
+		if( libbde_aes_ccm_crypt(
+		     &aes_context,
+		     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+		     aes_ccm_encrypted_key->nonce,
+		     12,
+		     aes_ccm_encrypted_key->data,
+		     aes_ccm_encrypted_key->data_size,
+		     test,
+		     512,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+			 "%s: unable to decrypt data.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: unencrypted data:\n",
+			 function );
+			libnotify_print_data(
+			 test,
+			 aes_ccm_encrypted_key->data_size );
+		}
+#endif
+		if( libbde_aes_finalize(
+		     &aes_context,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable finalize context.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( aes_ccm_encrypted_key != NULL )
+	{
+		if( libbde_aes_ccm_encrypted_key_free(
+		     &aes_ccm_encrypted_key,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free AES-CCM encrypted key.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( stretch_key != NULL )
+	{
+		if( libbde_stretch_key_free(
+		     &stretch_key,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free stretch key.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	return( 1 );
 
 on_error:
@@ -562,6 +734,23 @@ on_error:
 		 NULL );
 	}
 #endif
+/* TODO 
+		libbde_aes_finalize(
+		 &context,
+		 NULL );
+*/
+	if( stretch_key != NULL )
+	{
+		libbde_stretch_key_free(
+		 &stretch_key,
+		 NULL );
+	}
+	if( aes_ccm_encrypted_key != NULL )
+	{
+		libbde_aes_ccm_encrypted_key_free(
+		 &aes_ccm_encrypted_key,
+		 NULL );
+	}
 	if( property_metadata_entry != NULL )
 	{
 		libbde_metadata_entry_free(
@@ -572,94 +761,72 @@ on_error:
 }
 
 #ifdef TODO
-	libbde_aes_context_t context;
-
-	if( libbde_aes_initialize(
-	     &context,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable initialize context.",
-		 function );
-
-		goto on_error;
-	}
-	if( libbde_aes_set_encryption_key(
-	     &context,
-	     (uint8_t *) key,
-	     256,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set encryption key in context.",
-		 function );
-
-		libbde_aes_finalize(
-		 &context,
-		 NULL );
-
-		goto on_error;
-	}
-/* TODO */
-uint8_t test[ 512 ];
-
-	memset(
-	 test,
-	 0,
-	 512 );
-
-	if( libbde_aes_ccm_crypt(
-	     &context,
-	     LIBBDE_AES_CRYPT_MODE_DECRYPT,
-	     value_data,
-	     12,
-	     &( value_data[ 28 ] ),
-	     value_data_size - 28,
-	     test,
-	     512,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
-		 "%s: unable to decrypt data.",
-		 function );
-
-		libbde_aes_finalize(
-		 &context,
-		 NULL );
-
-		goto on_error;
-	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
-		libnotify_printf(
-		 "%s: unencrypted data:\n",
-		 function );
-		libnotify_print_data(
-		 test,
-		 value_data_size - 28 );
-	}
-#endif
-	if( libbde_aes_finalize(
-	     &context,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable finalize context.",
-		 function );
+		if( libbde_metadata_entry_initialize(
+		     &property_metadata_entry,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create property metadata entry.",
+			 function );
 
-		return( -1 );
+			goto on_error;
+		}
+		read_count = libbde_metadata_entry_read(
+			      property_metadata_entry,
+			      value_data,
+			      value_data_size,
+			      error );
+
+		if( read_count == -1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read property metadata entry.",
+			 function );
+
+			goto on_error;
+		}
+		value_data      += read_count;
+		value_data_size -= read_count;
+
+		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_AES_CCM_ENCRYPTED_KEY )
+		{
+			if( libbde_metadata_entry_read_aes_ccm_encrypted_key(
+			     property_metadata_entry,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_IO,
+				 LIBERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read AES-CCM encrypted key from property metadata entry.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		if( libbde_metadata_entry_free(
+		     &property_metadata_entry,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free property metadata entry.",
+			 function );
+
+			goto on_error;
+		}
 	}
 #endif
+#endif /* TODO */
+

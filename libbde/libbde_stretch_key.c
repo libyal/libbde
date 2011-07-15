@@ -27,14 +27,8 @@
 #include <liberror.h>
 #include <libnotify.h>
 
-#include "libbde_aes_ccm_encrypted_key.h"
-#include "libbde_definitions.h"
-#include "libbde_io_handle.h"
 #include "libbde_metadata_entry.h"
-#include "libbde_recovery.h"
 #include "libbde_stretch_key.h"
-
-#include "bde_metadata.h"
 
 /* Initialize a stretch key
  * Make sure the value stretch key is pointing to is set to NULL
@@ -60,7 +54,7 @@ int libbde_stretch_key_initialize(
 	if( *stretch_key == NULL )
 	{
 		*stretch_key = memory_allocate_structure(
-		                      libbde_stretch_key_t );
+		                libbde_stretch_key_t );
 
 		if( *stretch_key == NULL )
 		{
@@ -123,6 +117,11 @@ int libbde_stretch_key_free(
 	}
 	if( *stretch_key != NULL )
 	{
+		if( ( *stretch_key )->data != NULL )
+		{
+			memory_free(
+			 ( *stretch_key )->data );
+		}
 		memory_free(
 		 *stretch_key );
 
@@ -136,21 +135,15 @@ int libbde_stretch_key_free(
  */
 int libbde_stretch_key_read(
      libbde_stretch_key_t *stretch_key,
-     libbde_io_handle_t *io_handle,
      libbde_metadata_entry_t *metadata_entry,
-     uint8_t use_recovery_password,
      liberror_error_t **error )
 {
-	uint8_t key[ 32 ];
-
-	libbde_metadata_entry_t *property_metadata_entry = NULL;
-	uint8_t *value_data                              = NULL;
-	static char *function                            = "libbde_stretch_key_read";
-	size_t value_data_size                           = 0;
-	ssize_t read_count                               = 0;
+	uint8_t *value_data    = NULL;
+	static char *function  = "libbde_stretch_key_read";
+	size_t value_data_size = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit                             = 0;
+	uint32_t value_32bit   = 0;
 #endif
 
 	if( metadata_entry == NULL )
@@ -228,155 +221,61 @@ int libbde_stretch_key_read(
 		 "%s: unable to copy salt to stretch key.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	value_data      += 16;
 	value_data_size -= 16;
 
-	if( memory_set(
-	     key,
-	     0,
-	     32 ) == NULL )
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: encrypted data:\n",
+		 function );
+		libnotify_print_data(
+		 value_data,
+		 value_data_size );
+	}
+#endif
+	stretch_key->data = (uint8_t *) memory_allocate(
+	                                 sizeof( uint8_t ) * value_data_size );
+
+	if( stretch_key->data == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear key.",
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create data.",
 		 function );
 
 		goto on_error;
 	}
-	if( use_recovery_password != 0 )
+	if( memory_copy(
+	     stretch_key->data,
+	     value_data,
+	     value_data_size ) == NULL )
 	{
-		if( io_handle->recovery_password_is_set == 0 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing recovery password.",
-			 function );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy data to stretch key.",
+		 function );
 
-			return( -1 );
-		}
-		if( libbde_recovery_calculate_key(
-		     io_handle->recovery_password,
-		     stretch_key->salt,
-		     key,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine recovery key.",
-			 function );
-
-			return( -1 );
-		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
-		{
-			libnotify_printf(
-			 "%s: recovery key:\n",
-			 function );
-			libnotify_print_data(
-			 key,
-			 32 );
-		}
-#endif
+		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
-	{
-		if( libbde_metadata_entry_initialize(
-		     &property_metadata_entry,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create property metadata entry.",
-			 function );
-
-			goto on_error;
-		}
-		read_count = libbde_metadata_entry_read(
-			      property_metadata_entry,
-			      value_data,
-			      value_data_size,
-			      error );
-
-		if( read_count == -1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read property metadata entry.",
-			 function );
-
-			goto on_error;
-		}
-		value_data      += read_count;
-		value_data_size -= read_count;
-
-		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_AES_CMM_ENCRYPTED_KEY )
-		{
-/* TODO */
-			if( libbde_metadata_entry_read_aes_ccm_encrypted_key(
-			     property_metadata_entry,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_IO,
-				 LIBERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read AES-CMM encrypted key from property metadata entry.",
-				 function );
-
-				goto on_error;
-			}
-		}
-		if( libbde_metadata_entry_free(
-		     &property_metadata_entry,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free property metadata entry.",
-			 function );
-
-			goto on_error;
-		}
-	}
-#endif
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
-	{
-		if( value_data_size > 0 )
-		{
-			libnotify_printf(
-			 "%s: trailing data:\n",
-			 function );
-			libnotify_print_data(
-			 value_data,
-			 value_data_size );
-		}
-	}
-#endif
+	stretch_key->data_size = value_data_size;
+	
 	return( 1 );
 
 on_error:
-	if( property_metadata_entry != NULL )
+	if( stretch_key->data != NULL )
 	{
-		libbde_metadata_entry_free(
-		 &property_metadata_entry,
-		 NULL );
+		memory_free(
+		 stretch_key->data );
+
+		stretch_key->data = NULL;
 	}
 	return( -1 );
 }
