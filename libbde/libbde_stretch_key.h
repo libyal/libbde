@@ -27,7 +27,6 @@
 
 #include <liberror.h>
 
-#include "libbde_io_handle.h"
 #include "libbde_metadata_entry.h"
 
 #if defined( __cplusplus )
@@ -61,9 +60,7 @@ int libbde_stretch_key_free(
 
 int libbde_stretch_key_read(
      libbde_stretch_key_t *stretch_key,
-     libbde_io_handle_t *io_handle,
      libbde_metadata_entry_t *metadata_entry,
-     uint8_t use_recovery_password,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

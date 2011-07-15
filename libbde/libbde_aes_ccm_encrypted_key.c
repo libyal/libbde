@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include <libcstring.h>
 #include <liberror.h>
 #include <libnotify.h>
 
@@ -263,7 +264,7 @@ int libbde_aes_ccm_encrypted_key_read(
 			goto on_error;
 		}
 		libnotify_printf(
-		 "%s: nonce time\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 "%s: nonce time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
 		 function,
 		 filetime_string );
 
@@ -284,7 +285,7 @@ int libbde_aes_ccm_encrypted_key_read(
 		 ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->nonce_counter,
 		 value_32bit );
 		libnotify_printf(
-		 "%s: nonce counter\t\t: %" PRIu32 "\n",
+		 "%s: nonce counter\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -361,11 +362,13 @@ int libbde_aes_ccm_encrypted_key_read(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
 		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy data.",
+		 "%s: unable to copy data to AES-CCM encrypted key.",
 		 function );
 
 		goto on_error;
 	}
+	aes_ccm_encrypted_key->data_size = value_data_size;
+	
 	return( 1 );
 
 on_error:
@@ -377,6 +380,13 @@ on_error:
 		 NULL );
 	}
 #endif
+	if( aes_ccm_encrypted_key->data != NULL )
+	{
+		memory_free(
+		 aes_ccm_encrypted_key->data );
+
+		aes_ccm_encrypted_key->data = NULL;
+	}
 	return( -1 );
 }
 
