@@ -571,3 +571,95 @@ on_error:
 	return( -1 );
 }
 
+#ifdef TODO
+	libbde_aes_context_t context;
+
+	if( libbde_aes_initialize(
+	     &context,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable initialize context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_aes_set_encryption_key(
+	     &context,
+	     (uint8_t *) key,
+	     256,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set encryption key in context.",
+		 function );
+
+		libbde_aes_finalize(
+		 &context,
+		 NULL );
+
+		goto on_error;
+	}
+/* TODO */
+uint8_t test[ 512 ];
+
+	memset(
+	 test,
+	 0,
+	 512 );
+
+	if( libbde_aes_ccm_crypt(
+	     &context,
+	     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+	     value_data,
+	     12,
+	     &( value_data[ 28 ] ),
+	     value_data_size - 28,
+	     test,
+	     512,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 "%s: unable to decrypt data.",
+		 function );
+
+		libbde_aes_finalize(
+		 &context,
+		 NULL );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: unencrypted data:\n",
+		 function );
+		libnotify_print_data(
+		 test,
+		 value_data_size - 28 );
+	}
+#endif
+	if( libbde_aes_finalize(
+	     &context,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable finalize context.",
+		 function );
+
+		return( -1 );
+	}
+#endif

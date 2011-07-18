@@ -29,11 +29,11 @@
 #if defined( WINAPI )
 #include <wincrypt.h>
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-#include <openssl/evp.h>
-
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 #include <openssl/sha.h>
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+#include <openssl/evp.h>
 
 #endif
 
@@ -47,7 +47,7 @@
 
 #endif /* defined( WINAPI ) */
 
-#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) )
 
 /* FIPS-197 compliant AES encryption functions
  *
@@ -309,7 +309,7 @@ void libbde_aes_initialize_tables(
 	libbde_aes_tables_initialized = 1;
 }
 
-#endif /* !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) ) */
+#endif /* !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) ) */
 
 /* Initializes the AES context
  * Returns 1 if successful or -1 on error
@@ -334,12 +334,13 @@ int libbde_aes_initialize(
 #if defined( WINAPI )
 	/* TODO */
 
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	/* TODO */
+
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 	EVP_CIPHER_CTX_init(
 	 &( context->evp_context ) );
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	/* TODO */
 #else
 	if( libbde_aes_tables_initialized == 0 )
 	{
@@ -372,12 +373,13 @@ int libbde_aes_finalize(
 #if defined( WINAPI )
 	/* TODO */
 
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	/* TODO */
+
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 	EVP_CIPHER_CTX_cleanup(
 	 &( context->evp_context ) );
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	/* TODO */
 #else
 	/* TODO */
 #endif
@@ -395,7 +397,7 @@ int libbde_aes_set_decyption_key(
 {
 	static char *function = "libbde_aes_set_decyption_key";
 
-#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) )
 	libbde_aes_context_t encryption_context;
 
 	uint32_t *round_keys  = NULL;
@@ -430,6 +432,22 @@ int libbde_aes_set_decyption_key(
 #if defined( WINAPI )
 	/* TODO */
 
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	if( AES_set_decrypt_key(
+	     (unsigned char *) key,
+	     (int) bit_size,
+	     &( context->key ) ) != 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set decryption key in context.",
+		 function );
+
+		return( -1 );
+	}
+
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 	if( memory_copy(
 	     context->key,
@@ -447,21 +465,6 @@ int libbde_aes_set_decyption_key(
 	}
 	context->bit_size = bit_size;
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	if( AES_set_decrypt_key(
-	     (unsigned char *) key,
-	     (int) bit_size,
-	     &( context->key ) ) != 0 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set decryption key in context.",
-		 function );
-
-		return( -1 );
-	}
 #else
 	if( bit_size == 128 )
 	{
@@ -551,7 +554,7 @@ int libbde_aes_set_encryption_key(
 {
 	static char *function    = "libbde_aes_set_encryption_key";
 
-#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) )
 	uint32_t *round_keys     = NULL;
 	size_t key_index         = 0;
 	int round_constant_index = 0;
@@ -584,6 +587,22 @@ int libbde_aes_set_encryption_key(
 #if defined( WINAPI )
 /* TODO */
 
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	if( AES_set_encrypt_key(
+	     (unsigned char *) key,
+	     (int) bit_size,
+	     &( context->key ) ) != 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set encryption key in context.",
+		 function );
+
+		return( -1 );
+	}
+
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 	if( memory_copy(
 	     context->key,
@@ -601,21 +620,6 @@ int libbde_aes_set_encryption_key(
 	}
 	context->bit_size = bit_size;
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	if( AES_set_encrypt_key(
-	     (unsigned char *) key,
-	     (int) bit_size,
-	     &( context->key ) ) != 0 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set encryption key in context.",
-		 function );
-
-		return( -1 );
-	}
 #else
 	/* Align the buffer to next 16-byte blocks
 	 */
@@ -903,12 +907,12 @@ int libbde_aes_ecb_crypt(
 {
 	static char *function     = "libbde_aes_ecb_crypt";
 
-#if defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+#if defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
 	const EVP_CIPHER *cipher  = NULL;
 	int safe_output_data_size = 0;
 #endif
 
-#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) )
 	uint32_t *round_keys      = NULL;
 	int round_key_index       = 0;
 
@@ -941,6 +945,13 @@ int libbde_aes_ecb_crypt(
 	}
 #if defined( WINAPI )
 	/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+	AES_ecb_encrypt(
+	 input,
+	 output,
+	 context->key,
+	 mode );
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 	if( input_data_size > (size_t) INT_MAX )
@@ -1080,12 +1091,6 @@ int libbde_aes_ecb_crypt(
 		}
 	}
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	AES_ecb_encrypt(
-	 input,
-	 output,
-	 context->key,
-	 mode );
 #else
 	round_keys = context->round_keys;
 
@@ -1235,7 +1240,7 @@ int libbde_aes_cbc_crypt(
 {
 	static char *function = "libbde_aes_cbc_crypt";
 
-#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_EVP_H ) || defined( HAVE_OPENSSL_AES_H ) )
+#if !defined( WINAPI ) && !defined( HAVE_LIBCRYPTO ) && !( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) )
 	size_t data_index     = 0;
 	uint8_t block_index   = 0;
 #endif
@@ -1310,10 +1315,10 @@ int libbde_aes_cbc_crypt(
 #if defined( WINAPI )
 /* TODO */
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 /* TODO */
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 /* TODO */
 
 #else

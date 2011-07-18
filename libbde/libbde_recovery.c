@@ -26,8 +26,8 @@
 #include <liberror.h>
 
 #include "libbde_libfvalue.h"
+#include "libbde_libhmac.h"
 #include "libbde_recovery.h"
-#include "libbde_sha.h"
 
 /* Copies an UTF-8 formatted recovery password to a binary format
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
@@ -320,11 +320,11 @@ int libbde_recovery_calculate_key(
 
 		return( -1 );
 	}
-	if( libbde_sha256_calculate(
+	if( libhmac_sha256_calculate(
 	     (uint8_t *) &recovery_key_data,
 	     sizeof( libbde_recovery_key_data_t ),
 	     recovery_key_data.initial_sha256_hash,
-	     LIBBDE_SHA256_HASH_SIZE,
+	     LIBHMAC_SHA256_HASH_SIZE,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -356,11 +356,11 @@ int libbde_recovery_calculate_key(
 	     recovery_key_data.iteration_count < 0xfffff;
 	     recovery_key_data.iteration_count += 1 )
 	{
-		if( libbde_sha256_calculate(
+		if( libhmac_sha256_calculate(
 		     (uint8_t *) &recovery_key_data,
 		     sizeof( libbde_recovery_key_data_t ),
 		     recovery_key_data.last_sha256_hash,
-		     LIBBDE_SHA256_HASH_SIZE,
+		     LIBHMAC_SHA256_HASH_SIZE,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -373,7 +373,7 @@ int libbde_recovery_calculate_key(
 			return( -1 );
 		}
 	}
-	if( libbde_sha256_calculate(
+	if( libhmac_sha256_calculate(
 	     (uint8_t *) &recovery_key_data,
 	     sizeof( libbde_recovery_key_data_t ),
 	     key,
