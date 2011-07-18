@@ -27,7 +27,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
-#include "libbde_aes_cmm_encrypted_key.h"
+#include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_metadata_entry.h"

@@ -220,7 +220,7 @@ int libbde_aes_ccm_encrypted_key_read(
 		}
 		if( libfdatetime_filetime_copy_from_byte_stream(
 		     filetime,
-		     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->nonce_time,
+		     ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->nonce_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     error ) != 1 )
@@ -281,7 +281,7 @@ int libbde_aes_ccm_encrypted_key_read(
 			goto on_error;
 		}
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->nonce_counter,
+		 ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->nonce_counter,
 		 value_32bit );
 		libnotify_printf(
 		 "%s: nonce counter\t\t: %" PRIu32 "\n",
@@ -292,7 +292,7 @@ int libbde_aes_ccm_encrypted_key_read(
 		 "%s: message authenticate code:\n",
 		 function );
 		libnotify_print_data(
-		 ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->message_authentication_code,
+		 ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->message_authentication_code,
 		 16 );
 	}
 #endif
@@ -312,7 +312,7 @@ int libbde_aes_ccm_encrypted_key_read(
 	}
 	if( memory_copy(
 	     aes_ccm_encrypted_key->message_authentication_code,
-	     ( (bde_metadata_entry_aes_cmm_encrypted_data_t *) value_data )->message_authentication_code,
+	     ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->message_authentication_code,
 	     16 ) == NULL )
 	{
 		liberror_error_set(
@@ -324,8 +324,8 @@ int libbde_aes_ccm_encrypted_key_read(
 
 		return( -1 );
 	}
-	value_data      += sizeof( bde_metadata_entry_aes_cmm_encrypted_data_t );
-	value_data_size -= sizeof( bde_metadata_entry_aes_cmm_encrypted_data_t );
+	value_data      += sizeof( bde_metadata_entry_aes_ccm_encrypted_data_t );
+	value_data_size -= sizeof( bde_metadata_entry_aes_ccm_encrypted_data_t );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
