@@ -1,4 +1,5 @@
 TODO
+* add microseconds to filetime output
 * add libfdata vector for reading blocks
   - determine volume key for decrypting sectors
 * put volume metadata into structures
@@ -17,6 +18,11 @@ TODO
   - print value type description string
 * bdeinfo
   - pass recovery password as commandline argument
+
+20110718
+* changes for: warning: AC_LANG_CONFTEST: no AC_LANG_SOURCE call detected in body
+* updated libsystem, libuna, libbfio, libfvalue, libhmac, libfdata,
+  libfdatetime, libfguid,
 
 20110715
 * worked on initial version
