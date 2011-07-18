@@ -18,7 +18,7 @@ lib_LTLIBRARIES = libbde.la
 libbde_la_SOURCES = \
 	libbde.c \
 	libbde_aes.c libbde_aes.h \
-	libbde_aes_cmm_encrypted_key.c libbde_aes_cmm_encrypted_key.h \
+	libbde_aes_ccm_encrypted_key.c libbde_aes_ccm_encrypted_key.h \
 	libbde_debug.c libbde_debug.h \
 	libbde_definitions.h \
 	libbde_error.c libbde_error.h \
