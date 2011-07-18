@@ -27,7 +27,7 @@
 
 #include <liberror.h>
 
-#include "libbde_sha.h"
+#include "libbde_libhmac.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -40,12 +40,12 @@ struct libbde_recovery_key_data
 	/* The last calculated SHA256 hash
 	 * This value contains the SHA256 hash calculated in the previous key iteration
 	 */
-	uint8_t last_sha256_hash[ LIBBDE_SHA256_HASH_SIZE ];
+	uint8_t last_sha256_hash[ LIBHMAC_SHA256_HASH_SIZE ];
 
 	/* The initial calculated SHA256 hash
 	 * This value contains the SHA256 hash calculated from the recovery password
 	 */
-	uint8_t initial_sha256_hash[ LIBBDE_SHA256_HASH_SIZE ];
+	uint8_t initial_sha256_hash[ LIBHMAC_SHA256_HASH_SIZE ];
 
 	/* The salt
 	 */

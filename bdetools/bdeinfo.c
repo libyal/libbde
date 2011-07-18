@@ -114,10 +114,12 @@ int main( int argc, char * const argv[] )
 	libbde_volume_t *volume               = NULL;
 	libcstring_system_character_t *source = NULL;
 	char *program                         = "bdeinfo";
-	char *recovery_password               = "321519-069498-331287-394592-529177-194425-364452-702240";
+	char *recovery_password               = NULL;
 	size_t recovery_password_length       = 0;
 	libcstring_system_integer_t option    = 0;
 	int verbose                           = 0;
+
+	recovery_password = "004301-051986-278476-162294-184228-193919-575828-424457";
 
 	libsystem_notify_set_stream(
 	 stderr,

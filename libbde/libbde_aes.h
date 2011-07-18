@@ -30,11 +30,11 @@
 #if defined( WINAPI )
 #include <wincrypt.h>
 
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-#include <openssl/evp.h>
-
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 #include <openssl/aes.h>
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+#include <openssl/evp.h>
 
 #endif
 
@@ -64,6 +64,14 @@ struct libbde_aes_context
         HCRYPTHASH hash;
 };
 
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+typedef struct libbde_aes_context libbde_aes_context_t;
+
+struct libbde_aes_context
+{
+        AES_KEY key;
+};
+
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
 typedef struct libbde_aes_context libbde_aes_context_t;
 
@@ -72,14 +80,6 @@ struct libbde_aes_context
 	EVP_CIPHER_CTX evp_context;
         uint8_t key[ 32 ];
 	size_t bit_size;
-};
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-typedef struct libbde_aes_context libbde_aes_context_t;
-
-struct libbde_aes_context
-{
-        AES_KEY key;
 };
 
 #else

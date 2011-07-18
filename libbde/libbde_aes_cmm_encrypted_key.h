@@ -1,5 +1,5 @@
 /*
- * Metadata entry functions
+ * AES-CCM encrypted key metadata entry functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -19,54 +19,51 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_METADATA_ENTRY_H )
-#define _LIBBDE_METADATA_ENTRY_H
+#if !defined( _LIBBDE_AES_CCM_ENCRYPTED_KEY_H )
+#define _LIBBDE_AES_CCM_ENCRYPTED_KEY_H
 
 #include <common.h>
 #include <types.h>
 
 #include <liberror.h>
 
+#include "libbde_metadata_entry.h"
+
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libbde_metadata_entry libbde_metadata_entry_t;
+typedef struct libbde_aes_ccm_encrypted_key libbde_aes_ccm_encrypted_key_t;
 
-struct libbde_metadata_entry
+struct libbde_aes_ccm_encrypted_key
 {
-	/* The (entry) type
+	/* The nonce
 	 */
-	uint16_t type;
+	uint8_t nonce[ 12 ];
 
-	/* The value type
+	/* The message authentication code (MAC)
 	 */
-	uint16_t value_type;
+	uint8_t message_authentication_code[ 16 ];
 
-	/* The value data
+	/* The (encrypted) data
 	 */
-	uint8_t *value_data;
+	uint8_t *data;
 
-	/* The value data size
+	/* The (encrypted) data size
 	 */
-	uint16_t value_data_size;
+	size_t data_size;
 };
 
-int libbde_metadata_entry_initialize(
-     libbde_metadata_entry_t **metadata_entry,
+int libbde_aes_ccm_encrypted_key_initialize(
+     libbde_aes_ccm_encrypted_key_t **aes_ccm_encrypted_key,
      liberror_error_t **error );
 
-int libbde_metadata_entry_free(
-     libbde_metadata_entry_t **metadata_entry,
+int libbde_aes_ccm_encrypted_key_free(
+     libbde_aes_ccm_encrypted_key_t **aes_ccm_encrypted_key,
      liberror_error_t **error );
 
-ssize_t libbde_metadata_entry_read(
-         libbde_metadata_entry_t *metadata_entry,
-         const uint8_t *fve_metadata,
-         size_t fve_metadata_size,
-         liberror_error_t **error );
-
-int libbde_metadata_entry_read_string(
+int libbde_aes_ccm_encrypted_key_read(
+     libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key,
      libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error );
 

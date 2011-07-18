@@ -13,6 +13,26 @@ AC_DEFUN([LIBBDE_TEST_ENABLE],
    [ac_cv_libbde_enable_$2=$4])dnl
  ])
 
+dnl Function to detect whether a certain #define is present in a certain WINAPI header
+AC_DEFUN([LIBBDE_CHECK_WINAPI_DEFINE],
+ [AC_CACHE_CHECK(
+  [whether $1 defines $2],
+  [ac_cv_libbde_winapi_define_$2],
+  [AC_LANG_PUSH(C)
+  AC_COMPILE_IFELSE(
+   [AC_LANG_PROGRAM(
+    [[#include <windows.h>
+#include <$1>
+
+#if !defined( $2 )
+#error $2 is not defined
+#endif]]
+    [[]] )],
+   [ac_cv_libbde_winapi_define_$2=yes],
+   [ac_cv_libbde_winapi_define_$2=no])
+   AC_LANG_POP(C) ])
+ ])
+
 dnl Function to detect whether nl_langinfo supports CODESET
 AC_DEFUN([LIBBDE_CHECK_FUNC_LANGINFO_CODESET],
  [AC_CHECK_FUNCS([nl_langinfo])
@@ -312,6 +332,22 @@ AC_DEFUN([LIBBDE_CHECK_FUNC_MKDIR],
    [1])
  ])
 ])
+
+dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
+AC_DEFUN([LIBBDE_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
+ [AC_CACHE_CHECK(
+  [if openssl/evp.h can be used in combination with zlib.h],
+  [ac_cv_libbde_openssl_evp_zlib_compatible],
+  [AC_LANG_PUSH(C)
+  AC_LINK_IFELSE(
+   [AC_LANG_PROGRAM(
+    [[#include <zlib.h>
+#include <openssl/evp.h>]],
+    [[ ]] )],
+   [ac_cv_libbde_openssl_evp_zlib_compatible=yes],
+   [ac_cv_libbde_openssl_evp_zlib_compatible=no])
+  AC_LANG_POP(C)])
+ ])
 
 dnl Function to detect if libuna available
 AC_DEFUN([LIBBDE_CHECK_LIBUNA],
@@ -881,6 +917,24 @@ AC_DEFUN([LIBBDE_CHECK_LIBFVALUE],
    libfvalue_value_write_to_file_stream,
    [ac_libbde_dummy=yes],
    [ac_libbde_have_libfvalue=no])
+  ])
+ ])
+
+dnl Function to detect if libhmac available
+AC_DEFUN([LIBBDE_CHECK_LIBHMAC],
+ [AC_CHECK_HEADERS([libhmac.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_libhmac_h" = xno],
+  [ac_libbde_have_libhmac=no],
+  [ac_libbde_have_libhmac=yes
+  AC_CHECK_LIB(
+   hmac,
+   libhmac_get_version,
+   [],
+   [ac_libbde_have_libhmac=no])
+
+   ])
   ])
  ])
 

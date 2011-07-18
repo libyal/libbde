@@ -18,6 +18,11 @@ TODO
 * bdeinfo
   - pass recovery password as commandline argument
 
+20110627
+* added libhmac
+* updated configure.ac to support libhmac
+* replaced libbde_sha.[ch] by libhmac
+
 20110624
 * worked on initial version
   - SHA fallback

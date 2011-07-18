@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110624],
+ [20110627],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -909,175 +909,411 @@ AM_CONDITIONAL(
  [HAVE_LOCAL_LIBFVALUE],
  [test "x$ac_libbde_have_libfvalue" = xlocal])
 
-dnl Check for enabling crypographic digest hash support
-ac_libbde_have_libcrypto=no
+dnl Check for message digest hash and crypto support
+ac_libbde_have_cipher_support=no
+ac_libbde_have_hmac_support=no
+
+dnl Check for enabling libhmac for message digest hash function support
+LIBBDE_CHECK_LIBHMAC
 
 AS_IF(
- [test "x$ac_cv_libbde_enable_winapi" = xyes],
- [AC_SUBST(
-  [LIBCRYPTO_LIBADD],
-  [-ladvapi32])
-  ac_libbde_have_libcrypto=libadvapi32])
+ [test "x$ac_libbde_have_libhmac" = xyes],
+ [dnl libhmac is available
+ AC_SUBST(
+  [libbde_spec_requires_libhmac],
+  [libhmac])
+ AC_SUBST(
+  [libbde_spec_build_requires_libhmac],
+  [libhmac-devel])
+ AC_SUBST(
+  [LIBHMAC_CPPFLAGS],
+  [])
+ AC_SUBST(
+  [LIBHMAC_LIBADD],
+  [])
+ AC_SUBST(
+  [HAVE_LIBHMAC],
+  [1]) ],
+ [dnl libhmac is not available, using the (local) version that came with the source package
+ AC_DEFINE(
+  [HAVE_LOCAL_LIBHMAC],
+  [1],
+  [Define to 1 if the local version of libhmac is used.])
+ AC_SUBST(
+  [HAVE_LOCAL_LIBHMAC],
+  [1])
+ AC_SUBST(
+  [libbde_spec_requires_libhmac],
+  [])
+ AC_SUBST(
+  [libbde_spec_build_requires_libhmac],
+  [])
+ AC_SUBST(
+  [LIBHMAC_CPPFLAGS],
+  [-I../libhmac])
+ AC_SUBST(
+  [LIBHMAC_LIBADD],
+  [../libhmac/libhmac.la])
+ AC_SUBST(
+  [HAVE_LIBHMAC],
+  [0])
+ ac_libbde_have_libhmac=local])
 
-dnl Check for libcrypto openssl EVP support
+AM_CONDITIONAL(
+ [HAVE_LOCAL_LIBHMAC],
+ [test "x$ac_libbde_have_libhmac" = xlocal])
+
 AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xno],
+ [test "x$ac_libbde_have_libhmac" = xlocal],
+ [ac_libbde_have_hmac_support=no],
+ [ac_libbde_have_hmac_support=libhmac])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_support" = xlibhmac],
+ [dnl TODO check if all LIBHMAC functions are available])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_support" = xlibhmac],
+ [ac_libbde_have_hmac_md5_support=libhmac
+ ac_libbde_have_hmac_sha1_support=libhmac
+ ac_libbde_have_hmac_sha256_support=libhmac])
+
+dnl Check for Windows crypto API support
+AS_IF(
+ [test "x$ac_libbde_have_cipher_support" = xno || test "x$ac_libbde_have_hmac_support" = xno],
+ [AS_IF(
+  [test "x$ac_cv_libbde_enable_winapi" = xyes],
+  [AC_SUBST(
+   [LIBCRYPTO_LIBADD],
+   [-ladvapi32])
+   ac_libbde_have_cipher_support=libadvapi32
+   ac_libbde_have_hmac_support=libadvapi32])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_cipher_support" = xlibadvapi32],
+ [ac_libbde_have_cipher_aes_support=libadvapi32])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_support" = xlibadvapi32],
+ [ac_libbde_have_hmac_md5_support=libadvapi32
+ ac_libbde_have_hmac_sha1_support=libadvapi32
+ ac_libbde_have_hmac_sha256_support=libadvapi32])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_md5_support" = xlibadvapi32],
+ [LIBBDE_CHECK_WINAPI_DEFINE(
+  [wincrypt.h],
+  [CALG_MD5])
+
+ AS_IF(
+  [test "x$ac_cv_libbde_winapi_define_CALG_MD5" = xyes],
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_hmac_md5_support=local])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha1_support" = xlibadvapi32],
+ [LIBBDE_CHECK_WINAPI_DEFINE(
+  [wincrypt.h],
+  [CALG_SHA1])
+
+ AS_IF(
+  [test "x$ac_cv_libbde_winapi_define_CALG_SHA1" = xyes],
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_hmac_sha1_support=local])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha256_support" = xlibadvapi32],
+ [LIBBDE_CHECK_WINAPI_DEFINE(
+  [wincrypt.h],
+  [CALG_SHA_256])
+
+ AS_IF(
+  [test "x$ac_cv_libbde_winapi_define_CALG_SHA_256" = xyes],
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_hmac_sha256_support=local])
+ ])
+
+dnl Check for libcrypto (openssl) EVP support
+AS_IF(
+ [test "x$ac_libbde_have_cipher_support" = xno || test "x$ac_libbde_have_hmac_support" = xno],
  [AC_CHECK_HEADERS([openssl/evp.h openssl/opensslv.h])
 
  AS_IF(
   [test "x$ac_cv_header_openssl_evp_h" = xyes],
-  [AC_LANG_PUSH(C)
-  AC_MSG_CHECKING(
-   [if openssl/evp.h can be used in combination with zlib.h])
-  AC_LINK_IFELSE(
-   AC_LANG_PROGRAM(
-    [[#include <zlib.h>
-#include <openssl/evp.h>]],
-    [[ ]]),
-    [AC_MSG_RESULT(
-     [yes])
-    AC_DEFINE(
-     [HAVE_OPENSSL_EVP_H],
-     [1],
-     [Define to 1 if you have the <openssl/evp.h> header file.])
-    AC_SUBST(
-     [HAVE_OPENSSL_EVP_H],
-     [1])
-    ac_libbde_have_libcrypto=libcrypto_evp],
-   [AC_MSG_RESULT(
-    [no])
-   ac_libbde_have_libcrypto=no])
-  AC_LANG_POP(C)],
-  [ac_libbde_have_libcrypto=no])
+  [LIBBDE_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE
+
+  AS_IF(
+   [test "x$ac_cv_libbde_openssl_evp_zlib_compatible" = xyes],
+   [ac_libbde_have_cipher_support=libcrypto_evp
+   ac_libbde_have_hmac_support=libcrypto_evp],
+   [ac_libbde_have_cipher_support=no
+   ac_libbde_have_hmac_support=no]) ],
+  [ac_libbde_have_cipher_support=no
+  ac_libbde_have_hmac_support=no])
  ])
 
-dnl Check if all required libcrypto openssl EVP de/encryption functions are available
+dnl Check if all required libcrypto (openssl) EVP CIPHER functions are available
 AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
+ [test "x$ac_libbde_have_cipher_support" = xlibcrypto_evp],
  [AC_CHECK_LIB(
   crypto,
   EVP_CIPHER_CTX_init,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_CIPHER_CTX_cleanup,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_DecryptInit,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_DecryptUpdate,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_DecryptFinal,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_EncryptInit,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_EncryptUpdate,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_EncryptFinal,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
- ac_libbde_have_aes=libcrypto_evp
+  [ac_libbde_have_cipher_support=no])
  ])
 
-dnl Check if all required libcrypto openssl EVP message digest functions are available
 AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xlibcrypto_evp],
+ [test "x$ac_libbde_have_cipher_support" = xlibcrypto_evp],
+ [ac_libbde_have_openssl_evp=yes
+ ac_libbde_have_libcrypto=yes
+ ac_libbde_have_cipher_aes_support=libcrypto_evp])
+
+AS_IF(
+ [test "x$ac_libbde_have_cipher_aes_support" = xlibcrypto_evp],
  [AC_CHECK_LIB(
   crypto,
-  EVP_sha256,
+  EVP_aes_128_ecb,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_cipher_aes_support=no])
  AC_CHECK_LIB(
+  crypto,
+  EVP_aes_192_ecb,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_cipher_aes_support=no])
+ AC_CHECK_LIB(
+  crypto,
+  EVP_aes_256_ecb,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_cipher_aes_support=no])
+ ])
+
+dnl Check for libcrypto (openssl) AES support
+AS_IF(
+ [test "x$ac_libbde_have_cipher_aes_support" = xno],
+ [AC_CHECK_HEADERS([openssl/aes.h])
+ dnl TODO check for AES functions
+ ac_libbde_have_cipher_aes_support=libcrypto
+ ])
+
+dnl Check if all required libcrypto (openssl) EVP MD functions are available
+AS_IF(
+ [test "x$ac_libbde_have_hmac_support" = xlibcrypto_evp],
+ [AC_CHECK_LIB(
   crypto,
   EVP_MD_CTX_init,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_hmac_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_MD_CTX_cleanup,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_hmac_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_DigestInit_ex,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_hmac_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_DigestUpdate,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
+  [ac_libbde_have_hmac_support=no])
  AC_CHECK_LIB(
   crypto,
   EVP_DigestFinal_ex,
   [ac_libbde_dummy=yes],
-  [ac_libbde_have_libcrypto=no])
- ac_libbde_have_sha256=libcrypto_evp
+  [ac_libbde_have_hmac_support=no])
  ])
 
 AS_IF(
- [test "x$ac_libbde_have_libcrypto" != xlibcrypto_evp],
+ [test "x$ac_libbde_have_hmac_support" = xlibcrypto_evp],
+ [ac_libbde_have_openssl_evp=yes
+ ac_libbde_have_libcrypto=yes
+ ac_libbde_have_hmac_md5_support=libcrypto_evp
+ ac_libbde_have_hmac_sha1_support=libcrypto_evp
+ ac_libbde_have_hmac_sha256_support=libcrypto_evp])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_md5_support" = xlibcrypto_evp],
+ [AC_CHECK_LIB(
+  crypto,
+  EVP_md5,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_hmac_md5_support=no])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha1_support" = xlibcrypto_evp],
+ [AC_CHECK_LIB(
+  crypto,
+  EVP_sha1,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_hmac_sha1_support=no])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha256_support" = xlibcrypto_evp],
+ [AC_CHECK_LIB(
+  crypto,
+  EVP_sha256,
+  [ac_libbde_dummy=yes],
+  [ac_libbde_have_hmac_sha256_support=no])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_support" = xno],
+ [ac_libbde_have_hmac_md5_support=no
+ ac_libbde_have_hmac_sha1_support=no
+ ac_libbde_have_hmac_sha256_support=no])
+
+dnl Check for libcrypto (openssl) MD5 support
+AS_IF(
+ [test "x$ac_libbde_have_hmac_md5_support" = xno],
+ [AC_CHECK_HEADERS([openssl/md5.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_openssl_md5_h" = xyes],
+  [ac_libbde_have_hmac_md5_support=libcrypto
+  AC_CHECK_LIB(
+   crypto,
+   MD5_Init,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_md5_support=no])
+  AC_CHECK_LIB(
+   crypto,
+   MD5_Update,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_md5_support=no])
+  AC_CHECK_LIB(
+   crypto,
+   MD5_Final,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_md5_support=no])
+  ])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_md5_support" != xno],
+ [ac_libbde_have_libcrypto=yes],
+ [ac_libbde_have_hmac_md5_support=local])
+
+dnl Check for libcrypto (openssl) SHA1 support
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha1_support" = xno],
+ [AC_CHECK_HEADERS([openssl/sha.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_openssl_sha1_h" = xyes],
+  [ac_libbde_have_hmac_sha1_support=libcrypto
+  AC_CHECK_LIB(
+   crypto,
+   SHA1_Init,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_sha1_support=no])
+  AC_CHECK_LIB(
+   crypto,
+   SHA1_Update,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_sha1_support=no])
+  AC_CHECK_LIB(
+   crypto,
+   SHA1_Final,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_sha1_support=no])
+  ])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha1_support" != xno],
+ [ac_libbde_have_libcrypto=yes],
+ [ac_libbde_have_hmac_sha1_support=local])
+
+dnl Check for libcrypto (openssl) SHA256 support
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha256_support" = xno],
+ [AC_CHECK_HEADERS([openssl/sha.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_openssl_sha256_h" = xyes],
+  [ac_libbde_have_hmac_sha256_support=libcrypto
+  AC_CHECK_LIB(
+   crypto,
+   SHA256_Init,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_sha256_support=no])
+  AC_CHECK_LIB(
+   crypto,
+   SHA256_Update,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_sha256_support=no])
+  AC_CHECK_LIB(
+   crypto,
+   SHA256_Final,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_hmac_sha256_support=no])
+  ])
+ ])
+
+AS_IF(
+ [test "x$ac_libbde_have_hmac_sha256_support" != xno],
+ [ac_libbde_have_libcrypto=yes],
+ [ac_libbde_have_hmac_sha256_support=local])
+
+dnl Setup libcrypto (openssl) parameters
+AS_IF(
+ [test "x$ac_libbde_have_openssl_evp" = xyes],
+ [AC_DEFINE(
+  [HAVE_OPENSSL_EVP_H],
+  [1],
+  [Define to 1 if you have the <openssl/evp.h> header file.])
+ AC_SUBST(
+  [HAVE_OPENSSL_EVP_H],
+  [1]) ],
  [AC_SUBST(
   [HAVE_OPENSSL_EVP_H],
   [0])
  ])
 
 AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xlibadvapi32],
- [ac_libbde_have_sha256=libadvapi32
- ac_libbde_have_aes=libadvapi32])
-
-AS_IF(
- [test "x$ac_libbde_have_libcrypto" = xno],
- [ac_libbde_have_sha256=no
- ac_libbde_have_aes=no])
-
-dnl Check for libcrypto SHA256 support
-AS_IF(
- [test "x$ac_libbde_have_sha256" = xno],
- [AC_CHECK_HEADERS([openssl/sha.h])
-
- AS_IF(
-  [test "x$ac_cv_header_openssl_sha256_h" = xyes],
-  [ac_libbde_have_sha256=libcrypto
-  AC_CHECK_LIB(
-   crypto,
-   SHA256_Init,
-   [ac_libbde_dummy=yes],
-   [ac_libbde_have_sha256=no])
-  AC_CHECK_LIB(
-   crypto,
-   SHA256_Update,
-   [ac_libbde_dummy=yes],
-   [ac_libbde_have_sha256=no])
-  AC_CHECK_LIB(
-   crypto,
-   SHA256_Final,
-   [ac_libbde_dummy=yes],
-   [ac_libbde_have_sha256=no])
-  ])
- ])
-
-AS_IF(
- [test "x$ac_libbde_have_sha256" = xlibcrypto_evp || test "x$ac_libbde_have_sha256" = xlibcrypto || test "x$ac_libbde_have_aes" = xlibcrypto_evp || test "x$ac_libbde_have_aes" = xlibcrypto],
+ [test "x$ac_libbde_have_libcrypto" = xyes],
  [AC_SUBST(
   [LIBCRYPTO_LIBADD],
   ["-lcrypto"])
@@ -1338,6 +1574,7 @@ AC_CONFIG_FILES([libfdata/Makefile])
 AC_CONFIG_FILES([libfdatetime/Makefile])
 AC_CONFIG_FILES([libfguid/Makefile])
 AC_CONFIG_FILES([libfvalue/Makefile])
+AC_CONFIG_FILES([libhmac/Makefile])
 AC_CONFIG_FILES([libbde/Makefile])
 AC_CONFIG_FILES([libsystem/Makefile])
 AC_CONFIG_FILES([bdetools/Makefile])
@@ -1369,8 +1606,9 @@ Building:
    libfdatetime support:                     $ac_libbde_have_libfdatetime
    libfguid support:                         $ac_libbde_have_libfguid
    libfvalue support:                        $ac_libbde_have_libfvalue
-   SHA256 support:                           $ac_libbde_have_sha256
-   AES support:                              $ac_libbde_have_aes
+   libhmac support:                          $ac_libbde_have_libhmac
+   SHA256 support:                           $ac_libbde_have_hmac_sha256_support
+   AES support:                              $ac_libbde_have_cipher_aes_support
 
 Features:
    Wide character type support:              $ac_cv_libbde_enable_wide_character_type

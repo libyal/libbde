@@ -10,6 +10,7 @@ AM_CPPFLAGS = \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFVALUE_CPPFLAGS@ \
+	@LIBHMAC_CPPFLAGS@ \
 	@MEMWATCH_CPPFLAGS@
 
 lib_LTLIBRARIES = libbde.la
@@ -17,6 +18,7 @@ lib_LTLIBRARIES = libbde.la
 libbde_la_SOURCES = \
 	libbde.c \
 	libbde_aes.c libbde_aes.h \
+	libbde_aes_cmm_encrypted_key.c libbde_aes_cmm_encrypted_key.h \
 	libbde_debug.c libbde_debug.h \
 	libbde_definitions.h \
 	libbde_error.c libbde_error.h \
@@ -27,11 +29,11 @@ libbde_la_SOURCES = \
 	libbde_libfdatetime.h \
 	libbde_libfguid.h \
 	libbde_libfvalue.h \
+	libbde_libhmac.h \
 	libbde_libuna.h \
 	libbde_metadata_entry.c libbde_metadata_entry.h \
 	libbde_notify.c libbde_notify.h \
 	libbde_recovery.c libbde_recovery.h \
-	libbde_sha.c libbde_sha.h \
 	libbde_stretch_key.c libbde_stretch_key.h \
 	libbde_support.c libbde_support.h \
 	libbde_types.h \
@@ -51,6 +53,7 @@ libbde_la_LIBADD = \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
 	@LIBFVALUE_LIBADD@ \
+	@LIBHMAC_LIBADD@ \
 	@LIBCRYPTO_LIBADD@ \
 	@LIBDL_LIBADD@
 

@@ -935,6 +935,17 @@ int libbde_volume_set_utf8_recovery_password(
 
 		return( -1 );
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: binary recovery password:\n",
+		 function );
+		libnotify_print_data(
+		 (uint8_t *) internal_volume->io_handle->recovery_password,
+		 16 );
+	}
+#endif
 	internal_volume->io_handle->recovery_password_is_set = 1;
 
 	return( 1 );

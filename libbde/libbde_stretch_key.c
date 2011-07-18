@@ -27,6 +27,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_aes_cmm_encrypted_key.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_metadata_entry.h"
@@ -324,9 +325,9 @@ int libbde_stretch_key_read(
 
 		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_AES_CMM_ENCRYPTED_KEY )
 		{
+/* TODO */
 			if( libbde_metadata_entry_read_aes_ccm_encrypted_key(
 			     property_metadata_entry,
-			     key,
 			     error ) != 1 )
 			{
 				liberror_error_set(

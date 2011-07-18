@@ -41,6 +41,14 @@ struct libbde_stretch_key
 	/* The salt
 	 */
 	uint8_t salt[ 16 ];
+
+	/* The (encrypted) data
+	 */
+	uint8_t *data;
+
+	/* The (encrypted) data size
+	 */
+	size_t data_size;
 };
 
 int libbde_stretch_key_initialize(
