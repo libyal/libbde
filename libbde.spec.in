@@ -1,0 +1,74 @@
+Name: libbde
+Version: @VERSION@
+Release: 1
+Summary: Library to support the Windows NT BitLocker Drive Encryption (BDE) format
+Group: System Environment/Libraries
+License: LGPL
+Source: %{name}-%{version}.tar.gz
+URL: http://libbde.sourceforge.net
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+@libbde_spec_requires@ @libbde_spec_requires_libbfio@ @libbde_spec_requires_libfdata@ @libbde_spec_requires_libfdatetime@ @libbde_spec_requires_libfguid@ @libbde_spec_requires_libfvalue@ @libbde_spec_requires_libuna@
+@libbde_spec_build_requires@ @libbde_spec_build_requires_libbfio@ @libbde_spec_build_requires_libfdata@ @libbde_spec_build_requires_libfdatetime@ @libbde_spec_build_requires_libfguid@ @libbde_spec_build_requires_libfvalue@ @libbde_spec_build_requires_libuna@
+
+%description
+libbde is a library to support the Windows NT BitLocker Drive Encryption (BDE) format
+
+%package devel
+Summary: Header files and libraries for developing applications for libbde
+Group: Development/Libraries
+Requires: libbde = %{version}-%{release}
+
+%description devel
+Header files and libraries for developing applications for libbde.
+
+%package tools
+Summary: Several tools for accessing Windows NT BitLocker encrypted volumes
+Group: Applications/System
+Requires: libbde = %{version}-%{release}
+
+%description tools
+Several tools for accessing the Windows NT BitLocker encrypted volumes
+
+%prep
+%setup -q
+
+%build
+%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir}
+make %{?_smp_mflags}
+
+%install
+rm -rf ${RPM_BUILD_ROOT}
+make DESTDIR=${RPM_BUILD_ROOT} install
+
+%clean
+rm -rf ${RPM_BUILD_ROOT}
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(644,root,root,755)
+%doc AUTHORS COPYING NEWS README
+%attr(755,root,root) %{_libdir}/*.so.*
+
+%files devel
+%defattr(644,root,root,755)
+%doc AUTHORS COPYING NEWS README README.mingw ChangeLog
+%{_libdir}/*.a
+%{_libdir}/*.la
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/libbde.pc
+%{_includedir}/*
+%{_mandir}/man3/*
+
+%files tools
+%defattr(644,root,root,755)
+%doc AUTHORS COPYING NEWS README
+%attr(755,root,root) %{_bindir}/bdeinfo
+%{_mandir}/man1/*
+
+%changelog
+* Wed Mar 18 2011 Joachim Metz <jbmetz@users.sourceforge.net> 20110318-1
+- Initial version
+
