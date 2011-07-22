@@ -30,6 +30,7 @@
 #include "libbde_extern.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfdata.h"
 #include "libbde_types.h"
 
 #if defined( __cplusplus )
@@ -43,6 +44,14 @@ struct libbde_internal_volume
 	/* The (volume) size
 	 */
 	size64_t size;
+
+	/* The sectors vector
+	 */
+	libfdata_vector_t *sectors_vector;
+
+	/* The sectors cache
+	 */
+	libfdata_cache_t *sectors_cache;
 
 	/* The file IO handle
 	 */

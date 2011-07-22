@@ -330,10 +330,10 @@ int libbde_aes_initialize_tables(
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_initialize(
-     libbde_aes_context_t *context,
+     libbde_aes_context_t **context,
      liberror_error_t **error )
 {
-	static char *function = "libbde_aes_initialize";
+	static char *function = "libbde_aes_context_initialize";
 
 	if( context == NULL )
 	{
@@ -346,45 +346,86 @@ int libbde_aes_initialize(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
-	/* TODO */
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	/* No additional initialization necessary */
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-	EVP_CIPHER_CTX_init(
-	 &( context->evp_context ) );
-
-#else
-	if( libbde_aes_tables_initialized == 0 )
+	if( *context == NULL )
 	{
-		if( libbde_aes_initialize_tables(
-		     error ) != 1 )
+		*context = memory_allocate_structure(
+		            libbde_aes_context_t );
+
+		if( *context == NULL )
 		{
 			liberror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize tables.",
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create context.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
-		libbde_aes_tables_initialized = 1;
-	}
+		if( memory_set(
+		     *context,
+		     0,
+		     sizeof( libbde_aes_context_t ) ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear context.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( WINAPI )
+		/* TODO */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+		/* No additional initialization necessary */
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+		EVP_CIPHER_CTX_init(
+		 &( ( *context )->evp_context ) );
+
+#else
+		if( libbde_aes_tables_initialized == 0 )
+		{
+			if( libbde_aes_initialize_tables(
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to initialize tables.",
+				 function );
+
+				return( -1 );
+			}
+			libbde_aes_tables_initialized = 1;
+		}
 #endif
+	}
 	return( 1 );
+
+on_error:
+	if( *context != NULL )
+	{
+		memory_free(
+		 *context );
+
+		*context = NULL;
+	}
+	return( -1 );
 }
 
 /* Frees an AES context
  * Returns 1 if successful or -1 on error
  */
-int libbde_aes_context_free(
+int libbde_aes_free(
      libbde_aes_context_t **context,
      liberror_error_t **error )
 {
-	static char *function = "libbde_aes_context_free";
+	static char *function = "libbde_aes_free";
 
 	if( context == NULL )
 	{
@@ -440,21 +481,7 @@ int libbde_aes_finalize(
 
 		return( -1 );
 	}
-/* TODO refactor what should be in finalize and what should be in free */
-
-#if defined( WINAPI )
-	/* TODO */
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	/* No additional clean up necessary */
-
-#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-	EVP_CIPHER_CTX_cleanup(
-	 &( context->evp_context ) );
-
-#else
-	/* No additional clean up necessary */
-#endif
+/* TODO what should be in finalize ? */
 	return( 1 );
 }
 
@@ -869,13 +896,13 @@ int libbde_aes_cbc_crypt(
 
 		return( -1 );
 	}
-	if( output_data_size > input_data_size )
+	if( output_data_size < input_data_size )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid ouput data size value exceeds input data size.",
+		 "%s: invalid ouput data size smaller than input data size.",
 		 function );
 
 		return( -1 );

@@ -31,7 +31,9 @@
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfdata.h"
 #include "libbde_recovery.h"
+#include "libbde_sector_data.h"
 #include "libbde_volume.h"
 
 /* Initialize a volume
@@ -678,6 +680,32 @@ int libbde_volume_close(
 	internal_volume->file_io_handle                    = NULL;
 	internal_volume->file_io_handle_created_in_library = 0;
 
+	if( libfdata_vector_free(
+	     &( internal_volume->sectors_vector ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free sectors vector.",
+		 function );
+
+		result = -1;
+	}
+	if( libfdata_cache_free(
+	     &( internal_volume->sectors_cache ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free sectors cache.",
+		 function );
+
+		result = -1;
+	}
 	return( result );
 }
 
@@ -708,6 +736,28 @@ int libbde_volume_open_read(
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid internal volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->sectors_vector != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal file - sectors vector already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->sectors_cache != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal file - sectors cache already set.",
 		 function );
 
 		return( -1 );
@@ -825,6 +875,56 @@ int libbde_volume_open_read(
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read metadata.",
+		 function );
+
+		return( -1 );
+	}
+	/* TODO clone function ? */
+	if( libfdata_vector_initialize(
+	     &( internal_volume->sectors_vector ),
+	     (size64_t) internal_volume->size,
+	     (intptr_t *) internal_volume->io_handle,
+	     NULL,
+	     NULL,
+	     &libbde_io_handle_read_sector,
+	     LIBFDATA_FLAG_IO_HANDLE_NON_MANAGED,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create sectors vector.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfdata_vector_append_segment(
+	     internal_volume->sectors_vector,
+	     0,
+	     internal_volume->size,
+	     0,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_APPEND_FAILED,
+		 "%s: unable to append segment to sectors vector.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfdata_cache_initialize(
+	     &( internal_volume->sectors_cache ),
+	     LIBBDE_MAXIMUM_CACHE_ENTRIES_SECTORS,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create sectors cache.",
 		 function );
 
 		return( -1 );

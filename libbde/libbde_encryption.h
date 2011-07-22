@@ -33,13 +33,19 @@
 extern "C" {
 #endif
 
+enum LIBBDE_ENCYPTION_CRYPT_MODES
+{
+	LIBBDE_ENCYPTION_CRYPT_MODE_DECRYPT   = 0,
+	LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT   = 1
+};
+
 typedef struct libbde_encryption_context libbde_encryption_context_t;
 
 struct libbde_encryption_context
 {
 	/* The encryption method
 	 */
-	uint8_t encryption_method;
+	uint8_t method;
 
 	/* The volume (AES) decryption context
 	 */
@@ -52,7 +58,7 @@ struct libbde_encryption_context
 
 int libbde_encryption_initialize(
      libbde_encryption_context_t **context,
-     uint8_t encryption_method,
+     uint8_t method,
      liberror_error_t **error );
 
 int libbde_encryption_free(
@@ -63,6 +69,15 @@ int libbde_encryption_set_key(
      libbde_encryption_context_t *context,
      const uint8_t *key,
      size_t bit_size,
+     liberror_error_t **error );
+
+int libbde_encryption_crypt(
+     libbde_encryption_context_t *context,
+     int mode,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

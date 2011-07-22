@@ -28,190 +28,302 @@
 
 #include "libbde_diffuser.h"
 
-/* TODO */
-
-unsigned long Diffuser_B_Decrypt(unsigned char *input, int32 input_size);
-unsigned long Diffuser_A_Decrypt(unsigned char *input, int32 input_size);
-
-
-void decrypt_diffused_sector( options_structure *options, // the usual keys
-							  unsigned char *sector_data, // actual encrypted data after decrypted data is also available here
-							  int32  sector_size, // size of sector which is being decoded
-							  int64 sector  )  // this means if a 4 th sector sector is being decoded
+/* De- or encrypts a block of data using diffuser A
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_diffuser_a_crypt(
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
 {
+	uint32_t *values_32bit        = NULL;
+	static char *function         = "libbde_diffuser_a_crypt";
+	size_t data_index             = 0;
+	size_t number_of_iterations   = 0;
+	size_t number_of_values_32bit = 0;
+	size_t value_32bit_index1     = 0;
+	size_t value_32bit_index2     = 0;
+	size_t value_32bit_index3     = 0;
 
-	unsigned char IV[20]; // used to stor IV which is sector specific
-
-	unsigned char e[20] ; // used to store sector byte offset
-
-	unsigned char sector_key_buffer[40]; // it's actuall a 512 bit value which is xored into the plain text
-
-	int64 temp_var_e;
-
-	unsigned long loop_var;
-
-	
-/*aes_context fvek_e_ctxt,fvek_d_ctxt;
-	aes_context tweak_e_ctxt,tweak_d_ctxt;
-
-
-	// initialise contexts
-
-	aes_setkey_dec( &fvek_d_ctxt, options->FVEK_key  + 12, 128);
-	aes_setkey_enc( &fvek_e_ctxt, options->FVEK_key  + 12, 128);
-
-
-	aes_setkey_dec (&tweak_d_ctxt, options->Tweak_Key + 12 , 128);
-	aes_setkey_enc (&tweak_e_ctxt, options->Tweak_Key + 12 , 128); // this key is used to  get sector key
-
-*/
-	// let us compute e and other data which is necessary for decryption
-
-	/*first e is computed
-	e is nothing byt byte offset of that sector from start of volume
-	*/ 
-	temp_var_e = sector * options->fve_meta_data.BytesPerSector  ;
-
-	memset(e,0,sizeof(e));
-
-	memcpy(e, &temp_var_e , sizeof(temp_var_e)); // copy this number into a buffer in least byte first encoding
-
-	// now let us fill in IV for this sector
-
-	aes_crypt_ecb(&options->context.FVEK_E_ctx,AES_ENCRYPT,e , IV);
-
-
-
-	// this block will fill the sector key
+	if( input_data == NULL )
 	{
-	// now let us compuet sector_key_buffer
-	aes_crypt_ecb(&options->context.TWEAK_E_ctx,AES_ENCRYPT,e,sector_key_buffer) ;
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid input data.",
+		 function );
 
-	//now put 128 in the 16th byte of e
-	e[15] = 128; // now e represent's e'
-	aes_crypt_ecb(&options->context.TWEAK_E_ctx,AES_ENCRYPT,e,sector_key_buffer+ 16) ;
+		return( -1 );
 	}
-	
+	if( input_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
 
-	// now decrypt the buffer usinf AESCBC using the fvek key decryption context
-   // we use the same buffer as both input and output
-    aes_crypt_cbc(&options->context.FVEK_D_ctx,AES_DECRYPT,options->fve_meta_data.BytesPerSector,IV,sector_data,sector_data);
+		return( -1 );
+	}
+	if( output_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid output data.",
+		 function );
 
+		return( -1 );
+	}
+	if( output_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
 
+		return( -1 );
+	}
+	if( output_data_size < input_data_size )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid ouput data size smaller than input data size.",
+		 function );
 
-// now let us call the diffuser B decryptor
+		return( -1 );
+	}
+	if( ( input_data_size % 4 ) != 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported input data size - not a multitude of 4.",
+		 function );
 
-	Diffuser_B_Decrypt(sector_data,options->fve_meta_data.BytesPerSector);
+		return( -1 );
+	}
+	number_of_values_32bit = input_data_size / 4;
 
+	values_32bit = (uint32_t *) output_data;
 
-	// now let us call the diffuser B decryptor
+	for( value_32bit_index1 = 0;
+	     value_32bit_index1 < number_of_values_32bit;
+	     value_32bit_index1++ )
+	{
+		byte_stream_copy_to_uint32_little_endian(
+		 &( input_data[ data_index ] ),
+		 values_32bit[ value_32bit_index1 ] );
 
-	Diffuser_A_Decrypt(sector_data,options->fve_meta_data.BytesPerSector);
+		data_index += sizeof( uint32_t );
+	}
+	number_of_iterations = 5;
 
-	// apply sector XOR  wit sector key
-	for( loop_var = 0 ; loop_var < options->fve_meta_data.BytesPerSector ;loop_var++)
-		sector_data[loop_var] = sector_data[loop_var] ^ sector_key_buffer[ loop_var % 32] ;
+	while( number_of_iterations > 0 )
+	{
+		value_32bit_index1 = 0;
 
+/* TODO test first then refactor out most of the modulus calculus */
+		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
+		{
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-// at this stage the buffer is already decrypted succesfully, if everything went right
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ byte_stream_bit_rotate_left_32bit(
+			                                      output_data[ value_32bit_index3 ],
+			                                      9 );
 
-	return ;
+			value_32bit_index1++;
 
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ output_data[ value_32bit_index3 ];
+
+			value_32bit_index1++;
+
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ byte_stream_bit_rotate_left_32bit(
+			                                      output_data[ value_32bit_index3 ],
+			                                      13 );
+
+			value_32bit_index1++;
+
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ output_data[ value_32bit_index3 ];
+
+			value_32bit_index1++;
+		}
+		number_of_iterations--;
+	}
+	return( 1 );
 }
 
-
-// TODO write an ecryption function just convertting first plus into minus will make an encryption function
-//this applies to both Diffuser A and Diffuser B , thus we can have write support
-
-// this will apply an in place diffuser B decryption function
-int32 Diffuser_B_Decrypt(unsigned char *input, unsigned long input_size)
+/* De- or encrypts a block of data using diffuser B
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_diffuser_b_crypt(
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
 {
-	int32 temp_array[512];
-	int32 loop_var;
-	int32 max_loop;
+	uint32_t *values_32bit        = NULL;
+	static char *function         = "libbde_diffuser_b_crypt";
+	size_t data_index             = 0;
+	size_t number_of_iterations   = 0;
+	size_t number_of_values_32bit = 0;
+	size_t value_32bit_index1     = 0;
+	size_t value_32bit_index2     = 0;
+	size_t value_32bit_index3     = 0;
 
-	int32 total_loop; // no . of times diffuser is applied to whole block
 
-	//init  array with supplied data
-	memcpy(temp_array,input,  input_size);
- 
+	if( input_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid input data.",
+		 function );
 
-	max_loop = input_size / 4;
-
-	total_loop = 3;  // the diffuser function is applied a total of 3 times
-
-while ( total_loop) {
-	// the below loop should be executed 
-	for ( loop_var = 0 ; loop_var < (max_loop-1) ;)  {
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var +2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var + 5) % max_loop]),0));
-		loop_var++;
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var +2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var + 5) % max_loop]),10));
-		loop_var++;
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var +2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var + 5) % max_loop]),0));
-		loop_var++;
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var +2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var + 5) % max_loop]),25));
-		loop_var++;
-
+		return( -1 );
 	}
+	if( input_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
 
-	total_loop-- ;
-} // end total_loop
+		return( -1 );
+	}
+	if( output_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid output data.",
+		 function );
 
+		return( -1 );
+	}
+	if( output_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
 
-// now copy the output onto to the input
-memcpy(input, temp_array, input_size);
+		return( -1 );
+	}
+	if( output_data_size < input_data_size )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid ouput data size smaller than input data size.",
+		 function );
 
-return 0;
+		return( -1 );
+	}
+	if( ( input_data_size % 4 ) != 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported input data size - not a multitude of 4.",
+		 function );
+
+		return( -1 );
+	}
+	number_of_values_32bit = input_data_size / 4;
+
+	values_32bit = (uint32_t *) output_data;
+
+	for( value_32bit_index1 = 0;
+	     value_32bit_index1 < number_of_values_32bit;
+	     value_32bit_index1++ )
+	{
+		byte_stream_copy_to_uint32_little_endian(
+		 &( input_data[ data_index ] ),
+		 values_32bit[ value_32bit_index1 ] );
+
+		data_index += sizeof( uint32_t );
+	}
+	number_of_iterations = 5;
+
+	while( number_of_iterations > 0 )
+	{
+		value_32bit_index1 = 0;
+
+/* TODO test first then refactor out most of the modulus calculus */
+		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
+		{
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ output_data[ value_32bit_index3 ];
+
+			value_32bit_index1++;
+
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ byte_stream_bit_rotate_left_32bit(
+			                                      output_data[ value_32bit_index3 ],
+			                                      10 );
+
+			value_32bit_index1++;
+
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ output_data[ value_32bit_index3 ];
+
+			value_32bit_index1++;
+
+			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
+			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+
+			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
+			                                   ^ byte_stream_bit_rotate_left_32bit(
+			                                      output_data[ value_32bit_index3 ],
+			                                      25 );
+
+			value_32bit_index1++;
+		}
+		number_of_iterations--;
+	}
+	return( 1 );
 }
 
-// this will apply an in place diffuser A decryption function
-int32 Diffuser_A_Decrypt(unsigned char *input, int32 input_size)
-{
-
-	unsigned long temp_array[512];
-	unsigned long loop_var;
-	unsigned long max_loop;
-
-	unsigned long total_loop; // no . of times diffuser is applied to whole block
-
-	//init  array with supplied data
-	memcpy(temp_array,input,  input_size);
- 
-
-	max_loop = input_size / 4;
-
-	total_loop = 5;  // the diffuser function is applied a total of 3 times
-
-while ( total_loop) {
-	// the below loop should be executed 
-	for ( loop_var = 0 ; loop_var < (max_loop-1) ;)  {
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var -2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var - 5) % max_loop]),9));
-		loop_var++;
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var -2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var - 5) % max_loop]),0));
-		loop_var++;
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var -2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var - 5) % max_loop]),13));
-		loop_var++;
-
-		temp_array[loop_var] = temp_array[loop_var] + ( temp_array [ (loop_var -2 ) % max_loop] ^  ROTATE( (temp_array [ ( loop_var - 5) % max_loop]),0));
-		loop_var++;
-
-	}
-
-	total_loop-- ;
-} // end total_loop
-
-
-
-// now copy the output onto to the input
-memcpy(input, temp_array, input_size);
-
-return 0;
-
-}

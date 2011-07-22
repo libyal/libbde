@@ -46,6 +46,11 @@
 uint8_t libbde_volume_master_key_disk_password[ 26 ] = \
 	{ 'D', 0, 'i', 0, 's', 0, 'k', 0, 'P', 0, 'a', 0, 's', 0, 's', 0, 'w', 0, 'o', 0, 'r', 0, 'd', 0, 0, 0 };
 
+/* Contains the NUL-terminated UTF-16 little-endian string: ExternalKey
+ */
+uint8_t libbde_volume_master_key_external_key[ 24 ] = \
+	{ 'E', 0, 'x', 0, 't', 0, 'e', 0, 'r', 0, 'n', 0, 'a', 0, 'l', 0, 'K', 0, 'e', 0, 'y', 0, 0, 0 };
+
 /* Initialize a volume master key
  * Make sure the value volume master key is pointing to is set to NULL
  * Returns 1 if successful or -1 on error
@@ -152,9 +157,6 @@ int libbde_volume_master_key_read(
 {
 	uint8_t key[ 32 ];
 
-	/* TODO */
-	libbde_aes_context_t aes_context;
-
 	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
 	libbde_metadata_entry_t *property_metadata_entry      = NULL;
 	libbde_stretch_key_t *stretch_key                     = NULL;
@@ -163,6 +165,9 @@ int libbde_volume_master_key_read(
 	size_t value_data_size                                = 0;
 	ssize_t read_count                                    = 0;
 	uint8_t use_recovery_password                         = 0;
+
+	/* TODO */
+	libbde_aes_context_t *aes_context = NULL;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 24 ];
@@ -618,7 +623,7 @@ int libbde_volume_master_key_read(
 			goto on_error;
 		}
 		if( libbde_aes_set_encryption_key(
-		     &aes_context,
+		     aes_context,
 		     (uint8_t *) key,
 		     256,
 		     error ) != 1 )
@@ -641,7 +646,7 @@ int libbde_volume_master_key_read(
 		 512 );
 
 		if( libbde_aes_ccm_crypt(
-		     &aes_context,
+		     aes_context,
 		     LIBBDE_AES_CRYPT_MODE_DECRYPT,
 		     aes_ccm_encrypted_key->nonce,
 		     12,
@@ -672,7 +677,7 @@ int libbde_volume_master_key_read(
 		}
 #endif
 		if( libbde_aes_finalize(
-		     &aes_context,
+		     aes_context,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -680,6 +685,19 @@ int libbde_volume_master_key_read(
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable finalize context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_free(
+		     &aes_context,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable free context.",
 			 function );
 
 			goto on_error;
@@ -734,11 +752,13 @@ on_error:
 		 NULL );
 	}
 #endif
-/* TODO 
-		libbde_aes_finalize(
-		 &context,
+/* TODO */
+	if( aes_context != NULL )
+	{
+		libbde_aes_free(
+		 &aes_context,
 		 NULL );
-*/
+	}
 	if( stretch_key != NULL )
 	{
 		libbde_stretch_key_free(
