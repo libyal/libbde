@@ -36,7 +36,7 @@
  */
 int libbde_encryption_context_initialize(
      libbde_encryption_context_t **context,
-     uint8_t encryption_method,
+     uint8_t method,
      liberror_error_t **error )
 {
 	static char *function = "libbde_encryption_context_initialize";
@@ -71,7 +71,7 @@ int libbde_encryption_context_initialize(
 		if( memory_set(
 		     *context,
 		     0,
-		     sizeof( libbde_context_t ) ) == NULL )
+		     sizeof( libbde_encryption_context_t ) ) == NULL )
 		{
 			liberror_error_set(
 			 error,
@@ -88,7 +88,7 @@ int libbde_encryption_context_initialize(
 			return( -1 );
 		}
 		if( libbde_aes_initialize(
-		     ( *context )->volume_decryption_context,
+		     &( ( *context )->volume_decryption_context ),
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -101,7 +101,7 @@ int libbde_encryption_context_initialize(
 			goto on_error;
 		}
 		if( libbde_aes_initialize(
-		     ( *context )->volume_encryption_context,
+		     &( ( *context )->volume_encryption_context ),
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -113,6 +113,7 @@ int libbde_encryption_context_initialize(
 
 			goto on_error;
 		}
+		( *context )->method = method;
 	}
 	return( 1 );
 
@@ -121,7 +122,7 @@ on_error:
 	{
 		if( ( *context )->volume_decryption_context != NULL )
 		{
-			libbde_aes_context_free(
+			libbde_aes_free(
 			 &( ( *context )->volume_decryption_context ),
 			 NULL );
 		}
@@ -156,7 +157,7 @@ int libbde_encryption_context_free(
 	}
 	if( *context != NULL )
 	{
-		if( libbde_aes_context_free(
+		if( libbde_aes_free(
 		     &( ( *context )->volume_decryption_context ),
 		     error ) != 1 )
 		{
@@ -169,7 +170,7 @@ int libbde_encryption_context_free(
 
 			result = -1;
 		}
-		if( libbde_aes_context_free(
+		if( libbde_aes_free(
 		     &( ( *context )->volume_encryption_context ),
 		     error ) != 1 )
 		{
@@ -190,7 +191,7 @@ int libbde_encryption_context_free(
 	return( result );
 }
 
-/* Sets the volume decryption and encryption key
+/* Sets the volume de- and encryption key
  * Returns 1 if successful or -1 on error
  */
 int libbde_encryption_set_volume_key(
@@ -290,161 +291,215 @@ if (  options->Encryption_Type == AES256_diffuser )  {
 }
 
 
+#endif
 
+/* De- or encrypts a block of data using AES-CBC
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_encryption_crypt(
+     libbde_encryption_context_t *context,
+     int mode,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     liberror_error_t **error )
+{
+	uint8_t initialization_vector[ 20 ];
+
+	static char *function = "libbde_encryption_crypt";
+	int result            = 0;
+
+	if( context == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( mode != LIBBDE_ENCYPTION_CRYPT_MODE_DECRYPT )
+	 && ( mode != LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported mode.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     initialization_vector,
+	     0,
+	     20 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear initialization vector.",
+		 function );
+
+		return( -1 );
+	}
+	if( mode == LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT )
+	{
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC ) )
+		{
+			result = libbde_aes_cbc_crypt(
+				  context->volume_encryption_context,
+				  LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+				  initialization_vector,
+				  input_data,
+				  input_data_size,
+				  output_data,
+				  output_data_size,
+				  error );
+		}
+		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+		{
+		}
+		if( result != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+			 "%s: unable to encrypt output data.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	else
+	{
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC ) )
+		{
+			result = libbde_aes_cbc_crypt(
+				  context->volume_decryption_context,
+				  LIBBDE_AES_CRYPT_MODE_DECRYPT,
+				  initialization_vector,
+				  input_data,
+				  input_data_size,
+				  output_data,
+				  output_data_size,
+				  error );
+		}
+		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+		{
+		}
+		if( result != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+			 "%s: unable to encrypt output data.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( 1 );
+}
+
+#ifdef TODO
 
 void decrypt_diffused_sector( options_structure *options, // the usual keys
-							  int8 *sector_data, // actual encrypted data after decrypted data is also available here
-							  int32  sector_size, // size of sector which is being decoded
-							  int64 sector  );
-
-// this means a sector encrypted with pure AES 128 or AES 256
-unsigned long decrypt_normal_sector( options_structure *options, // the usual keys
-							  int8 *sector_data, // actual encrypted data after decrypted data is also available here
+							  unsigned char *sector_data, // actual encrypted data after decrypted data is also available here
 							  int32  sector_size, // size of sector which is being decoded
 							  int64 sector  )  // this means if a 4 th sector sector is being decoded
 {
 
-aes_context fvek_d_ctxt;
- int8 IV[20] ;  // initilization vector
+	unsigned char IV[20]; // used to stor IV which is sector specific
 
+	unsigned char e[20] ; // used to store sector byte offset
 
+	unsigned char sector_key_buffer[40]; // it's actuall a 512 bit value which is xored into the plain text
 
-/*
-// if algorithm is not AES 128 or AES 256 return -1
-if ( options->Encryption_Type == AES128_diffuser ||
-	 options->Encryption_Type == AES256_diffuser )
-	 return -1;
-
-// setup key schedule  according to the algorithm
-
-if ( options->Encryption_Type == AES128 ) 
-			aes_setkey_dec( &fvek_d_ctxt, options->FVEK_key  + 12, 128); // 128 bit encryption
-else if (options->Encryption_Type == AES256)
-           aes_setkey_dec( &fvek_d_ctxt, options->FVEK_key  + 12, 256); // select 256 bit encryption
-else
-  return -1;
-
-*/
- 
-		memset(IV,0,sizeof(IV));  // init initialization vector
-		aes_crypt_cbc(&options->context.FVEK_D_ctx,AES_DECRYPT,sector_size,IV,sector_data,sector_data);
-
-
-
-return 0;
-}
-
-
-
-// this will select a decryptor based on the algorithm selected in the FVEK
-// and return result
-void decrypt_sector(options_structure *options,
-					int8 *sector_data,
-					 int64 sector )
-{
-
-	// select a function based on algorithm 
-
-	if ( options->Encryption_Type == AES128 || options->Encryption_Type == AES256 )
-		  return decrypt_normal_sector(options,sector_data,options->fve_meta_data.BytesPerSector,sector);
-
-
-	if ( options->Encryption_Type == AES128_diffuser || options->Encryption_Type == AES256_diffuser )
-		  return decrypt_diffused_sector(options,sector_data,options->fve_meta_data.BytesPerSector,sector);
-
-
-	// we are here means unknown algorithm
-
-	return -1;
-
-
-
-}
-
-
-
-// this function does the actual decryption of data
-void decrypt_data(Interface* input_interface, options_structure *options) {
-	unsigned char encrypted_buffer[ 8192];
-	unsigned char decrypted_buffer[8192];
-
-	FILE *stream;
-
+	int64 temp_var_e;
 
 	unsigned long loop_var;
+
 	
+/*aes_context fvek_e_ctxt,fvek_d_ctxt;
+	aes_context tweak_e_ctxt,tweak_d_ctxt;
 
 
-	if( (stream = fopen( "decrypted", "w+b" )) == NULL )    {
+	// initialise contexts
 
-		printf("Output file could not be opned");
-    return ;
-	}
-
-
-	// process first sector and write it
-
-	Read_Sector( input_interface,0  ,1, encrypted_buffer);
-	fix_sector(options,encrypted_buffer);
-	fwrite(encrypted_buffer,1,512,stream);
-
-	loop_var =0; // start decrypting from the 9 sector
+	aes_setkey_dec( &fvek_d_ctxt, options->FVEK_key  + 12, 128);
+	aes_setkey_enc( &fvek_e_ctxt, options->FVEK_key  + 12, 128);
 
 
-#define DECRYPTED_SECTORS 10
-	for ( loop_var =1 ;loop_var < DECRYPTED_SECTORS;loop_var++)
+	aes_setkey_dec (&tweak_d_ctxt, options->Tweak_Key + 12 , 128);
+	aes_setkey_enc (&tweak_e_ctxt, options->Tweak_Key + 12 , 128); // this key is used to  get sector key
+
+*/
+	// let us compute e and other data which is necessary for decryption
+
+	/*first e is computed
+	e is nothing byt byte offset of that sector from start of volume
+	*/ 
+	temp_var_e = sector * options->fve_meta_data.BytesPerSector  ;
+
+	memset(e,0,sizeof(e));
+
+	memcpy(e, &temp_var_e , sizeof(temp_var_e)); // copy this number into a buffer in least byte first encoding
+
+	// now let us fill in IV for this sector
+
+	aes_crypt_ecb(&options->context.FVEK_E_ctx,AES_ENCRYPT,e , IV);
+
+
+
+	// this block will fill the sector key
 	{
-				Read_Sector( input_interface,loop_var  ,1, encrypted_buffer);
-			     fwrite(encrypted_buffer,1,512,stream);
+	// now let us compuet sector_key_buffer
+	aes_crypt_ecb(&options->context.TWEAK_E_ctx,AES_ENCRYPT,e,sector_key_buffer) ;
+
+	//now put 128 in the 16th byte of e
+	e[15] = 128; // now e represent's e'
+	aes_crypt_ecb(&options->context.TWEAK_E_ctx,AES_ENCRYPT,e,sector_key_buffer+ 16) ;
 	}
-
-loop_var = DECRYPTED_SECTORS  ;
-
-	//for(loop_var = 0; loop_var < 100000 ;loop_var++) 
-	while( 1)//!feof(input_interface->stream ))
-	{
-		
-loop_var++;
-	// read one sector at a time and decrypt it
-	//if (! feof( input_interface->stream))	{
-		Read_Sector( input_interface,loop_var  ,1, encrypted_buffer);
-	//}
-
-		// if eof break;
-
-		if ( feof(input_interface->stream ))
-			break;
 	
 
-
-		// sector has been read now decrypt it
-	decrypt_sector(options,encrypted_buffer,loop_var);
-
-	
-
-     fwrite(encrypted_buffer,1,512,stream);
-
-	}
-
-
-	// we are here means whole file has been decrypte including the last sector
-	// so fix it up
-	// it is done by seeking back 512 bytes
-	// reading  0 sector , fixing it up
-	// and then writing it again
-
-	custom_fseek(stream, (int64)0 - (int64)input_interface->SectorSize ,SEEK_CUR);
-	Read_Sector( input_interface,0  ,1, encrypted_buffer);
-	fix_sector(options,encrypted_buffer);
-	 fwrite(encrypted_buffer,1,512,stream);
+	// now decrypt the buffer usinf AESCBC using the fvek key decryption context
+   // we use the same buffer as both input and output
+    aes_crypt_cbc(&options->context.FVEK_D_ctx,AES_DECRYPT,options->fve_meta_data.BytesPerSector,IV,sector_data,sector_data);
 
 
 
+// now let us call the diffuser B decryptor
+
+	Diffuser_B_Decrypt(sector_data,options->fve_meta_data.BytesPerSector);
 
 
-fclose(stream);
+	// now let us call the diffuser B decryptor
+
+	Diffuser_A_Decrypt(sector_data,options->fve_meta_data.BytesPerSector);
+
+	// apply sector XOR  wit sector key
+	for( loop_var = 0 ; loop_var < options->fve_meta_data.BytesPerSector ;loop_var++)
+		sector_data[loop_var] = sector_data[loop_var] ^ sector_key_buffer[ loop_var % 32] ;
+
+
+// at this stage the buffer is already decrypted succesfully, if everything went right
+
+	return ;
 
 }
+
+
 
 #endif
 

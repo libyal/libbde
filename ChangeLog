@@ -1,4 +1,11 @@
 TODO
+* read metadata with out decrypting ?
+* downsize IV fo 20 to 16 bytes
+* fix diffuser
+* get bytes per sector from volume header ?
+* start up key support ?
+* FKEV and TWEAK keys ?
+
 * add microseconds to filetime output
 * add libfdata vector for reading blocks
   - determine volume key for decrypting sectors
@@ -11,8 +18,6 @@ TODO
 * AES
   - use openssl and MS Crypto API implementation
   - clean up fallback routines
-* SHA256
-  - complete fallback routines
 * debug
   - print entry type description string
   - print value type description string
@@ -21,6 +26,7 @@ TODO
 
 20110721
 * worked on encryption
+* worked on sector vector and cache
 
 20110720
 * worked on encryption

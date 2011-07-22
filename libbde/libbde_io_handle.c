@@ -31,9 +31,11 @@
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfdata.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_metadata_entry.h"
+#include "libbde_sector_data.h"
 #include "libbde_unused.h"
 #include "libbde_volume_master_key.h"
 
@@ -94,8 +96,15 @@ int libbde_io_handle_initialize(
 			 "%s: unable to clear IO handle.",
 			 function );
 
-			goto on_error;
+			memory_free(
+			 *io_handle );
+
+			*io_handle = NULL;
+
+			return( -1 );
 		}
+/* TODO init encryption context */
+		( *io_handle )->sector_size = 512;
 	}
 	return( 1 );
 
@@ -1237,6 +1246,99 @@ on_error:
 	{
 		memory_free(
 		 fve_metadata_block );
+	}
+	return( -1 );
+}
+
+/* Reads a sector
+ * Callback function for the volume vector
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_io_handle_read_sector(
+     intptr_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     libfdata_vector_t *vector,
+     libfdata_cache_t *cache,
+     int element_index,
+     off64_t element_data_offset,
+     size64_t element_data_size LIBBDE_ATTRIBUTE_UNUSED,
+     uint8_t read_flags LIBBDE_ATTRIBUTE_UNUSED,
+     liberror_error_t **error )
+{
+	libbde_sector_data_t *sector_data = NULL;
+	static char *function             = "libbde_io_handle_read_sector";
+
+	LIBBDE_UNREFERENCED_PARAMETER( element_data_size );
+	LIBBDE_UNREFERENCED_PARAMETER( read_flags );
+
+	if( io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO handle virtual sectors, what about different sector sizes? */
+	if( libbde_sector_data_initialize(
+	     &sector_data,
+	     ( (libbde_io_handle_t *) io_handle )->sector_size,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create sector data.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_sector_data_read(
+	     sector_data,
+	     file_io_handle,
+	     element_data_offset,
+	     ( (libbde_io_handle_t *) io_handle )->encryption_context,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read sector data.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdata_vector_set_element_value_by_index(
+	     vector,
+	     cache,
+	     element_index,
+	     (intptr_t *) sector_data,
+	     (int (*)(intptr_t *, liberror_error_t **)) &libbde_sector_data_free,
+	     LIBFDATA_LIST_ELEMENT_VALUE_FLAG_MANAGED,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set sector data as element value.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+
+on_error:
+	if( sector_data != NULL )
+	{
+		libbde_sector_data_free(
+		 sector_data,
+		 NULL );
 	}
 	return( -1 );
 }

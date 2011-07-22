@@ -27,7 +27,9 @@
 
 #include <liberror.h>
 
+#include "libbde_encryption.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfdata.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -42,6 +44,10 @@ struct libbde_io_handle
 	/* The format version
 	 */
 	int version;
+
+	/* The sector size
+	 */
+	size_t sector_size;
 
 	/* The first metadata offset
 	 */
@@ -58,6 +64,10 @@ struct libbde_io_handle
 	/* The encryption method
 	 */
 	int encryption_method;
+
+	/* The encryption context
+	 */
+	libbde_encryption_context_t *encryption_context;
 
 	/* The (binary) recovery password
 	 */
@@ -90,6 +100,17 @@ int libbde_io_handle_read_metadata(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     liberror_error_t **error );
+
+int libbde_io_handle_read_sector(
+     intptr_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     libfdata_vector_t *vector,
+     libfdata_cache_t *cache,
+     int element_index,
+     off64_t element_data_offset,
+     size64_t element_data_size,
+     uint8_t read_flags,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

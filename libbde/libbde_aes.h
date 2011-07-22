@@ -106,7 +106,11 @@ int libbde_aes_initialize_tables(
 #endif
 
 int libbde_aes_initialize(
-     libbde_aes_context_t *context,
+     libbde_aes_context_t **context,
+     liberror_error_t **error );
+
+int libbde_aes_free(
+     libbde_aes_context_t **context,
      liberror_error_t **error );
 
 int libbde_aes_finalize(

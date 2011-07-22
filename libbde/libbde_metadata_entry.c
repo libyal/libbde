@@ -269,7 +269,7 @@ ssize_t libbde_metadata_entry_read(
 		 "%s: unable to create value data.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( memory_copy(
 	     metadata_entry->value_data,
@@ -283,12 +283,7 @@ ssize_t libbde_metadata_entry_read(
 		 "%s: unable to copy value data.",
 		 function );
 
-		memory_free(
-		 metadata_entry->value_data );
-
-		metadata_entry->value_data = NULL;
-
-		return( -1 );
+		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
@@ -302,6 +297,16 @@ ssize_t libbde_metadata_entry_read(
 	}
 #endif
 	return( (ssize_t) entry_size );
+
+on_error:
+	if( metadata_entry->value_data != NULL )
+	{
+		memory_free(
+		 metadata_entry->value_data );
+
+		metadata_entry->value_data = NULL;
+	}
+	return( -1 );
 }
 
 /* Reads a string from the metadata entry
