@@ -32,6 +32,7 @@
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libfdata.h"
+#include "libbde_metadata.h"
 #include "libbde_recovery.h"
 #include "libbde_sector_data.h"
 #include "libbde_volume.h"
@@ -88,6 +89,45 @@ int libbde_volume_initialize(
 
 			goto on_error;
 		}
+		if( libbde_metadata_initialize(
+		     &( internal_volume->primary_metadata ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create primary metadata.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_metadata_initialize(
+		     &( internal_volume->secondary_metadata ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create secondary metadata.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_metadata_initialize(
+		     &( internal_volume->tertiary_metadata ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create tertiary metadata.",
+			 function );
+
+			goto on_error;
+		}
 		if( libbde_io_handle_initialize(
 		     &( internal_volume->io_handle ),
 		     error ) != 1 )
@@ -108,6 +148,24 @@ int libbde_volume_initialize(
 on_error:
 	if( internal_volume != NULL )
 	{
+		if( internal_volume->tertiary_metadata != NULL )
+		{
+			libbde_metadata_free(
+			 &( internal_volume->tertiary_metadata ),
+			 NULL );
+		}
+		if( internal_volume->secondary_metadata != NULL )
+		{
+			libbde_metadata_free(
+			 &( internal_volume->secondary_metadata ),
+			 NULL );
+		}
+		if( internal_volume->primary_metadata != NULL )
+		{
+			libbde_metadata_free(
+			 &( internal_volume->primary_metadata ),
+			 NULL );
+		}
 		memory_free(
 		 internal_volume );
 	}
@@ -158,6 +216,45 @@ int libbde_volume_free(
 		}
 		*volume = NULL;
 
+		if( libbde_metadata_free(
+		     &( internal_volume->primary_metadata ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free primary metadata.",
+			 function );
+
+			result = -1;
+		}
+		if( libbde_metadata_free(
+		     &( internal_volume->secondary_metadata ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free secondary metadata.",
+			 function );
+
+			result = -1;
+		}
+		if( libbde_metadata_free(
+		     &( internal_volume->tertiary_metadata ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free tertiary metadata.",
+			 function );
+
+			result = -1;
+		}
 		if( libbde_io_handle_free(
 		     &( internal_volume->io_handle ),
 		     error ) != 1 )
@@ -817,10 +914,11 @@ int libbde_volume_open_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "Reading BitLocker first metadata:\n" );
+		 "Reading BitLocker primary metadata:\n" );
 	}
 #endif
-	if( libbde_io_handle_read_metadata(
+	if( libbde_metadata_read(
+	     internal_volume->primary_metadata,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->first_metadata_offset,
@@ -830,7 +928,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata.",
+		 "%s: unable to read primary metadata.",
 		 function );
 
 		return( -1 );
@@ -839,10 +937,11 @@ int libbde_volume_open_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "Reading BitLocker second metadata:\n" );
+		 "Reading BitLocker secondary metadata:\n" );
 	}
 #endif
-	if( libbde_io_handle_read_metadata(
+	if( libbde_metadata_read(
+	     internal_volume->secondary_metadata,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->second_metadata_offset,
@@ -852,7 +951,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata.",
+		 "%s: unable to read secondary metadata.",
 		 function );
 
 		return( -1 );
@@ -861,10 +960,11 @@ int libbde_volume_open_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "Reading BitLocker third metadata:\n" );
+		 "Reading BitLocker tertiary metadata:\n" );
 	}
 #endif
-	if( libbde_io_handle_read_metadata(
+	if( libbde_metadata_read(
+	     internal_volume->tertiary_metadata,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->third_metadata_offset,
@@ -874,11 +974,13 @@ int libbde_volume_open_read(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata.",
+		 "%s: unable to read tertiary metadata.",
 		 function );
 
 		return( -1 );
 	}
+/* TODO set up keys ? */
+
 	/* TODO clone function ? */
 	if( libfdata_vector_initialize(
 	     &( internal_volume->sectors_vector ),
@@ -973,7 +1075,7 @@ ssize_t libbde_volume_read_buffer(
 
 		return( -1 );
 	}
-	if( internal_volume->sectors_vector != NULL )
+	if( internal_volume->sectors_vector == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -984,7 +1086,7 @@ ssize_t libbde_volume_read_buffer(
 
 		return( -1 );
 	}
-	if( internal_volume->sectors_cache != NULL )
+	if( internal_volume->sectors_cache == NULL )
 	{
 		liberror_error_set(
 		 error,

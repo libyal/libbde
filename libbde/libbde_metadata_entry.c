@@ -102,7 +102,7 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_metadata_entry_free(
-     libbde_metadata_entry_t **metadata_entry,
+     libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error )
 {
 	static char *function = "libbde_metadata_entry_free";
@@ -118,18 +118,14 @@ int libbde_metadata_entry_free(
 
 		return( -1 );
 	}
-	if( *metadata_entry != NULL )
+	if( metadata_entry->value_data != NULL )
 	{
-		if( ( *metadata_entry )->value_data != NULL )
-		{
-			memory_free(
-			 ( *metadata_entry )->value_data );
-		}
 		memory_free(
-		 *metadata_entry );
-
-		*metadata_entry = NULL;
+		 metadata_entry->value_data );
 	}
+	memory_free(
+	 metadata_entry );
+
 	return( 1 );
 }
 

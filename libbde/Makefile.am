@@ -19,6 +19,7 @@ libbde_la_SOURCES = \
 	libbde.c \
 	libbde_aes.c libbde_aes.h \
 	libbde_aes_ccm_encrypted_key.c libbde_aes_ccm_encrypted_key.h \
+	libbde_array_type.c libbde_array_type.h \
 	libbde_debug.c libbde_debug.h \
 	libbde_definitions.h \
 	libbde_diffuser.c libbde_diffuser.h \
@@ -33,6 +34,7 @@ libbde_la_SOURCES = \
 	libbde_libfvalue.h \
 	libbde_libhmac.h \
 	libbde_libuna.h \
+	libbde_metadata.c libbde_metadata.h \
 	libbde_metadata_entry.c libbde_metadata_entry.h \
 	libbde_notify.c libbde_notify.h \
 	libbde_recovery.c libbde_recovery.h \

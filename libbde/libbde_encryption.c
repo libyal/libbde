@@ -34,12 +34,12 @@
  * Make sure the value encryption context is pointing to is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libbde_encryption_context_initialize(
+int libbde_encryption_initialize(
      libbde_encryption_context_t **context,
      uint8_t method,
      liberror_error_t **error )
 {
-	static char *function = "libbde_encryption_context_initialize";
+	static char *function = "libbde_encryption_initialize";
 
 	if( context == NULL )
 	{
@@ -137,11 +137,11 @@ on_error:
 /* Frees an encryption context
  * Returns 1 if successful or -1 on error
  */
-int libbde_encryption_context_free(
+int libbde_encryption_free(
      libbde_encryption_context_t **context,
      liberror_error_t **error )
 {
-	static char *function = "libbde_encryption_context_free";
+	static char *function = "libbde_encryption_free";
 	int result            = 1;
 
 	if( context == NULL )

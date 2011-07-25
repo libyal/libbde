@@ -524,7 +524,7 @@ int libbde_volume_master_key_read(
 			}
 		}
 		if( libbde_metadata_entry_free(
-		     &property_metadata_entry,
+		     property_metadata_entry,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -774,7 +774,7 @@ on_error:
 	if( property_metadata_entry != NULL )
 	{
 		libbde_metadata_entry_free(
-		 &property_metadata_entry,
+		 property_metadata_entry,
 		 NULL );
 	}
 	return( -1 );
@@ -834,7 +834,7 @@ on_error:
 			}
 		}
 		if( libbde_metadata_entry_free(
-		     &property_metadata_entry,
+		     property_metadata_entry,
 		     error ) != 1 )
 		{
 			liberror_error_set(

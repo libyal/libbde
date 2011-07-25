@@ -27,6 +27,7 @@
 
 #include <liberror.h>
 
+#include "libbde_array_type.h"
 #include "libbde_encryption.h"
 #include "libbde_libbfio.h"
 #include "libbde_libfdata.h"
@@ -117,6 +118,7 @@ int libbde_io_handle_read_metadata(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     libbde_array_t *metadata_entries,
      liberror_error_t **error );
 
 int libbde_io_handle_read_sector(
