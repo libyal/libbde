@@ -31,6 +31,7 @@
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libfdata.h"
+#include "libbde_metadata.h"
 #include "libbde_types.h"
 
 #if defined( __cplusplus )
@@ -44,6 +45,18 @@ struct libbde_internal_volume
 	/* The (volume) size
 	 */
 	size64_t size;
+
+	/* The metadata at the first metadata offset
+	 */
+	libbde_metadata_t *primary_metadata;
+
+	/* The metadata at the second metadata offset
+	 */
+	libbde_metadata_t *secondary_metadata;
+
+	/* The metadata at the third metadata offset
+	 */
+	libbde_metadata_t *tertiary_metadata;
 
 	/* The sectors vector
 	 */

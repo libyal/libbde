@@ -57,7 +57,7 @@ int libbde_metadata_entry_initialize(
      liberror_error_t **error );
 
 int libbde_metadata_entry_free(
-     libbde_metadata_entry_t **metadata_entry,
+     libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error );
 
 ssize_t libbde_metadata_entry_read(
