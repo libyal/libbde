@@ -45,10 +45,6 @@ AC_DEFUN([AC_CHECK_WINAPI],
              ac_cv_enable_winapi=yes],
    [*],[ac_cv_enable_winapi=no])
   ])
-
- AS_IF(
-  [test "x$ac_cv_enable_winapi" = xyes],
-  [ac_cv_enable_wide_character_type=yes])
  ])
 
 dnl Function to detect whether printf conversion specifier "%jd" is available

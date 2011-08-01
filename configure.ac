@@ -58,6 +58,24 @@ COMMON_ARG_WITH(
  [auto-detect],
  [DIR])
 COMMON_ARG_WITH(
+ [libfdata],
+ [libfdata],
+ [search for libfdata in includedir and libdir or in the specified DIR, or no if to use local version],
+ [auto-detect],
+ [DIR])
+COMMON_ARG_WITH(
+ [libfdatetime],
+ [libfdatetime],
+ [search for libfdatetime in includedir and libdir or in the specified DIR, or no if to use local version],
+ [auto-detect],
+ [DIR])
+COMMON_ARG_WITH(
+ [libfguid],
+ [libfguid],
+ [search for libfguid in includedir and libdir or in the specified DIR, or no if to use local version],
+ [auto-detect],
+ [DIR])
+COMMON_ARG_WITH(
  [libfvalue],
  [libfvalue],
  [search for libfvalue in includedir and libdir or in the specified DIR, or no if to use local version],
@@ -459,30 +477,6 @@ AS_IF(
 
 dnl TODO move the open ssl checks here ?
 
-dnl Check if libbde should be build with wide character type support
-AS_IF(
- [test "x$ac_cv_enable_wide_character_type" != xno ],
- [dnl Make the necessary definitions
- AC_DEFINE(
-  [HAVE_WIDE_CHARACTER_TYPE],
-  [1],
-  [Define to 1 if wide character type should be used.])
- AC_SUBST(
-  [HAVE_WIDE_CHARACTER_TYPE],
-  [1])
- ac_cv_enable_wide_character_type=yes],
-
- [AC_SUBST(
-  [HAVE_WIDE_CHARACTER_TYPE],
-  [0])
- AC_SUBST(
-  [HAVE_WCHAR_H],
-  [0]) ])
-
-AC_SUBST(
- [HAVE_WIDE_CHARACTER_SUPPORT_FUNCTIONS],
- [0])
-
 dnl Check if bdetools should be build as static executables
 AS_IF(
  [test "x$ac_cv_enable_static_executables" != xno],
@@ -616,5 +610,4 @@ Features:
    Verbose output:                           $ac_cv_enable_verbose_output
    Debug output:                             $ac_cv_enable_debug_output
 ]);
-
 

@@ -447,8 +447,8 @@ int libbde_aes_free(
 	/* No additional clean up necessary */
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-		EVP_CIPHER_CTX_cleanup(
-		 &( ( *context )->evp_context ) );
+	EVP_CIPHER_CTX_cleanup(
+	 &( ( *context )->evp_context ) );
 
 #else
 	/* No additional clean up necessary */
@@ -833,11 +833,18 @@ int libbde_aes_cbc_crypt(
      size_t output_data_size,
      liberror_error_t **error )
 {
-	static char *function = "libbde_aes_cbc_crypt";
+	static char *function     = "libbde_aes_cbc_crypt";
+
+#if defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
+	uint8_t trash_data[ 16 ];
+
+	const EVP_CIPHER *cipher  = NULL;
+	int safe_output_data_size = 0;
+#endif
 
 #if !defined( WINAPI ) && !( defined( HAVE_LIBCRYPTO ) && ( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) ) )
-	size_t data_index     = 0;
-	uint8_t block_index   = 0;
+	size_t data_index         = 0;
+	uint8_t block_index       = 0;
 #endif
 
 	if( ( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
@@ -911,9 +918,150 @@ int libbde_aes_cbc_crypt(
 /* TODO */
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-/* TODO */
+	AES_cbc_encrypt(
+	 (unsigned char *) input_data,
+	 (unsigned char *) output_data,
+	 input_data_size,
+	 &( context->key ),
+	 (unsigned char *) initialization_vector,
+	 mode );
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+	if( input_data_size > (size_t) INT_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data_size > (size_t) INT_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	safe_output_data_size = (int) output_data_size;
+
+	if( context->bit_size == 128 )
+	{
+		cipher = EVP_aes_128_cbc();
+	}
+	else if( context->bit_size == 192 )
+	{
+		cipher = EVP_aes_192_cbc();
+	}
+	else if( context->bit_size == 256 )
+	{
+		cipher = EVP_aes_256_cbc();
+	}
+	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+	{
+		if( EVP_EncryptInit(
+		     &( context->evp_context ),
+		     cipher,
+		     (unsigned char *) context->key,
+		     NULL ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to initialize encryption.",
+			 function );
+
+			return( -1 );
+		}
+		if( EVP_EncryptUpdate(
+		     &( context->evp_context ),
+		     (unsigned char *) output_data,
+		     &safe_output_data_size,
+		     (unsigned char *) input_data,
+		     16 ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to update encryption.",
+			 function );
+
+			return( -1 );
+		}
+/* TODO add check: safe_output_data_size == 16 */
+		if( EVP_EncryptFinal(
+		     &( context->evp_context ),
+		     (unsigned char *) trash_data,
+		     &safe_output_data_size ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to finalize encryption.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	else
+	{
+		if( EVP_DecryptInit(
+		     &( context->evp_context ),
+		     cipher,
+		     (unsigned char *) context->key,
+		     NULL ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to initialize decryption.",
+			 function );
+
+			return( -1 );
+		}
+		if( EVP_DecryptUpdate(
+		     &( context->evp_context ),
+		     (unsigned char *) output_data,
+		     &safe_output_data_size,
+		     (unsigned char *) input_data,
+		     16 ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to update decryption.",
+			 function );
+
+			return( -1 );
+		}
+/* TODO add check: safe_output_data_size == 16 */
+/* TODO test this */
+		if( EVP_DecryptFinal(
+		     &( context->evp_context ),
+		     (unsigned char *) trash_data,
+		     &safe_output_data_size ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to finalize decryption.",
+			 function );
+
+			return( -1 );
+		}
+	}
 /* TODO */
 
 #else
@@ -1434,8 +1582,8 @@ int libbde_aes_ecb_crypt(
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 	AES_ecb_encrypt(
-	 input_data,
-	 output_data,
+	 (unsigned char *) input_data,
+	 (unsigned char *) output_data,
 	 &( context->key ),
 	 mode );
 

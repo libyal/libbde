@@ -294,7 +294,7 @@ int libbde_io_handle_read_volume_header(
 
 		goto on_error;
 	}
-	byte_stream_copy_to_uint64_little_endian(
+	byte_stream_copy_to_uint16_little_endian(
 	 ( (bde_volume_header_v1_t *) volume_header_data )->bytes_per_sector,
 	 io_handle->bytes_per_sector );
 
