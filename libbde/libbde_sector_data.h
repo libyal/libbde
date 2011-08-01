@@ -28,6 +28,7 @@
 #include <liberror.h>
 
 #include "libbde_encryption.h"
+#include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 
 #if defined( __cplusplus )
@@ -62,6 +63,7 @@ int libbde_sector_data_free(
 
 int libbde_sector_data_read(
      libbde_sector_data_t *sector_data,
+     libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t sector_offset,
      libbde_encryption_context_t *encryption_context,

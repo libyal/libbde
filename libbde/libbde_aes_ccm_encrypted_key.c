@@ -148,7 +148,7 @@ int libbde_aes_ccm_encrypted_key_read(
 	size_t value_data_size            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t filetime_string[ 24 ];
+	libcstring_system_character_t filetime_string[ 32 ];
 
 	libfdatetime_filetime_t *filetime = NULL;
 	uint32_t value_32bit              = 0;
@@ -239,16 +239,16 @@ int libbde_aes_ccm_encrypted_key_read(
 		result = libfdatetime_filetime_copy_to_utf16_string(
 			  filetime,
 			  (uint16_t *) filetime_string,
-			  24,
-			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  32,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_MICRO_SECONDS,
 			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
 			  error );
 #else
 		result = libfdatetime_filetime_copy_to_utf8_string(
 			  filetime,
 			  (uint8_t *) filetime_string,
-			  24,
-			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  32,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_MICRO_SECONDS,
 			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
 			  error );
 #endif

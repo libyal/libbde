@@ -246,6 +246,31 @@ ssize_t libbde_volume_read_random(
          off64_t offset,
          libbde_error_t **error );
 
+#ifdef TODO
+
+/* Writes (media) data at the current offset
+ * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
+ */
+LIBBDE_EXTERN \
+ssize_t libbde_volume_write_buffer(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         libbde_error_t **error );
+
+/* Writes (media) data at a specific offset,
+ * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
+ */
+LIBBDE_EXTERN \
+ssize_t libbde_volume_write_random(
+         libbde_volume_t *volume,
+         const void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libbde_error_t **error );
+
+#endif
+
 /* Seeks a certain offset of the data
  * Returns the offset if seek is successful or -1 on error
  */

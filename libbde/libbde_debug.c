@@ -39,16 +39,16 @@ const char *libbde_debug_print_encryption_method(
 {
 	switch( encryption_method )
 	{
-		case LIBBDE_ENCRYPTION_METHOD_AES_CBC_128:
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC:
 			return( "AES-CBC 128-bit encryption" );
 
-		case LIBBDE_ENCRYPTION_METHOD_AES_CBC_128_DIFFUSER:
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
 			return( "AES-CBC 128-bit encryption with diffuser" );
 
-		case LIBBDE_ENCRYPTION_METHOD_AES_CBC_256:
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC:
 			return( "AES-CBC 256-bit encryption" );
 
-		case LIBBDE_ENCRYPTION_METHOD_AES_CBC_256_DIFFUSER:
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER:
 			return( "AES-CBC 256-bit encryption with diffuser" );
 	}
 	return( "_UNKNOWN_" );

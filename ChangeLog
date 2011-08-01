@@ -1,12 +1,11 @@
 TODO
+* copy volume header code from libfsntfs
 * read metadata with out decrypting ?
 * downsize IV fo 20 to 16 bytes
 * fix diffuser
-* get bytes per sector from volume header ?
 * start up key support ?
 * FKEV and TWEAK keys ?
 
-* add microseconds to filetime output
 * add libfdata vector for reading blocks
   - determine volume key for decrypting sectors
 * put volume metadata into structures
@@ -23,6 +22,10 @@ TODO
   - print value type description string
 * bdeinfo
   - pass recovery password as commandline argument
+
+20110722
+* added bytes per sector support in volume header
+* added microseconds to filetime output
 
 20110721
 * worked on encryption

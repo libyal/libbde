@@ -932,6 +932,382 @@ int libbde_volume_open_read(
 	return( 1 );
 }
 
+/* Reads data at the current offset into a buffer
+ * Returns the number of bytes read or -1 on error
+ */
+ssize_t libbde_volume_read_buffer(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         liberror_error_t **error )
+{
+	libbde_sector_data_t *sector_data         = NULL;
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_read_buffer";
+	size_t buffer_offset                      = 0;
+	size_t read_size                          = 0;
+	size_t sector_data_offset                 = 0;
+	ssize_t total_read_count                  = 0;
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->sectors_vector != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid internal file - missing sectors vector.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->sectors_cache != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid internal file - missing sectors cache.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->io_handle->current_offset < 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid internal volume - invalid IO handle - current offset value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( buffer == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid buffer.",
+		 function );
+
+		return( -1 );
+	}
+	if( buffer_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid buffer size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->size )
+	{
+		return( 0 );
+	}
+	if( (size64_t) ( internal_volume->io_handle->current_offset + buffer_size ) >= internal_volume->size )
+	{
+		buffer_size = (size_t) ( internal_volume->size - internal_volume->io_handle->current_offset );
+	}
+	sector_data_offset = (size_t) ( internal_volume->io_handle->current_offset % internal_volume->io_handle->bytes_per_sector );
+
+	while( buffer_size > 0 )
+	{
+		if( libfdata_vector_get_element_value_at_offset(
+		     internal_volume->sectors_vector,
+		     internal_volume->file_io_handle,
+		     internal_volume->sectors_cache,
+		     internal_volume->io_handle->current_offset,
+		     (intptr_t **) &sector_data,
+		     0,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve sector data at offset: %" PRIi64 ".",
+			 function,
+			 internal_volume->io_handle->current_offset );
+
+			return( -1 );
+		}
+		if( sector_data == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing sector data at offset: %" PRIi64 ".",
+			 function,
+			 internal_volume->io_handle->current_offset );
+
+			return( -1 );
+		}
+		read_size = sector_data->data_size - sector_data_offset;
+
+		if( read_size > buffer_size )
+		{
+			read_size = buffer_size;
+		}
+		if( read_size == 0 )
+		{
+			break;
+		}
+		if( memory_copy(
+		     &( ( (uint8_t *) buffer )[ buffer_offset ] ),
+		     &( ( sector_data->data )[ sector_data_offset ] ),
+		     read_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy sector data to buffer.",
+			 function );
+
+			return( -1 );
+		}
+		buffer_offset     += read_size;
+		buffer_size       -= read_size;
+		total_read_count  += (ssize_t) read_size;
+		sector_data_offset = 0;
+
+		internal_volume->io_handle->current_offset += (off64_t) read_size;
+
+		if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->size )
+		{
+			break;
+		}
+		if( internal_volume->io_handle->abort != 0 )
+		{
+			break;
+		}
+	}
+	return( total_read_count );
+}
+
+/* Reads (media) data at a specific offset
+ * Returns the number of bytes read or -1 on error
+ */
+ssize_t libbde_volume_read_random(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         liberror_error_t **error )
+{
+	static char *function = "libbde_volume_read_random";
+	ssize_t read_count    = 0;
+
+	if( libbde_volume_seek_offset(
+	     volume,
+	     offset,
+	     SEEK_SET,
+	     error ) == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek offset.",
+		 function );
+
+		return( -1 );
+	}
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              buffer,
+	              buffer_size,
+	              error );
+
+	if( read_count < 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read buffer.",
+		 function );
+
+		return( -1 );
+	}
+	return( read_count );
+}
+
+#ifdef TODO
+
+/* Writes (media) data at the current offset
+ * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
+ */
+ssize_t libbde_volume_write_buffer(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         liberror_error_t **error )
+{
+	return( -1 );
+}
+
+/* Writes (media) data at a specific offset,
+ * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
+ */
+ssize_t libbde_volume_write_random(
+         libbde_volume_t *volume,
+         const void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         liberror_error_t **error )
+{
+	static char *function = "libbde_volume_write_random";
+	ssize_t write_count   = 0;
+
+	if( libbde_volume_seek_offset(
+	     volume,
+	     offset,
+	     SEEK_SET,
+	     error ) == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek offset.",
+		 function );
+
+		return( -1 );
+	}
+	write_count = libbde_volume_write_buffer(
+	               volume,
+	               buffer,
+	               buffer_size,
+	               error );
+
+	if( write_count < 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_WRITE_FAILED,
+		 "%s: unable to write buffer.",
+		 function );
+
+		return( -1 );
+	}
+	return( write_count );
+}
+
+#endif
+
+/* Seeks a certain offset of the data
+ * Returns the offset if seek is successful or -1 on error
+ */
+off64_t libbde_volume_seek_offset(
+         libbde_volume_t *volume,
+         off64_t offset,
+         int whence,
+         liberror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_seek_offset";
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( whence != SEEK_CUR )
+	 && ( whence != SEEK_END )
+	 && ( whence != SEEK_SET ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported whence.",
+		 function );
+
+		return( -1 );
+	}
+	if( whence == SEEK_CUR )
+	{	
+		offset += internal_volume->io_handle->current_offset;
+	}
+	else if( whence == SEEK_END )
+	{	
+		offset += (off64_t) internal_volume->size;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: seeking media data offset: %" PRIi64 ".\n",
+		 function,
+		 offset );
+	}
+#endif
+	if( offset < 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid offset value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume->io_handle->current_offset = offset;
+
+	return( offset );
+}
+
 /* Retrieves the size
  * Returns 1 if successful or -1 on error
  */

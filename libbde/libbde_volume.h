@@ -114,6 +114,45 @@ int libbde_volume_open_read(
      liberror_error_t **error );
 
 LIBBDE_EXTERN \
+ssize_t libbde_volume_read_buffer(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         liberror_error_t **error );
+
+LIBBDE_EXTERN \
+ssize_t libbde_volume_read_random(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         liberror_error_t **error );
+
+#ifdef TODO
+LIBBDE_EXTERN \
+ssize_t libbde_volume_write_buffer(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         liberror_error_t **error );
+
+LIBBDE_EXTERN \
+ssize_t libbde_volume_write_random(
+         libbde_volume_t *volume,
+         const void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         liberror_error_t **error );
+#endif
+
+LIBBDE_EXTERN \
+off64_t libbde_volume_seek_offset(
+         libbde_volume_t *volume,
+         off64_t offset,
+         int whence,
+         liberror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_get_size(
      libbde_volume_t *volume,
      size64_t *size,
