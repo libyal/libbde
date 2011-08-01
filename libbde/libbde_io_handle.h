@@ -41,13 +41,17 @@ typedef struct libbde_io_handle libbde_io_handle_t;
 
 struct libbde_io_handle
 {
+	/* The current (storage media) offset
+	 */
+	off64_t current_offset;
+
 	/* The format version
 	 */
 	int version;
 
-	/* The sector size
+	/* The bytes per sector
 	 */
-	size_t sector_size;
+	uint16_t bytes_per_sector;
 
 	/* The first metadata offset
 	 */
@@ -60,6 +64,19 @@ struct libbde_io_handle
 	/* The third metadata offset
 	 */
 	off64_t third_metadata_offset;
+
+	union
+	{
+		/* The MFT mirror cluster block number
+		 * Used by Windows Vista (version 1)
+		 */
+		uint64_t mft_mirror_cluster_block_number;
+
+		/* The volume header offset
+		 * Used by Windows 7 (version 2)
+		 */
+		off64_t volume_header_offset;
+	};
 
 	/* The encryption method
 	 */

@@ -104,7 +104,6 @@ int libbde_io_handle_initialize(
 			return( -1 );
 		}
 /* TODO init encryption context */
-		( *io_handle )->sector_size = 512;
 	}
 	return( 1 );
 
@@ -289,6 +288,10 @@ int libbde_io_handle_read_volume_header(
 
 		goto on_error;
 	}
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (bde_volume_header_v1_t *) volume_header_data )->bytes_per_sector,
+	 io_handle->bytes_per_sector );
+
 	if( io_handle->version == 1 )
 	{
 		byte_stream_copy_to_uint64_little_endian(
@@ -331,23 +334,28 @@ int libbde_io_handle_read_volume_header(
 		 volume_header_data[ 9 ],
 		 volume_header_data[ 10 ] );
 
+		libnotify_printf(
+		 "%s: bytes per sector\t\t\t: %" PRIu16 "\n",
+		 function,
+		 io_handle->bytes_per_sector );
+
 		if( io_handle->version == 1 )
 		{
 			libnotify_printf(
-			 "%s: unknown2:\n",
+			 "%s: unknown1:\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_volume_header_v1_t *) volume_header_data )->unknown2,
-			 45 );
+			 ( (bde_volume_header_v1_t *) volume_header_data )->unknown1,
+			 43 );
 		}
 		else if( io_handle->version == 2 )
 		{
 			libnotify_printf(
-			 "%s: unknown2:\n",
+			 "%s: unknown1:\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_volume_header_v2_t *) volume_header_data )->unknown2,
-			 149 );
+			 ( (bde_volume_header_v2_t *) volume_header_data )->unknown1,
+			 147 );
 
 			if( libfguid_identifier_initialize(
 			     &guid,
@@ -488,7 +496,7 @@ int libbde_io_handle_read_metadata(
 	uint32_t version                              = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t filetime_string[ 24 ];
+	libcstring_system_character_t filetime_string[ 32 ];
 	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
 
 	libfdatetime_filetime_t *filetime             = NULL;
@@ -610,6 +618,18 @@ int libbde_io_handle_read_metadata(
 
 		goto on_error;
 	}
+	if( version == 1 )
+	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->mft_mirror_cluster_block,
+		 io_handle->mft_mirror_cluster_block_number );
+	}
+	else if( version == 2 )
+	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_header_offset,
+		 io_handle->volume_header_offset );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -715,23 +735,17 @@ int libbde_io_handle_read_metadata(
 
 		if( version == 1 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (bde_metadata_block_header_v1_t *) fve_metadata )->mft_mirror_cluster_block,
-			 value_64bit );
 			libnotify_printf(
 			 "%s: MFT mirror cluster block\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 value_64bit );
+			 io_handle->mft_mirror_cluster_block_number );
 		}
 		else if( version == 2 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_header_offset,
-			 value_64bit );
 			libnotify_printf(
 			 "%s: volume header offset\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 value_64bit );
+			 io_handle->volume_header_offset );
 		}
 		libnotify_printf(
 		 "\n" );
@@ -925,16 +939,16 @@ int libbde_io_handle_read_metadata(
 		result = libfdatetime_filetime_copy_to_utf16_string(
 			  filetime,
 			  (uint16_t *) filetime_string,
-			  24,
-			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  32,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_MICRO_SECONDS,
 			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
 			  error );
 #else
 		result = libfdatetime_filetime_copy_to_utf8_string(
 			  filetime,
 			  (uint8_t *) filetime_string,
-			  24,
-			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME,
+			  32,
+			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_MICRO_SECONDS,
 			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
 			  error );
 #endif
@@ -1285,7 +1299,7 @@ int libbde_io_handle_read_sector(
 /* TODO handle virtual sectors, what about different sector sizes? */
 	if( libbde_sector_data_initialize(
 	     &sector_data,
-	     ( (libbde_io_handle_t *) io_handle )->sector_size,
+	     (size_t) ( (libbde_io_handle_t *) io_handle )->bytes_per_sector,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -1299,6 +1313,7 @@ int libbde_io_handle_read_sector(
 	}
 	if( libbde_sector_data_read(
 	     sector_data,
+	     (libbde_io_handle_t *) io_handle,
 	     file_io_handle,
 	     element_data_offset,
 	     ( (libbde_io_handle_t *) io_handle )->encryption_context,

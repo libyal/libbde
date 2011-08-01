@@ -44,10 +44,15 @@ struct bde_volume_header_v1
 	 */
 	uint8_t signature[ 8 ];
 
-	/* Unknown
-	 * Consists of 45 bytes
+	/* The number of bytes per sector
+	 * Consists of 2 bytes
 	 */
-	uint8_t unknown2[ 45 ];
+	uint8_t bytes_per_sector[ 2 ];
+
+	/* Unknown
+	 * Consists of 43 bytes
+	 */
+	uint8_t unknown1[ 43 ];
 
 	/* The first FVE metadata offset
 	 * Consists of 8 bytes
@@ -70,10 +75,15 @@ struct bde_volume_header_v2
 	 */
 	uint8_t signature[ 8 ];
 
-	/* Unknown
-	 * Consists of 149 bytes
+	/* The number of bytes per sector
+	 * Consists of 2 bytes
 	 */
-	uint8_t unknown2[ 149 ];
+	uint8_t bytes_per_sector[ 2 ];
+
+	/* Unknown
+	 * Consists of 147 bytes
+	 */
+	uint8_t unknown1[ 147 ];
 
 	/* The bitlocker identifier
 	 * Consists of 16 bytes
