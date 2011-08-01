@@ -114,13 +114,6 @@ int libbde_io_handle_read_volume_header(
      off64_t file_offset,
      liberror_error_t **error );
 
-int libbde_io_handle_read_metadata(
-     libbde_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     libbde_array_t *metadata_entries,
-     liberror_error_t **error );
-
 int libbde_io_handle_read_sector(
      intptr_t *io_handle,
      libbfio_handle_t *file_io_handle,

@@ -28,8 +28,9 @@
 #include <liberror.h>
 
 #include "libbde_array_type.h"
-#include "libbde_libbfio.h"
 #include "libbde_io_handle.h"
+#include "libbde_libbfio.h"
+#include "libbde_volume_master_key.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -69,6 +70,14 @@ struct libbde_metadata
 	 */
 	uint64_t creation_time;
 
+	/* The disk password protected volume master key
+	 */
+	libbde_volume_master_key_t *disk_password_volume_master_key;
+
+	/* The external key protected volume master key
+	 */
+	libbde_volume_master_key_t *external_key_volume_master_key;
+
 	/* The metadata entries array
 	 */
 	libbde_array_t *entries_array;
@@ -87,6 +96,12 @@ int libbde_metadata_read(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     liberror_error_t **error );
+
+int libbde_metadata_get_volume_master_key(
+     libbde_metadata_t *metadata,
+     libbde_io_handle_t *io_handle,
+     uint8_t key[ 32 ],
      liberror_error_t **error );
 
 #if defined( __cplusplus )

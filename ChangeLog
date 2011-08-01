@@ -1,4 +1,10 @@
 TODO
+* the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
+  - make sure to handle them correctly
+  - do empty block test, do not decrypt empty blocks, cheaper than decryption
+
+* stretch key
+  - add aes ccm encrypted key to struct
 * copy volume header code from libfsntfs ?
 * downsize IV fo 20 to 16 bytes
 * fix diffuser
@@ -15,6 +21,11 @@ TODO
   - print value type description string
 * bdeinfo
   - pass recovery password as commandline argument
+
+20110801
+* configure clean up
+* updated libhmac
+* worked on reading sector data
 
 20110722
 * added bytes per sector support in volume header

@@ -239,6 +239,28 @@ struct bde_metadata_entry_aes_ccm_encrypted_data
 	uint8_t nonce_counter[ 4 ];
 };
 
+typedef struct bde_metadata_entry_volume_master_key_header bde_metadata_entry_volume_master_key_header_t;
+
+struct bde_metadata_entry_volume_master_key_header
+{
+	/* The identfier
+	 * Consists of 16 bytes
+	 * Contains a GUID
+	 */
+	uint8_t identifier[ 16 ];
+
+	/* The unknown date and time
+	 * Consists of 8 bytes
+	 * Contains a filetime
+	 */
+	uint8_t unknown_time[ 8 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown1[ 4 ];
+};
+
 #if defined( __cplusplus )
 }
 #endif

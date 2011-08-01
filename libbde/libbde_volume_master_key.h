@@ -27,8 +27,9 @@
 
 #include <liberror.h>
 
-#include "libbde_io_handle.h"
+#include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_metadata_entry.h"
+#include "libbde_stretch_key.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -38,9 +39,26 @@ typedef struct libbde_volume_master_key libbde_volume_master_key_t;
 
 struct libbde_volume_master_key
 {
-	/* The value data size
+	/* The identifier
+	 * Contains a GUID
 	 */
-	uint16_t value_data_size;
+	uint8_t identifier[ 16 ];
+
+	/* The string metadata entry
+	 */
+	libbde_metadata_entry_t *string_entry;
+
+	/* The stretch key
+	 */
+	libbde_stretch_key_t *stretch_key;
+
+	/* The AES-CCM encrypted key
+	 */
+	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key;
+
+	/* The metadata entries array
+	 */
+	libbde_array_t *entries_array;
 };
 
 int libbde_volume_master_key_initialize(
@@ -53,8 +71,15 @@ int libbde_volume_master_key_free(
 
 int libbde_volume_master_key_read(
      libbde_volume_master_key_t *volume_master_key,
-     libbde_io_handle_t *io_handle,
      libbde_metadata_entry_t *metadata_entry,
+     liberror_error_t **error );
+
+int libbde_volume_master_key_is_disk_password_protected(
+     libbde_volume_master_key_t *volume_master_key,
+     liberror_error_t **error );
+
+int libbde_volume_master_key_is_external_key_protected(
+     libbde_volume_master_key_t *volume_master_key,
      liberror_error_t **error );
 
 #if defined( __cplusplus )
