@@ -26,6 +26,7 @@ TODO
 * configure clean up
 * updated libhmac
 * worked on reading sector data
+* worked on AES functions
 
 20110722
 * added bytes per sector support in volume header
@@ -56,21 +57,17 @@ TODO
 * replaced libbde_sha.[ch] by libhmac
 
 20110624
-* worked on initial version
-  - SHA fallback
+* worked on SHA256 functions
 
 20110623
-* worked on initial version
-  - AES fallback
-  - SHA fallback
+* worked on AES functions
+* worked on SHA256 functions
 
 20110622
-* worked on initial version
-  - AES fallback
+* worked on AES functions
 
 20110620
-* worked on initial version
-  - AES fallback
+* worked on AES functions
 
 20110619
 * worked on initial version

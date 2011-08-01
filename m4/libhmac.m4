@@ -2,19 +2,34 @@ dnl Functions for libhmac
 
 dnl Function to detect if libhmac is available
 AC_DEFUN([AC_CHECK_LIBHMAC],
- [AC_CHECK_HEADERS([libhmac.h])
+ [dnl Check if parameters were provided
+ AS_IF(
+  [test x"$ac_cv_with_libhmac" != x && test "x$ac_cv_with_libhmac" != xno && test "x$ac_cv_with_libhmac" != xauto-detect],
+  [AS_IF(
+   [test -d "$ac_cv_with_libhmac"],
+   [CFLAGS="$CFLAGS -I${ac_cv_with_libhmac}/include"
+   LDFLAGS="$LDFLAGS -L${ac_cv_with_libhmac}/lib"],
+   [AC_MSG_WARN([no such directory: $ac_cv_with_libhmac])
+   ])
+  ])
 
  AS_IF(
-  [test "x$ac_cv_header_libhmac_h" = xno],
-  [ac_cv_libhmac=no],
-  [ac_cv_libhmac=yes
-  AC_CHECK_LIB(
-   hmac,
-   libhmac_get_version,
-   [],
-   [ac_cv_libhmac=no])
+  [test x"$ac_cv_with_libhmac" != xno],
+  [dnl Check for headers
+  AC_CHECK_HEADERS([libhmac.h])
 
-   dnl TODO check if all LIBHMAC functions are available
+  AS_IF(
+   [test "x$ac_cv_header_libhmac_h" = xno],
+   [ac_cv_libhmac=no],
+   [ac_cv_libhmac=yes
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_get_version,
+    [],
+    [ac_cv_libhmac=no])
+
+    dnl TODO check if all LIBHMAC functions are available
+   ])
   ])
 
  AS_IF(
@@ -249,7 +264,19 @@ AC_DEFUN([AC_CHECK_LOCAL_LIBHMAC_OPENSSL_SHA256],
  
 dnl Function to detect if libhmac dependencies are available
 AC_DEFUN([AC_CHECK_LOCAL_LIBHMAC],
- [ac_cv_libhmac_md5=no
+ [dnl Check if parameters were provided 
+ AS_IF(
+  [test x"$ac_cv_with_openssl" != x && test "x$ac_cv_with_openssl" != xno && test "x$ac_cv_with_openssl" != xauto-detect],
+  [AS_IF(
+   [test -d "$ac_cv_with_openssl"],
+   [CFLAGS="$CFLAGS -I${ac_cv_with_openssl}/include"
+   LDFLAGS="$LDFLAGS -L${ac_cv_with_openssl}/lib"],
+   [AC_MSG_WARN([no such directory: $ac_cv_with_openssl])
+   ])
+  ])
+
+ ac_cv_libcrypto=no 
+ ac_cv_libhmac_md5=no
  ac_cv_libhmac_sha1=no
  ac_cv_libhmac_sha256=no
 
@@ -257,7 +284,7 @@ AC_DEFUN([AC_CHECK_LOCAL_LIBHMAC],
  AS_IF(
   [test "x$ac_cv_enable_winapi" = xyes],
   [AC_CHECK_LOCAL_LIBHMAC_WINCRYPT])
- 
+
  dnl Check for libcrypto (openssl) support
  AS_IF(
   [test "x$ac_cv_with_openssl" != xno],
