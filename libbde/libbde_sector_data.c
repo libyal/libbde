@@ -329,48 +329,46 @@ int libbde_sector_data_read(
 		 sector_data->data_size );
 	}
 #endif
-	if( sector_data_offset == 0 )
+	if( ( sector_data_offset == io_handle->volume_header_offset )
+	 && ( io_handle->version == 1 ) )
 	{
-		if( io_handle->version == 1 )
+		if( memory_copy(
+		     sector_data->data,
+		     sector_data->encrypted_data,
+		     sector_data->data_size ) == NULL )
 		{
-			if( memory_copy(
-			     sector_data->data,
-			     sector_data->encrypted_data,
-			     sector_data->data_size ) == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy encrypted data.",
-				 function );
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy encrypted data.",
+			 function );
 
-				return( -1 );
-			}
-			/* Change the volume header signature "-FVE-FS-"
-			 * into "NTFS    "
-			 */
-			if( memory_copy(
-			     &( sector_data->data[ 3 ] ),
-			     "NTFS    ",
-			     8 ) == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy encrypted data.",
-				 function );
-
-				return( -1 );
-			}
-			/* Change the FVE metadatsa block 1 cluster block number
-			 * into the MFT mirror cluster block number
-			 */
-			byte_stream_copy_from_uint64_little_endian(
-			 &( sector_data->data[ 56 ] ),
-			 io_handle->mft_mirror_cluster_block_number );
+			return( -1 );
 		}
+		/* Change the volume header signature "-FVE-FS-"
+		 * into "NTFS    "
+		 */
+		if( memory_copy(
+		     &( sector_data->data[ 3 ] ),
+		     "NTFS    ",
+		     8 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy encrypted data.",
+			 function );
+
+			return( -1 );
+		}
+		/* Change the FVE metadatsa block 1 cluster block number
+		 * into the MFT mirror cluster block number
+		 */
+		byte_stream_copy_from_uint64_little_endian(
+		 &( sector_data->data[ 56 ] ),
+		 io_handle->mft_mirror_cluster_block_number );
 	}
 	else
 	{

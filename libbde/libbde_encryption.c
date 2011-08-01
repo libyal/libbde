@@ -36,7 +36,7 @@
  */
 int libbde_encryption_initialize(
      libbde_encryption_context_t **context,
-     uint8_t method,
+     uint32_t method,
      liberror_error_t **error )
 {
 	static char *function = "libbde_encryption_initialize";

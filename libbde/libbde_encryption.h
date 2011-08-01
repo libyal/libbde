@@ -45,7 +45,7 @@ struct libbde_encryption_context
 {
 	/* The encryption method
 	 */
-	uint8_t method;
+	uint32_t method;
 
 	/* The volume (AES) decryption context
 	 */
@@ -58,14 +58,14 @@ struct libbde_encryption_context
 
 int libbde_encryption_initialize(
      libbde_encryption_context_t **context,
-     uint8_t method,
+     uint32_t method,
      liberror_error_t **error );
 
 int libbde_encryption_free(
      libbde_encryption_context_t **context,
      liberror_error_t **error );
 
-int libbde_encryption_set_key(
+int libbde_encryption_set_volume_key(
      libbde_encryption_context_t *context,
      const uint8_t *key,
      size_t bit_size,
