@@ -379,6 +379,7 @@ int libbde_sector_data_read(
 		     sector_data->data_size,
 		     sector_data->data,
 		     sector_data->data_size,
+		     (uint64_t) sector_data_offset,
 		     error ) != 1 )
 		{
 			liberror_error_set(

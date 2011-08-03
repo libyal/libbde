@@ -28,18 +28,16 @@
 
 #include "libbde_diffuser.h"
 
-/* De- or encrypts a block of data using diffuser A
+/* Applies Diffuser-A to data
  * Returns 1 if successful or -1 on error
  */
-int libbde_diffuser_a_crypt(
-     const uint8_t *input_data,
-     size_t input_data_size,
-     uint8_t *output_data,
-     size_t output_data_size,
+int libbde_diffuser_a(
+     uint8_t *data,
+     size_t data_size,
      liberror_error_t **error )
 {
 	uint32_t *values_32bit        = NULL;
-	static char *function         = "libbde_diffuser_a_crypt";
+	static char *function         = "libbde_diffuser_a";
 	size_t data_index             = 0;
 	size_t number_of_iterations   = 0;
 	size_t number_of_values_32bit = 0;
@@ -47,82 +45,61 @@ int libbde_diffuser_a_crypt(
 	size_t value_32bit_index2     = 0;
 	size_t value_32bit_index3     = 0;
 
-	if( input_data == NULL )
+	if( data == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid input data.",
+		 "%s: invalid data.",
 		 function );
 
 		return( -1 );
 	}
-	if( input_data_size > (size_t) SSIZE_MAX )
+	if( data_size > (size_t) SSIZE_MAX )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid input data size value exceeds maximum.",
+		 "%s: invalid data size value exceeds maximum.",
 		 function );
 
 		return( -1 );
 	}
-	if( output_data == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid output data.",
-		 function );
-
-		return( -1 );
-	}
-	if( output_data_size > (size_t) SSIZE_MAX )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid output data size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-	if( output_data_size < input_data_size )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid ouput data size smaller than input data size.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( input_data_size % 4 ) != 0 )
+	if( ( data_size % 4 ) != 0 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported input data size - not a multitude of 4.",
+		 "%s: unsupported data size - not a multitude of 4.",
 		 function );
 
 		return( -1 );
 	}
-	number_of_values_32bit = input_data_size / 4;
+	number_of_values_32bit = data_size / 4;
 
-	values_32bit = (uint32_t *) output_data;
+	values_32bit = (uint32_t *) memory_allocate(
+	                             data_size );
 
+	if( values_32bit == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
 	for( value_32bit_index1 = 0;
 	     value_32bit_index1 < number_of_values_32bit;
 	     value_32bit_index1++ )
 	{
 		byte_stream_copy_to_uint32_little_endian(
-		 &( input_data[ data_index ] ),
+		 &( data[ data_index ] ),
 		 values_32bit[ value_32bit_index1 ] );
 
 		data_index += sizeof( uint32_t );
@@ -133,62 +110,72 @@ int libbde_diffuser_a_crypt(
 	{
 		value_32bit_index1 = 0;
 
-/* TODO test first then refactor out most of the modulus calculus */
 		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
 		{
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ byte_stream_bit_rotate_left_32bit(
-			                                      output_data[ value_32bit_index3 ],
-			                                      9 );
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ byte_stream_bit_rotate_left_32bit(
+			                                       values_32bit[ value_32bit_index3 ],
+			                                       9 );
 
 			value_32bit_index1++;
 
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ output_data[ value_32bit_index3 ];
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
 
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ byte_stream_bit_rotate_left_32bit(
-			                                      output_data[ value_32bit_index3 ],
-			                                      13 );
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ byte_stream_bit_rotate_left_32bit(
+			                                       values_32bit[ value_32bit_index3 ],
+			                                       13 );
 
 			value_32bit_index1++;
 
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ output_data[ value_32bit_index3 ];
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
 		}
 		number_of_iterations--;
 	}
+	for( value_32bit_index1 = 0;
+	     value_32bit_index1 < number_of_values_32bit;
+	     value_32bit_index1++ )
+	{
+		byte_stream_copy_from_uint32_little_endian(
+		 &( data[ data_index ] ),
+		 values_32bit[ value_32bit_index1 ] );
+
+		data_index += sizeof( uint32_t );
+	}
+	memory_free(
+	 values_32bit );
+
 	return( 1 );
 }
 
-/* De- or encrypts a block of data using diffuser B
+/* Applies Diffuser-B to data
  * Returns 1 if successful or -1 on error
  */
-int libbde_diffuser_b_crypt(
-     const uint8_t *input_data,
-     size_t input_data_size,
-     uint8_t *output_data,
-     size_t output_data_size,
+int libbde_diffuser_b(
+     uint8_t *data,
+     size_t data_size,
      liberror_error_t **error )
 {
 	uint32_t *values_32bit        = NULL;
-	static char *function         = "libbde_diffuser_b_crypt";
+	static char *function         = "libbde_diffuser_b";
 	size_t data_index             = 0;
 	size_t number_of_iterations   = 0;
 	size_t number_of_values_32bit = 0;
@@ -196,83 +183,61 @@ int libbde_diffuser_b_crypt(
 	size_t value_32bit_index2     = 0;
 	size_t value_32bit_index3     = 0;
 
-
-	if( input_data == NULL )
+	if( data == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid input data.",
+		 "%s: invalid data.",
 		 function );
 
 		return( -1 );
 	}
-	if( input_data_size > (size_t) SSIZE_MAX )
+	if( data_size > (size_t) SSIZE_MAX )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid input data size value exceeds maximum.",
+		 "%s: invalid data size value exceeds maximum.",
 		 function );
 
 		return( -1 );
 	}
-	if( output_data == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid output data.",
-		 function );
-
-		return( -1 );
-	}
-	if( output_data_size > (size_t) SSIZE_MAX )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid output data size value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-	if( output_data_size < input_data_size )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid ouput data size smaller than input data size.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( input_data_size % 4 ) != 0 )
+	if( ( data_size % 4 ) != 0 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported input data size - not a multitude of 4.",
+		 "%s: unsupported data size - not a multitude of 4.",
 		 function );
 
 		return( -1 );
 	}
-	number_of_values_32bit = input_data_size / 4;
+	number_of_values_32bit = data_size / 4;
 
-	values_32bit = (uint32_t *) output_data;
+	values_32bit = (uint32_t *) memory_allocate(
+	                             data_size );
 
+	if( values_32bit == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
 	for( value_32bit_index1 = 0;
 	     value_32bit_index1 < number_of_values_32bit;
 	     value_32bit_index1++ )
 	{
 		byte_stream_copy_to_uint32_little_endian(
-		 &( input_data[ data_index ] ),
+		 &( data[ data_index ] ),
 		 values_32bit[ value_32bit_index1 ] );
 
 		data_index += sizeof( uint32_t );
@@ -283,47 +248,59 @@ int libbde_diffuser_b_crypt(
 	{
 		value_32bit_index1 = 0;
 
-/* TODO test first then refactor out most of the modulus calculus */
 		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
 		{
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ output_data[ value_32bit_index3 ];
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
 
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ byte_stream_bit_rotate_left_32bit(
-			                                      output_data[ value_32bit_index3 ],
-			                                      10 );
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ byte_stream_bit_rotate_left_32bit(
+			                                       values_32bit[ value_32bit_index3 ],
+			                                       10 );
 
 			value_32bit_index1++;
 
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ output_data[ value_32bit_index3 ];
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
 
 			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
 			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
 
-			output_data[ value_32bit_index1 ] += output_data[ value_32bit_index2 ]
-			                                   ^ byte_stream_bit_rotate_left_32bit(
-			                                      output_data[ value_32bit_index3 ],
-			                                      25 );
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ byte_stream_bit_rotate_left_32bit(
+			                                       values_32bit[ value_32bit_index3 ],
+			                                       25 );
 
 			value_32bit_index1++;
 		}
 		number_of_iterations--;
 	}
+	for( value_32bit_index1 = 0;
+	     value_32bit_index1 < number_of_values_32bit;
+	     value_32bit_index1++ )
+	{
+		byte_stream_copy_from_uint32_little_endian(
+		 &( data[ data_index ] ),
+		 values_32bit[ value_32bit_index1 ] );
+
+		data_index += sizeof( uint32_t );
+	}
+	memory_free(
+	 values_32bit );
+
 	return( 1 );
 }
 

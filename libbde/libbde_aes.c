@@ -1190,7 +1190,7 @@ int libbde_aes_ccm_crypt(
      size_t output_data_size,
      liberror_error_t **error )
 {
-	uint8_t internal_initialization_vector[ 20 ];
+	uint8_t internal_initialization_vector[ 16 ];
 	uint8_t block_data[ 16 ];
 
 	static char *function    = "libbde_aes_ccm_crypt";
@@ -1293,7 +1293,7 @@ int libbde_aes_ccm_crypt(
 	if( memory_set(
 	     internal_initialization_vector,
 	     0,
-	     20 ) == NULL )
+	     16 ) == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -1326,7 +1326,7 @@ int libbde_aes_ccm_crypt(
 		     context,
 		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
 		     internal_initialization_vector,
-		     20,
+		     16,
 		     block_data,
 		     16,
 		     error ) != 1 )

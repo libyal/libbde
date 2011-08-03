@@ -31,18 +31,14 @@
 extern "C" {
 #endif
 
-int libbde_diffuser_a_crypt(
-     const uint8_t *input_data,
-     size_t input_data_size,
-     uint8_t *output_data,
-     size_t output_data_size,
+int libbde_diffuser_a(
+     uint8_t *data,
+     size_t data_size,
      liberror_error_t **error );
 
-int libbde_diffuser_b_crypt(
-     const uint8_t *input_data,
-     size_t input_data_size,
-     uint8_t *output_data,
-     size_t output_data_size,
+int libbde_diffuser_b(
+     uint8_t *data,
+     size_t data_size,
      liberror_error_t **error );
 
 #ifdef __cplusplus

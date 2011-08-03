@@ -47,6 +47,7 @@ struct libbde_encryption_context
 	 */
 	uint32_t method;
 
+/* TODO are the VMK contexts necessary ? */
 	/* The VMK (AES) decryption context
 	 */
 	libbde_aes_context_t *vmk_decryption_context;
@@ -57,7 +58,7 @@ struct libbde_encryption_context
 
 	/* The FVEK (AES) decryption context
 	 */
-	libbde_aes_context_t *fkev_decryption_context;
+	libbde_aes_context_t *fvek_decryption_context;
 
 	/* The FVEK (AES) encryption context
 	 */
@@ -95,6 +96,7 @@ int libbde_encryption_crypt(
      size_t input_data_size,
      uint8_t *output_data,
      size_t output_data_size,
+     uint64_t block_key,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

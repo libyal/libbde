@@ -2,25 +2,44 @@ TODO
 * what is entry type 0x000b FKEV for external key ?
 * AES
   - fix openssl EVP error on finalize of CBC
+  - add support for MS Crypto API implementation
+  - clean up and test fallback routines
 * the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
   - make sure to handle them correctly
   - do empty block test, do not decrypt empty blocks, cheaper than decryption
-
-* detect "clear key" - unprotected VMK
 * stretch key
   - add aes ccm encrypted key to struct
-* copy volume header code from libfsntfs ?
-* downsize IV fo 20 to 16 bytes
-* fix diffuser
-* add external (start up) key support
+* debug print more volume header info
 
+Library
+* add external (start up) key support
+* "clear key" - unprotected VMK - support
+
+Release:
 * check debug output aligment
 * update .pc and .spec file for openssl and ld dependency
-* AES
-  - add support for MS Crypto API implementation
-  - clean up fallback routines
+* automated tests
+* manuals
+* msvscpp build
+* check TODOs
+
+Tools:
 * bdeinfo
-  - pass recovery password as commandline argument
+* bdeexport
+
+Format:
+* validation
+* bit locker ToGo ?
+
+Test images:
+* for both Windows Vista and Windows 7
+* AES 128
+* AES 128 diffuser
+* AES 256
+* AES 256 diffuser
+* recovery key
+* external key
+* clear key
 
 20110803
 * added recovery password option to bdeinfo
@@ -28,6 +47,7 @@ TODO
 * worked on AES functions
 * added metadata entry type and value type debug functions
 * worked on FVEK support
+* worked on diffuser
 
 20110801
 * configure clean up

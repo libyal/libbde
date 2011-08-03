@@ -267,6 +267,16 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER ) )
+	{
+		key_bit_size = 128;
+	}
+	else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+	      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+	{
+		key_bit_size = 256;
+	}
 	/* The volume master key is always 256-bit in size
 	 */
 	if( libbde_aes_set_decryption_key(
@@ -299,18 +309,8 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
-	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER ) )
-	{
-		key_bit_size = 128;
-	}
-	else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
-	      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
-	{
-		key_bit_size = 256;
-	}
 	if( libbde_aes_set_decryption_key(
-	     context->fkev_decryption_context,
+	     context->fvek_decryption_context,
 	     full_volume_encryption_key,
 	     key_bit_size,
 	     error ) != 1 )
@@ -325,7 +325,7 @@ int libbde_encryption_set_keys(
 		return( -1 );
 	}
 	if( libbde_aes_set_encryption_key(
-	     context->fkev_encryption_context,
+	     context->fvek_encryption_context,
 	     full_volume_encryption_key,
 	     key_bit_size,
 	     error ) != 1 )
@@ -339,87 +339,46 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( libbde_aes_set_decryption_key(
-	     context->fkev_decryption_context,
-	     tweak_key,
-	     key_bit_size,
-	     error ) != 1 )
+	/* The TWEAK key is only used with diffuser
+	 */
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set tweak key in decryption context.",
-		 function );
+		if( libbde_aes_set_decryption_key(
+		     context->fvek_decryption_context,
+		     tweak_key,
+		     key_bit_size,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set tweak key in decryption context.",
+			 function );
 
-		return( -1 );
-	}
-	if( libbde_aes_set_encryption_key(
-	     context->fkev_encryption_context,
-	     tweak_key,
-	     key_bit_size,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set tweak key in encryption context.",
-		 function );
+			return( -1 );
+		}
+		if( libbde_aes_set_encryption_key(
+		     context->fvek_encryption_context,
+		     tweak_key,
+		     key_bit_size,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set tweak key in encryption context.",
+			 function );
 
-		return( -1 );
+			return( -1 );
+		}
 	}
 	return( 1 );
 }
 
-/* TODO */
-#ifdef TODO
-
-void init_keys(options_structure *options)
-{
-
-// volume keys are always 256 bit whatevr the condition
-aes_setkey_enc( &options->context.VMK_E_ctx, options->VMK_key+12,256);
-aes_setkey_dec( &options->context.VMK_D_ctx, options->VMK_key+12,256);
-
-
-
-//FVEK keys depend on algorithm
-if ( options->Encryption_Type == AES128 || options->Encryption_Type == AES128_diffuser )  {
- 		aes_setkey_enc( &options->context.FVEK_E_ctx, options->FVEK_key+12,128);
-                aes_setkey_dec( &options->context.FVEK_D_ctx, options->FVEK_key+12,128);
-    }
-
-if ( options->Encryption_Type == AES256 || options->Encryption_Type == AES256_diffuser )  {
- 		aes_setkey_enc( &options->context.FVEK_E_ctx, options->FVEK_key+12,256);
-                aes_setkey_dec( &options->context.FVEK_D_ctx, options->FVEK_key+12,256);
-    }
-
-
-
-
-// TWEAK keys also depend on algorithm
-if (  options->Encryption_Type == AES128_diffuser )  {
- 		aes_setkey_enc( &options->context.TWEAK_E_ctx, options->Tweak_Key+12,128);
-                aes_setkey_dec( &options->context.TWEAK_D_ctx, options->Tweak_Key+12,128);
-    }
-
-if (  options->Encryption_Type == AES256_diffuser )  {
- 		aes_setkey_enc( &options->context.TWEAK_E_ctx, options->Tweak_Key+12,256);
-                aes_setkey_dec( &options->context.TWEAK_D_ctx, options->Tweak_Key+12,256);
-    }
-
-
-
-
-// all key contexts have been set
-
-}
-
-
-#endif
-
-/* De- or encrypts a block of data using AES-CBC
+/* De- or encrypts a block of data
  * Returns 1 if successful or -1 on error
  */
 int libbde_encryption_crypt(
@@ -429,12 +388,15 @@ int libbde_encryption_crypt(
      size_t input_data_size,
      uint8_t *output_data,
      size_t output_data_size,
+     uint64_t block_key,
      liberror_error_t **error )
 {
-	uint8_t initialization_vector[ 20 ];
+	uint8_t block_key_data[ 16 ];
+	uint8_t initialization_vector[ 16 ];
+	uint8_t xor_data[ 64 ];
 
 	static char *function = "libbde_encryption_crypt";
-	int result            = 0;
+	size_t data_index     = 0;
 
 	if( context == NULL )
 	{
@@ -462,7 +424,7 @@ int libbde_encryption_crypt(
 	if( memory_set(
 	     initialization_vector,
 	     0,
-	     20 ) == NULL )
+	     16 ) == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -473,32 +435,164 @@ int libbde_encryption_crypt(
 
 		return( -1 );
 	}
-	if( mode == LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT )
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
-		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC ) )
+		if( memory_set(
+		     block_key_data,
+		     0,
+		     16 ) == NULL )
 		{
-			result = libbde_aes_cbc_crypt(
-				  context->volume_encryption_context,
-				  LIBBDE_AES_CRYPT_MODE_ENCRYPT,
-				  initialization_vector,
-				  input_data,
-				  input_data_size,
-				  output_data,
-				  output_data_size,
-				  error );
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear block key data.",
+			 function );
+
+			return( -1 );
 		}
-		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
-		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+		if( memory_set(
+		     xor_data,
+		     0,
+		     64 ) == NULL )
 		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear XOR data.",
+			 function );
+
+			return( -1 );
 		}
-		if( result != 1 )
+		byte_stream_copy_to_uint64_little_endian(
+		 block_key_data,
+		 block_key );
+
+		/* The block key for the initialization vector is encrypted
+		 * with the FVEK
+		 */
+		if( libbde_aes_ecb_crypt(
+		     context->fvek_encryption_context,
+		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     block_key_data,
+		     16,
+		     initialization_vector,
+		     16,
+		     error ) != 1 )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
 			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt output data.",
+			 "%s: unable to encrypt initialization vector.",
+			 function );
+
+			return( -1 );
+		}
+		/* The block key for the XOR data is encrypted
+		 * with the TWEAK key
+		 */
+		if( libbde_aes_ecb_crypt(
+		     context->tweak_encryption_context,
+		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     block_key_data,
+		     16,
+		     xor_data,
+		     64,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+			 "%s: unable to encrypt XOR data.",
+			 function );
+
+			return( -1 );
+		}
+		/* Negate block key
+		 */
+		block_key_data[ 15 ] = 0x80;
+
+		if( libbde_aes_ecb_crypt(
+		     context->tweak_encryption_context,
+		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     block_key_data,
+		     16,
+		     &( xor_data[ 16 ] ),
+		     56,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+			 "%s: unable to encrypt XOR data.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( mode == LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT )
+	{
+/* TODO safe guard input data ? */
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+		{
+			for( data_index = 0;
+			     data_index < input_data_size;
+			     data_index++ )
+			{
+				/* value & 0x1f = value % 32
+				 */
+				output_data[ data_index ] ^= xor_data[ data_index & 0x1f ];
+			}
+			if( libbde_diffuser_a(
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to Diffuser-A output data.",
+				 function );
+
+				return( -1 );
+			}
+			if( libbde_diffuser_b(
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to Diffuser-B output data.",
+				 function );
+
+				return( -1 );
+			}
+		}
+		if( libbde_aes_cbc_crypt(
+		     context->fvek_encryption_context,
+		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     initialization_vector,
+		     input_data,
+		     input_data_size,
+		     output_data,
+		     output_data_size,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+			 "%s: unable to AES-CBC encrypt output data.",
 			 function );
 
 			return( -1 );
@@ -506,126 +600,66 @@ int libbde_encryption_crypt(
 	}
 	else
 	{
-		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
-		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC ) )
-		{
-			result = libbde_aes_cbc_crypt(
-				  context->volume_decryption_context,
-				  LIBBDE_AES_CRYPT_MODE_DECRYPT,
-				  initialization_vector,
-				  input_data,
-				  input_data_size,
-				  output_data,
-				  output_data_size,
-				  error );
-		}
-		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
-		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
-		{
-		}
-		if( result != 1 )
+		if( libbde_aes_cbc_crypt(
+		     context->fvek_decryption_context,
+		     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+		     initialization_vector,
+		     input_data,
+		     input_data_size,
+		     output_data,
+		     output_data_size,
+		     error ) != 1 )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
 			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt output data.",
+			 "%s: unable to AES-CBC decrypt output data.",
 			 function );
 
 			return( -1 );
 		}
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+		{
+			if( libbde_diffuser_b(
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to Diffuser-B output data.",
+				 function );
+
+				return( -1 );
+			}
+			if( libbde_diffuser_a(
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to Diffuser-A output data.",
+				 function );
+
+				return( -1 );
+			}
+			for( data_index = 0;
+			     data_index < input_data_size;
+			     data_index++ )
+			{
+				/* value & 0x1f = value % 32
+				 */
+				output_data[ data_index ] ^= xor_data[ data_index & 0x1f ];
+			}
+		}
 	}
 	return( 1 );
 }
-
-#ifdef TODO
-
-void decrypt_diffused_sector( options_structure *options, // the usual keys
-							  unsigned char *sector_data, // actual encrypted data after decrypted data is also available here
-							  int32  sector_size, // size of sector which is being decoded
-							  int64 sector  )  // this means if a 4 th sector sector is being decoded
-{
-
-	unsigned char IV[20]; // used to stor IV which is sector specific
-
-	unsigned char e[20] ; // used to store sector byte offset
-
-	unsigned char sector_key_buffer[40]; // it's actuall a 512 bit value which is xored into the plain text
-
-	int64 temp_var_e;
-
-	unsigned long loop_var;
-
-	
-/*aes_context fvek_e_ctxt,fvek_d_ctxt;
-	aes_context tweak_e_ctxt,tweak_d_ctxt;
-
-
-	// initialise contexts
-
-	aes_setkey_dec( &fvek_d_ctxt, options->FVEK_key  + 12, 128);
-	aes_setkey_enc( &fvek_e_ctxt, options->FVEK_key  + 12, 128);
-
-
-	aes_setkey_dec (&tweak_d_ctxt, options->Tweak_Key + 12 , 128);
-	aes_setkey_enc (&tweak_e_ctxt, options->Tweak_Key + 12 , 128); // this key is used to  get sector key
-
-*/
-	// let us compute e and other data which is necessary for decryption
-
-	/*first e is computed
-	e is nothing byt byte offset of that sector from start of volume
-	*/ 
-	temp_var_e = sector * options->fve_meta_data.BytesPerSector  ;
-
-	memset(e,0,sizeof(e));
-
-	memcpy(e, &temp_var_e , sizeof(temp_var_e)); // copy this number into a buffer in least byte first encoding
-
-	// now let us fill in IV for this sector
-
-	aes_crypt_ecb(&options->context.FVEK_E_ctx,AES_ENCRYPT,e , IV);
-
-
-
-	// this block will fill the sector key
-	{
-	// now let us compuet sector_key_buffer
-	aes_crypt_ecb(&options->context.TWEAK_E_ctx,AES_ENCRYPT,e,sector_key_buffer) ;
-
-	//now put 128 in the 16th byte of e
-	e[15] = 128; // now e represent's e'
-	aes_crypt_ecb(&options->context.TWEAK_E_ctx,AES_ENCRYPT,e,sector_key_buffer+ 16) ;
-	}
-	
-
-	// now decrypt the buffer usinf AESCBC using the fvek key decryption context
-   // we use the same buffer as both input and output
-    aes_crypt_cbc(&options->context.FVEK_D_ctx,AES_DECRYPT,options->fve_meta_data.BytesPerSector,IV,sector_data,sector_data);
-
-
-
-// now let us call the diffuser B decryptor
-
-	Diffuser_B_Decrypt(sector_data,options->fve_meta_data.BytesPerSector);
-
-
-	// now let us call the diffuser B decryptor
-
-	Diffuser_A_Decrypt(sector_data,options->fve_meta_data.BytesPerSector);
-
-	// apply sector XOR  wit sector key
-	for( loop_var = 0 ; loop_var < options->fve_meta_data.BytesPerSector ;loop_var++)
-		sector_data[loop_var] = sector_data[loop_var] ^ sector_key_buffer[ loop_var % 32] ;
-
-
-// at this stage the buffer is already decrypted succesfully, if everything went right
-
-	return ;
-
-}
-
-
-
-#endif
 
