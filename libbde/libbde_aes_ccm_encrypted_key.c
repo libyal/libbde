@@ -177,7 +177,7 @@ int libbde_aes_ccm_encrypted_key_read(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_type != 0x0005 )
+	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_AES_CCM_ENCRYPTED_KEY )
 	{
 		liberror_error_set(
 		 error,

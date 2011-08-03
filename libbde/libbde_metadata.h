@@ -78,6 +78,10 @@ struct libbde_metadata
 	 */
 	libbde_volume_master_key_t *external_key_volume_master_key;
 
+	/* The full volume encryption key
+	 */
+	libbde_aes_ccm_encrypted_key_t *full_volume_encryption_key;
+
 	/* The metadata entries array
 	 */
 	libbde_array_t *entries_array;
@@ -101,7 +105,14 @@ int libbde_metadata_read(
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
-     uint8_t key[ 32 ],
+     uint8_t volume_master_key[ 32 ],
+     liberror_error_t **error );
+
+int libbde_metadata_get_full_volume_encryption_key(
+     libbde_metadata_t *metadata,
+     uint8_t volume_master_key[ 32 ],
+     uint8_t full_volume_encryption_key[ 32 ],
+     uint8_t tweak_key[ 32 ],
      liberror_error_t **error );
 
 #if defined( __cplusplus )

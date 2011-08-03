@@ -38,6 +38,12 @@ extern "C" {
 const char *libbde_debug_print_encryption_method(
              uint32_t encryption_method );
 
+const char *libbde_debug_print_entry_type(
+             uint16_t entry_type );
+
+const char *libbde_debug_print_value_type(
+             uint16_t value_type );
+
 int libbde_debug_print_read_offsets(
      libbfio_handle_t *file_io_handle,
      liberror_error_t **error );

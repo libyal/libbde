@@ -54,6 +54,83 @@ const char *libbde_debug_print_encryption_method(
 	return( "_UNKNOWN_" );
 }
 
+/* Prints the entry type
+ */
+const char *libbde_debug_print_entry_type(
+             uint16_t entry_type )
+{
+	switch( entry_type )
+	{
+		case LIBBDE_ENTRY_TYPE_PROPERTY:
+			return( "Property" );
+
+		case LIBBDE_ENTRY_TYPE_VOLUME_MASTER_KEY:
+			return( "Volume master key (VMK)" );
+
+		case LIBBDE_ENTRY_TYPE_FULL_VOLUME_ENCRYPTION_KEY:
+			return( "Full volume encryption key (FVEK)" );
+
+		case LIBBDE_ENTRY_TYPE_VALIDATION:
+			return( "Validation" );
+
+		case LIBBDE_ENTRY_TYPE_VOLUME_NAME:
+			return( "Volume name" );
+
+		case LIBBDE_ENTRY_TYPE_VOLUME_HEADER_BLOCK:
+			return( "Volume header block" );
+	}
+	return( "_UNKNOWN_" );
+}
+
+/* Prints the value type
+ */
+const char *libbde_debug_print_value_type(
+             uint16_t value_type )
+{
+	switch( value_type )
+	{
+		case LIBBDE_VALUE_TYPE_ERASED:
+			return( "Erased" );
+
+		case LIBBDE_VALUE_TYPE_KEY:
+			return( "Key" );
+
+		case LIBBDE_VALUE_TYPE_UNICODE_STRING:
+			return( "Unicode string (UTF-16 little-endian)" );
+
+		case LIBBDE_VALUE_TYPE_STRETCH_KEY:
+			return( "Stretch key" );
+
+		case LIBBDE_VALUE_TYPE_USE_KEY:
+			return( "Use key" );
+
+		case LIBBDE_VALUE_TYPE_AES_CCM_ENCRYPTED_KEY:
+			return( "AES-CCM encrypted key" );
+
+		case LIBBDE_VALUE_TYPE_TPM_ENCODED_KEY:
+			return( "TPM encoded key" );
+
+		case LIBBDE_VALUE_TYPE_VALIDATION:
+			return( "Validation" );
+
+		case LIBBDE_VALUE_TYPE_VOLUME_MASTER_KEY:
+			return( "Volume master key" );
+
+		case LIBBDE_VALUE_TYPE_EXTERNAL_KEY:
+			return( "External key" );
+
+		case LIBBDE_VALUE_TYPE_UPDATE:
+			return( "Update" );
+
+		case LIBBDE_VALUE_TYPE_ERROR:
+			return( "Error" );
+
+		case LIBBDE_VALUE_TYPE_OFFSET_AND_SIZE:
+			return( "Offset and size" );
+	}
+	return( "_UNKNOWN_" );
+}
+
 /* Prints the read offsets
  * Returns 1 if successful or -1 on error
  */

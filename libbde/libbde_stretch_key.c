@@ -27,6 +27,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_definitions.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_stretch_key.h"
 
@@ -157,7 +158,7 @@ int libbde_stretch_key_read(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_type != 0x0003 )
+	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_STRETCH_KEY )
 	{
 		liberror_error_set(
 		 error,

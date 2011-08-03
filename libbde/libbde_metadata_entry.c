@@ -28,6 +28,7 @@
 #include <libnotify.h>
 
 #include "libbde_debug.h"
+#include "libbde_definitions.h"
 #include "libbde_libuna.h"
 #include "libbde_metadata_entry.h"
 
@@ -211,14 +212,18 @@ ssize_t libbde_metadata_entry_read(
 		 entry_size );\
 
 		libnotify_printf(
-		 "%s: entry type\t\t\t\t\t: 0x%04" PRIx16 "\n",
+		 "%s: entry type\t\t\t\t\t: 0x%04" PRIx16 " (%s)\n",
 		 function,
-		 metadata_entry->type );
+		 metadata_entry->type,
+		 libbde_debug_print_entry_type(
+		  metadata_entry->type ) );
 
 		libnotify_printf(
-		 "%s: value type\t\t\t\t\t: 0x%04" PRIx16 "\n",
+		 "%s: value type\t\t\t\t\t: 0x%04" PRIx16 " (%s)\n",
 		 function,
-		 metadata_entry->value_type );
+		 metadata_entry->value_type,
+		 libbde_debug_print_value_type(
+		  metadata_entry->value_type ) );
 
 		libnotify_printf(
 		 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
@@ -331,7 +336,7 @@ int libbde_metadata_entry_read_string(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_type != 0x0002 )
+	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_UNICODE_STRING )
 	{
 		liberror_error_set(
 		 error,

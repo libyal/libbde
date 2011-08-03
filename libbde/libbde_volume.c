@@ -813,12 +813,8 @@ int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
      liberror_error_t **error )
 {
-	uint8_t key[ 32 ];
-
-	static char *function        = "libbde_volume_open_read";
-	off64_t volume_header_offset = 0;
-	uint32_t encryption_method   = 0;
-	int result                   = 0;
+	static char *function = "libbde_volume_open_read";
+	int result            = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -984,44 +980,36 @@ int libbde_volume_open_read(
 
 		return( -1 );
 	}
-	volume_header_offset = internal_volume->primary_metadata->volume_header_offset;
-	encryption_method    = internal_volume->primary_metadata->encryption_method;
-
-	result = libbde_metadata_get_volume_master_key(
+	result = libbde_volume_open_read_keys_from_metadata(
+	          internal_volume,
 	          internal_volume->primary_metadata,
-	          internal_volume->io_handle,
-	          key,
 	          error );
 
 	if( result == -1 )
 	{
 		liberror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume master key from primary metadata.",
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read keys from primary metadata.",
 		 function );
 
 		return( -1 );
 	}
 	if( result == 0 )
 	{
-		volume_header_offset = internal_volume->secondary_metadata->volume_header_offset;
-		encryption_method    = internal_volume->secondary_metadata->encryption_method;
-
-		result = libbde_metadata_get_volume_master_key(
+		result = libbde_volume_open_read_keys_from_metadata(
+			  internal_volume,
 			  internal_volume->secondary_metadata,
-			  internal_volume->io_handle,
-		          key,
 			  error );
 
 		if( result == -1 )
 		{
 			liberror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume master key from secondary metadata.",
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read keys from secondary metadata.",
 			 function );
 
 			return( -1 );
@@ -1029,22 +1017,18 @@ int libbde_volume_open_read(
 	}
 	if( result == 0 )
 	{
-		volume_header_offset = internal_volume->tertiary_metadata->volume_header_offset;
-		encryption_method    = internal_volume->tertiary_metadata->encryption_method;
-
-		result = libbde_metadata_get_volume_master_key(
+		result = libbde_volume_open_read_keys_from_metadata(
+			  internal_volume,
 			  internal_volume->tertiary_metadata,
-			  internal_volume->io_handle,
-		          key,
 			  error );
 
 		if( result == -1 )
 		{
 			liberror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume master key from tertiary metadata.",
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read keys from tertiary metadata.",
 			 function );
 
 			return( -1 );
@@ -1054,40 +1038,9 @@ int libbde_volume_open_read(
 	{
 		liberror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume master key from metadata.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume->io_handle->volume_header_offset = volume_header_offset;
-
-	if( libbde_encryption_initialize(
-	     &( internal_volume->io_handle->encryption_context ),
-	     encryption_method,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create encryption context.",
-		 function );
-
-		return( -1 );
-	}
-	if( libbde_encryption_set_volume_key(
-	     internal_volume->io_handle->encryption_context,
-	     key,
-	     256,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set volume key in encryption context.",
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read keys from metadata.",
 		 function );
 
 		return( -1 );
@@ -1143,6 +1096,161 @@ int libbde_volume_open_read(
 		return( -1 );
 	}
 	return( 1 );
+}
+
+/* Reads the keys from the metadata when opening the volume for reading
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_volume_open_read_keys_from_metadata(
+     libbde_internal_volume_t *internal_volume,
+     libbde_metadata_t *metadata,
+     liberror_error_t **error )
+{
+/* TODO wipe key data */
+	uint8_t full_volume_encryption_key[ 32 ];
+	uint8_t tweak_key[ 32 ];
+	uint8_t volume_master_key[ 32 ];
+
+	static char *function        = "libbde_volume_open_read_keys_from_metadata";
+	off64_t volume_header_offset = 0;
+	uint32_t encryption_method   = 0;
+	int result                   = 0;
+
+	if( internal_volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid internal volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid internal volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( metadata == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	volume_header_offset = metadata->volume_header_offset;
+	encryption_method    = metadata->encryption_method;
+
+	result = libbde_metadata_get_volume_master_key(
+	          metadata,
+	          internal_volume->io_handle,
+	          volume_master_key,
+	          error );
+
+	if( result == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume master key from metadata.",
+		 function );
+
+		return( -1 );
+	}
+	else if( result != 0 )
+	{
+		result = libbde_metadata_get_full_volume_encryption_key(
+		          metadata,
+		          volume_master_key,
+		          full_volume_encryption_key,
+		          tweak_key,
+		          error );
+
+		if( result == -1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve full volume encryption key from metadata.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( result != 0 )
+	{
+		internal_volume->io_handle->volume_header_offset = volume_header_offset;
+
+		if( libbde_encryption_initialize(
+		     &( internal_volume->io_handle->encryption_context ),
+		     encryption_method,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create encryption context.",
+			 function );
+
+			return( -1 );
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: volume master key:\n",
+			 function );
+			libnotify_print_data(
+			 volume_master_key,
+			 32 );
+
+			libnotify_printf(
+			 "%s: full volume encryption key:\n",
+			 function );
+			libnotify_print_data(
+			 full_volume_encryption_key,
+			 32 );
+
+			libnotify_printf(
+			 "%s: tweak key:\n",
+			 function );
+			libnotify_print_data(
+			 tweak_key,
+			 32 );
+		}
+#endif
+		if( libbde_encryption_set_keys(
+		     internal_volume->io_handle->encryption_context,
+		     volume_master_key,
+		     full_volume_encryption_key,
+		     tweak_key,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set keys in encryption context.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( result );
 }
 
 /* Reads data at the current offset into a buffer

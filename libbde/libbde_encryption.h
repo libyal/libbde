@@ -47,13 +47,29 @@ struct libbde_encryption_context
 	 */
 	uint32_t method;
 
-	/* The volume (AES) decryption context
+	/* The VMK (AES) decryption context
 	 */
-	libbde_aes_context_t *volume_decryption_context;
+	libbde_aes_context_t *vmk_decryption_context;
 
-	/* The volume (AES) encryption context
+	/* The VMK (AES) encryption context
 	 */
-	libbde_aes_context_t *volume_encryption_context;
+	libbde_aes_context_t *vmk_encryption_context;
+
+	/* The FVEK (AES) decryption context
+	 */
+	libbde_aes_context_t *fkev_decryption_context;
+
+	/* The FVEK (AES) encryption context
+	 */
+	libbde_aes_context_t *fvek_encryption_context;
+
+	/* The TWEAK key (AES) decryption context
+	 */
+	libbde_aes_context_t *tweak_decryption_context;
+
+	/* The TWEAK key (AES) encryption context
+	 */
+	libbde_aes_context_t *tweak_encryption_context;
 };
 
 int libbde_encryption_initialize(
@@ -65,10 +81,11 @@ int libbde_encryption_free(
      libbde_encryption_context_t **context,
      liberror_error_t **error );
 
-int libbde_encryption_set_volume_key(
+int libbde_encryption_set_keys(
      libbde_encryption_context_t *context,
-     const uint8_t *key,
-     size_t bit_size,
+     uint8_t volume_master_key[ 32 ],
+     uint8_t full_volume_encryption_key[ 32 ],
+     uint8_t tweak_key[ 32 ],
      liberror_error_t **error );
 
 int libbde_encryption_crypt(

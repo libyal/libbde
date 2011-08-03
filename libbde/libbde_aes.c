@@ -488,13 +488,13 @@ int libbde_aes_finalize(
 /* Sets the AES decryption key
  * Returns 1 if successful or -1 on error
  */
-int libbde_aes_set_decyption_key(
+int libbde_aes_set_decryption_key(
      libbde_aes_context_t *context,
      const uint8_t *key,
      size_t bit_size,
      liberror_error_t **error )
 {
-	static char *function = "libbde_aes_set_decyption_key";
+	static char *function = "libbde_aes_set_decryption_key";
 
 #if !defined( WINAPI ) && !( defined( HAVE_LIBCRYPTO ) && ( defined( HAVE_OPENSSL_AES_H ) || defined( HAVE_OPENSSL_EVP_H ) ) )
 	libbde_aes_context_t encryption_context;
@@ -985,7 +985,7 @@ int libbde_aes_cbc_crypt(
 		     (unsigned char *) output_data,
 		     &safe_output_data_size,
 		     (unsigned char *) input_data,
-		     16 ) != 1 )
+		     input_data_size ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -996,7 +996,10 @@ int libbde_aes_cbc_crypt(
 
 			return( -1 );
 		}
-/* TODO add check: safe_output_data_size == 16 */
+/* TODO add check: safe_output_data_size == input_data_size */
+
+		safe_output_data_size = 16;
+
 		if( EVP_EncryptFinal(
 		     &( context->evp_context ),
 		     (unsigned char *) trash_data,
@@ -1034,7 +1037,7 @@ int libbde_aes_cbc_crypt(
 		     (unsigned char *) output_data,
 		     &safe_output_data_size,
 		     (unsigned char *) input_data,
-		     16 ) != 1 )
+		     input_data_size ) != 1 )
 		{
 			liberror_error_set(
 			 error,
@@ -1045,8 +1048,10 @@ int libbde_aes_cbc_crypt(
 
 			return( -1 );
 		}
-/* TODO add check: safe_output_data_size == 16 */
+/* TODO add check: safe_output_data_size == input_data_size */
 /* TODO test this */
+		safe_output_data_size = 16;
+
 		if( EVP_DecryptFinal(
 		     &( context->evp_context ),
 		     (unsigned char *) trash_data,
