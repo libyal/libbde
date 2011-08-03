@@ -126,6 +126,11 @@ int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
      liberror_error_t **error );
 
+int libbde_volume_open_read_keys_from_metadata(
+     libbde_internal_volume_t *internal_volume,
+     libbde_metadata_t *metadata,
+     liberror_error_t **error );
+
 LIBBDE_EXTERN \
 ssize_t libbde_volume_read_buffer(
          libbde_volume_t *volume,

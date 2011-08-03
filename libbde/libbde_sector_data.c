@@ -265,7 +265,7 @@ int libbde_sector_data_read(
 		 "%s: reading sector data at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
 		 sector_data_offset,
-		 sector_data_offset  );
+		 sector_data_offset );
 	}
 #endif
 	if( sector_data_offset == 0 )
@@ -279,7 +279,7 @@ int libbde_sector_data_read(
 				 "%s: reading volume header data at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 				 function,
 				 io_handle->volume_header_offset,
-				 io_handle->volume_header_offset  );
+				 io_handle->volume_header_offset );
 			}
 #endif
 			sector_data_offset = io_handle->volume_header_offset;

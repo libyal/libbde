@@ -259,7 +259,7 @@ int libbde_volume_master_key_read(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_type != 0x0008 )
+	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_VOLUME_MASTER_KEY )
 	{
 		liberror_error_set(
 		 error,
@@ -499,7 +499,7 @@ int libbde_volume_master_key_read(
 		value_data      += read_count;
 		value_data_size -= read_count;
 
-		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_STRING )
+		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_UNICODE_STRING )
 		{
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libbde_metadata_entry_read_string(

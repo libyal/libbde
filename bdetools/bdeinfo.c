@@ -54,11 +54,14 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
 	                 " Drive Encryption (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -p password ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
+	fprintf( stream, "\t-k:     specify the file containing the external key.\n"
+	                 "\t        typically this file has the extension .BEK\n" );
+	fprintf( stream, "\t-p:     specify the recovery password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -95,11 +98,7 @@ int bdeinfo_volume_info_fprint(
 
 		return( -1 );
 	}
-/* TODO */
 	return( 1 );
-
-on_error:
-	return( -1 );
 }
 
 /* The main program
@@ -110,16 +109,15 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_error_t *error                 = NULL;
-	libbde_volume_t *volume               = NULL;
-	libcstring_system_character_t *source = NULL;
-	char *program                         = "bdeinfo";
-	char *recovery_password               = NULL;
-	size_t recovery_password_length       = 0;
-	libcstring_system_integer_t option    = 0;
-	int verbose                           = 0;
-
-	recovery_password = "004301-051986-278476-162294-184228-193919-575828-424457";
+	libbde_error_t *error                                   = NULL;
+	libbde_volume_t *volume                                 = NULL;
+	libcstring_system_character_t *option_external_key_file = NULL;
+	libcstring_system_character_t *option_recovery_password = NULL;
+	libcstring_system_character_t *source                   = NULL;
+	char *program                                           = "bdeinfo";
+	libcstring_system_integer_t option                      = 0;
+	size_t recovery_password_length                         = 0;
+	int verbose                                             = 0;
 
 	libsystem_notify_set_stream(
 	 stderr,
@@ -151,7 +149,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = libsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hvV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "hk:p:vV" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -172,6 +170,16 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (libcstring_system_integer_t) 'k':
+				option_external_key_file = optarg;
+
+				break;
+
+			case (libcstring_system_integer_t) 'p':
+				option_recovery_password = optarg;
+
+				break;
 
 			case (libcstring_system_integer_t) 'v':
 				verbose = 1;
@@ -216,28 +224,36 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	recovery_password_length = libcstring_system_string_length(
-	                            recovery_password );
+	if( option_external_key_file != NULL )
+	{
+/* TODO */
+	}
+/* TODO make this a else if ? */
+	if( option_recovery_password != NULL )
+	{
+		recovery_password_length = libcstring_system_string_length(
+		                            option_recovery_password );
 
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libbde_volume_set_utf8_recovery_password(
-	     volume,
-	     (uint16_t *) recovery_password,
-	     recovery_password_length + 1,
-	     &error ) != 1 )
+		if( libbde_volume_set_utf8_recovery_password(
+		     volume,
+		     (uint16_t *) option_recovery_password,
+		     recovery_password_length + 1,
+		     &error ) != 1 )
 #else
-	if( libbde_volume_set_utf8_recovery_password(
-	     volume,
-	     (uint8_t *) recovery_password,
-	     recovery_password_length + 1,
-	     &error ) != 1 )
+		if( libbde_volume_set_utf8_recovery_password(
+		     volume,
+		     (uint8_t *) option_recovery_password,
+		     recovery_password_length + 1,
+		     &error ) != 1 )
 #endif
-	{
-		fprintf(
-		 stderr,
-		 "Unable to set recovery password.\n" );
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set recovery password.\n" );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libbde_volume_open_wide(
