@@ -88,27 +88,53 @@ int libbde_encryption_initialize(
 			return( -1 );
 		}
 		if( libbde_aes_initialize(
-		     &( ( *context )->vmk_decryption_context ),
+		     &( ( *context )->fvek_decryption_context ),
 		     error ) != 1 )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable initialize VMK decryption context.",
+			 "%s: unable initialize FVEK decryption context.",
 			 function );
 
 			goto on_error;
 		}
 		if( libbde_aes_initialize(
-		     &( ( *context )->vmk_encryption_context ),
+		     &( ( *context )->fvek_encryption_context ),
 		     error ) != 1 )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable initialize VMK encryption context.",
+			 "%s: unable initialize FVEK encryption context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_initialize(
+		     &( ( *context )->tweak_decryption_context ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable initialize TWEAK decryption context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_initialize(
+		     &( ( *context )->tweak_encryption_context ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable initialize TWEAK encryption context.",
 			 function );
 
 			goto on_error;
@@ -120,10 +146,22 @@ int libbde_encryption_initialize(
 on_error:
 	if( *context != NULL )
 	{
-		if( ( *context )->vmk_decryption_context != NULL )
+		if( ( *context )->tweak_decryption_context != NULL )
 		{
 			libbde_aes_free(
-			 &( ( *context )->vmk_decryption_context ),
+			 &( ( *context )->tweak_decryption_context ),
+			 NULL );
+		}
+		if( ( *context )->fvek_encryption_context != NULL )
+		{
+			libbde_aes_free(
+			 &( ( *context )->fvek_encryption_context ),
+			 NULL );
+		}
+		if( ( *context )->fvek_decryption_context != NULL )
+		{
+			libbde_aes_free(
+			 &( ( *context )->fvek_decryption_context ),
 			 NULL );
 		}
 		memory_free(
@@ -157,32 +195,6 @@ int libbde_encryption_free(
 	}
 	if( *context != NULL )
 	{
-		if( libbde_aes_free(
-		     &( ( *context )->vmk_decryption_context ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable free VMK decryption context.",
-			 function );
-
-			result = -1;
-		}
-		if( libbde_aes_free(
-		     &( ( *context )->vmk_encryption_context ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable free VMK encryption context.",
-			 function );
-
-			result = -1;
-		}
 		if( libbde_aes_free(
 		     &( ( *context )->fvek_decryption_context ),
 		     error ) != 1 )
@@ -248,7 +260,6 @@ int libbde_encryption_free(
  */
 int libbde_encryption_set_keys(
      libbde_encryption_context_t *context,
-     uint8_t volume_master_key[ 32 ],
      uint8_t full_volume_encryption_key[ 32 ],
      uint8_t tweak_key[ 32 ],
      liberror_error_t **error )
@@ -279,36 +290,6 @@ int libbde_encryption_set_keys(
 	}
 	/* The volume master key is always 256-bit in size
 	 */
-	if( libbde_aes_set_decryption_key(
-	     context->vmk_decryption_context,
-	     volume_master_key,
-	     256,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set volume master key in decryption context.",
-		 function );
-
-		return( -1 );
-	}
-	if( libbde_aes_set_encryption_key(
-	     context->vmk_encryption_context,
-	     volume_master_key,
-	     256,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set volume master key in encryption context.",
-		 function );
-
-		return( -1 );
-	}
 	if( libbde_aes_set_decryption_key(
 	     context->fvek_decryption_context,
 	     full_volume_encryption_key,
@@ -345,7 +326,7 @@ int libbde_encryption_set_keys(
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
 		if( libbde_aes_set_decryption_key(
-		     context->fvek_decryption_context,
+		     context->tweak_decryption_context,
 		     tweak_key,
 		     key_bit_size,
 		     error ) != 1 )
@@ -360,7 +341,7 @@ int libbde_encryption_set_keys(
 			return( -1 );
 		}
 		if( libbde_aes_set_encryption_key(
-		     context->fvek_encryption_context,
+		     context->tweak_encryption_context,
 		     tweak_key,
 		     key_bit_size,
 		     error ) != 1 )
@@ -393,7 +374,7 @@ int libbde_encryption_crypt(
 {
 	uint8_t block_key_data[ 16 ];
 	uint8_t initialization_vector[ 16 ];
-	uint8_t xor_data[ 64 ];
+	uint8_t xor_data[ 32 ];
 
 	static char *function = "libbde_encryption_crypt";
 	size_t data_index     = 0;
@@ -455,7 +436,7 @@ int libbde_encryption_crypt(
 		if( memory_set(
 		     xor_data,
 		     0,
-		     64 ) == NULL )
+		     32 ) == NULL )
 		{
 			liberror_error_set(
 			 error,

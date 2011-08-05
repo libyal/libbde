@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-typedef struct bde_volume_header_v1 bde_volume_header_v1_t;
+typedef struct bde_volume_header_windows_vista bde_volume_header_windows_vista_t;
 
-struct bde_volume_header_v1
+struct bde_volume_header_windows_vista
 {
 	/* The boot entry point
 	 * Consists of 3 bytes
@@ -60,9 +60,9 @@ struct bde_volume_header_v1
 	uint8_t first_metadata_offset[ 8 ];
 };
 
-typedef struct bde_volume_header_v2 bde_volume_header_v2_t;
+typedef struct bde_volume_header_windows_7 bde_volume_header_windows_7_t;
 
-struct bde_volume_header_v2
+struct bde_volume_header_windows_7
 {
 	/* The boot entry point
 	 * Consists of 3 bytes
@@ -85,11 +85,58 @@ struct bde_volume_header_v2
 	 */
 	uint8_t unknown1[ 147 ];
 
-	/* The bitlocker identifier
+	/* The identifier
 	 * Consists of 16 bytes
 	 * Contains a GUID
 	 */
-	uint8_t bitlocker_identifier[ 16 ];
+	uint8_t identifier[ 16 ];
+
+	/* The first FVE metadata offset
+	 * Consists of 8 bytes
+	 */
+	uint8_t first_metadata_offset[ 8 ];
+
+	/* The second FVE metadata offset
+	 * Consists of 8 bytes
+	 */
+	uint8_t second_metadata_offset[ 8 ];
+
+	/* The third FVE metadata offset
+	 * Consists of 8 bytes
+	 */
+	uint8_t third_metadata_offset[ 8 ];
+};
+
+typedef struct bde_volume_header_togo bde_volume_header_togo_t;
+
+struct bde_volume_header_togo
+{
+	/* The boot entry point
+	 * Consists of 3 bytes
+	 */
+	uint8_t boot_entry_point[ 3 ];
+
+	/* The signature
+	 * Consists of 9 bytes
+	 * Contains: MSWIN4.1
+	 */
+	uint8_t signature[ 8 ];
+
+	/* The number of bytes per sector
+	 * Consists of 2 bytes
+	 */
+	uint8_t bytes_per_sector[ 2 ];
+
+	/* Unknown
+	 * Consists of 411 bytes
+	 */
+	uint8_t unknown1[ 411 ];
+
+	/* The identifier
+	 * Consists of 16 bytes
+	 * Contains a GUID
+	 */
+	uint8_t identifier[ 16 ];
 
 	/* The first FVE metadata offset
 	 * Consists of 8 bytes

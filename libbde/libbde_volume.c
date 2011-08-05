@@ -1235,7 +1235,6 @@ int libbde_volume_open_read_keys_from_metadata(
 #endif
 		if( libbde_encryption_set_keys(
 		     internal_volume->io_handle->encryption_context,
-		     volume_master_key,
 		     full_volume_encryption_key,
 		     tweak_key,
 		     error ) != 1 )

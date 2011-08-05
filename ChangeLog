@@ -1,4 +1,5 @@
 TODO
+* debug print unencrypted data
 * what is entry type 0x000b FKEV for external key ?
 * AES
   - fix openssl EVP error on finalize of CBC
@@ -14,6 +15,7 @@ TODO
 Library
 * add external (start up) key support
 * "clear key" - unprotected VMK - support
+* use metadata volume size instead of end offset check ?
 
 Release:
 * check debug output aligment
@@ -29,17 +31,29 @@ Tools:
 
 Format:
 * validation
+* clear key
 * bit locker ToGo ?
+* TPM encoded VMK ?
+* VMK date time - change password on USB encrypted drive
 
 Test images:
 * for both Windows Vista and Windows 7
+* clear key
+
+Validate test cases:
 * AES 128
 * AES 128 diffuser
 * AES 256
 * AES 256 diffuser
 * recovery key
 * external key
-* clear key
+
+20110805
+* worked on reading sector data
+* worked on BitLocker ToGo support
+
+20110804
+* worked on reading sector data
 
 20110803
 * added recovery password option to bdeinfo

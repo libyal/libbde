@@ -255,10 +255,10 @@ struct bde_metadata_entry_volume_master_key_header
 	 */
 	uint8_t unknown_time[ 8 ];
 
-	/* Unknown
+	/* Type
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 4 ];
+	uint8_t type[ 4 ];
 };
 
 #if defined( __cplusplus )

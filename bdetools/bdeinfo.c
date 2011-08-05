@@ -54,14 +54,14 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
 	                 " Drive Encryption (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -p password ] [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -r password ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-k:     specify the file containing the external key.\n"
 	                 "\t        typically this file has the extension .BEK\n" );
-	fprintf( stream, "\t-p:     specify the recovery password\n" );
+	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -144,12 +144,12 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-/* TODO add option to pass recovery password */
+/* TODO add option to pass extenal password/key, what about BEK file */
 
 	while( ( option = libsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hk:p:vV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "hk:r:vV" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -176,7 +176,7 @@ int main( int argc, char * const argv[] )
 
 				break;
 
-			case (libcstring_system_integer_t) 'p':
+			case (libcstring_system_integer_t) 'r':
 				option_recovery_password = optarg;
 
 				break;
@@ -287,6 +287,38 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+/* TODO test */
+	if( libbde_volume_seek_offset(
+	     volume,
+	     0x0d2ba000,
+	     SEEK_SET,
+	     &error ) == -1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to seek offset in volume.\n" );
+
+		goto on_error;
+	}
+	uint8_t buffer[ 512 ];
+
+	if( libbde_volume_read_buffer(
+	     volume,
+	     buffer,
+	     512,
+	     &error ) != 512 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to read buffer from volume.\n" );
+
+		goto on_error;
+	}
+	libsystem_notify_print_data(
+	 buffer,
+	 512 );
+/* TODO test */
+
 	if( libbde_volume_close(
 	     volume,
 	     &error ) != 0 )

@@ -39,17 +39,17 @@ const char *libbde_debug_print_encryption_method(
 {
 	switch( encryption_method )
 	{
-		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC:
-			return( "AES-CBC 128-bit encryption" );
-
 		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
 			return( "AES-CBC 128-bit encryption with diffuser" );
 
-		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC:
-			return( "AES-CBC 256-bit encryption" );
-
 		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER:
 			return( "AES-CBC 256-bit encryption with diffuser" );
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC:
+			return( "AES-CBC 128-bit encryption" );
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC:
+			return( "AES-CBC 256-bit encryption" );
 	}
 	return( "_UNKNOWN_" );
 }
@@ -73,8 +73,8 @@ const char *libbde_debug_print_entry_type(
 		case LIBBDE_ENTRY_TYPE_VALIDATION:
 			return( "Validation" );
 
-		case LIBBDE_ENTRY_TYPE_VOLUME_NAME:
-			return( "Volume name" );
+		case LIBBDE_ENTRY_TYPE_DESCRIPTION:
+			return( "Description" );
 
 		case LIBBDE_ENTRY_TYPE_VOLUME_HEADER_BLOCK:
 			return( "Volume header block" );
@@ -127,6 +127,25 @@ const char *libbde_debug_print_value_type(
 
 		case LIBBDE_VALUE_TYPE_OFFSET_AND_SIZE:
 			return( "Offset and size" );
+	}
+	return( "_UNKNOWN_" );
+}
+
+/* Prints the volume master key type
+ */
+const char *libbde_debug_print_volume_master_key_type(
+             uint32_t volume_master_key_type )
+{
+	switch( volume_master_key_type )
+	{
+		case LIBBDE_VMK_TYPE_RECOVERY_KEY_PROTECTED:
+			return( "recovery key protected" );
+
+		case LIBBDE_VMK_TYPE_TPM_PROTECTED:
+			return( "TMP protected" );
+
+		case LIBBDE_VMK_TYPE_EXTERNAL_KEY_PROTECTED:
+			return( "external key protected" );
 	}
 	return( "_UNKNOWN_" );
 }
