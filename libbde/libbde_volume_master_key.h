@@ -44,6 +44,10 @@ struct libbde_volume_master_key
 	 */
 	uint8_t identifier[ 16 ];
 
+	/* The type
+	 */
+	uint32_t type;
+
 	/* The string metadata entry
 	 */
 	libbde_metadata_entry_t *string_entry;

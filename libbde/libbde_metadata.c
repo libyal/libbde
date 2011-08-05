@@ -463,7 +463,7 @@ int libbde_metadata_read(
 			 value_32bit );
 
 			byte_stream_copy_to_uint32_little_endian(
-			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_size,
+			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->number_of_volume_header_sectors,
 			 value_32bit );
 			libnotify_printf(
 			 "%s: number of volume header sectors\t\t\t: %" PRIu32 "\n",
@@ -994,7 +994,7 @@ int libbde_metadata_read(
 				}
 				break;
 
-			case LIBBDE_ENTRY_TYPE_VOLUME_NAME:
+			case LIBBDE_ENTRY_TYPE_DESCRIPTION:
 #if defined( HAVE_DEBUG_OUTPUT )
 				if( libbde_metadata_entry_read_string(
 				     metadata_entry,
@@ -1034,7 +1034,7 @@ int libbde_metadata_read(
 							 &( metadata_entry->value_data[ 8 ] ),
 							 value_64bit );
 							libnotify_printf(
-							 "%s: size\t\t\t\t\t\t: %" PRIu64 "\n",
+							 "%s: unknown\t\t\t\t\t\t: 0x%" PRIx64 "\n",
 							 function,
 							 value_64bit );
 
@@ -1603,9 +1603,43 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 	if( version == 1 )
 	{
-/* TODO support sizes of 0x2c and 0x1c ?
- */
-		if( data_size == 0x4c )
+		if( data_size == 0x1c )
+		{
+			if( memory_copy(
+			     full_volume_encryption_key,
+			     &( unencrypted_data[ 28 ] ),
+			     16 ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy unencrypted full volume encryption key.",
+				 function );
+
+				goto on_error;
+			}
+			result = 1;
+		}
+		else if( data_size == 0x2c )
+		{
+			if( memory_copy(
+			     full_volume_encryption_key,
+			     &( unencrypted_data[ 28 ] ),
+			     32 ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy unencrypted full volume encryption key.",
+				 function );
+
+				goto on_error;
+			}
+			result = 1;
+		}
+		else if( data_size == 0x4c )
 		{
 			if( memory_copy(
 			     full_volume_encryption_key,
@@ -1664,23 +1698,25 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( memory_set(
-	     unencrypted_data,
-	     0,
-	     unencrypted_data_size ) == NULL )
+	if( unencrypted_data != NULL )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear unencrypted data.",
-		 function );
+		if( memory_set(
+		     unencrypted_data,
+		     0,
+		     unencrypted_data_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear unencrypted data.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		memory_free(
+		 unencrypted_data );
 	}
-	memory_free(
-	 unencrypted_data );
-
 	return( result );
 
 on_error:

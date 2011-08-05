@@ -27,6 +27,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_definitions.h"
 #include "libbde_encryption.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
@@ -270,7 +271,7 @@ int libbde_sector_data_read(
 #endif
 	if( sector_data_offset == 0 )
 	{
-		if( io_handle->version == 2 )
+		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		{
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libnotify_verbose != 0 )
@@ -330,7 +331,7 @@ int libbde_sector_data_read(
 	}
 #endif
 	if( ( sector_data_offset == io_handle->volume_header_offset )
-	 && ( io_handle->version == 1 ) )
+	 && ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA ) )
 	{
 		if( memory_copy(
 		     sector_data->data,

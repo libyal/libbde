@@ -47,15 +47,6 @@ struct libbde_encryption_context
 	 */
 	uint32_t method;
 
-/* TODO are the VMK contexts necessary ? */
-	/* The VMK (AES) decryption context
-	 */
-	libbde_aes_context_t *vmk_decryption_context;
-
-	/* The VMK (AES) encryption context
-	 */
-	libbde_aes_context_t *vmk_encryption_context;
-
 	/* The FVEK (AES) decryption context
 	 */
 	libbde_aes_context_t *fvek_decryption_context;
@@ -84,7 +75,6 @@ int libbde_encryption_free(
 
 int libbde_encryption_set_keys(
      libbde_encryption_context_t *context,
-     uint8_t volume_master_key[ 32 ],
      uint8_t full_volume_encryption_key[ 32 ],
      uint8_t tweak_key[ 32 ],
      liberror_error_t **error );

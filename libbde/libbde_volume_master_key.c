@@ -29,6 +29,7 @@
 #include <libnotify.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
+#include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libfdatetime.h"
@@ -233,7 +234,6 @@ int libbde_volume_master_key_read(
 
 	libfdatetime_filetime_t *filetime                     = NULL;
 	libfguid_identifier_t *guid                           = NULL;
-	uint32_t value_32bit                                  = 0;
 	int result                                            = 0;
 #endif
 
@@ -299,6 +299,10 @@ int libbde_volume_master_key_read(
 
 		goto on_error;
 	}
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->type,
+	 volume_master_key->type );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -449,13 +453,12 @@ int libbde_volume_master_key_read(
 
 			goto on_error;
 		}
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->unknown1,
-		 value_32bit );
 		libnotify_printf(
-		 "%s: unknown1\t\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: type\t\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
 		 function,
-		 value_32bit );
+		 volume_master_key->type,
+		 libbde_debug_print_volume_master_key_type(
+		  volume_master_key->type ) );
 
 		libnotify_printf(
 		 "\n" );
@@ -714,27 +717,25 @@ int libbde_volume_master_key_is_disk_password_protected(
 
 		return( -1 );
 	}
-	if( volume_master_key->string_entry == NULL )
+	if( volume_master_key->type == LIBBDE_VMK_TYPE_RECOVERY_KEY_PROTECTED )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume master key - missing string entry.",
-		 function );
-
-		return( -1 );
+		return( 1 );
 	}
-	if( volume_master_key->string_entry->value_data_size == 26 )
+/* TODO this approach does not work for BitLocker ToGo
+	if( volume_master_key->string_entry != NULL )
 	{
-		if( memory_compare(
-		     volume_master_key->string_entry->value_data,
-		     libbde_volume_master_key_disk_password,
-		     26 ) == 0 )
+		if( volume_master_key->string_entry->value_data_size == 26 )
 		{
-			return( 1 );
+			if( memory_compare(
+			     volume_master_key->string_entry->value_data,
+			     libbde_volume_master_key_disk_password,
+			     26 ) == 0 )
+			{
+				return( 1 );
+			}
 		}
 	}
+*/
 	return( 0 );
 }
 
@@ -758,27 +759,25 @@ int libbde_volume_master_key_is_external_key_protected(
 
 		return( -1 );
 	}
-	if( volume_master_key->string_entry == NULL )
+	if( volume_master_key->type == LIBBDE_VMK_TYPE_EXTERNAL_KEY_PROTECTED )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume master key - missing string entry.",
-		 function );
-
-		return( -1 );
+		return( 1 );
 	}
-	if( volume_master_key->string_entry->value_data_size == 24 )
+/* TODO this approach does not work for BitLocker ToGo
+	if( volume_master_key->string_entry != NULL )
 	{
-		if( memory_compare(
-		     volume_master_key->string_entry->value_data,
-		     libbde_volume_master_key_external_key,
-		     24 ) == 0 )
+		if( volume_master_key->string_entry->value_data_size == 24 )
 		{
-			return( 1 );
+			if( memory_compare(
+			     volume_master_key->string_entry->value_data,
+			     libbde_volume_master_key_external_key,
+			     24 ) == 0 )
+			{
+				return( 1 );
+			}
 		}
 	}
+*/
 	return( 0 );
 }
 

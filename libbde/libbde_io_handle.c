@@ -28,6 +28,7 @@
 #include <liberror.h>
 #include <libnotify.h>
 
+#include "libbde_definitions.h"
 #include "libbde_encryption.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
@@ -40,6 +41,7 @@
 
 const uint8_t bde_boot_entry_point_vista[ 3 ] = { 0xeb, 0x52, 0x90 };
 const uint8_t bde_boot_entry_point_win7[ 3 ]  = { 0xeb, 0x58, 0x90 };
+const uint8_t bde_identifier[ 16 ]            = { 0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
 
 const uint8_t *bde_signature = (uint8_t *) "-FVE-FS-";
 
@@ -94,6 +96,7 @@ int libbde_io_handle_initialize(
 
 			goto on_error;
 		}
+		( *io_handle )->bytes_per_sector = 512;
 	}
 	return( 1 );
 
@@ -260,14 +263,38 @@ int libbde_io_handle_read_volume_header(
 	     bde_boot_entry_point_vista,
 	     3 ) == 0 )
 	{
-		io_handle->version = 1;
+		io_handle->version = LIBBDE_VERSION_WINDOWS_VISTA;
 	}
 	else if( memory_compare(
 	          volume_header_data,
 	          bde_boot_entry_point_win7,
 	          3 ) == 0 )
 	{
-		io_handle->version = 2;
+		if( memory_compare(
+		     ( (bde_volume_header_windows_7_t *) volume_header_data )->identifier,
+		     bde_identifier,
+		     16 ) == 0 )
+		{
+			io_handle->version = LIBBDE_VERSION_WINDOWS_7;
+		}
+		else if( memory_compare(
+		          ( (bde_volume_header_togo_t *) volume_header_data )->identifier,
+		          bde_identifier,
+		          16 ) == 0 )
+		{
+			io_handle->version = LIBBDE_VERSION_TOGO;
+		}
+		else
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: unsupported identifier.",
+			 function );
+
+			goto on_error;
+		}
 	}
 	else
 	{
@@ -280,42 +307,60 @@ int libbde_io_handle_read_volume_header(
 
 		goto on_error;
 	}
-	if( memory_compare(
-	     &( volume_header_data[ 3 ] ),
-	     bde_signature,
-	     8 ) != 0 )
+	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
+	 || ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 ) )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid volume signature.",
-		 function );
+		if( memory_compare(
+		     &( volume_header_data[ 3 ] ),
+		     bde_signature,
+		     8 ) != 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: invalid volume signature.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (bde_volume_header_v1_t *) volume_header_data )->bytes_per_sector,
+	 ( (bde_volume_header_windows_vista_t *) volume_header_data )->bytes_per_sector,
 	 io_handle->bytes_per_sector );
 
-	if( io_handle->version == 1 )
+	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_v1_t *) volume_header_data )->first_metadata_offset,
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->first_metadata_offset,
 		 io_handle->first_metadata_offset );
 	}
-	else if( io_handle->version == 2 )
+	else if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_v2_t *) volume_header_data )->first_metadata_offset,
+		 ( (bde_volume_header_windows_7_t *) volume_header_data )->first_metadata_offset,
 		 io_handle->first_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_v2_t *) volume_header_data )->second_metadata_offset,
+		 ( (bde_volume_header_windows_7_t *) volume_header_data )->second_metadata_offset,
 		 io_handle->second_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_v2_t *) volume_header_data )->third_metadata_offset,
+		 ( (bde_volume_header_windows_7_t *) volume_header_data )->third_metadata_offset,
+		 io_handle->third_metadata_offset );
+	}
+	else if( io_handle->version == LIBBDE_VERSION_TOGO )
+	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_volume_header_togo_t *) volume_header_data )->first_metadata_offset,
+		 io_handle->first_metadata_offset );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_volume_header_togo_t *) volume_header_data )->second_metadata_offset,
+		 io_handle->second_metadata_offset );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_volume_header_togo_t *) volume_header_data )->third_metadata_offset,
 		 io_handle->third_metadata_offset );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -345,22 +390,22 @@ int libbde_io_handle_read_volume_header(
 		 function,
 		 io_handle->bytes_per_sector );
 
-		if( io_handle->version == 1 )
+		if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 		{
 			libnotify_printf(
 			 "%s: unknown1:\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_volume_header_v1_t *) volume_header_data )->unknown1,
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown1,
 			 43 );
 		}
-		else if( io_handle->version == 2 )
+		else if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		{
 			libnotify_printf(
 			 "%s: unknown1:\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_volume_header_v2_t *) volume_header_data )->unknown1,
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown1,
 			 147 );
 
 			if( libfguid_identifier_initialize(
@@ -378,7 +423,7 @@ int libbde_io_handle_read_volume_header(
 			}
 			if( libfguid_identifier_copy_from_byte_stream(
 			     guid,
-			     ( (bde_volume_header_v2_t *) volume_header_data )->bitlocker_identifier,
+			     ( (bde_volume_header_windows_7_t *) volume_header_data )->identifier,
 			     16,
 			     LIBFGUID_ENDIAN_LITTLE,
 			     error ) != 1 )
@@ -417,7 +462,88 @@ int libbde_io_handle_read_volume_header(
 				goto on_error;
 			}
 			libnotify_printf(
-			 "%s: BitLocker identifier\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 function,
+			 guid_string );
+
+			if( libfguid_identifier_free(
+			     &guid,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free GUID.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		else if( io_handle->version == LIBBDE_VERSION_TOGO )
+		{
+			libnotify_printf(
+			 "%s: unknown1:\n",
+			 function );
+			libnotify_print_data(
+			 ( (bde_volume_header_togo_t *) volume_header_data )->unknown1,
+			 411 );
+
+			if( libfguid_identifier_initialize(
+			     &guid,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create GUID.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfguid_identifier_copy_from_byte_stream(
+			     guid,
+			     ( (bde_volume_header_togo_t *) volume_header_data )->identifier,
+			     16,
+			     LIBFGUID_ENDIAN_LITTLE,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+				 "%s: unable to copy byte stream to GUID.",
+				 function );
+
+				goto on_error;
+			}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+			result = libfguid_identifier_copy_to_utf16_string(
+				  guid,
+				  (uint16_t *) guid_string,
+				  LIBFGUID_IDENTIFIER_STRING_SIZE,
+				  error );
+#else
+			result = libfguid_identifier_copy_to_utf8_string(
+				  guid,
+				  (uint8_t *) guid_string,
+				  LIBFGUID_IDENTIFIER_STRING_SIZE,
+				  error );
+#endif
+			if( result != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+				 "%s: unable to copy GUID to string.",
+				 function );
+
+				goto on_error;
+			}
+			libnotify_printf(
+			 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 			 function,
 			 guid_string );
 
@@ -440,7 +566,8 @@ int libbde_io_handle_read_volume_header(
 		 function,
 		 io_handle->first_metadata_offset );
 
-		if( io_handle->version == 2 )
+		if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+		 || ( io_handle->version == LIBBDE_VERSION_TOGO ) )
 		{
 			libnotify_printf(
 			 "%s: second metadata offset\t\t: 0x%08" PRIx64 "\n",
