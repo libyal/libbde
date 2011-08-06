@@ -1,8 +1,8 @@
 TODO
+* fix diffuser A
 * debug print unencrypted data
 * what is entry type 0x000b FKEV for external key ?
 * AES
-  - fix openssl EVP error on finalize of CBC
   - add support for MS Crypto API implementation
   - clean up and test fallback routines
 * the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
@@ -11,6 +11,10 @@ TODO
 * stretch key
   - add aes ccm encrypted key to struct
 * debug print more volume header info
+
+Optimizations
+* combine difusers in a single function
+  or pass values 32bit
 
 Library
 * add external (start up) key support
@@ -47,6 +51,13 @@ Validate test cases:
 * AES 256 diffuser
 * recovery key
 * external key
+
+20110806
+* updated libhmac - bug fixes for Solaris
+* updated libsystem, libfvalue, 
+* created work around for openssl EVP issues
+  - currently ignoring the output of Final function
+* cleaned up some TODOs
 
 20110805
 * worked on reading sector data

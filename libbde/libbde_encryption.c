@@ -24,6 +24,7 @@
 #include <types.h>
 
 #include <liberror.h>
+#include <libnotify.h>
 
 #include "libbde_aes.h"
 #include "libbde_definitions.h"
@@ -481,7 +482,7 @@ int libbde_encryption_crypt(
 		     block_key_data,
 		     16,
 		     xor_data,
-		     64,
+		     16,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -493,7 +494,7 @@ int libbde_encryption_crypt(
 
 			return( -1 );
 		}
-		/* Negate block key
+		/* Set the last byte to contain 0x80 (128)
 		 */
 		block_key_data[ 15 ] = 0x80;
 
@@ -503,7 +504,7 @@ int libbde_encryption_crypt(
 		     block_key_data,
 		     16,
 		     &( xor_data[ 16 ] ),
-		     56,
+		     16,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -603,6 +604,10 @@ int libbde_encryption_crypt(
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
+			libnotify_print_data(
+			 output_data,
+			 output_data_size );
+
 			if( libbde_diffuser_b(
 			     output_data,
 			     output_data_size,
@@ -617,6 +622,15 @@ int libbde_encryption_crypt(
 
 				return( -1 );
 			}
+			libnotify_print_data(
+			 output_data,
+			 output_data_size );
+
+			Diffuser_A_Decrypt(
+			 output_data,
+			 output_data_size );
+
+/* TODO
 			if( libbde_diffuser_a(
 			     output_data,
 			     output_data_size,
@@ -631,6 +645,11 @@ int libbde_encryption_crypt(
 
 				return( -1 );
 			}
+*/
+			libnotify_print_data(
+			 output_data,
+			 output_data_size );
+
 			for( data_index = 0;
 			     data_index < input_data_size;
 			     data_index++ )

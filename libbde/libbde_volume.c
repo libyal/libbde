@@ -1106,7 +1106,6 @@ int libbde_volume_open_read_keys_from_metadata(
      libbde_metadata_t *metadata,
      liberror_error_t **error )
 {
-/* TODO wipe key data */
 	uint8_t full_volume_encryption_key[ 32 ];
 	uint8_t tweak_key[ 32 ];
 	uint8_t volume_master_key[ 32 ];
@@ -1149,6 +1148,48 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		return( -1 );
 	}
+	if( memory_set(
+	     full_volume_encryption_key,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear full volume encryption key.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     tweak_key,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear tweak key.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     volume_master_key,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to volume master key.",
+		 function );
+
+		return( -1 );
+	}
 	volume_header_offset = metadata->volume_header_offset;
 	encryption_method    = metadata->encryption_method;
 
@@ -1167,7 +1208,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		 "%s: unable to retrieve volume master key from metadata.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	else if( result != 0 )
 	{
@@ -1187,7 +1228,7 @@ int libbde_volume_open_read_keys_from_metadata(
 			 "%s: unable to retrieve full volume encryption key from metadata.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	if( result != 0 )
@@ -1206,7 +1247,7 @@ int libbde_volume_open_read_keys_from_metadata(
 			 "%s: unable to create encryption context.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libnotify_verbose != 0 )
@@ -1246,10 +1287,70 @@ int libbde_volume_open_read_keys_from_metadata(
 			 "%s: unable to set keys in encryption context.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
+	if( memory_set(
+	     full_volume_encryption_key,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear full volume encryption key.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     tweak_key,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear tweak key.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     volume_master_key,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to volume master key.",
+		 function );
+
+		goto on_error;
+	}
 	return( result );
+
+on_error:
+	memory_set(
+	 full_volume_encryption_key,
+	 0,
+	 32 );
+
+	memory_set(
+	 tweak_key,
+	 0,
+	 32 );
+
+	memory_set(
+	 volume_master_key,
+	 0,
+	 32 );
+
+	return( -1 );
 }
 
 /* Reads data at the current offset into a buffer
