@@ -531,6 +531,7 @@ int libbde_encryption_crypt(
 				 */
 				output_data[ data_index ] ^= xor_data[ data_index & 0x1f ];
 			}
+/* TODO create diffuser encryption functons
 			if( libbde_diffuser_a(
 			     output_data,
 			     output_data_size,
@@ -559,6 +560,7 @@ int libbde_encryption_crypt(
 
 				return( -1 );
 			}
+*/
 		}
 		if( libbde_aes_cbc_crypt(
 		     context->fvek_encryption_context,
