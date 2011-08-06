@@ -25,6 +25,7 @@
 #include <types.h>
 
 #include <liberror.h>
+#include <libnotify.h>
 
 #include "libbde_diffuser.h"
 
@@ -39,7 +40,7 @@ int libbde_diffuser_a(
 	uint32_t *values_32bit        = NULL;
 	static char *function         = "libbde_diffuser_a";
 	size_t data_index             = 0;
-	size_t number_of_iterations   = 0;
+	size_t number_of_cycles       = 0;
 	size_t number_of_values_32bit = 0;
 	size_t value_32bit_index1     = 0;
 	size_t value_32bit_index2     = 0;
@@ -94,6 +95,8 @@ int libbde_diffuser_a(
 
 		return( -1 );
 	}
+	data_index = 0;
+
 	for( value_32bit_index1 = 0;
 	     value_32bit_index1 < number_of_values_32bit;
 	     value_32bit_index1++ )
@@ -104,52 +107,60 @@ int libbde_diffuser_a(
 
 		data_index += sizeof( uint32_t );
 	}
-	number_of_iterations = 5;
+	number_of_cycles = 5;
 
-	while( number_of_iterations > 0 )
+	while( number_of_cycles > 0 )
 	{
 		value_32bit_index1 = 0;
+		value_32bit_index2 = number_of_values_32bit - 2;
+		value_32bit_index3 = number_of_values_32bit - 5;
 
 		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
 		{
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
-
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ byte_stream_bit_rotate_left_32bit(
 			                                       values_32bit[ value_32bit_index3 ],
 			                                       9 );
 
 			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
 
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
-
+			if( value_32bit_index3 >= number_of_values_32bit )
+			{
+				value_32bit_index3 -= number_of_values_32bit;
+			}
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
 
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
-
+			if( value_32bit_index2 >= number_of_values_32bit )
+			{
+				value_32bit_index2 -= number_of_values_32bit;
+			}
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ byte_stream_bit_rotate_left_32bit(
 			                                       values_32bit[ value_32bit_index3 ],
 			                                       13 );
 
 			value_32bit_index1++;
-
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+			value_32bit_index2++;
+			value_32bit_index3++;
 
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
 		}
-		number_of_iterations--;
+		number_of_cycles--;
 	}
+	data_index = 0;
+
 	for( value_32bit_index1 = 0;
 	     value_32bit_index1 < number_of_values_32bit;
 	     value_32bit_index1++ )
@@ -177,7 +188,7 @@ int libbde_diffuser_b(
 	uint32_t *values_32bit        = NULL;
 	static char *function         = "libbde_diffuser_b";
 	size_t data_index             = 0;
-	size_t number_of_iterations   = 0;
+	size_t number_of_cycles       = 0;
 	size_t number_of_values_32bit = 0;
 	size_t value_32bit_index1     = 0;
 	size_t value_32bit_index2     = 0;
@@ -232,6 +243,8 @@ int libbde_diffuser_b(
 
 		return( -1 );
 	}
+	data_index = 0;
+
 	for( value_32bit_index1 = 0;
 	     value_32bit_index1 < number_of_values_32bit;
 	     value_32bit_index1++ )
@@ -242,24 +255,25 @@ int libbde_diffuser_b(
 
 		data_index += sizeof( uint32_t );
 	}
-	number_of_iterations = 5;
+	number_of_cycles = 3;
 
-	while( number_of_iterations > 0 )
+	while( number_of_cycles > 0 )
 	{
 		value_32bit_index1 = 0;
+		value_32bit_index2 = 2;
+		value_32bit_index3 = 5;
 
-		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
+		while( ( ( number_of_cycles == 0 )
+		     &&  ( value_32bit_index1 < ( number_of_values_32bit - 1 ) ) )
+		    || ( ( ( number_of_cycles != 0 )
+		     &&  ( value_32bit_index1 < number_of_values_32bit ) ) ) )
 		{
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
-
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
-
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
+			value_32bit_index2++;
+			value_32bit_index3++;
 
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ byte_stream_bit_rotate_left_32bit(
@@ -267,27 +281,37 @@ int libbde_diffuser_b(
 			                                       10 );
 
 			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
 
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
-
+			if( value_32bit_index2 >= number_of_values_32bit )
+			{
+				value_32bit_index2 -= number_of_values_32bit;
+			}
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ values_32bit[ value_32bit_index3 ];
 
 			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
 
-			value_32bit_index2 = ( value_32bit_index1 - 2 ) % number_of_values_32bit;
-			value_32bit_index3 = ( value_32bit_index1 - 5 ) % number_of_values_32bit;
-
+			if( value_32bit_index3 >= number_of_values_32bit )
+			{
+				value_32bit_index3 -= number_of_values_32bit;
+			}
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ byte_stream_bit_rotate_left_32bit(
 			                                       values_32bit[ value_32bit_index3 ],
 			                                       25 );
 
 			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
 		}
-		number_of_iterations--;
+		number_of_cycles--;
 	}
+	data_index = 0;
+
 	for( value_32bit_index1 = 0;
 	     value_32bit_index1 < number_of_values_32bit;
 	     value_32bit_index1++ )
@@ -304,3 +328,83 @@ int libbde_diffuser_b(
 	return( 1 );
 }
 
+#define ROTATE(a,n)     (((a)<<(n))|(((a)&0xffffffff)>>(32-(n))))
+
+// this will apply an in place diffuser A decryption function
+uint32_t Diffuser_A_Decrypt(unsigned char *input, uint32_t input_size)
+{
+
+	unsigned long temp_array[512];
+	unsigned long loop_var1;
+	unsigned long loop_var2;
+	unsigned long loop_var3;
+	unsigned long max_loop;
+
+	unsigned long total_loop; // no . of times diffuser is applied to whole block
+
+	//init  array with supplied data
+	memcpy(temp_array,input,  input_size);
+ 
+
+	max_loop = input_size / 4;
+
+	total_loop = 5;  // the diffuser function is applied a total of 3 times
+
+while ( total_loop) {
+	// the below loop should be executed 
+	loop_var1 = 0;
+	loop_var2 = -2 % max_loop;
+	loop_var3 = -5 % max_loop;
+
+	loop_var2 = max_loop - 2;
+	loop_var3 = max_loop - 5;
+
+/*
+	while( loop_var1 < (max_loop-1) )
+*/
+	while( ( ( total_loop == 0 )
+	     &&  ( loop_var1 < (max_loop-1) ) )
+	    || ( ( total_loop != 0 )
+	     &&  ( loop_var1 < max_loop ) ) )
+	{
+
+		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  ROTATE( (temp_array [ loop_var3 ]),9));
+		loop_var1++;
+		loop_var2++;
+		loop_var3++;
+
+		if( loop_var3 >= max_loop )
+		{
+			loop_var3 -= max_loop;
+		}
+		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  temp_array [ loop_var3 ]);
+		loop_var1++;
+		loop_var2++;
+		loop_var3++;
+
+		if( loop_var2 >= max_loop )
+		{
+			loop_var2 -= max_loop;
+		}
+		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  ROTATE( (temp_array [ loop_var3 ]),13));
+		loop_var1++;
+		loop_var2++;
+		loop_var3++;
+
+		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  temp_array [ loop_var3 ]);
+		loop_var1++;
+		loop_var2++;
+		loop_var3++;
+	}
+
+	total_loop-- ;
+} // end total_loop
+
+
+
+// now copy the output onto to the input
+memcpy(input, temp_array, input_size);
+
+return 0;
+
+}

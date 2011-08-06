@@ -54,13 +54,20 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
 	                 " Drive Encryption (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -r password ] [ -hvV ] source\n\n" );
+#ifdef TODO
+	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -p password ] [ -r password ]\n"
+	                 "       [ -hvV ] source\n\n" );
+#endif
+	fprintf( stream, "Usage: bdeinfo [ -r password ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
+#ifdef TODO
 	fprintf( stream, "\t-k:     specify the file containing the external key.\n"
 	                 "\t        typically this file has the extension .BEK\n" );
+	fprintf( stream, "\t-p:     specify the password\n" );
+#endif
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
@@ -112,6 +119,7 @@ int main( int argc, char * const argv[] )
 	libbde_error_t *error                                   = NULL;
 	libbde_volume_t *volume                                 = NULL;
 	libcstring_system_character_t *option_external_key_file = NULL;
+	libcstring_system_character_t *option_password          = NULL;
 	libcstring_system_character_t *option_recovery_password = NULL;
 	libcstring_system_character_t *source                   = NULL;
 	char *program                                           = "bdeinfo";
@@ -149,7 +157,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = libsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hk:r:vV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "hk:p:r:vV" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -173,6 +181,11 @@ int main( int argc, char * const argv[] )
 
 			case (libcstring_system_integer_t) 'k':
 				option_external_key_file = optarg;
+
+				break;
+
+			case (libcstring_system_integer_t) 'p':
+				option_password = optarg;
 
 				break;
 
@@ -225,6 +238,10 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
 	if( option_external_key_file != NULL )
+	{
+/* TODO */
+	}
+	if( option_password != NULL )
 	{
 /* TODO */
 	}

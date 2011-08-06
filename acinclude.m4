@@ -205,32 +205,23 @@ AC_DEFUN([AC_CHECK_LIBBDE_OPENSSL_EVP],
    [ac_cv_cypher_aes=no])
   AC_CHECK_LIB(
    crypto,
-   EVP_DecryptInit,
+   EVP_CIPHER_CTX_set_padding,
+   [ac_cv_cypher_aes_dummy=yes],
+   [ac_cv_cypher_aes=no])
+
+  AC_CHECK_LIB(
+   crypto,
+   EVP_CipherInit_ex,
    [ac_cv_cypher_aes_dummy=yes],
    [ac_cv_cypher_aes=no])
   AC_CHECK_LIB(
    crypto,
-   EVP_DecryptUpdate,
+   EVP_CipherUpdate,
    [ac_cv_cypher_aes_dummy=yes],
    [ac_cv_cypher_aes=no])
   AC_CHECK_LIB(
    crypto,
-   EVP_DecryptFinal,
-   [ac_cv_cypher_aes_dummy=yes],
-   [ac_cv_cypher_aes=no])
-  AC_CHECK_LIB(
-   crypto,
-   EVP_EncryptInit,
-   [ac_cv_cypher_aes_dummy=yes],
-   [ac_cv_cypher_aes=no])
-  AC_CHECK_LIB(
-   crypto,
-   EVP_EncryptUpdate,
-   [ac_cv_cypher_aes_dummy=yes],
-   [ac_cv_cypher_aes=no])
-  AC_CHECK_LIB(
-   crypto,
-   EVP_EncryptFinal,
+   EVP_CipherFinal_ex,
    [ac_cv_cypher_aes_dummy=yes],
    [ac_cv_cypher_aes=no])
   ])
