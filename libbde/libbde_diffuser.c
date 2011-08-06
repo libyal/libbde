@@ -263,10 +263,7 @@ int libbde_diffuser_b(
 		value_32bit_index2 = 2;
 		value_32bit_index3 = 5;
 
-		while( ( ( number_of_cycles == 0 )
-		     &&  ( value_32bit_index1 < ( number_of_values_32bit - 1 ) ) )
-		    || ( ( ( number_of_cycles != 0 )
-		     &&  ( value_32bit_index1 < number_of_values_32bit ) ) ) )
+		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
 		{
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ values_32bit[ value_32bit_index3 ];
@@ -359,13 +356,7 @@ while ( total_loop) {
 	loop_var2 = max_loop - 2;
 	loop_var3 = max_loop - 5;
 
-/*
 	while( loop_var1 < (max_loop-1) )
-*/
-	while( ( ( total_loop == 0 )
-	     &&  ( loop_var1 < (max_loop-1) ) )
-	    || ( ( total_loop != 0 )
-	     &&  ( loop_var1 < max_loop ) ) )
 	{
 
 		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  ROTATE( (temp_array [ loop_var3 ]),9));
