@@ -42,6 +42,17 @@
 extern "C" {
 #endif
 
+#if defined( WINAPI )
+#define LIBBDE_HAVE_AES_SUPPORT
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
+#define LIBBDE_HAVE_AES_SUPPORT
+
+#elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
+#define LIBBDE_HAVE_AES_SUPPORT
+
+#endif
+
 #if defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 #define LIBBDE_AES_CRYPT_MODE_DECRYPT	AES_DECRYPT
 #define LIBBDE_AES_CRYPT_MODE_ENCRYPT	AES_ENCRYPT
@@ -150,6 +161,7 @@ int libbde_aes_ccm_crypt(
      size_t output_data_size,
      liberror_error_t **error );
 
+#ifdef TODO
 int libbde_aes_cfb_crypt(
      libbde_aes_context_t *context,
      int mode,
@@ -160,6 +172,7 @@ int libbde_aes_cfb_crypt(
      uint8_t *output_data,
      size_t output_data_size,
      liberror_error_t **error );
+#endif
 
 int libbde_aes_ecb_crypt(
      libbde_aes_context_t *context,

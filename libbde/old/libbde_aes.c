@@ -57,183 +57,63 @@
  * http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
  */
 
-#define libbde_aes_calculate_forward_substitution_value( value, index0, index1, index2, index3 ) \
-	value   = libbde_aes_forward_substitution_box[ index3 ]; \
-	value <<= 8; \
-	value  |= libbde_aes_forward_substitution_box[ index2 ]; \
-	value <<= 8; \
-	value  |= libbde_aes_forward_substitution_box[ index1 ]; \
-	value <<= 8; \
-	value  |= libbde_aes_forward_substitution_box[ index0 ];
+/* TODO replace X - Y with more descriptive names */
 
-#define libbde_aes_calculate_forward_table_value( value, index0, index1, index2, index3 ) \
-	value  = libbde_aes_forward_table0[ index0 ]; \
-	value ^= libbde_aes_forward_table1[ index1 ]; \
-	value ^= libbde_aes_forward_table2[ index2 ]; \
-	value ^= libbde_aes_forward_table3[ index3 ];
+#define libbde_aes_calculate_forward_round( round_keys, X0, X1, X2, X3, Y0, Y1, Y2, Y3 ) \
+{ \
+	X0 = *round_keys++ \
+	   ^ libbde_aes_forward_table0[ ( Y0 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y1 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y2 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y3 >> 24 ) & 0xff ]; \
+\
+	X1 = *round_keys++ \
+	   ^ libbde_aes_forward_table0[ ( Y1 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y2 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y3 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y0 >> 24 ) & 0xff ]; \
+\
+	X2 = *round_keys++ \
+	   ^ libbde_aes_forward_table0[ ( Y2 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y3 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y0 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y1 >> 24 ) & 0xff ]; \
+\
+	X3 = *round_keys++ \
+	   ^ libbde_aes_forward_table0[ ( Y3 ) & 0xff ] \
+	   ^ libbde_aes_forward_table1[ ( Y0 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_forward_table2[ ( Y1 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_forward_table3[ ( Y2 >> 24 ) & 0xff ]; \
+}
 
-#define libbde_aes_calculate_reverse_substitution_value( value, index0, index1, index2, index3 ) \
-	value   = libbde_aes_reverse_substitution_box[ index3 ]; \
-	value <<= 8; \
-	value  |= libbde_aes_reverse_substitution_box[ index2 ]; \
-	value <<= 8; \
-	value  |= libbde_aes_reverse_substitution_box[ index1 ]; \
-	value <<= 8; \
-	value  |= libbde_aes_reverse_substitution_box[ index0 ];
+/* TODO replace X - Y with more descriptive names */
 
-#define libbde_aes_calculate_reverse_table_value( value, index0, index1, index2, index3 ) \
-	value  = libbde_aes_reverse_table0[ index0 ]; \
-	value ^= libbde_aes_reverse_table1[ index1 ]; \
-	value ^= libbde_aes_reverse_table2[ index2 ]; \
-	value ^= libbde_aes_reverse_table3[ index3 ];
-
-#define libbde_aes_calculate_forward_substitution_round( round_keys, values_32bit, cipher_values_32bit, substitution_value ) \
-	libbde_aes_calculate_forward_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 0 ], \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 24 ) ); \
+#define libbde_aes_calculate_reverse_round( round_keys, X0, X1, X2, X3, Y0, Y1, Y2, Y3 ) \
+{ \
+	X0 = *round_keys++ \
+	   ^ libbde_aes_reverse_table0[ ( Y0 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y3 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y2 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y1 >> 24 ) & 0xff ]; \
 \
-	values_32bit[ 0 ] = round_keys[ 0 ] ^ substitution_value; \
+	X1 = *round_keys++ \
+	   ^ libbde_aes_reverse_table0[ ( Y1 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y0 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y3 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y2 >> 24 ) & 0xff ]; \
 \
-	libbde_aes_calculate_forward_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 1 ], \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 24 ) ); \
+	X2 = *round_keys++ \
+	   ^ libbde_aes_reverse_table0[ ( Y2 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y1 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y0 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y3 >> 24 ) & 0xff ]; \
 \
-	values_32bit[ 1 ] = round_keys[ 1 ] ^ substitution_value; \
-\
-	libbde_aes_calculate_forward_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 2 ], \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 24 ) ); \
-\
-	values_32bit[ 2 ] = round_keys[ 2 ] ^ substitution_value; \
-\
-	libbde_aes_calculate_forward_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 3 ], \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 24 ) ); \
-\
-	values_32bit[ 3 ] = round_keys[ 3 ] ^ substitution_value; 
-
-#define libbde_aes_calculate_forward_table_round( round_keys, values_32bit, cipher_values_32bit, table_value ) \
-	libbde_aes_calculate_forward_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 0 ], \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 24 ) ); \
-\
-	values_32bit[ 0 ] = round_keys[ 0 ] ^ table_value; \
-\
-	libbde_aes_calculate_forward_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 1 ], \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 24 ) ); \
-\
-	values_32bit[ 1 ] = round_keys[ 1 ] ^ table_value; \
-\
-	libbde_aes_calculate_forward_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 2 ], \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 24 ) ); \
-\
-	values_32bit[ 2 ] = round_keys[ 2 ] ^ table_value; \
-\
-	libbde_aes_calculate_forward_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 3 ], \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 24 ) ); \
-\
-	values_32bit[ 3 ] = round_keys[ 3 ] ^ table_value; 
-
-#define libbde_aes_calculate_reverse_substitution_round( round_keys, values_32bit, cipher_values_32bit, substitution_value ) \
-	libbde_aes_calculate_reverse_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 0 ], \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 24 ) ); \
-\
-	values_32bit[ 0 ] = round_keys[ 0 ] ^ substitution_value; \
-\
-	libbde_aes_calculate_reverse_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 1 ], \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 24 ) ); \
-\
-	values_32bit[ 1 ] = round_keys[ 1 ] ^ substitution_value; \
-\
-	libbde_aes_calculate_reverse_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 2 ], \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 24 ) ); \
-\
-	values_32bit[ 2 ] = round_keys[ 2 ] ^ substitution_value; \
-\
-	libbde_aes_calculate_reverse_substitution_value( \
-	 substitution_value, \
-	 (uint8_t) cipher_values_32bit[ 3 ], \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 24 ) ); \
-\
-	values_32bit[ 3 ] = round_keys[ 3 ] ^ substitution_value;
-
-#define libbde_aes_calculate_reverse_table_round( round_keys, values_32bit, cipher_values_32bit, table_value ) \
-	libbde_aes_calculate_reverse_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 0 ], \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 24 ) ); \
-\
-	values_32bit[ 0 ] = round_keys[ 0 ] ^ table_value; \
-\
-	libbde_aes_calculate_reverse_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 1 ], \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 24 ) ); \
-\
-	values_32bit[ 1 ] = round_keys[ 1 ] ^ table_value; \
-\
-	libbde_aes_calculate_reverse_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 2 ], \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 3 ] >> 24 ) ); \
-\
-	values_32bit[ 2 ] = round_keys[ 2 ] ^ table_value; \
-\
-	libbde_aes_calculate_reverse_table_value( \
-	 table_value, \
-	 (uint8_t) cipher_values_32bit[ 3 ], \
-	 (uint8_t) ( cipher_values_32bit[ 2 ] >> 8 ), \
-	 (uint8_t) ( cipher_values_32bit[ 1 ] >> 16 ), \
-	 (uint8_t) ( cipher_values_32bit[ 0 ] >> 24 ) ); \
-\
-	values_32bit[ 3 ] = round_keys[ 3 ] ^ table_value;
+	X3 = *round_keys++ \
+	   ^ libbde_aes_reverse_table0[ ( Y3 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table1[ ( Y2 >>  8 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table2[ ( Y1 >> 16 ) & 0xff ] \
+	   ^ libbde_aes_reverse_table3[ ( Y0 >> 24 ) & 0xff ]; \
+}
 
 /* Forward S-box & tables
  */
@@ -628,18 +508,14 @@ int libbde_aes_set_decryption_key(
      size_t bit_size,
      liberror_error_t **error )
 {
-	static char *function           = "libbde_aes_set_decryption_key";
+	static char *function = "libbde_aes_set_decryption_key";
 
 #if !defined( LIBBDE_HAVE_AES_SUPPORT )
 	libbde_aes_context_t encryption_context;
 
-	uint32_t *encryption_round_keys = NULL;
-	uint32_t *round_keys            = NULL;
-	uint8_t byte_value0             = 0;
-	uint8_t byte_value1             = 0;
-	uint8_t byte_value2             = 0;
-	uint8_t byte_value3             = 0;
-	int round_key_iterator          = 0;
+	uint32_t *round_keys  = NULL;
+	int byte_index        = 0;
+	int round_key_index   = 0;
 #endif
 
 	if( context == NULL )
@@ -703,6 +579,7 @@ int libbde_aes_set_decryption_key(
 	context->bit_size = bit_size;
 
 #else
+/* TODO test */
 	if( bit_size == 128 )
 	{
 		context->number_of_round_keys = 10;
@@ -736,95 +613,46 @@ int libbde_aes_set_decryption_key(
 
 		return( -1 );
 	}
+/* TODO */
+	uint32_t *SK;
+
 	/* Point to the end of the round keys
 	 */
-	encryption_round_keys = encryption_context.round_keys
-	                      + ( encryption_context.number_of_round_keys * sizeof( uint32_t ) );
+	SK = encryption_context.round_keys
+	   + ( encryption_context.number_of_round_keys * sizeof( uint32_t ) );
 
-/* TODO why doesn't this work
-	encryption_round_keys = &( encryption_context.round_keys[ encryption_context.number_of_round_keys ] );
-*/
+/* TODO replace by:
+	SK = &( encryption_context.round_keys[ encryption_context.number_of_round_keys ] );
+ */
 
-	round_keys[ 0 ] = encryption_round_keys[ 0 ];
-	round_keys[ 1 ] = encryption_round_keys[ 1 ];
-	round_keys[ 2 ] = encryption_round_keys[ 2 ];
-	round_keys[ 3 ] = encryption_round_keys[ 3 ];
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
 
-	round_keys            += 4;
-	encryption_round_keys -= 4;
+	SK -= 8;
 
-	for( round_key_iterator = context->number_of_round_keys;
-	     round_key_iterator > 1;
-	     round_key_iterator-- )
+	for( round_key_index = context->number_of_round_keys;
+	     round_key_index > 1;
+	     round_key_index-- )
 	{
-		byte_value0 = (uint8_t) encryption_round_keys[ 0 ];
-		byte_value1 = (uint8_t) ( encryption_round_keys[ 0 ] >> 8 );
-		byte_value2 = (uint8_t) ( encryption_round_keys[ 0 ] >> 16 );
-		byte_value3 = (uint8_t) ( encryption_round_keys[ 0 ] >> 24 );
+		for( byte_index = 0;
+		     byte_index < 4;
+		     byte_index++ )
+		{
+			*round_keys++ = libbde_aes_reverse_table0[ libbde_aes_forward_substitution_box[ ( *SK ) & 0xff ] ]
+			              ^ libbde_aes_reverse_table1[ libbde_aes_forward_substitution_box[ ( *SK >>  8 ) & 0xff ] ]
+			              ^ libbde_aes_reverse_table2[ libbde_aes_forward_substitution_box[ ( *SK >> 16 ) & 0xff ] ]
+			              ^ libbde_aes_reverse_table3[ libbde_aes_forward_substitution_box[ ( *SK >> 24 ) & 0xff ] ];
 
-		byte_value0 = libbde_aes_forward_substitution_box[ byte_value0 ];
-		byte_value1 = libbde_aes_forward_substitution_box[ byte_value1 ];
-		byte_value2 = libbde_aes_forward_substitution_box[ byte_value2 ];
-		byte_value3 = libbde_aes_forward_substitution_box[ byte_value3 ];
-
-		round_keys[ 0 ] = libbde_aes_reverse_table0[ byte_value0 ]
-			        ^ libbde_aes_reverse_table1[ byte_value1 ]
-			        ^ libbde_aes_reverse_table2[ byte_value2 ]
-			        ^ libbde_aes_reverse_table3[ byte_value3 ];
-
-		byte_value0 = (uint8_t) encryption_round_keys[ 1 ];
-		byte_value1 = (uint8_t) ( encryption_round_keys[ 1 ] >> 8 );
-		byte_value2 = (uint8_t) ( encryption_round_keys[ 1 ] >> 16 );
-		byte_value3 = (uint8_t) ( encryption_round_keys[ 1 ] >> 24 );
-
-		byte_value0 = libbde_aes_forward_substitution_box[ byte_value0 ];
-		byte_value1 = libbde_aes_forward_substitution_box[ byte_value1 ];
-		byte_value2 = libbde_aes_forward_substitution_box[ byte_value2 ];
-		byte_value3 = libbde_aes_forward_substitution_box[ byte_value3 ];
-
-		round_keys[ 1 ] = libbde_aes_reverse_table0[ byte_value0 ]
-			        ^ libbde_aes_reverse_table1[ byte_value1 ]
-			        ^ libbde_aes_reverse_table2[ byte_value2 ]
-			        ^ libbde_aes_reverse_table3[ byte_value3 ];
-
-		byte_value0 = (uint8_t) encryption_round_keys[ 2 ];
-		byte_value1 = (uint8_t) ( encryption_round_keys[ 2 ] >> 8 );
-		byte_value2 = (uint8_t) ( encryption_round_keys[ 2 ] >> 16 );
-		byte_value3 = (uint8_t) ( encryption_round_keys[ 2 ] >> 24 );
-
-		byte_value0 = libbde_aes_forward_substitution_box[ byte_value0 ];
-		byte_value1 = libbde_aes_forward_substitution_box[ byte_value1 ];
-		byte_value2 = libbde_aes_forward_substitution_box[ byte_value2 ];
-		byte_value3 = libbde_aes_forward_substitution_box[ byte_value3 ];
-
-		round_keys[ 2 ] = libbde_aes_reverse_table0[ byte_value0 ]
-			        ^ libbde_aes_reverse_table1[ byte_value1 ]
-			        ^ libbde_aes_reverse_table2[ byte_value2 ]
-			        ^ libbde_aes_reverse_table3[ byte_value3 ];
-
-		byte_value0 = (uint8_t) encryption_round_keys[ 3 ];
-		byte_value1 = (uint8_t) ( encryption_round_keys[ 3 ] >> 8 );
-		byte_value2 = (uint8_t) ( encryption_round_keys[ 3 ] >> 16 );
-		byte_value3 = (uint8_t) ( encryption_round_keys[ 3 ] >> 24 );
-
-		byte_value0 = libbde_aes_forward_substitution_box[ byte_value0 ];
-		byte_value1 = libbde_aes_forward_substitution_box[ byte_value1 ];
-		byte_value2 = libbde_aes_forward_substitution_box[ byte_value2 ];
-		byte_value3 = libbde_aes_forward_substitution_box[ byte_value3 ];
-
-		round_keys[ 3 ] = libbde_aes_reverse_table0[ byte_value0 ]
-			        ^ libbde_aes_reverse_table1[ byte_value1 ]
-			        ^ libbde_aes_reverse_table2[ byte_value2 ]
-			        ^ libbde_aes_reverse_table3[ byte_value3 ];
-
-		round_keys            += 4;
-		encryption_round_keys -= 4;
+			SK++;
+		}
+		SK -= 8;
 	}
-	round_keys[ 0 ] = encryption_round_keys[ 0 ];
-	round_keys[ 1 ] = encryption_round_keys[ 1 ];
-	round_keys[ 2 ] = encryption_round_keys[ 2 ];
-	round_keys[ 3 ] = encryption_round_keys[ 3 ];
-
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
+	*round_keys++ = *SK++;
 #endif
 	return( 1 );
 }
@@ -1652,24 +1480,23 @@ int libbde_aes_ecb_crypt(
      size_t output_data_size,
      liberror_error_t **error )
 {
-	static char *function       = "libbde_aes_ecb_crypt";
-	int result                  = 1;
+	static char *function     = "libbde_aes_ecb_crypt";
 
 #if defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
 	uint8_t block_data[ EVP_MAX_BLOCK_LENGTH ];
 
-	const EVP_CIPHER *cipher    = NULL;
-	int safe_output_data_size   = 0;
+	const EVP_CIPHER *cipher  = NULL;
+	int safe_output_data_size = 0;
 #endif
 
 #if !defined( LIBBDE_HAVE_AES_SUPPORT )
-	uint32_t cipher_values_32bit[ 4 ];
 	uint32_t values_32bit[ 4 ];
 
-	uint32_t *round_keys        = NULL;
-	uint32_t substitution_value = 0;
-	uint32_t table_value        = 0;
-	int round_key_iterator      = 0;
+	uint32_t *round_keys      = NULL;
+	int round_key_index       = 0;
+
+/* TODO refactor */
+	uint32_t Y0, Y1, Y2, Y3;
 #endif
 
 	if( context == NULL )
@@ -1835,85 +1662,100 @@ int libbde_aes_ecb_crypt(
 
 	round_keys = context->round_keys;
 
-	values_32bit[ 0 ] ^= round_keys[ 0 ];
-	values_32bit[ 1 ] ^= round_keys[ 1 ];
-	values_32bit[ 2 ] ^= round_keys[ 2 ];
-	values_32bit[ 3 ] ^= round_keys[ 3 ];
-
-	round_keys += 4;
+	values_32bit[ 0 ] ^= *round_keys++;
+	values_32bit[ 1 ] ^= *round_keys++;
+	values_32bit[ 2 ] ^= *round_keys++;
+	values_32bit[ 3 ] ^= *round_keys++;
 
 	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
 	{
-		for( round_key_iterator = ( context->number_of_round_keys / 2 );
-		     round_key_iterator > 1;
-		     round_key_iterator-- )
+		for( round_key_index = ( context->number_of_round_keys / 2 );
+		     round_key_index > 1;
+		     round_key_index-- )
 		{
-			libbde_aes_calculate_forward_table_round(
+			libbde_aes_calculate_forward_round(
 			 round_keys,
-			 cipher_values_32bit,
-			 values_32bit,
-			 table_value );
+			 Y0, Y1, Y2, Y3,
+			 values_32bit[ 0 ], values_32bit[ 1 ], values_32bit[ 2 ], values_32bit[ 3 ] );
 
-			round_keys += 4;
-
-			libbde_aes_calculate_forward_table_round(
+			libbde_aes_calculate_forward_round(
 			 round_keys,
-			 values_32bit,
-			 cipher_values_32bit,
-			 table_value );
-
-			round_keys += 4;
+			 values_32bit[ 0 ], values_32bit[ 1 ], values_32bit[ 2 ], values_32bit[ 3 ],
+			 Y0, Y1, Y2, Y3 );
 		}
-		libbde_aes_calculate_forward_table_round(
+		libbde_aes_calculate_forward_round(
 		 round_keys,
-		 cipher_values_32bit,
-		 values_32bit,
-		 table_value );
+		 Y0, Y1, Y2, Y3,
+		 values_32bit[ 0 ], values_32bit[ 1 ], values_32bit[ 2 ], values_32bit[ 3 ] );
 
-		round_keys += 4;
+		values_32bit[ 0 ]  = *round_keys++;
+		values_32bit[ 0 ] ^= (uint32_t) libbde_aes_forward_substitution_box[ Y0 & 0xff ];
+		values_32bit[ 0 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y1 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 0 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y2 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 0 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y3 >> 24 ) & 0xff ] ) << 24;
 
-		libbde_aes_calculate_forward_substitution_round(
-		 round_keys,
-		 values_32bit,
-		 cipher_values_32bit,
-		 substitution_value );
+		values_32bit[ 1 ]  = *round_keys++;
+		values_32bit[ 1 ] ^= (uint32_t) libbde_aes_forward_substitution_box[ Y1 & 0xff ];
+		values_32bit[ 1 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y2 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 1 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y3 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 1 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y0 >> 24 ) & 0xff ] ) << 24;
+
+		values_32bit[ 2 ]  = *round_keys++;
+		values_32bit[ 2 ] ^= (uint32_t) libbde_aes_forward_substitution_box[ Y2 & 0xff ];
+		values_32bit[ 2 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y3 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 2 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y0 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 2 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y1 >> 24 ) & 0xff ] ) << 24;
+
+		values_32bit[ 3 ]  = *round_keys++;
+		values_32bit[ 3 ] ^= (uint32_t) libbde_aes_forward_substitution_box[ Y3 & 0xff ];
+		values_32bit[ 3 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y0 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 3 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y1 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 3 ] ^= ( (uint32_t) libbde_aes_forward_substitution_box[ ( Y2 >> 24 ) & 0xff ] ) << 24;
 	}
 	else
 	{
-/* TODO test */
-		for( round_key_iterator = ( context->number_of_round_keys / 2 );
-		     round_key_iterator > 1;
-		     round_key_iterator-- )
+		for( round_key_index = ( context->number_of_round_keys / 2 );
+		     round_key_index > 1;
+		     round_key_index-- )
 		{
-			libbde_aes_calculate_reverse_table_round(
+			libbde_aes_calculate_reverse_round(
 			 round_keys,
-			 cipher_values_32bit,
-			 values_32bit,
-			 table_value );
+			 Y0, Y1, Y2, Y3,
+			 values_32bit[ 0 ], values_32bit[ 1 ], values_32bit[ 2 ], values_32bit[ 3 ] );
 
-			round_keys += 4;
-
-			libbde_aes_calculate_reverse_table_round(
+			libbde_aes_calculate_reverse_round(
 			 round_keys,
-			 values_32bit,
-			 cipher_values_32bit,
-			 table_value );
-
-			round_keys += 4;
+			 values_32bit[ 0 ], values_32bit[ 1 ], values_32bit[ 2 ], values_32bit[ 3 ],
+			 Y0, Y1, Y2, Y3 );
 		}
-		libbde_aes_calculate_reverse_table_round(
+		libbde_aes_calculate_reverse_round(
 		 round_keys,
-		 cipher_values_32bit,
-		 values_32bit,
-		 table_value );
+		 Y0, Y1, Y2, Y3,
+		 values_32bit[ 0 ], values_32bit[ 1 ], values_32bit[ 2 ], values_32bit[ 3 ] );
 
-		round_keys += 4;
+		values_32bit[ 0 ]  = *round_keys++;
+		values_32bit[ 0 ] ^= (uint32_t) libbde_aes_reverse_substitution_box[ Y0 & 0xff ];
+                values_32bit[ 0 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y3 >>  8 ) & 0xff ] ) <<  8;
+                values_32bit[ 0 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y2 >> 16 ) & 0xff ] ) << 16;
+                values_32bit[ 0 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y1 >> 24 ) & 0xff ] ) << 24;
 
-		libbde_aes_calculate_reverse_substitution_round(
-		 round_keys,
-		 values_32bit,
-		 cipher_values_32bit,
-		 table_value );
+		values_32bit[ 1 ]  = *round_keys++;
+		values_32bit[ 1 ] ^= (uint32_t) libbde_aes_reverse_substitution_box[ Y1 & 0xff ];
+		values_32bit[ 1 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y0 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 1 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y3 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 1 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y2 >> 24 ) & 0xff ] ) << 24;
+
+		values_32bit[ 2 ]  = *round_keys++;
+		values_32bit[ 2 ] ^= (uint32_t) libbde_aes_reverse_substitution_box[ Y2 & 0xff ];
+		values_32bit[ 2 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y1 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 2 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y0 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 2 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y3 >> 24 ) & 0xff ] ) << 24;
+
+		values_32bit[ 3 ]  = *round_keys++;
+		values_32bit[ 3 ] ^= (uint32_t) libbde_aes_reverse_substitution_box[ Y3 & 0xff ];
+		values_32bit[ 3 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y2 >>  8 ) & 0xff ] ) <<  8;
+		values_32bit[ 3 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y1 >> 16 ) & 0xff ] ) << 16;
+		values_32bit[ 3 ] ^= ( (uint32_t) libbde_aes_reverse_substitution_box[ ( Y0 >> 24 ) & 0xff ] ) << 24;
 	}
 	byte_stream_copy_from_uint32_little_endian(
 	 &( output_data[ 0 ] ),
@@ -1943,23 +1785,9 @@ int libbde_aes_ecb_crypt(
 		 "%s: unable to clear values 32-bit.",
 		 function );
 
-		result = -1;
-	}
-	if( memory_set(
-	     cipher_values_32bit,
-	     0,
-	     sizeof( uint32_t ) * 4 ) == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear cipher values 32-bit.",
-		 function );
-
-		result = -1;
+		return( -1 );
 	}
 #endif
-	return( result );
+	return( 1 );
 }
 

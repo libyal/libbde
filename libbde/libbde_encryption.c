@@ -24,6 +24,7 @@
 #include <types.h>
 
 #include <liberror.h>
+#include <libnotify.h>
 
 #include "libbde_aes.h"
 #include "libbde_definitions.h"
@@ -374,11 +375,11 @@ int libbde_encryption_crypt(
 {
 	uint8_t block_key_data[ 16 ];
 	uint8_t initialization_vector[ 16 ];
-	uint8_t xor_data[ 32 ];
+	uint8_t sector_key_data[ 32 ];
 
-	static char *function = "libbde_encryption_crypt";
-	size_t data_index     = 0;
-	size_t xor_data_index = 0;
+	static char *function        = "libbde_encryption_crypt";
+	size_t data_index            = 0;
+	size_t sector_key_data_index = 0;
 
 	if( context == NULL )
 	{
@@ -435,7 +436,7 @@ int libbde_encryption_crypt(
 			return( -1 );
 		}
 		if( memory_set(
-		     xor_data,
+		     sector_key_data,
 		     0,
 		     32 ) == NULL )
 		{
@@ -443,7 +444,7 @@ int libbde_encryption_crypt(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear XOR data.",
+			 "%s: unable to clear sector key data.",
 			 function );
 
 			return( -1 );
@@ -473,7 +474,14 @@ int libbde_encryption_crypt(
 
 			return( -1 );
 		}
-		/* The block key for the XOR data is encrypted
+libnotify_printf(
+ "%s: IV:\n",
+ function );
+libnotify_print_data(
+ initialization_vector,
+ 16 );
+
+		/* The block key for the sector key data is encrypted
 		 * with the TWEAK key
 		 */
 		if( libbde_aes_ecb_crypt(
@@ -481,7 +489,7 @@ int libbde_encryption_crypt(
 		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
 		     16,
-		     xor_data,
+		     sector_key_data,
 		     16,
 		     error ) != 1 )
 		{
@@ -489,11 +497,17 @@ int libbde_encryption_crypt(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
 			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt XOR data.",
+			 "%s: unable to encrypt sector key data.",
 			 function );
 
 			return( -1 );
 		}
+libnotify_printf(
+ "%s: sector key:\n",
+ function );
+libnotify_print_data(
+ sector_key_data,
+ 32 );
 		/* Set the last byte to contain 0x80 (128)
 		 */
 		block_key_data[ 15 ] = 0x80;
@@ -503,7 +517,7 @@ int libbde_encryption_crypt(
 		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
 		     16,
-		     &( xor_data[ 16 ] ),
+		     &( sector_key_data[ 16 ] ),
 		     16,
 		     error ) != 1 )
 		{
@@ -511,11 +525,17 @@ int libbde_encryption_crypt(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
 			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt XOR data.",
+			 "%s: unable to encrypt sector key data.",
 			 function );
 
 			return( -1 );
 		}
+libnotify_printf(
+ "%s: sector key:\n",
+ function );
+libnotify_print_data(
+ sector_key_data,
+ 32 );
 	}
 	if( mode == LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT )
 	{
@@ -523,19 +543,19 @@ int libbde_encryption_crypt(
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
-			xor_data_index = 0;
+			sector_key_data_index = 0;
 
 			for( data_index = 0;
 			     data_index < input_data_size;
 			     data_index++ )
 			{
-				output_data[ data_index ] ^= xor_data[ xor_data_index ];
+				output_data[ data_index ] ^= sector_key_data[ sector_key_data_index ];
 
-				xor_data_index++;
+				sector_key_data_index++;
 
-				if( xor_data_index >= 32 )
+				if( sector_key_data_index >= 32 )
 				{
-					xor_data_index -= 32;
+					sector_key_data_index -= 32;
 				}
 			}
 			if( libbde_diffuser_encrypt(
@@ -611,19 +631,19 @@ int libbde_encryption_crypt(
 
 				return( -1 );
 			}
-			xor_data_index = 0;
+			sector_key_data_index = 0;
 
 			for( data_index = 0;
 			     data_index < input_data_size;
 			     data_index++ )
 			{
-				output_data[ data_index ] ^= xor_data[ xor_data_index ];
+				output_data[ data_index ] ^= sector_key_data[ sector_key_data_index ];
 
-				xor_data_index++;
+				sector_key_data_index++;
 
-				if( xor_data_index >= 32 )
+				if( sector_key_data_index >= 32 )
 				{
-					xor_data_index -= 32;
+					sector_key_data_index -= 32;
 				}
 			}
 		}
