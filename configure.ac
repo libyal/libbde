@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110806],
+ [20110807],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -526,7 +526,7 @@ AS_IF(
  ac_libbde_dummy=yes])
 
 dnl Set memwatch support
-ac_libbde_have_memwatch=yes
+ac_libbde_have_memwatch=no
 
 AS_IF(
  [test "x$ac_libbde_have_memwatch" != xno ],

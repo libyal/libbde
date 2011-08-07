@@ -379,6 +379,7 @@ int libbde_encryption_crypt(
 
 	static char *function = "libbde_encryption_crypt";
 	size_t data_index     = 0;
+	size_t xor_data_index = 0;
 
 	if( context == NULL )
 	{
@@ -523,16 +524,22 @@ int libbde_encryption_crypt(
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
+			xor_data_index = 0;
+
 			for( data_index = 0;
 			     data_index < input_data_size;
 			     data_index++ )
 			{
-				/* value & 0x1f = value % 32
-				 */
-				output_data[ data_index ] ^= xor_data[ data_index & 0x1f ];
+				output_data[ data_index ] ^= xor_data[ xor_data_index ];
+
+				xor_data_index++;
+
+				if( xor_data_index >= 32 )
+				{
+					xor_data_index -= 32;
+				}
 			}
-/* TODO create diffuser encryption functons
-			if( libbde_diffuser_a(
+			if( libbde_diffuser_encrypt(
 			     output_data,
 			     output_data_size,
 			     error ) != 1 )
@@ -540,27 +547,12 @@ int libbde_encryption_crypt(
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-				 "%s: unable to Diffuser-A output data.",
+				 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+				 "%s: unable to encrypt data using Diffuser.",
 				 function );
 
 				return( -1 );
 			}
-			if( libbde_diffuser_b(
-			     output_data,
-			     output_data_size,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-				 "%s: unable to Diffuser-B output data.",
-				 function );
-
-				return( -1 );
-			}
-*/
 		}
 		if( libbde_aes_cbc_crypt(
 		     context->fvek_encryption_context,
@@ -606,11 +598,13 @@ int libbde_encryption_crypt(
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
+			libnotify_printf(
+			 "AES-CBC\n" );
 			libnotify_print_data(
 			 output_data,
 			 output_data_size );
 
-			if( libbde_diffuser_b(
+			if( libbde_diffuser_decrypt(
 			     output_data,
 			     output_data_size,
 			     error ) != 1 )
@@ -618,47 +612,26 @@ int libbde_encryption_crypt(
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-				 "%s: unable to Diffuser-B output data.",
+				 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+				 "%s: unable to decrypt data using Diffuser.",
 				 function );
 
 				return( -1 );
 			}
-			libnotify_print_data(
-			 output_data,
-			 output_data_size );
-
-			Diffuser_A_Decrypt(
-			 output_data,
-			 output_data_size );
-
-/* TODO
-			if( libbde_diffuser_a(
-			     output_data,
-			     output_data_size,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-				 "%s: unable to Diffuser-A output data.",
-				 function );
-
-				return( -1 );
-			}
-*/
-			libnotify_print_data(
-			 output_data,
-			 output_data_size );
+			xor_data_index = 0;
 
 			for( data_index = 0;
 			     data_index < input_data_size;
 			     data_index++ )
 			{
-				/* value & 0x1f = value % 32
-				 */
-				output_data[ data_index ] ^= xor_data[ data_index & 0x1f ];
+				output_data[ data_index ] ^= xor_data[ xor_data_index ];
+
+				xor_data_index++;
+
+				if( xor_data_index >= 32 )
+				{
+					xor_data_index -= 32;
+				}
 			}
 		}
 	}
