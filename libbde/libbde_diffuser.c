@@ -157,11 +157,12 @@ int libbde_diffuser_a_decrypt(
      size_t number_of_values,
      liberror_error_t **error )
 {
-	static char *function     = "libbde_diffuser_a_decrypt";
-	size_t number_of_cycles   = 0;
-	size_t value_32bit_index1 = 0;
-	size_t value_32bit_index2 = 0;
-	size_t value_32bit_index3 = 0;
+	static char *function       = "libbde_diffuser_a_decrypt";
+	size_t iterator             = 0;
+	size_t number_of_iterations = 0;
+	size_t value_32bit_index1   = 0;
+	size_t value_32bit_index2   = 0;
+	size_t value_32bit_index3   = 0;
 
 	if( values_32bit == NULL )
 	{
@@ -185,57 +186,60 @@ int libbde_diffuser_a_decrypt(
 
 		return( -1 );
 	}
-	number_of_cycles = 5;
+	number_of_iterations = number_of_values * 5;
 
-	while( number_of_cycles > 0 )
+	value_32bit_index1 = 0;
+	value_32bit_index2 = number_of_values - 2;
+	value_32bit_index3 = number_of_values - 5;
+
+	for( iterator = 0;
+	     iterator < number_of_iterations;
+	     iterator++ )
 	{
-		value_32bit_index1 = 0;
-		value_32bit_index2 = number_of_values - 2;
-		value_32bit_index3 = number_of_values - 5;
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       9 );
 
-		while( value_32bit_index1 < ( number_of_values - 1 ) )
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index3 >= number_of_values )
 		{
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ byte_stream_bit_rotate_left_32bit(
-			                                       values_32bit[ value_32bit_index3 ],
-			                                       9 );
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			if( value_32bit_index3 >= number_of_values )
-			{
-				value_32bit_index3 -= number_of_values;
-			}
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ values_32bit[ value_32bit_index3 ];
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			if( value_32bit_index2 >= number_of_values )
-			{
-				value_32bit_index2 -= number_of_values;
-			}
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ byte_stream_bit_rotate_left_32bit(
-			                                       values_32bit[ value_32bit_index3 ],
-			                                       13 );
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ values_32bit[ value_32bit_index3 ];
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
+			value_32bit_index3 -= number_of_values;
 		}
-		number_of_cycles--;
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index2 >= number_of_values )
+		{
+			value_32bit_index2 -= number_of_values;
+		}
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       13 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index1 >= number_of_values )
+		{
+			value_32bit_index1 -= number_of_values;
+		}
 	}
 	return( 1 );
 }
@@ -248,11 +252,12 @@ int libbde_diffuser_b_decrypt(
      size_t number_of_values,
      liberror_error_t **error )
 {
-	static char *function     = "libbde_diffuser_b_decrypt";
-	size_t number_of_cycles   = 0;
-	size_t value_32bit_index1 = 0;
-	size_t value_32bit_index2 = 0;
-	size_t value_32bit_index3 = 0;
+	static char *function       = "libbde_diffuser_b_decrypt";
+	size_t iterator             = 0;
+	size_t number_of_iterations = 0;
+	size_t value_32bit_index1   = 0;
+	size_t value_32bit_index2   = 0;
+	size_t value_32bit_index3   = 0;
 
 	if( values_32bit == NULL )
 	{
@@ -276,57 +281,60 @@ int libbde_diffuser_b_decrypt(
 
 		return( -1 );
 	}
-	number_of_cycles = 3;
+	number_of_iterations = number_of_values * 5;
 
-	while( number_of_cycles > 0 )
+	value_32bit_index1 = 0;
+	value_32bit_index2 = 2;
+	value_32bit_index3 = 5;
+
+	for( iterator = 0;
+	     iterator < number_of_iterations;
+	     iterator++ )
 	{
-		value_32bit_index1 = 0;
-		value_32bit_index2 = 2;
-		value_32bit_index3 = 5;
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
 
-		while( value_32bit_index1 < ( number_of_values - 1 ) )
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       10 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index2 >= number_of_values )
 		{
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ values_32bit[ value_32bit_index3 ];
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ byte_stream_bit_rotate_left_32bit(
-			                                       values_32bit[ value_32bit_index3 ],
-			                                       10 );
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			if( value_32bit_index2 >= number_of_values )
-			{
-				value_32bit_index2 -= number_of_values;
-			}
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ values_32bit[ value_32bit_index3 ];
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			if( value_32bit_index3 >= number_of_values )
-			{
-				value_32bit_index3 -= number_of_values;
-			}
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ byte_stream_bit_rotate_left_32bit(
-			                                       values_32bit[ value_32bit_index3 ],
-			                                       25 );
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
+			value_32bit_index2 -= number_of_values;
 		}
-		number_of_cycles--;
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index3 >= number_of_values )
+		{
+			value_32bit_index3 -= number_of_values;
+		}
+		values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       25 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index1 >= number_of_values )
+		{
+			value_32bit_index1 -= number_of_values;
+		}
 	}
 	return( 1 );
 }
@@ -406,7 +414,6 @@ int libbde_diffuser_encrypt(
 
 		data_index += sizeof( uint32_t );
 	}
-/* TODO
 	if( libbde_diffuser_a_encrypt(
 	     values_32bit,
 	     number_of_values,
@@ -435,7 +442,6 @@ int libbde_diffuser_encrypt(
 
 		return( -1 );
 	}
-*/
 	data_index = 0;
 
 	for( value_32bit_index = 0;
@@ -451,6 +457,198 @@ int libbde_diffuser_encrypt(
 	memory_free(
 	 values_32bit );
 
+	return( 1 );
+}
+
+/* Encrypts the data using Diffuser-A
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_diffuser_a_encrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error )
+{
+	static char *function       = "libbde_diffuser_a_encrypt";
+	size_t iterator             = 0;
+	size_t number_of_iterations = 0;
+	size_t value_32bit_index1   = 0;
+	size_t value_32bit_index2   = 0;
+	size_t value_32bit_index3   = 0;
+
+	if( values_32bit == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_values > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid number of values exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	number_of_iterations = number_of_values * 5;
+
+	value_32bit_index1 = 0;
+	value_32bit_index2 = number_of_values - 2;
+	value_32bit_index3 = number_of_values - 5;
+
+/* TODO reverse loop */
+	for( iterator = 0;
+	     iterator < number_of_iterations;
+	     iterator++ )
+	{
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       9 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index3 >= number_of_values )
+		{
+			value_32bit_index3 -= number_of_values;
+		}
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index2 >= number_of_values )
+		{
+			value_32bit_index2 -= number_of_values;
+		}
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       13 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index1 >= number_of_values )
+		{
+			value_32bit_index1 -= number_of_values;
+		}
+	}
+	return( 1 );
+}
+
+/* Encrypts the data using Diffuser-B
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_diffuser_b_encrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error )
+{
+	static char *function       = "libbde_diffuser_b_encrypt";
+	size_t iterator             = 0;
+	size_t number_of_iterations = 0;
+	size_t value_32bit_index1   = 0;
+	size_t value_32bit_index2   = 0;
+	size_t value_32bit_index3   = 0;
+
+	if( values_32bit == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_values > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid number of values exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	number_of_iterations = number_of_values * 3;
+
+	value_32bit_index1 = 0;
+	value_32bit_index2 = 2;
+	value_32bit_index3 = 5;
+
+/* TODO reverse loop */
+	for( iterator = 0;
+	     iterator < number_of_iterations;
+	     iterator++ )
+	{
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       10 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index2 >= number_of_values )
+		{
+			value_32bit_index2 -= number_of_values;
+		}
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ values_32bit[ value_32bit_index3 ];
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index3 >= number_of_values )
+		{
+			value_32bit_index3 -= number_of_values;
+		}
+		values_32bit[ value_32bit_index1 ] -= values_32bit[ value_32bit_index2 ]
+						    ^ byte_stream_bit_rotate_left_32bit(
+						       values_32bit[ value_32bit_index3 ],
+						       25 );
+
+		value_32bit_index1++;
+		value_32bit_index2++;
+		value_32bit_index3++;
+
+		if( value_32bit_index1 >= number_of_values )
+		{
+			value_32bit_index1 -= number_of_values;
+		}
+	}
 	return( 1 );
 }
 
