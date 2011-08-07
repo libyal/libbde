@@ -37,7 +37,7 @@ int libbde_diffuser_decrypt(
      liberror_error_t **error )
 {
 	uint32_t *values_32bit   = NULL;
-	static char *function    = "libbde_diffuser_a_decrypt";
+	static char *function    = "libbde_diffuser_decrypt";
 	size_t data_index        = 0;
 	size_t number_of_values  = 0;
 	size_t value_32bit_index = 0;
@@ -89,7 +89,7 @@ int libbde_diffuser_decrypt(
 		 "%s: unable to create values 32-bit.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	data_index = 0;
 
@@ -115,7 +115,7 @@ int libbde_diffuser_decrypt(
 		 "%s: unable to decrypt data using Diffuser-B.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbde_diffuser_a_decrypt(
 	     values_32bit,
@@ -129,7 +129,7 @@ int libbde_diffuser_decrypt(
 		 "%s: unable to decrypt data using Diffuser-A.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	data_index = 0;
 
@@ -143,10 +143,37 @@ int libbde_diffuser_decrypt(
 
 		data_index += sizeof( uint32_t );
 	}
+	if( memory_set(
+	     values_32bit,
+	     0,
+	     data_size ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear values 32-bit.",
+		 function );
+
+		goto on_error;
+	}
 	memory_free(
 	 values_32bit );
 
 	return( 1 );
+
+on_error:
+	if( values_32bit != NULL )
+	{
+		memory_set(
+		 values_32bit,
+		 0,
+		 data_size );
+
+		memory_free(
+		 values_32bit );
+	}
+	return( -1 );
 }
 
 /* Decrypts the data using Diffuser-A
@@ -348,7 +375,7 @@ int libbde_diffuser_encrypt(
      liberror_error_t **error )
 {
 	uint32_t *values_32bit   = NULL;
-	static char *function    = "libbde_diffuser_a_encrypt";
+	static char *function    = "libbde_diffuser_encrypt";
 	size_t data_index        = 0;
 	size_t number_of_values  = 0;
 	size_t value_32bit_index = 0;
@@ -400,7 +427,7 @@ int libbde_diffuser_encrypt(
 		 "%s: unable to create values 32-bit.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	data_index = 0;
 
@@ -426,7 +453,7 @@ int libbde_diffuser_encrypt(
 		 "%s: unable to encrypt data using Diffuser-A.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbde_diffuser_b_encrypt(
 	     values_32bit,
@@ -440,7 +467,7 @@ int libbde_diffuser_encrypt(
 		 "%s: unable to encrypt data using Diffuser-B.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	data_index = 0;
 
@@ -454,10 +481,37 @@ int libbde_diffuser_encrypt(
 
 		data_index += sizeof( uint32_t );
 	}
+	if( memory_set(
+	     values_32bit,
+	     0,
+	     data_size ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear values 32-bit.",
+		 function );
+
+		goto on_error;
+	}
 	memory_free(
 	 values_32bit );
 
 	return( 1 );
+
+on_error:
+	if( values_32bit != NULL )
+	{
+		memory_set(
+		 values_32bit,
+		 0,
+		 data_size );
+
+		memory_free(
+		 values_32bit );
+	}
+	return( -1 );
 }
 
 /* Encrypts the data using Diffuser-A
