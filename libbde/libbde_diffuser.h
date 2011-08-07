@@ -31,14 +31,34 @@
 extern "C" {
 #endif
 
-int libbde_diffuser_a(
+int libbde_diffuser_decrypt(
      uint8_t *data,
      size_t data_size,
      liberror_error_t **error );
 
-int libbde_diffuser_b(
+int libbde_diffuser_a_decrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error );
+
+int libbde_diffuser_b_decrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error );
+
+int libbde_diffuser_encrypt(
      uint8_t *data,
      size_t data_size,
+     liberror_error_t **error );
+
+int libbde_diffuser_a_encrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error );
+
+int libbde_diffuser_b_encrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
      liberror_error_t **error );
 
 #ifdef __cplusplus

@@ -25,26 +25,22 @@
 #include <types.h>
 
 #include <liberror.h>
-#include <libnotify.h>
 
 #include "libbde_diffuser.h"
 
-/* Applies Diffuser-A to data
+/* Decrypts the data using Diffuser-A and B
  * Returns 1 if successful or -1 on error
  */
-int libbde_diffuser_a(
+int libbde_diffuser_decrypt(
      uint8_t *data,
      size_t data_size,
      liberror_error_t **error )
 {
-	uint32_t *values_32bit        = NULL;
-	static char *function         = "libbde_diffuser_a";
-	size_t data_index             = 0;
-	size_t number_of_cycles       = 0;
-	size_t number_of_values_32bit = 0;
-	size_t value_32bit_index1     = 0;
-	size_t value_32bit_index2     = 0;
-	size_t value_32bit_index3     = 0;
+	uint32_t *values_32bit   = NULL;
+	static char *function    = "libbde_diffuser_a_decrypt";
+	size_t data_index        = 0;
+	size_t number_of_values  = 0;
+	size_t value_32bit_index = 0;
 
 	if( data == NULL )
 	{
@@ -79,7 +75,7 @@ int libbde_diffuser_a(
 
 		return( -1 );
 	}
-	number_of_values_32bit = data_size / 4;
+	number_of_values = data_size / 4;
 
 	values_32bit = (uint32_t *) memory_allocate(
 	                             data_size );
@@ -97,25 +93,107 @@ int libbde_diffuser_a(
 	}
 	data_index = 0;
 
-	for( value_32bit_index1 = 0;
-	     value_32bit_index1 < number_of_values_32bit;
-	     value_32bit_index1++ )
+	for( value_32bit_index = 0;
+	     value_32bit_index < number_of_values;
+	     value_32bit_index++ )
 	{
 		byte_stream_copy_to_uint32_little_endian(
 		 &( data[ data_index ] ),
-		 values_32bit[ value_32bit_index1 ] );
+		 values_32bit[ value_32bit_index ] );
 
 		data_index += sizeof( uint32_t );
+	}
+	if( libbde_diffuser_b_decrypt(
+	     values_32bit,
+	     number_of_values,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+		 "%s: unable to decrypt data using Diffuser-B.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_diffuser_a_decrypt(
+	     values_32bit,
+	     number_of_values,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+		 "%s: unable to decrypt data using Diffuser-A.",
+		 function );
+
+		return( -1 );
+	}
+	data_index = 0;
+
+	for( value_32bit_index = 0;
+	     value_32bit_index < number_of_values;
+	     value_32bit_index++ )
+	{
+		byte_stream_copy_from_uint32_little_endian(
+		 &( data[ data_index ] ),
+		 values_32bit[ value_32bit_index ] );
+
+		data_index += sizeof( uint32_t );
+	}
+	memory_free(
+	 values_32bit );
+
+	return( 1 );
+}
+
+/* Decrypts the data using Diffuser-A
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_diffuser_a_decrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error )
+{
+	static char *function     = "libbde_diffuser_a_decrypt";
+	size_t number_of_cycles   = 0;
+	size_t value_32bit_index1 = 0;
+	size_t value_32bit_index2 = 0;
+	size_t value_32bit_index3 = 0;
+
+	if( values_32bit == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_values > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid number of values exceeds maximum.",
+		 function );
+
+		return( -1 );
 	}
 	number_of_cycles = 5;
 
 	while( number_of_cycles > 0 )
 	{
 		value_32bit_index1 = 0;
-		value_32bit_index2 = number_of_values_32bit - 2;
-		value_32bit_index3 = number_of_values_32bit - 5;
+		value_32bit_index2 = number_of_values - 2;
+		value_32bit_index3 = number_of_values - 5;
 
-		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
+		while( value_32bit_index1 < ( number_of_values - 1 ) )
 		{
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ byte_stream_bit_rotate_left_32bit(
@@ -126,9 +204,9 @@ int libbde_diffuser_a(
 			value_32bit_index2++;
 			value_32bit_index3++;
 
-			if( value_32bit_index3 >= number_of_values_32bit )
+			if( value_32bit_index3 >= number_of_values )
 			{
-				value_32bit_index3 -= number_of_values_32bit;
+				value_32bit_index3 -= number_of_values;
 			}
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ values_32bit[ value_32bit_index3 ];
@@ -137,9 +215,9 @@ int libbde_diffuser_a(
 			value_32bit_index2++;
 			value_32bit_index3++;
 
-			if( value_32bit_index2 >= number_of_values_32bit )
+			if( value_32bit_index2 >= number_of_values )
 			{
-				value_32bit_index2 -= number_of_values_32bit;
+				value_32bit_index2 -= number_of_values;
 			}
 			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
 			                                    ^ byte_stream_bit_rotate_left_32bit(
@@ -159,40 +237,113 @@ int libbde_diffuser_a(
 		}
 		number_of_cycles--;
 	}
-	data_index = 0;
-
-	for( value_32bit_index1 = 0;
-	     value_32bit_index1 < number_of_values_32bit;
-	     value_32bit_index1++ )
-	{
-		byte_stream_copy_from_uint32_little_endian(
-		 &( data[ data_index ] ),
-		 values_32bit[ value_32bit_index1 ] );
-
-		data_index += sizeof( uint32_t );
-	}
-	memory_free(
-	 values_32bit );
-
 	return( 1 );
 }
 
-/* Applies Diffuser-B to data
+/* Decrypts the data using Diffuser-B
  * Returns 1 if successful or -1 on error
  */
-int libbde_diffuser_b(
+int libbde_diffuser_b_decrypt(
+     uint32_t *values_32bit,
+     size_t number_of_values,
+     liberror_error_t **error )
+{
+	static char *function     = "libbde_diffuser_b_decrypt";
+	size_t number_of_cycles   = 0;
+	size_t value_32bit_index1 = 0;
+	size_t value_32bit_index2 = 0;
+	size_t value_32bit_index3 = 0;
+
+	if( values_32bit == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_values > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid number of values exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	number_of_cycles = 3;
+
+	while( number_of_cycles > 0 )
+	{
+		value_32bit_index1 = 0;
+		value_32bit_index2 = 2;
+		value_32bit_index3 = 5;
+
+		while( value_32bit_index1 < ( number_of_values - 1 ) )
+		{
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ values_32bit[ value_32bit_index3 ];
+
+			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
+
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ byte_stream_bit_rotate_left_32bit(
+			                                       values_32bit[ value_32bit_index3 ],
+			                                       10 );
+
+			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
+
+			if( value_32bit_index2 >= number_of_values )
+			{
+				value_32bit_index2 -= number_of_values;
+			}
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ values_32bit[ value_32bit_index3 ];
+
+			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
+
+			if( value_32bit_index3 >= number_of_values )
+			{
+				value_32bit_index3 -= number_of_values;
+			}
+			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
+			                                    ^ byte_stream_bit_rotate_left_32bit(
+			                                       values_32bit[ value_32bit_index3 ],
+			                                       25 );
+
+			value_32bit_index1++;
+			value_32bit_index2++;
+			value_32bit_index3++;
+		}
+		number_of_cycles--;
+	}
+	return( 1 );
+}
+
+/* Encrypts the data using Diffuser-A and B
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_diffuser_encrypt(
      uint8_t *data,
      size_t data_size,
      liberror_error_t **error )
 {
-	uint32_t *values_32bit        = NULL;
-	static char *function         = "libbde_diffuser_b";
-	size_t data_index             = 0;
-	size_t number_of_cycles       = 0;
-	size_t number_of_values_32bit = 0;
-	size_t value_32bit_index1     = 0;
-	size_t value_32bit_index2     = 0;
-	size_t value_32bit_index3     = 0;
+	uint32_t *values_32bit   = NULL;
+	static char *function    = "libbde_diffuser_a_encrypt";
+	size_t data_index        = 0;
+	size_t number_of_values  = 0;
+	size_t value_32bit_index = 0;
 
 	if( data == NULL )
 	{
@@ -227,7 +378,7 @@ int libbde_diffuser_b(
 
 		return( -1 );
 	}
-	number_of_values_32bit = data_size / 4;
+	number_of_values = data_size / 4;
 
 	values_32bit = (uint32_t *) memory_allocate(
 	                             data_size );
@@ -245,77 +396,55 @@ int libbde_diffuser_b(
 	}
 	data_index = 0;
 
-	for( value_32bit_index1 = 0;
-	     value_32bit_index1 < number_of_values_32bit;
-	     value_32bit_index1++ )
+	for( value_32bit_index = 0;
+	     value_32bit_index < number_of_values;
+	     value_32bit_index++ )
 	{
 		byte_stream_copy_to_uint32_little_endian(
 		 &( data[ data_index ] ),
-		 values_32bit[ value_32bit_index1 ] );
+		 values_32bit[ value_32bit_index ] );
 
 		data_index += sizeof( uint32_t );
 	}
-	number_of_cycles = 3;
-
-	while( number_of_cycles > 0 )
+/* TODO
+	if( libbde_diffuser_a_encrypt(
+	     values_32bit,
+	     number_of_values,
+	     error ) != 1 )
 	{
-		value_32bit_index1 = 0;
-		value_32bit_index2 = 2;
-		value_32bit_index3 = 5;
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 "%s: unable to encrypt data using Diffuser-A.",
+		 function );
 
-		while( value_32bit_index1 < ( number_of_values_32bit - 1 ) )
-		{
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ values_32bit[ value_32bit_index3 ];
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ byte_stream_bit_rotate_left_32bit(
-			                                       values_32bit[ value_32bit_index3 ],
-			                                       10 );
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			if( value_32bit_index2 >= number_of_values_32bit )
-			{
-				value_32bit_index2 -= number_of_values_32bit;
-			}
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ values_32bit[ value_32bit_index3 ];
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-
-			if( value_32bit_index3 >= number_of_values_32bit )
-			{
-				value_32bit_index3 -= number_of_values_32bit;
-			}
-			values_32bit[ value_32bit_index1 ] += values_32bit[ value_32bit_index2 ]
-			                                    ^ byte_stream_bit_rotate_left_32bit(
-			                                       values_32bit[ value_32bit_index3 ],
-			                                       25 );
-
-			value_32bit_index1++;
-			value_32bit_index2++;
-			value_32bit_index3++;
-		}
-		number_of_cycles--;
+		return( -1 );
 	}
+	if( libbde_diffuser_b_encrypt(
+	     values_32bit,
+	     number_of_values,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 "%s: unable to encrypt data using Diffuser-B.",
+		 function );
+
+		return( -1 );
+	}
+*/
 	data_index = 0;
 
-	for( value_32bit_index1 = 0;
-	     value_32bit_index1 < number_of_values_32bit;
-	     value_32bit_index1++ )
+	for( value_32bit_index = 0;
+	     value_32bit_index < number_of_values;
+	     value_32bit_index++ )
 	{
 		byte_stream_copy_from_uint32_little_endian(
 		 &( data[ data_index ] ),
-		 values_32bit[ value_32bit_index1 ] );
+		 values_32bit[ value_32bit_index ] );
 
 		data_index += sizeof( uint32_t );
 	}
@@ -325,77 +454,3 @@ int libbde_diffuser_b(
 	return( 1 );
 }
 
-#define ROTATE(a,n)     (((a)<<(n))|(((a)&0xffffffff)>>(32-(n))))
-
-// this will apply an in place diffuser A decryption function
-uint32_t Diffuser_A_Decrypt(unsigned char *input, uint32_t input_size)
-{
-
-	unsigned long temp_array[512];
-	unsigned long loop_var1;
-	unsigned long loop_var2;
-	unsigned long loop_var3;
-	unsigned long max_loop;
-
-	unsigned long total_loop; // no . of times diffuser is applied to whole block
-
-	//init  array with supplied data
-	memcpy(temp_array,input,  input_size);
- 
-
-	max_loop = input_size / 4;
-
-	total_loop = 5;  // the diffuser function is applied a total of 3 times
-
-while ( total_loop) {
-	// the below loop should be executed 
-	loop_var1 = 0;
-	loop_var2 = -2 % max_loop;
-	loop_var3 = -5 % max_loop;
-
-	loop_var2 = max_loop - 2;
-	loop_var3 = max_loop - 5;
-
-	while( loop_var1 < (max_loop-1) )
-	{
-
-		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  ROTATE( (temp_array [ loop_var3 ]),9));
-		loop_var1++;
-		loop_var2++;
-		loop_var3++;
-
-		if( loop_var3 >= max_loop )
-		{
-			loop_var3 -= max_loop;
-		}
-		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  temp_array [ loop_var3 ]);
-		loop_var1++;
-		loop_var2++;
-		loop_var3++;
-
-		if( loop_var2 >= max_loop )
-		{
-			loop_var2 -= max_loop;
-		}
-		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  ROTATE( (temp_array [ loop_var3 ]),13));
-		loop_var1++;
-		loop_var2++;
-		loop_var3++;
-
-		temp_array[loop_var1] += ( temp_array [ loop_var2 ] ^  temp_array [ loop_var3 ]);
-		loop_var1++;
-		loop_var2++;
-		loop_var3++;
-	}
-
-	total_loop-- ;
-} // end total_loop
-
-
-
-// now copy the output onto to the input
-memcpy(input, temp_array, input_size);
-
-return 0;
-
-}
