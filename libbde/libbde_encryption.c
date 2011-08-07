@@ -24,7 +24,6 @@
 #include <types.h>
 
 #include <liberror.h>
-#include <libnotify.h>
 
 #include "libbde_aes.h"
 #include "libbde_definitions.h"
@@ -449,7 +448,7 @@ int libbde_encryption_crypt(
 
 			return( -1 );
 		}
-		byte_stream_copy_to_uint64_little_endian(
+		byte_stream_copy_from_uint64_little_endian(
 		 block_key_data,
 		 block_key );
 
@@ -598,12 +597,6 @@ int libbde_encryption_crypt(
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
-			libnotify_printf(
-			 "AES-CBC\n" );
-			libnotify_print_data(
-			 output_data,
-			 output_data_size );
-
 			if( libbde_diffuser_decrypt(
 			     output_data,
 			     output_data_size,
