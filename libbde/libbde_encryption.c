@@ -418,62 +418,59 @@ int libbde_encryption_crypt(
 
 		return( -1 );
 	}
-	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
-	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+	if( memory_set(
+	     block_key_data,
+	     0,
+	     16 ) == NULL )
 	{
-		if( memory_set(
-		     block_key_data,
-		     0,
-		     16 ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear block key data.",
-			 function );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear block key data.",
+		 function );
 
-			return( -1 );
-		}
-		if( memory_set(
-		     sector_key_data,
-		     0,
-		     32 ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear sector key data.",
-			 function );
+		return( -1 );
+	}
+	if( memory_set(
+	     sector_key_data,
+	     0,
+	     32 ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear sector key data.",
+		 function );
 
-			return( -1 );
-		}
-		byte_stream_copy_from_uint64_little_endian(
-		 block_key_data,
-		 block_key );
+		return( -1 );
+	}
+	byte_stream_copy_from_uint64_little_endian(
+	 block_key_data,
+	 block_key );
 
-		/* The block key for the initialization vector is encrypted
-		 * with the FVEK
-		 */
-		if( libbde_aes_ecb_crypt(
-		     context->fvek_encryption_context,
-		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
-		     block_key_data,
-		     16,
-		     initialization_vector,
-		     16,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt initialization vector.",
-			 function );
+	/* The block key for the initialization vector is encrypted
+	 * with the FVEK
+	 */
+	if( libbde_aes_ecb_crypt(
+	     context->fvek_encryption_context,
+	     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+	     block_key_data,
+	     16,
+	     initialization_vector,
+	     16,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+		 "%s: unable to encrypt initialization vector.",
+		 function );
 
-			return( -1 );
-		}
+		return( -1 );
+	}
 libnotify_printf(
  "%s: IV:\n",
  function );
@@ -481,6 +478,9 @@ libnotify_print_data(
  initialization_vector,
  16 );
 
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+	{
 		/* The block key for the sector key data is encrypted
 		 * with the TWEAK key
 		 */

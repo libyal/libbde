@@ -305,6 +305,8 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
 /* TODO test */
+	uint8_t buffer[ 512 ];
+
 	if( libbde_volume_seek_offset(
 	     volume,
 	     0x0d2ba000,
@@ -317,7 +319,21 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	uint8_t buffer[ 512 ];
+	if( libbde_volume_read_buffer(
+	     volume,
+	     buffer,
+	     512,
+	     &error ) != 512 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to read buffer from volume.\n" );
+
+		goto on_error;
+	}
+	libsystem_notify_print_data(
+	 buffer,
+	 512 );
 
 	if( libbde_volume_read_buffer(
 	     volume,
