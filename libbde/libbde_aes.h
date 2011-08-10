@@ -27,6 +27,9 @@
 
 #include <liberror.h>
 
+/* TODO */
+#define HAVE_OPENSSL_AES_H
+
 #if defined( WINAPI )
 #include <wincrypt.h>
 

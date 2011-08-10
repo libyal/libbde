@@ -52,6 +52,12 @@ Validate test cases:
 * recovery key
 * external key
 
+20110810
+* worked on encryption functions
+
+20110807
+* worked on AES functions
+
 20110806
 * updated libhmac - bug fixes for Solaris
 * updated libsystem, libfvalue, 
