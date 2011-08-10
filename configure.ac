@@ -478,6 +478,21 @@ AS_IF(
 
 dnl TODO move the open ssl checks here ?
 
+dnl Check for libfuse Filesystem in Userspace (FUSE) support
+AS_IF(
+ [test "x$ac_cv_enable_winapi" = xno],
+ [AC_CHECK_HEADERS([fuse/fuse.h])
+
+ AS_IF(
+  [test "x$ac_cv_header_fuse_fuse_h" = xyes],
+  [AC_CHECK_LIB(
+   fuse,
+   fuse_main,
+   [ac_libbde_dummy=yes],
+   [ac_libbde_have_fuse_support=no])
+  ])
+ ])
+
 dnl Check if bdetools should be build as static executables
 AS_IF(
  [test "x$ac_cv_enable_static_executables" != xno],
