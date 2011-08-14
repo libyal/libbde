@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from a Windows NT BitLocker Drive Encryptrion (BDE) volume
+ * Mounts a Windows NT BitLocker Drive Encryptrion (BDE) volume
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -41,10 +41,6 @@
 #include "bdeoutput.h"
 #include "bdetools_libfdatetime.h"
 #include "bdetools_libbde.h"
-#include "info_handle.h"
-
-info_handle_t *bdeinfo_info_handle = NULL;
-int bdeinfo_abort                  = 0;
 
 /* Prints the executable usage information
  */
@@ -55,14 +51,14 @@ void usage_fprint(
 	{
 		return;
 	}
-	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
-	                 " Drive Encryption (BDE) volume\n\n" );
+	fprintf( stream, "Use bdemount to mount a Windows NT BitLocker Drive Encryption (BDE)\n"
+	                 " volume\n\n" );
 
 #ifdef TODO
-	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -p password ] [ -r password ]\n"
-	                 "               [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: bdemount [ -k file ] [ -p password ] [ -r password ]\n"
+	                 "                [ -hvV ] source\n\n" );
 #endif
-	fprintf( stream, "Usage: bdeinfo [ -r password ] [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: bdemount [ -r password ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
@@ -77,42 +73,6 @@ void usage_fprint(
 	fprintf( stream, "\t-V:     print version\n" );
 }
 
-/* Signal handler for bdeinfo
- */
-void bdeinfo_signal_handler(
-      libsystem_signal_t signal )
-{
-	liberror_error_t *error = NULL;
-	static char *function   = "bdeinfo_signal_handler";
-
-	bdeinfo_abort = 1;
-
-	if( bdeinfo_info_handle != NULL )
-	{
-		if( info_handle_signal_abort(
-		     bdeinfo_info_handle,
-		     &error ) != 1 )
-		{
-			libsystem_notify_printf(
-			 "%s: unable to signal info handle to abort.\n",
-			 function );
-
-			libsystem_notify_print_error_backtrace(
-			 error );
-			liberror_error_free(
-			 &error );
-		}
-	}
-	/* Force stdin to close otherwise any function reading it will remain blocked
-	 */
-	if( libsystem_file_io_close(
-	     0 ) != 0 )
-	{
-		libsystem_notify_printf(
-		 "%s: unable to close stdin.\n",
-		 function );
-	}
-}
 
 /* The main program
  */
@@ -123,12 +83,14 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libbde_error_t *error                                   = NULL;
+	libbde_volume_t *volume                                 = NULL;
 	libcstring_system_character_t *option_external_key_file = NULL;
 	libcstring_system_character_t *option_password          = NULL;
 	libcstring_system_character_t *option_recovery_password = NULL;
 	libcstring_system_character_t *source                   = NULL;
-	char *program                                           = "bdeinfo";
+	char *program                                           = "bdemount";
 	libcstring_system_integer_t option                      = 0;
+	size_t recovery_password_length                         = 0;
 	int verbose                                             = 0;
 
 	libsystem_notify_set_stream(
@@ -231,13 +193,13 @@ int main( int argc, char * const argv[] )
 	libbde_notify_set_verbose(
 	 verbose );
 
-	if( info_handle_initialize(
-	     &bdeinfo_info_handle,
+	if( libbde_volume_initialize(
+	     &volume,
 	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to initialize info handle.\n" );
+		 "Unable to initialize volume.\n" );
 
 		goto on_error;
 	}
@@ -252,10 +214,22 @@ int main( int argc, char * const argv[] )
 /* TODO make this a else if ? */
 	if( option_recovery_password != NULL )
 	{
-		if( info_handle_set_recovery_password(
-		     bdeinfo_info_handle,
-		     option_recovery_password,
+		recovery_password_length = libcstring_system_string_length(
+		                            option_recovery_password );
+
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+		if( libbde_volume_set_utf8_recovery_password(
+		     volume,
+		     (uint16_t *) option_recovery_password,
+		     recovery_password_length + 1,
 		     &error ) != 1 )
+#else
+		if( libbde_volume_set_utf8_recovery_password(
+		     volume,
+		     (uint8_t *) option_recovery_password,
+		     recovery_password_length + 1,
+		     &error ) != 1 )
+#endif
 		{
 			fprintf(
 			 stderr,
@@ -264,69 +238,28 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	if( info_handle_open(
-	     bdeinfo_info_handle,
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+	if( libbde_volume_open_wide(
+	     volume,
 	     source,
+	     LIBBDE_OPEN_READ,
 	     &error ) != 1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to open: %" PRIs_LIBCSTRING_SYSTEM ".\n",
-		 source );
-
-		goto on_error;
-	}
-	if( info_handle_volume_fprint(
-	     bdeinfo_info_handle,
+#else
+	if( libbde_volume_open(
+	     volume,
+	     source,
+	     LIBBDE_OPEN_READ,
 	     &error ) != 1 )
+#endif
 	{
 		fprintf(
 		 stderr,
-		 "Unable to print volume information.\n" );
+		 "Unable to open volume: %" PRIs_LIBCSTRING_SYSTEM ".\n",
+		 argv[ optind ] );
 
 		goto on_error;
 	}
-	if( info_handle_close(
-	     bdeinfo_info_handle,
-	     &error ) != 0 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to close info handle.\n" );
-
-		goto on_error;
-	}
-	if( info_handle_free(
-	     &bdeinfo_info_handle,
-	     &error ) != 1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to free info handle.\n" );
-
-		goto on_error;
-	}
-	return( EXIT_SUCCESS );
-
-on_error:
-	if( error != NULL )
-	{
-		libsystem_notify_print_error_backtrace(
-		 error );
-		liberror_error_free(
-		 &error );
-	}
-	if( bdeinfo_info_handle != NULL )
-	{
-		info_handle_free(
-		 &bdeinfo_info_handle,
-		 NULL );
-	}
-	return( EXIT_FAILURE );
-}
-
-#ifdef TODO
-	if( bdeinfo_volume_info_fprint(
+	if( bdemount_volume_info_fprint(
 	     stdout,
 	     volume,
 	     &error ) != 1 )
@@ -337,53 +270,7 @@ on_error:
 
 		goto on_error;
 	}
-/* TODO test */
-	uint8_t buffer[ 512 ];
-
-	if( libbde_volume_seek_offset(
-	     volume,
-	     0x0d2ba000,
-	     SEEK_SET,
-	     &error ) == -1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to seek offset in volume.\n" );
-
-		goto on_error;
-	}
-	if( libbde_volume_read_buffer(
-	     volume,
-	     buffer,
-	     512,
-	     &error ) != 512 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to read buffer from volume.\n" );
-
-		goto on_error;
-	}
-	libsystem_notify_print_data(
-	 buffer,
-	 512 );
-
-	if( libbde_volume_read_buffer(
-	     volume,
-	     buffer,
-	     512,
-	     &error ) != 512 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to read buffer from volume.\n" );
-
-		goto on_error;
-	}
-	libsystem_notify_print_data(
-	 buffer,
-	 512 );
-/* TODO test */
+/* TODO setup mount handle */
 
 	if( libbde_volume_close(
 	     volume,
@@ -405,5 +292,22 @@ on_error:
 
 		goto on_error;
 	}
-#endif
+	return( EXIT_SUCCESS );
+
+on_error:
+	if( error != NULL )
+	{
+		libsystem_notify_print_error_backtrace(
+		 error );
+		libbde_error_free(
+		 &error );
+	}
+	if( volume != NULL )
+	{
+		libbde_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( EXIT_FAILURE );
+}
 

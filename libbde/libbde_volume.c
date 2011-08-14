@@ -1332,6 +1332,8 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		goto on_error;
 	}
+	internal_volume->encryption_method = encryption_method;
+
 	return( result );
 
 on_error:
@@ -1769,6 +1771,46 @@ int libbde_volume_get_size(
 	return( 1 );
 }
 
+/* Retrieves the encryption method
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_get_encryption_method(
+     libbde_volume_t *volume,
+     uint32_t *encryption_method,
+     liberror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_encryption_method";
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( encryption_method == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid encryption method.",
+		 function );
+
+		return( -1 );
+	}
+	*encryption_method = internal_volume->encryption_method;
+
+	return( 1 );
+}
+
 /* Sets an UTF-8 formatted recovery password
  * This function needs to be used before one of the open functions
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
@@ -1776,7 +1818,7 @@ int libbde_volume_get_size(
 int libbde_volume_set_utf8_recovery_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,
-     size_t utf8_string_size,
+     size_t utf8_string_length,
      liberror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
@@ -1819,7 +1861,7 @@ int libbde_volume_set_utf8_recovery_password(
 	}
 	if( libbde_recovery_password_copy_utf8_to_binary(
 	     utf8_string,
-	     utf8_string_size,
+	     utf8_string_length,
 	     internal_volume->io_handle->recovery_password,
 	     error ) != 1 )
 	{
@@ -1855,7 +1897,7 @@ int libbde_volume_set_utf8_recovery_password(
 int libbde_volume_set_utf16_recovery_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
-     size_t utf16_string_size,
+     size_t utf16_string_length,
      liberror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
@@ -1898,7 +1940,7 @@ int libbde_volume_set_utf16_recovery_password(
 	}
 	if( libbde_recovery_password_copy_utf16_to_binary(
 	     utf16_string,
-	     utf16_string_size,
+	     utf16_string_length,
 	     internal_volume->io_handle->recovery_password,
 	     error ) != 1 )
 	{

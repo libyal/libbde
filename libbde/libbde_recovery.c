@@ -37,7 +37,7 @@
  */
 int libbde_recovery_password_copy_utf8_to_binary(
      const uint8_t *utf8_string,
-     size_t utf8_string_size,
+     size_t utf8_string_length,
      uint8_t binary_recovery_password[ 16 ],
      liberror_error_t **error )
 {
@@ -52,7 +52,7 @@ int libbde_recovery_password_copy_utf8_to_binary(
 
 	if( libfvalue_utf8_string_split(
 	     utf8_string,
-	     utf8_string_size,
+	     utf8_string_length + 1,
 	     (uint8_t) '-',
  	     &split_string,
  	     error ) != 1 )
@@ -171,7 +171,7 @@ on_error:
  */
 int libbde_recovery_password_copy_utf16_to_binary(
      const uint16_t *utf16_string,
-     size_t utf16_string_size,
+     size_t utf16_string_length,
      uint8_t binary_recovery_password[ 16 ],
      liberror_error_t **error )
 {
@@ -186,7 +186,7 @@ int libbde_recovery_password_copy_utf16_to_binary(
 
 	if( libfvalue_utf16_string_split(
 	     utf16_string,
-	     utf16_string_size,
+	     utf16_string_length + 1,
 	     (uint16_t) '-',
  	     &split_string,
  	     error ) != 1 )
