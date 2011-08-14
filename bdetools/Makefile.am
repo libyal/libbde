@@ -19,9 +19,23 @@ bdeinfo_SOURCES = \
 	bdeinfo.c \
 	bdeoutput.c bdeoutput.h \
 	bdetools_libfdatetime.h \
-	bdetools_libbde.h
+	bdetools_libbde.h \
+	info_handle.c info_handle.h
 
 bdeinfo_LDADD  = \
+	../liberror/liberror.la \
+	../libbde/libbde.la \
+	../libsystem/libsystem.la \
+	@MEMWATCH_LIBADD@
+
+bdemount_SOURCES = \
+	bdemount.c \
+	bdeoutput.c bdeoutput.h \
+	bdetools_libbfio.h \
+	bdetools_libbde.h \
+	mount_handle.c mount_handle.h
+
+bdemount_LDADD  = \
 	../liberror/liberror.la \
 	../libbde/libbde.la \
 	../libsystem/libsystem.la \

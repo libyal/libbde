@@ -79,10 +79,6 @@ struct libbde_io_handle
 		off64_t volume_header_offset;
 	};
 
-	/* The encryption method
-	 */
-	int encryption_method;
-
 	/* The encryption context
 	 */
 	libbde_encryption_context_t *encryption_context;

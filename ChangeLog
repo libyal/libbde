@@ -1,5 +1,5 @@
 TODO
-* fix diffuser A
+* add external key support
 * debug print unencrypted data
 * what is entry type 0x000b FKEV for external key ?
 * AES
@@ -51,6 +51,11 @@ Validate test cases:
 * AES 256 diffuser
 * recovery key
 * external key
+
+20110811
+* worked on libbfio file range IO handle for bdemount
+* libbfio code clean up
+* added info handle
 
 20110810
 * worked on encryption functions

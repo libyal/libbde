@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_LIBBFIO_H )
-#define _LIBBDE_LIBBFIO_H
+#if !defined( _BDETOOLS_LIBBFIO_H )
+#define _BDETOOLS_LIBBFIO_H
 
 #include <common.h>
 

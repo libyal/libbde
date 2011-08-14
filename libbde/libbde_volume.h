@@ -46,6 +46,10 @@ struct libbde_internal_volume
 	 */
 	size64_t size;
 
+	/* The encryption method
+	 */
+	uint32_t encryption_method;
+
 	/* The metadata at the first metadata offset
 	 */
 	libbde_metadata_t *primary_metadata;
@@ -177,17 +181,23 @@ int libbde_volume_get_size(
      liberror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_get_encryption_method(
+     libbde_volume_t *volume,
+     uint32_t *encryption_method,
+     liberror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_set_utf8_recovery_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,
-     size_t utf8_string_size,
+     size_t utf8_string_length,
      liberror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_set_utf16_recovery_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
-     size_t utf16_string_size,
+     size_t utf16_string_length,
      liberror_error_t **error );
 
 #if defined( __cplusplus )
