@@ -51,12 +51,54 @@ mount_handle_t *bdemount_mount_handle = NULL;
 int bdemount_abort                    = 0;
 
 #if defined( HAVE_FUSE_H )
-static \
-struct fuse_operations bdemount_fuse_operations = {
-	.getattr	= mount_handle_fuse_getattr,
-	.readdir	= mount_handle_fuse_readdir,
-	.open		= mount_handle_fuse_open,
-	.read		= mount_handle_fuse_read
+static struct fuse_operations bdemount_fuse_operations = {
+/*
+	.getattr     = NULL,
+	.readlink    = NULL,
+	.mknod       = NULL,
+	.mkdir       = NULL,
+	.unlink      = NULL,
+	.rmdir       = NULL,
+	.symlink     = NULL,
+	.rename      = NULL,
+	.link        = NULL,
+	.chmod       = NULL,
+	.chown       = NULL,
+	.truncate    = NULL,
+	.utime       = NULL,
+*/
+	.open        = mount_handle_fuse_open,
+	.read        = mount_handle_fuse_read,
+/*
+	.write       = NULL,
+	.statfs      = NULL,
+	.flush       = NULL,
+	.release     = NULL,
+	.fsync       = NULL,
+	.setxattr    = NULL,
+	.getxattr    = NULL,
+	.listxattr   = NULL,
+	.removexattr = NULL,
+	.opendir     = NULL,
+*/
+	.readdir     = mount_handle_fuse_readdir,
+./*
+	.releasedir  = NULL,
+	.fsyncdir    = NULL,
+	.init        = NULL,
+	.destroy     = NULL,
+	.access      = NULL,
+	.create      = NULL,
+	.ftruncate   = NULL,
+*/
+	.fgetattr    = mount_handle_fuse_fgetattr,
+/*
+	.lock        = NULL,
+	.utimens     = NULL,
+	.bmap        = NULL,
+	.ioctl       = NULL,
+	.poll        = NULL
+*/
 };
 #endif
 
@@ -144,6 +186,10 @@ int main( int argc, char * const argv[] )
 	char *program                                           = "bdemount";
 	libcstring_system_integer_t option                      = 0;
 	int verbose                                             = 0;
+
+#if defined( HAVE_FUSE_H )
+	int result                                              = 0;
+#endif
 
 	libsystem_notify_set_stream(
 	 stderr,
@@ -302,10 +348,13 @@ int main( int argc, char * const argv[] )
 	}
 #if defined( HAVE_FUSE_H )
 /* TODO pass stripped arguments */
-	if( fuse_main(
-	     argc,
-	     argv,
-	     &bdemount_fuse_operations ) != 1 )
+	result = fuse_main(
+	          argc,
+	          argv,
+	          &bdemount_fuse_operations,
+	          bdemount_mount_handle );
+
+	if( result != 0 )
 	{
 		fprintf(
 		 stderr,
