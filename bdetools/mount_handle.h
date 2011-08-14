@@ -43,9 +43,9 @@ typedef struct mount_handle mount_handle_t;
 
 struct mount_handle
 {
-	/* The libbde input handle
+	/* The libbde input volume
 	 */
-	libbde_handle_t *input_handle;
+	libbde_volume_t *input_volume;
 
 	/* The nofication output stream
 	 */
@@ -78,33 +78,35 @@ int mount_handle_close(
      mount_handle_t *mount_handle,
      liberror_error_t **error );
 
+int mount_handle_get_size(
+     mount_handle_t *mount_handle,
+     size64_t *size,
+     liberror_error_t **error );
+
 #if defined( HAVE_FUSE_H )
 
-static \
-int mount_handle_fuse_readdir(
-     const char *path,
-     void *buffer,
-     fuse_fill_dir_t filler,
-     off_t offset,
-     struct fuse_file_info *file_info );
+static int mount_handle_fuse_open(
+            const char *path,
+            struct fuse_file_info *file_info );
 
-static \
-int mount_handle_fuse_open(
-     const char *path,
-     struct fuse_file_info *file_info );
+static int mount_handle_fuse_read(
+            const char *path,
+            char *buffer,
+            size_t size,
+            off_t offset,
+            struct fuse_file_info *file_info );
 
-static \
-int mount_handle_fuse_read(
-     const char *path,
-     char *buffer,
-     size_t size,
-     off_t offset,
-     struct fuse_file_info *file_info );
+static int mount_handle_fuse_readdir(
+            const char *path,
+            void *buffer,
+            fuse_fill_dir_t filler,
+            off_t offset,
+            struct fuse_file_info *file_info );
 
-static \
-int mount_handle_fuse_getattr(
-     const char *path,
-     struct stat *status );
+static int mount_handle_fuse_fgetattr(
+            const char *path,
+            struct stat *stat_info,
+            struct fuse_file_info *file_info );
 
 #endif /* defined( HAVE_FUSE_H ) */
 

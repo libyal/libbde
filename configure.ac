@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110811],
+ [20110812],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -481,7 +481,7 @@ dnl TODO move the open ssl checks here ?
 dnl Check for libfuse Filesystem in Userspace (FUSE) support
 AS_IF(
  [test "x$ac_cv_enable_winapi" = xno],
- [AC_CHECK_HEADERS([fuse/fuse.h])
+ [AC_CHECK_HEADERS([fuse.h])
 
  AS_IF(
   [test "x$ac_cv_header_fuse_fuse_h" = xyes],
