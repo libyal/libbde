@@ -23,12 +23,11 @@
 #define _MOUNT_HANDLE_H
 
 #include <common.h>
+#include <file_stream.h>
 #include <types.h>
 
 #include <libcstring.h>
 #include <liberror.h>
-
-#include <stdio.h>
 
 #if defined( HAVE_FUSE_H )
 #include <fuse.h>
@@ -47,6 +46,10 @@ struct mount_handle
 	/* The libbde input handle
 	 */
 	libbde_handle_t *input_handle;
+
+	/* The nofication output stream
+	 */
+	FILE *notify_stream;
 };
 
 int mount_handle_initialize(
@@ -58,6 +61,20 @@ int mount_handle_free(
      liberror_error_t **error );
 
 int mount_handle_signal_abort(
+     mount_handle_t *mount_handle,
+     liberror_error_t **error );
+
+int mount_handle_set_recovery_password(
+     mount_handle_t *mount_handle,
+     const libcstring_system_character_t *string,
+     liberror_error_t **error );
+
+int mount_handle_open(
+     mount_handle_t *mount_handle,
+     const libcstring_system_character_t *filename,
+     liberror_error_t **error );
+
+int mount_handle_close(
      mount_handle_t *mount_handle,
      liberror_error_t **error );
 

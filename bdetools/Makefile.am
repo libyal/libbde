@@ -13,7 +13,8 @@ AM_CPPFLAGS = \
 AM_LDFLAGS = @STATIC_LDFLAGS@
 
 bin_PROGRAMS = \
-	bdeinfo
+	bdeinfo \
+	bdemount
 
 bdeinfo_SOURCES = \
 	bdeinfo.c \
