@@ -36,13 +36,31 @@
 #include <stdlib.h>
 #endif
 
+#if defined( HAVE_FUSE_H )
+#include <fuse.h>
+#endif
+
 #include <libsystem.h>
 
 #include "bdeoutput.h"
 #include "bdetools_libfdatetime.h"
 #include "bdetools_libbde.h"
+#include "mount_handle.h"
 
-/* Prints the executable usage information
+mount_handle_t *bdemount_mount_handle = NULL;
+int bdemount_abort                    = 0;
+
+#if defined( HAVE_FUSE_H )
+static \
+struct fuse_operations bdemount_fuse_operations = {
+	.getattr	= mount_handle_fuse_getattr,
+	.readdir	= mount_handle_fuse_readdir,
+	.open		= mount_handle_fuse_open,
+	.read		= mount_handle_fuse_read
+};
+#endif
+
+/* Prints the executable usage mountrmation
  */
 void usage_fprint(
       FILE *stream )
@@ -73,6 +91,42 @@ void usage_fprint(
 	fprintf( stream, "\t-V:     print version\n" );
 }
 
+/* Signal handler for bdemount
+ */
+void bdemount_signal_handler(
+      libsystem_signal_t signal )
+{
+	liberror_error_t *error = NULL;
+	static char *function   = "bdemount_signal_handler";
+
+	bdemount_abort = 1;
+
+	if( bdemount_mount_handle != NULL )
+	{
+		if( mount_handle_signal_abort(
+		     bdemount_mount_handle,
+		     &error ) != 1 )
+		{
+			libsystem_notify_printf(
+			 "%s: unable to signal mount handle to abort.\n",
+			 function );
+
+			libsystem_notify_print_error_backtrace(
+			 error );
+			liberror_error_free(
+			 &error );
+		}
+	}
+	/* Force stdin to close otherwise any function reading it will remain blocked
+	 */
+	if( libsystem_file_io_close(
+	     0 ) != 0 )
+	{
+		libsystem_notify_printf(
+		 "%s: unable to close stdin.\n",
+		 function );
+	}
+}
 
 /* The main program
  */
@@ -83,14 +137,12 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libbde_error_t *error                                   = NULL;
-	libbde_volume_t *volume                                 = NULL;
 	libcstring_system_character_t *option_external_key_file = NULL;
 	libcstring_system_character_t *option_password          = NULL;
 	libcstring_system_character_t *option_recovery_password = NULL;
 	libcstring_system_character_t *source                   = NULL;
 	char *program                                           = "bdemount";
 	libcstring_system_integer_t option                      = 0;
-	size_t recovery_password_length                         = 0;
 	int verbose                                             = 0;
 
 	libsystem_notify_set_stream(
@@ -193,43 +245,41 @@ int main( int argc, char * const argv[] )
 	libbde_notify_set_verbose(
 	 verbose );
 
-	if( libbde_volume_initialize(
-	     &volume,
+	if( mount_handle_initialize(
+	     &bdemount_mount_handle,
 	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to initialize volume.\n" );
+		 "Unable to initialize mount handle.\n" );
 
 		goto on_error;
 	}
 	if( option_external_key_file != NULL )
 	{
 /* TODO */
+		fprintf(
+		 stderr,
+		 "External key file not yet supported.\n" );
+
+		goto on_error;
 	}
 	if( option_password != NULL )
 	{
 /* TODO */
+		fprintf(
+		 stderr,
+		 "Password not yet supported.\n" );
+
+		goto on_error;
 	}
 /* TODO make this a else if ? */
 	if( option_recovery_password != NULL )
 	{
-		recovery_password_length = libcstring_system_string_length(
-		                            option_recovery_password );
-
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-		if( libbde_volume_set_utf8_recovery_password(
-		     volume,
-		     (uint16_t *) option_recovery_password,
-		     recovery_password_length + 1,
+		if( mount_handle_set_recovery_password(
+		     bdemount_mount_handle,
+		     option_recovery_password,
 		     &error ) != 1 )
-#else
-		if( libbde_volume_set_utf8_recovery_password(
-		     volume,
-		     (uint8_t *) option_recovery_password,
-		     recovery_password_length + 1,
-		     &error ) != 1 )
-#endif
 		{
 			fprintf(
 			 stderr,
@@ -238,39 +288,100 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libbde_volume_open_wide(
-	     volume,
+	if( mount_handle_open(
+	     bdemount_mount_handle,
 	     source,
-	     LIBBDE_OPEN_READ,
 	     &error ) != 1 )
-#else
-	if( libbde_volume_open(
-	     volume,
-	     source,
-	     LIBBDE_OPEN_READ,
-	     &error ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to open: %" PRIs_LIBCSTRING_SYSTEM ".\n",
+		 source );
+
+		goto on_error;
+	}
+#if defined( HAVE_FUSE_H )
+/* TODO pass stripped arguments */
+	if( fuse_main(
+	     argc,
+	     argv,
+	     &bdemount_fuse_operations ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to run fuse main.\n",
+		 source );
+
+		goto on_error;
+	}
 #endif
-	{
-		fprintf(
-		 stderr,
-		 "Unable to open volume: %" PRIs_LIBCSTRING_SYSTEM ".\n",
-		 argv[ optind ] );
+	return( EXIT_SUCCESS );
 
-		goto on_error;
+on_error:
+	if( error != NULL )
+	{
+		libsystem_notify_print_error_backtrace(
+		 error );
+		liberror_error_free(
+		 &error );
 	}
-	if( bdemount_volume_info_fprint(
-	     stdout,
+	if( bdemount_mount_handle != NULL )
+	{
+		mount_handle_free(
+		 &bdemount_mount_handle,
+		 NULL );
+	}
+	return( EXIT_FAILURE );
+}
+
+#ifdef TODO
+/* TODO test */
+	uint8_t buffer[ 512 ];
+
+	if( libbde_volume_seek_offset(
 	     volume,
-	     &error ) != 1 )
+	     0x0d2ba000,
+	     SEEK_SET,
+	     &error ) == -1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to print volume information.\n" );
+		 "Unable to seek offset in volume.\n" );
 
 		goto on_error;
 	}
-/* TODO setup mount handle */
+	if( libbde_volume_read_buffer(
+	     volume,
+	     buffer,
+	     512,
+	     &error ) != 512 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to read buffer from volume.\n" );
+
+		goto on_error;
+	}
+	libsystem_notify_print_data(
+	 buffer,
+	 512 );
+
+	if( libbde_volume_read_buffer(
+	     volume,
+	     buffer,
+	     512,
+	     &error ) != 512 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to read buffer from volume.\n" );
+
+		goto on_error;
+	}
+	libsystem_notify_print_data(
+	 buffer,
+	 512 );
+/* TODO test */
 
 	if( libbde_volume_close(
 	     volume,
@@ -292,22 +403,5 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	return( EXIT_SUCCESS );
-
-on_error:
-	if( error != NULL )
-	{
-		libsystem_notify_print_error_backtrace(
-		 error );
-		libbde_error_free(
-		 &error );
-	}
-	if( volume != NULL )
-	{
-		libbde_volume_free(
-		 &volume,
-		 NULL );
-	}
-	return( EXIT_FAILURE );
-}
+#endif
 

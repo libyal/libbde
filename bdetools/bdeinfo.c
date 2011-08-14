@@ -244,10 +244,20 @@ int main( int argc, char * const argv[] )
 	if( option_external_key_file != NULL )
 	{
 /* TODO */
+		fprintf(
+		 stderr,
+		 "External key file not yet supported.\n" );
+
+		goto on_error;
 	}
 	if( option_password != NULL )
 	{
 /* TODO */
+		fprintf(
+		 stderr,
+		 "Password not yet supported.\n" );
+
+		goto on_error;
 	}
 /* TODO make this a else if ? */
 	if( option_recovery_password != NULL )
@@ -324,86 +334,4 @@ on_error:
 	}
 	return( EXIT_FAILURE );
 }
-
-#ifdef TODO
-	if( bdeinfo_volume_info_fprint(
-	     stdout,
-	     volume,
-	     &error ) != 1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to print volume information.\n" );
-
-		goto on_error;
-	}
-/* TODO test */
-	uint8_t buffer[ 512 ];
-
-	if( libbde_volume_seek_offset(
-	     volume,
-	     0x0d2ba000,
-	     SEEK_SET,
-	     &error ) == -1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to seek offset in volume.\n" );
-
-		goto on_error;
-	}
-	if( libbde_volume_read_buffer(
-	     volume,
-	     buffer,
-	     512,
-	     &error ) != 512 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to read buffer from volume.\n" );
-
-		goto on_error;
-	}
-	libsystem_notify_print_data(
-	 buffer,
-	 512 );
-
-	if( libbde_volume_read_buffer(
-	     volume,
-	     buffer,
-	     512,
-	     &error ) != 512 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to read buffer from volume.\n" );
-
-		goto on_error;
-	}
-	libsystem_notify_print_data(
-	 buffer,
-	 512 );
-/* TODO test */
-
-	if( libbde_volume_close(
-	     volume,
-	     &error ) != 0 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to close volume.\n" );
-
-		goto on_error;
-	}
-	if( libbde_volume_free(
-	     &volume,
-	     &error ) != 1 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to free volume.\n" );
-
-		goto on_error;
-	}
-#endif
 
