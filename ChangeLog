@@ -52,6 +52,13 @@ Validate test cases:
 * recovery key
 * external key
 
+20110816
+* updated libbfio
+* worked on fuse mount
+
+20110812
+* worked on fuse mount
+
 20110811
 * worked on libbfio file range IO handle for bdemount
 * libbfio code clean up

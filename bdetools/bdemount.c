@@ -36,71 +36,20 @@
 #include <stdlib.h>
 #endif
 
-#if defined( HAVE_FUSE_H )
-#include <fuse.h>
-#endif
-
 #include <libsystem.h>
 
 #include "bdeoutput.h"
+#include "bdetools_fuse.h"
 #include "bdetools_libfdatetime.h"
 #include "bdetools_libbde.h"
 #include "mount_handle.h"
 
+#if defined( HAVE_FUSE_H )
+static struct fuse_operations bdemount_fuse_operations;
+#endif
+
 mount_handle_t *bdemount_mount_handle = NULL;
 int bdemount_abort                    = 0;
-
-#if defined( HAVE_FUSE_H )
-static struct fuse_operations bdemount_fuse_operations = {
-/*
-	.getattr     = NULL,
-	.readlink    = NULL,
-	.mknod       = NULL,
-	.mkdir       = NULL,
-	.unlink      = NULL,
-	.rmdir       = NULL,
-	.symlink     = NULL,
-	.rename      = NULL,
-	.link        = NULL,
-	.chmod       = NULL,
-	.chown       = NULL,
-	.truncate    = NULL,
-	.utime       = NULL,
-*/
-	.open        = mount_handle_fuse_open,
-	.read        = mount_handle_fuse_read,
-/*
-	.write       = NULL,
-	.statfs      = NULL,
-	.flush       = NULL,
-	.release     = NULL,
-	.fsync       = NULL,
-	.setxattr    = NULL,
-	.getxattr    = NULL,
-	.listxattr   = NULL,
-	.removexattr = NULL,
-	.opendir     = NULL,
-*/
-	.readdir     = mount_handle_fuse_readdir,
-./*
-	.releasedir  = NULL,
-	.fsyncdir    = NULL,
-	.init        = NULL,
-	.destroy     = NULL,
-	.access      = NULL,
-	.create      = NULL,
-	.ftruncate   = NULL,
-*/
-	.fgetattr    = mount_handle_fuse_fgetattr,
-/*
-	.lock        = NULL,
-	.utimens     = NULL,
-	.bmap        = NULL,
-	.ioctl       = NULL,
-	.poll        = NULL
-*/
-};
-#endif
 
 /* Prints the executable usage mountrmation
  */
@@ -116,21 +65,22 @@ void usage_fprint(
 
 #ifdef TODO
 	fprintf( stream, "Usage: bdemount [ -k file ] [ -p password ] [ -r password ]\n"
-	                 "                [ -hvV ] source\n\n" );
+	                 "                [ -hvV ] source mount_point\n\n" );
 #endif
-	fprintf( stream, "Usage: bdemount [ -r password ] [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: bdemount [ -r password ] [ -hvV ] source mount_point\n\n" );
 
-	fprintf( stream, "\tsource: the source file or device\n\n" );
+	fprintf( stream, "\tsource:      the source file or device\n" );
+	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
-	fprintf( stream, "\t-h:     shows this help\n" );
+	fprintf( stream, "\t-h:          shows this help\n" );
 #ifdef TODO
-	fprintf( stream, "\t-k:     specify the file containing the external key.\n"
-	                 "\t        typically this file has the extension .BEK\n" );
-	fprintf( stream, "\t-p:     specify the password\n" );
+	fprintf( stream, "\t-k:          specify the file containing the external key.\n"
+	                 "\t             typically this file has the extension .BEK\n" );
+	fprintf( stream, "\t-p:          specify the password\n" );
 #endif
-	fprintf( stream, "\t-r:     specify the recovery password\n" );
-	fprintf( stream, "\t-v:     verbose output to stderr\n" );
-	fprintf( stream, "\t-V:     print version\n" );
+	fprintf( stream, "\t-r:          specify the recovery password\n" );
+	fprintf( stream, "\t-v:          verbose output to stderr\n" );
+	fprintf( stream, "\t-V:          print version\n" );
 }
 
 /* Signal handler for bdemount
@@ -283,6 +233,17 @@ int main( int argc, char * const argv[] )
 	}
 	source = argv[ optind ];
 
+	if( ( optind + 1 ) == argc )
+	{
+		fprintf(
+		 stderr,
+		 "Missing mount point.\n" );
+
+		usage_fprint(
+		 stdout );
+
+		return( EXIT_FAILURE );
+	}
 	libsystem_notify_set_verbose(
 	 verbose );
 	libbde_notify_set_stream(
@@ -347,10 +308,26 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
 #if defined( HAVE_FUSE_H )
+	if( memory_set(
+	     &bdemount_fuse_operations,
+	     0,
+	     sizeof( struct fuse_operations ) ) == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to clear fuse operations.\n" );
+
+		goto on_error;
+	}
+	bdemount_fuse_operations.open     = &mount_handle_fuse_open;
+	bdemount_fuse_operations.read     = &mount_handle_fuse_read;
+	bdemount_fuse_operations.readdir  = &mount_handle_fuse_readdir;
+	bdemount_fuse_operations.fgetattr = &mount_handle_fuse_fgetattr;
+
 /* TODO pass stripped arguments */
 	result = fuse_main(
-	          argc,
-	          argv,
+	          optind - argc + 1,
+	          (char **) &( argv[ optind ] ),
 	          &bdemount_fuse_operations,
 	          bdemount_mount_handle );
 
@@ -358,8 +335,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to run fuse main.\n",
-		 source );
+		 "Unable to run fuse main.\n" );
 
 		goto on_error;
 	}
