@@ -1392,23 +1392,25 @@ int libbde_metadata_get_volume_master_key(
 			goto on_error;
 		}
 	}
-	if( memory_set(
-	     unencrypted_data,
-	     0,
-	     unencrypted_data_size ) == NULL )
+	if( unencrypted_data != NULL )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear unencrypted data.",
-		 function );
+		if( memory_set(
+		     unencrypted_data,
+		     0,
+		     unencrypted_data_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear unencrypted data.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		memory_free(
+		 unencrypted_data );
 	}
-	memory_free(
-	 unencrypted_data );
-
 	return( result );
 
 on_error:

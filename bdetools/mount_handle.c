@@ -30,10 +30,9 @@
 #include <errno.h>
 #endif
 
-#if defined( HAVE_FUSE_H )
-#include <fuse.h>
-#endif
+#include <libsystem.h>
 
+#include "bdetools_fuse.h"
 #include "bdetools_libbde.h"
 #include "mount_handle.h"
 
@@ -346,14 +345,13 @@ static size_t mount_handle_fuse_path_length = 5;
 /* Opens a file
  * Returns 0 if successful or a negative errno value otherwise
  */
-static int mount_handle_fuse_open(
-            const char *path,
-            struct fuse_file_info *file_info )
+int mount_handle_fuse_open(
+     const char *path,
+     struct fuse_file_info *file_info )
 {
 	liberror_error_t *error = NULL;
 	static char *function   = "mount_handle_fuse_open";
 	size_t path_length      = 0;
-	ssize_t read_count      = 0;
 	int result              = 0;
 
 	if( path == NULL )
@@ -444,12 +442,12 @@ on_error:
 /* Reads a buffer of data at the specified offset
  * Returns number of bytes read if successful or a negative errno value otherwise
  */
-static int mount_handle_fuse_read(
-            const char *path,
-            char *buffer,
-            size_t size,
-            off_t offset,
-            struct fuse_file_info *file_info )
+int mount_handle_fuse_read(
+     const char *path,
+     char *buffer,
+     size_t size,
+     off_t offset,
+     struct fuse_file_info *file_info )
 {
 	liberror_error_t *error      = NULL;
 	mount_handle_t *mount_handle = NULL;
@@ -536,7 +534,7 @@ static int mount_handle_fuse_read(
 	     mount_handle->input_volume,
 	     (off64_t) offset,
 	     SEEK_SET,
-	     error ) != 1 )
+	     &error ) != 1 )
 	{
 		liberror_error_set(
 		 &error,
@@ -552,7 +550,8 @@ static int mount_handle_fuse_read(
 	read_count = libbde_volume_read_buffer(
 	              mount_handle->input_volume,
 	              buffer,
-	              size );
+	              size,
+	              &error );
 
 	if( read_count == -1 )
 	{
@@ -583,17 +582,16 @@ on_error:
 /* Reads a directory
  * Returns 0 if successful or a negative errno value otherwise
  */
-static int mount_handle_fuse_readdir(
-            const char *path,
-            void *buffer,
-            fuse_fill_dir_t filler,
-            off_t offset,
-            struct fuse_file_info *file_info )
+int mount_handle_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_fill_dir_t filler,
+     off_t offset,
+     struct fuse_file_info *file_info )
 {
 	liberror_error_t *error = NULL;
 	static char *function   = "mount_handle_fuse_readdir";
 	size_t path_length      = 0;
-	ssize_t read_count      = 0;
 	int result              = 0;
 
 	if( path == NULL )
@@ -704,15 +702,25 @@ static int mount_handle_fuse_readdir(
 		goto on_error;
 	}
 	return( 0 );
+
+on_error:
+	if( error != NULL )
+	{
+		libsystem_notify_print_error_backtrace(
+		 error );
+		liberror_error_free(
+		 &error );
+	}
+	return( result );
 }
 
 /* Retrieves the file stat info
  * Returns 0 if successful or a negative errno value otherwise
  */
-static int mount_handle_fuse_fgetattr(
-            const char *path,
-            struct stat *stat_info,
-            struct fuse_file_info *file_info );
+int mount_handle_fuse_fgetattr(
+     const char *path,
+     struct stat *stat_info,
+     struct fuse_file_info *file_info )
 {
 	liberror_error_t *error      = NULL;
 	mount_handle_t *mount_handle = NULL;

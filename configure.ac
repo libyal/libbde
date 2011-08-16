@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110812],
+ [20110816],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -484,11 +484,11 @@ AS_IF(
  [AC_CHECK_HEADERS([fuse.h])
 
  AS_IF(
-  [test "x$ac_cv_header_fuse_fuse_h" = xyes],
+  [test "x$ac_cv_header_fuse_h" = xyes],
   [AC_CHECK_LIB(
    fuse,
    fuse_main,
-   [ac_libbde_dummy=yes],
+   [],
    [ac_libbde_have_fuse_support=no])
   ])
  ])
