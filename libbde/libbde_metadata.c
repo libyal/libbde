@@ -239,6 +239,8 @@ int libbde_metadata_read(
 	static char *function                                 = "libbde_metadata_read";
 	size_t read_size                                      = 4096;
 	ssize_t read_count                                    = 0;
+	uint64_t volume_header_offset                         = 0;
+	uint64_t volume_header_size                           = 0;
 	uint32_t metadata_header_size                         = 0;
 	uint32_t metadata_size                                = 0;
 	uint32_t metadata_size_copy                           = 0;
@@ -1013,37 +1015,58 @@ int libbde_metadata_read(
 				break;
 
 			case LIBBDE_ENTRY_TYPE_VOLUME_HEADER_BLOCK:
-#if defined( HAVE_DEBUG_OUTPUT )
 				if( metadata_entry->value_type == LIBBDE_VALUE_TYPE_OFFSET_AND_SIZE )
 				{
 /* TODO move to separate function and check fo size */
-					if( metadata_entry->value_data_size == 16 )
+					if( metadata_entry->value_data_size < 16 )
 					{
-						if( libnotify_verbose != 0 )
-						{
-/* TODO the offset matches the volume header offset although the size is a 8k */
-							byte_stream_copy_to_uint64_little_endian(
-							 metadata_entry->value_data,
-							 value_64bit );
-							libnotify_printf(
-							 "%s: offset\t\t\t\t\t\t: 0x%" PRIx64 "\n",
-							 function,
-							 value_64bit );
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+						 "%s: value data size value out of bounds.",
+						 function );
 
-							byte_stream_copy_to_uint64_little_endian(
-							 &( metadata_entry->value_data[ 8 ] ),
-							 value_64bit );
-							libnotify_printf(
-							 "%s: unknown\t\t\t\t\t\t: 0x%" PRIx64 "\n",
-							 function,
-							 value_64bit );
-
-							libnotify_printf(
-							 "\n" );
-						}
+						goto on_error;
 					}
-				}
+					byte_stream_copy_to_uint64_little_endian(
+					 &( metadata_entry->value_data[ 0 ] ),
+					 volume_header_offset );
+
+					byte_stream_copy_to_uint64_little_endian(
+					 &( metadata_entry->value_data[ 8 ] ),
+					 volume_header_size );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libnotify_verbose != 0 )
+					{
+						libnotify_printf(
+						 "%s: offset\t\t\t\t\t\t: 0x%" PRIx64 "\n",
+						 function,
+						 volume_header_offset );
+
+						libnotify_printf(
+						 "%s: size\t\t\t\t\t\t\t: 0x%" PRIx64 "\n",
+						 function,
+						 volume_header_size );
+
+						libnotify_printf(
+						 "\n" );
+					}
 #endif
+					if( volume_header_offset != metadata->volume_header_offset )
+					{
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_INPUT,
+						 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+						 "%s: value mismatch for metadata volume header offset.",
+						 function );
+
+						goto on_error;
+					}
+					metadata->volume_header_size = volume_header_size;
+				}
 				break;
 
 			default:
