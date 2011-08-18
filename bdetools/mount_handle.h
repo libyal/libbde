@@ -29,8 +29,8 @@
 #include <libcstring.h>
 #include <liberror.h>
 
-#include "bdetools_fuse.h"
 #include "bdetools_libbde.h"
+#include "bdetools_libbfio.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -40,6 +40,14 @@ typedef struct mount_handle mount_handle_t;
 
 struct mount_handle
 {
+	/* The volume offset
+	 */
+	off64_t volume_offset;
+
+	/* The libbfio input file IO handle
+	 */
+	libbfio_handle_t *input_file_io_handle;
+
 	/* The libbde input volume
 	 */
 	libbde_volume_t *input_volume;
@@ -79,33 +87,6 @@ int mount_handle_get_size(
      mount_handle_t *mount_handle,
      size64_t *size,
      liberror_error_t **error );
-
-#if defined( HAVE_FUSE_H )
-
-int mount_handle_fuse_open(
-     const char *path,
-     struct fuse_file_info *file_info );
-
-int mount_handle_fuse_read(
-     const char *path,
-     char *buffer,
-     size_t size,
-     off_t offset,
-     struct fuse_file_info *file_info );
-
-int mount_handle_fuse_readdir(
-     const char *path,
-     void *buffer,
-     fuse_fill_dir_t filler,
-     off_t offset,
-     struct fuse_file_info *file_info );
-
-int mount_handle_fuse_fgetattr(
-     const char *path,
-     struct stat *stat_info,
-     struct fuse_file_info *file_info );
-
-#endif /* defined( HAVE_FUSE_H ) */
 
 #if defined( __cplusplus )
 }

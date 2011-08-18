@@ -1,4 +1,7 @@
 TODO
+* libbde allow to open volume if bfio handle is already open?
+* bdemount:
+  - create a mount handle seek offset and read function
 * add external key support
 * debug print unencrypted data
 * what is entry type 0x000b FKEV for external key ?
@@ -51,6 +54,9 @@ Validate test cases:
 * AES 256 diffuser
 * recovery key
 * external key
+
+20110817
+* worked on fuse mount
 
 20110816
 * updated libbfio

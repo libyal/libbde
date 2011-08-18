@@ -32,7 +32,6 @@ bdeinfo_LDADD  = \
 bdemount_SOURCES = \
 	bdemount.c \
 	bdeoutput.c bdeoutput.h \
-	bdetools_fuse.h \
 	bdetools_libbfio.h \
 	bdetools_libbde.h \
 	mount_handle.c mount_handle.h

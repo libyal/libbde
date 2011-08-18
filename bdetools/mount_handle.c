@@ -26,15 +26,18 @@
 #include <libcstring.h>
 #include <liberror.h>
 
-#if defined( HAVE_ERRNO_H )
-#include <errno.h>
-#endif
-
 #include <libsystem.h>
 
-#include "bdetools_fuse.h"
 #include "bdetools_libbde.h"
+#include "bdetools_libbfio.h"
 #include "mount_handle.h"
+
+extern \
+int libbde_volume_open_file_io_handle(
+     libbde_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
+     int access_flags,
+     libbde_error_t **error );
 
 /* Initializes the mount handle
  * Returns 1 if successful or -1 on error
@@ -84,6 +87,24 @@ int mount_handle_initialize(
 			 "%s: unable to clear mount handle.",
 			 function );
 
+			memory_free(
+			 *mount_handle );
+
+			*mount_handle = NULL;
+
+			return( -1 );
+		}
+		if( libbfio_file_range_initialize(
+		     &( ( *mount_handle )->input_file_io_handle ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize input file IO handle.",
+			 function );
+
 			goto on_error;
 		}
 		if( libbde_volume_initialize(
@@ -105,6 +126,12 @@ int mount_handle_initialize(
 on_error:
 	if( *mount_handle != NULL )
 	{
+		if( ( *mount_handle )->input_file_io_handle != NULL )
+		{
+			libbfio_handle_free(
+			 &( ( *mount_handle )->input_file_io_handle ),
+			 NULL );
+		}
 		memory_free(
 		 *mount_handle );
 
@@ -136,21 +163,31 @@ int mount_handle_free(
 	}
 	if( *mount_handle != NULL )
 	{
-		if( ( *mount_handle )->input_volume != NULL )
+		if( libbde_volume_free(
+		     &( ( *mount_handle )->input_volume ),
+		     error ) != 1 )
 		{
-			if( libbde_volume_free(
-			     &( ( *mount_handle )->input_volume ),
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free input handle.",
-				 function );
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free input handle.",
+			 function );
 
-				result = -1;
-			}
+			result = -1;
+		}
+		if( libbfio_handle_free(
+		     &( ( *mount_handle )->input_file_io_handle ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free input file IO handle.",
+			 function );
+
+			result = -1;
 		}
 		memory_free(
 		 *mount_handle );
@@ -258,7 +295,8 @@ int mount_handle_open(
      const libcstring_system_character_t *filename,
      liberror_error_t **error )
 {
-	static char *function = "mount_handle_open";
+	static char *function  = "mount_handle_open";
+	size_t filename_length = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -271,19 +309,68 @@ int mount_handle_open(
 
 		return( -1 );
 	}
+	filename_length = libcstring_system_string_length(
+	                   filename );
+
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libbde_volume_open_wide(
-	     mount_handle->input_volume,
+	if( libbfio_file_range_set_name_wide(
+	     mount_handle->input_file_io_handle,
 	     filename,
-	     LIBBDE_OPEN_READ,
+	     filename_length,
 	     error ) != 1 )
 #else
-	if( libbde_volume_open(
-	     mount_handle->input_volume,
+	if( libbfio_file_range_set_name(
+	     mount_handle->input_file_io_handle,
 	     filename,
-	     LIBBDE_OPEN_READ,
+	     filename_length,
 	     error ) != 1 )
 #endif
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open set file name.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbfio_file_range_set(
+	     mount_handle->input_file_io_handle,
+	     mount_handle->volume_offset,
+	     0,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open set volume offset.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO
+	if( libbfio_handle_open(
+	     mount_handle->input_file_io_handle,
+	     LIBBFIO_OPEN_READ,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open input file IO handle.",
+		 function );
+
+		return( -1 );
+	}
+*/
+	if( libbde_volume_open_file_io_handle(
+	     mount_handle->input_volume,
+	     mount_handle->input_file_io_handle,
+	     LIBBDE_OPEN_READ,
+	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
@@ -332,560 +419,4 @@ int mount_handle_close(
 	}
 	return( 0 );
 }
-
-#if defined( HAVE_FUSE_H )
-
-#if ( SIZEOF_OFF_T != 8 ) && ( SIZEOF_OFF_T != 4 )
-#error Size of off_t not supported
-#endif
-
-static char *mount_handle_fuse_path         = "/bde1";
-static size_t mount_handle_fuse_path_length = 5;
-
-/* Opens a file
- * Returns 0 if successful or a negative errno value otherwise
- */
-int mount_handle_fuse_open(
-     const char *path,
-     struct fuse_file_info *file_info )
-{
-	liberror_error_t *error = NULL;
-	static char *function   = "mount_handle_fuse_open";
-	size_t path_length      = 0;
-	int result              = 0;
-
-	if( path == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( file_info == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file info.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	path_length = libcstring_narrow_string_length(
-	               path );
-
-	if( ( path_length != mount_handle_fuse_path_length )
-	 || ( libcstring_narrow_string_compare(
-	       path,
-	       mount_handle_fuse_path,
-	       mount_handle_fuse_path_length ) != 0 ) )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported path.",
-		 function );
-
-		result = -ENOENT;
-
-		goto on_error;
-	}
-	if( file_info->fh == (uint64_t) NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file info - missing file handle.",
-		 function );
-
-		result = -EBADF;
-
-		goto on_error;
-	}
-	if( ( file_info->flags & 0x03 ) != O_RDONLY )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: write access currently not supported.",
-		 function );
-
-		result = -EACCES;
-
-		goto on_error;
-	}
-	return( 0 );
-
-on_error:
-	if( error != NULL )
-	{
-		libsystem_notify_print_error_backtrace(
-		 error );
-		liberror_error_free(
-		 &error );
-	}
-	return( result );
-}
-
-/* Reads a buffer of data at the specified offset
- * Returns number of bytes read if successful or a negative errno value otherwise
- */
-int mount_handle_fuse_read(
-     const char *path,
-     char *buffer,
-     size_t size,
-     off_t offset,
-     struct fuse_file_info *file_info )
-{
-	liberror_error_t *error      = NULL;
-	mount_handle_t *mount_handle = NULL;
-	static char *function        = "mount_handle_fuse_read";
-	size_t path_length           = 0;
-	ssize_t read_count           = 0;
-	int result                   = 0;
-
-	if( path == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( size > (size_t) INT_MAX )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid size value exceeds maximum.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( file_info == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file info.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	path_length = libcstring_narrow_string_length(
-	               path );
-
-	if( ( path_length != mount_handle_fuse_path_length )
-	 || ( libcstring_narrow_string_compare(
-	       path,
-	       mount_handle_fuse_path,
-	       mount_handle_fuse_path_length ) != 0 ) )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported path.",
-		 function );
-
-		result = -ENOENT;
-
-		goto on_error;
-	}
-	if( file_info->fh == (uint64_t) NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file info - missing file handle.",
-		 function );
-
-		result = -EBADF;
-
-		goto on_error;
-	}
-	mount_handle = (mount_handle_t *) file_info->fh;
-
-	if( libbde_volume_seek_offset(
-	     mount_handle->input_volume,
-	     (off64_t) offset,
-	     SEEK_SET,
-	     &error ) != 1 )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unsupported to read from input volume.",
-		 function );
-
-		result = -EIO;
-
-		goto on_error;
-	}
-	read_count = libbde_volume_read_buffer(
-	              mount_handle->input_volume,
-	              buffer,
-	              size,
-	              &error );
-
-	if( read_count == -1 )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unsupported to read from input volume.",
-		 function );
-
-		result = -EIO;
-
-		goto on_error;
-	}
-	return( (int) read_count );
-
-on_error:
-	if( error != NULL )
-	{
-		libsystem_notify_print_error_backtrace(
-		 error );
-		liberror_error_free(
-		 &error );
-	}
-	return( result );
-}
-
-/* Reads a directory
- * Returns 0 if successful or a negative errno value otherwise
- */
-int mount_handle_fuse_readdir(
-     const char *path,
-     void *buffer,
-     fuse_fill_dir_t filler,
-     off_t offset,
-     struct fuse_file_info *file_info )
-{
-	liberror_error_t *error = NULL;
-	static char *function   = "mount_handle_fuse_readdir";
-	size_t path_length      = 0;
-	int result              = 0;
-
-	if( path == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( file_info == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file info.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	path_length = libcstring_narrow_string_length(
-	               path );
-
-	if( ( path_length != 1 )
-	 || ( path[ 0 ] != '/' ) )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported path.",
-		 function );
-
-		result = -ENOENT;
-
-		goto on_error;
-	}
-	if( file_info->fh == (uint64_t) NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file info - missing file handle.",
-		 function );
-
-		result = -EBADF;
-
-		goto on_error;
-	}
-	if( filler(
-	     buffer,
-	     ".",
-	     NULL,
-	     0 ) == 1 )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set directory entry.",
-		 function );
-
-		result = -EIO;
-
-		goto on_error;
-	}
-	if( filler(
-	     buffer,
-	     "..",
-	     NULL,
-	     0 ) == 1 )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set directory entry.",
-		 function );
-
-		result = -EIO;
-
-		goto on_error;
-	}
-	if( filler(
-	     buffer,
-	     &( mount_handle_fuse_path[ 1 ] ),
-	     NULL,
-	     0 ) == 1 )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set directory entry.",
-		 function );
-
-		result = -EIO;
-
-		goto on_error;
-	}
-	return( 0 );
-
-on_error:
-	if( error != NULL )
-	{
-		libsystem_notify_print_error_backtrace(
-		 error );
-		liberror_error_free(
-		 &error );
-	}
-	return( result );
-}
-
-/* Retrieves the file stat info
- * Returns 0 if successful or a negative errno value otherwise
- */
-int mount_handle_fuse_fgetattr(
-     const char *path,
-     struct stat *stat_info,
-     struct fuse_file_info *file_info )
-{
-	liberror_error_t *error      = NULL;
-	mount_handle_t *mount_handle = NULL;
-	static char *function        = "mount_handle_fuse_fgetattr";
-	size64_t volume_size         = 0;
-	size_t path_length           = 0;
-	int result                   = 0;
-
-	if( stat_info == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid stat info.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( file_info == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file info.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( memory_set(
-	     stat_info,
-	     0,
-	     sizeof( struct stat ) ) == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid stat info.",
-		 function );
-
-		result = errno;
-
-		goto on_error;
-	}
-	path_length = libcstring_narrow_string_length(
-	               path );
-
-	if( path_length == 1 )
-	{
-		if( path[ 0 ] != '/' )
-		{
-			liberror_error_set(
-			 &error,
-			 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported path.",
-			 function );
-
-			result = -ENOENT;
-
-			goto on_error;
-		}
-		stat_info->st_mode  = S_IFDIR | 0755;
-		stat_info->st_nlink = 2;
-	}
-	else if( path_length == mount_handle_fuse_path_length )
-	{
-		if( libcstring_narrow_string_compare(
-		     path,
-		     mount_handle_fuse_path,
-		     mount_handle_fuse_path_length ) != 0 )
-		{
-			liberror_error_set(
-			 &error,
-			 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported path.",
-			 function );
-
-			result = -ENOENT;
-
-			goto on_error;
-		}
-		stat_info->st_mode  = S_IFREG | 0444;
-		stat_info->st_nlink = 1;
-
-		if( file_info->fh == (uint64_t) NULL )
-		{
-			liberror_error_set(
-			 &error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid file info - missing file handle.",
-			 function );
-
-			result = -EBADF;
-
-			goto on_error;
-		}
-		mount_handle = (mount_handle_t *) file_info->fh;
-
-		if( libbde_volume_get_size(
-		     mount_handle->input_volume,
-		     &volume_size,
-		     &error ) != 1 )
-		{
-			liberror_error_set(
-			 &error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unsupported to retrieve volume size.",
-			 function );
-
-			result = -EBADFD;
-
-			goto on_error;
-		}
-#if SIZEOF_OFF_T == 4
-		if( volume_size > (size64_t) UINT32_MAX )
-		{
-			liberror_error_set(
-			 &error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: unsupported to volume size value out of bounds.",
-			 function );
-
-			result = -ERANGE;
-
-			goto on_error;
-		}
-#endif
-		stat_info->st_size = (off_t) volume_size;
-	}
-	else
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported path.",
-		 function );
-
-		result = -ENOENT;
-
-		goto on_error;
-	}
-	return( 0 );
-
-on_error:
-	if( error != NULL )
-	{
-		libsystem_notify_print_error_backtrace(
-		 error );
-		liberror_error_free(
-		 &error );
-	}
-	return( result );
-}
-
-#endif /* defined( HAVE_FUSE_H ) */
 

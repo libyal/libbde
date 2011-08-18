@@ -61,6 +61,11 @@ struct libbde_metadata
 		off64_t volume_header_offset;
 	};
 
+	/* The volume header size
+	 * Used by Windows 7 (version 2)
+	 */
+	size64_t volume_header_size;
+
 	/* The volume identifier
 	 * Contains a GUID
 	 */

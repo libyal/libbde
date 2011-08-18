@@ -269,9 +269,11 @@ int libbde_sector_data_read(
 		 sector_data_offset );
 	}
 #endif
-	if( sector_data_offset == 0 )
+	if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 	{
-		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+		/* Normally the first 8192 bytes are stored in another location on the volume
+		 */
+		if( sector_data_offset < io_handle->volume_header_size )
 		{
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libnotify_verbose != 0 )
@@ -283,7 +285,7 @@ int libbde_sector_data_read(
 				 io_handle->volume_header_offset );
 			}
 #endif
-			sector_data_offset = io_handle->volume_header_offset;
+			sector_data_offset += io_handle->volume_header_offset;
 		}
 	}
 	if( libbfio_handle_seek_offset(
