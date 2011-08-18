@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110817],
+ [20110818],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -591,6 +591,7 @@ AC_CONFIG_FILES([bdetools/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([po/Makevars])
 AC_CONFIG_FILES([manuals/Makefile])
+AC_CONFIG_FILES([msvscpp/Makefile])
 dnl Have configure make the include files
 AC_CONFIG_FILES([include/libbde.h])
 AC_CONFIG_FILES([include/libbde/definitions.h])

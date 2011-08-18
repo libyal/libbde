@@ -28,7 +28,7 @@ BEGIN
       VALUE "OriginalFilename",		"libbde.dll\0"
       VALUE "ProductName",		"libbde\0"
       VALUE "ProductVersion",		"@VERSION@" "\0"
-      VALUE "Comments",			"For more information visit http://libfsal.sourceforge.net\0"
+      VALUE "Comments",			"For more information visit http://libbde.sourceforge.net\0"
     END
   END
   BLOCK "VarFileInfo"

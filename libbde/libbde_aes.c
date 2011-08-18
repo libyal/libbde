@@ -1202,11 +1202,11 @@ int libbde_aes_cbc_crypt(
 	 &safe_output_data_size );
 
 #else
-/* TODO test */
 	while( ( data_index + 16 ) <= input_data_size )
 	{
 		if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
 		{
+/* TODO test */
 			if( memory_copy(
 			     &( output_data[ data_index ] ),
 			     &( input_data[ data_index ] ),
@@ -1303,7 +1303,6 @@ int libbde_aes_cbc_crypt(
 		}
 		data_index += 16;
   	}
-/* TODO test */
 #endif
 	return( 1 );
 }
@@ -1491,6 +1490,7 @@ int libbde_aes_ccm_crypt(
 	return( 1 );
 }
 
+#ifdef TODO
 /* De- or encrypts a block of data using AES-CFB
  * Returns 1 if successful or -1 on error
  */
@@ -1639,6 +1639,7 @@ int libbde_aes_cfb_crypt(
 /* TODO test */
 	return( 1 );
 }
+#endif
 
 /* De- or encrypts a 16-byte block using AES-ECB
  * Returns 1 if successful or -1 on error

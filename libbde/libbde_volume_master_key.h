@@ -78,14 +78,6 @@ int libbde_volume_master_key_read(
      libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error );
 
-int libbde_volume_master_key_is_disk_password_protected(
-     libbde_volume_master_key_t *volume_master_key,
-     liberror_error_t **error );
-
-int libbde_volume_master_key_is_external_key_protected(
-     libbde_volume_master_key_t *volume_master_key,
-     liberror_error_t **error );
-
 #if defined( __cplusplus )
 }
 #endif

@@ -241,12 +241,12 @@ int libbde_metadata_read(
 	ssize_t read_count                                    = 0;
 	uint64_t volume_header_offset                         = 0;
 	uint64_t volume_header_size                           = 0;
+	uint64_t volume_size                                  = 0;
 	uint32_t metadata_header_size                         = 0;
 	uint32_t metadata_size                                = 0;
 	uint32_t metadata_size_copy                           = 0;
 	uint32_t version                                      = 0;
 	int metadata_entry_index                              = 0;
-	int result                                            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 32 ];
@@ -257,6 +257,7 @@ int libbde_metadata_read(
 	uint64_t value_64bit                                  = 0;
 	uint32_t value_32bit                                  = 0;
 	uint16_t value_16bit                                  = 0;
+	int result                                            = 0;
 #endif
 
 	if( metadata == NULL )
@@ -390,6 +391,10 @@ int libbde_metadata_read(
 	else if( metadata->version == 2 )
 	{
 		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_size,
+		 volume_size );
+
+		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_header_offset,
 		 metadata->volume_header_offset );
 	}
@@ -448,13 +453,10 @@ int libbde_metadata_read(
 		}
 		else if( metadata->version == 2 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_size,
-			 value_64bit );
 			libnotify_printf(
 			 "%s: volume size\t\t\t\t\t: %" PRIu64 "\n",
 			 function,
-			 value_64bit );
+			 volume_size );
 
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->unknown3,
@@ -868,22 +870,7 @@ int libbde_metadata_read(
 
 					goto on_error;
 				}
-				result = libbde_volume_master_key_is_disk_password_protected(
-					  volume_master_key,
-					  error );
-
-				if( result == -1 )
-				{
-					liberror_error_set(
-					 error,
-					 LIBERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to determine if volume master key is disk password protected.",
-					 function );
-
-					goto on_error;
-				}
-				else if( result != 0 )
+				if( volume_master_key->type == LIBBDE_VMK_TYPE_RECOVERY_KEY_PROTECTED )
 				{
 					if( metadata->disk_password_volume_master_key == NULL )
 					{
@@ -892,31 +879,13 @@ int libbde_metadata_read(
 						volume_master_key = NULL;
 					}
 				}
-				else
+				else if( volume_master_key->type == LIBBDE_VMK_TYPE_EXTERNAL_KEY_PROTECTED )
 				{
-					result = libbde_volume_master_key_is_external_key_protected(
-						  volume_master_key,
-						  error );
-
-					if( result == -1 )
+					if( metadata->external_key_volume_master_key == NULL )
 					{
-						liberror_error_set(
-						 error,
-						 LIBERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-						 "%s: unable to determine if volume master key is external key protected.",
-						 function );
+						metadata->external_key_volume_master_key = volume_master_key;
 
-						goto on_error;
-					}
-					else if( result != 0 )
-					{
-						if( metadata->external_key_volume_master_key == NULL )
-						{
-							metadata->external_key_volume_master_key = volume_master_key;
-
-							volume_master_key = NULL;
-						}
+						volume_master_key = NULL;
 					}
 				}
 				if( volume_master_key != NULL )
@@ -1046,7 +1015,7 @@ int libbde_metadata_read(
 						 volume_header_offset );
 
 						libnotify_printf(
-						 "%s: size\t\t\t\t\t\t\t: 0x%" PRIx64 "\n",
+						 "%s: size\t\t\t\t\t\t: %" PRIu64 "\n",
 						 function,
 						 volume_header_size );
 
@@ -1054,7 +1023,7 @@ int libbde_metadata_read(
 						 "\n" );
 					}
 #endif
-					if( volume_header_offset != metadata->volume_header_offset )
+					if( (off64_t) volume_header_offset != metadata->volume_header_offset )
 					{
 						liberror_error_set(
 						 error,
@@ -1065,7 +1034,7 @@ int libbde_metadata_read(
 
 						goto on_error;
 					}
-					metadata->volume_header_size = volume_header_size;
+					metadata->volume_header_size = (size64_t) volume_header_size;
 				}
 				break;
 

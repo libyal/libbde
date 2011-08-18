@@ -79,6 +79,11 @@ struct libbde_io_handle
 		off64_t volume_header_offset;
 	};
 
+	/* The volume header size
+	 * Used by Windows 7 (version 2)
+	 */
+	size64_t volume_header_size;
+
 	/* The encryption context
 	 */
 	libbde_encryption_context_t *encryption_context;
