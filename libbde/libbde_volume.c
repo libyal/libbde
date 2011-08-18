@@ -1112,6 +1112,7 @@ int libbde_volume_open_read_keys_from_metadata(
 
 	static char *function        = "libbde_volume_open_read_keys_from_metadata";
 	off64_t volume_header_offset = 0;
+	size64_t volume_header_size  = 0;
 	uint32_t encryption_method   = 0;
 	int result                   = 0;
 
@@ -1191,6 +1192,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		return( -1 );
 	}
 	volume_header_offset = metadata->volume_header_offset;
+	volume_header_size   = metadata->volume_header_size;
 	encryption_method    = metadata->encryption_method;
 
 	result = libbde_metadata_get_volume_master_key(
@@ -1234,6 +1236,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	if( result != 0 )
 	{
 		internal_volume->io_handle->volume_header_offset = volume_header_offset;
+		internal_volume->io_handle->volume_header_size   = volume_header_size;
 
 		if( libbde_encryption_initialize(
 		     &( internal_volume->io_handle->encryption_context ),

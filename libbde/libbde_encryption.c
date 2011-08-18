@@ -24,7 +24,6 @@
 #include <types.h>
 
 #include <liberror.h>
-#include <libnotify.h>
 
 #include "libbde_aes.h"
 #include "libbde_definitions.h"
@@ -471,13 +470,6 @@ int libbde_encryption_crypt(
 
 		return( -1 );
 	}
-libnotify_printf(
- "%s: IV:\n",
- function );
-libnotify_print_data(
- initialization_vector,
- 16 );
-
 	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
@@ -502,12 +494,6 @@ libnotify_print_data(
 
 			return( -1 );
 		}
-libnotify_printf(
- "%s: sector key:\n",
- function );
-libnotify_print_data(
- sector_key_data,
- 32 );
 		/* Set the last byte to contain 0x80 (128)
 		 */
 		block_key_data[ 15 ] = 0x80;
@@ -530,12 +516,6 @@ libnotify_print_data(
 
 			return( -1 );
 		}
-libnotify_printf(
- "%s: sector key:\n",
- function );
-libnotify_print_data(
- sector_key_data,
- 32 );
 	}
 	if( mode == LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT )
 	{

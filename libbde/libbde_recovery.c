@@ -25,8 +25,6 @@
 #include <types.h>
 
 #include <liberror.h>
-/* TODO */
-#include <libnotify.h>
 
 #include "libbde_libfvalue.h"
 #include "libbde_libhmac.h"

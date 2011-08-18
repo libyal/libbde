@@ -273,7 +273,7 @@ int libbde_sector_data_read(
 	{
 		/* Normally the first 8192 bytes are stored in another location on the volume
 		 */
-		if( sector_data_offset < io_handle->volume_header_size )
+		if( (size64_t) sector_data_offset < io_handle->volume_header_size )
 		{
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libnotify_verbose != 0 )

@@ -55,6 +55,12 @@ Validate test cases:
 * recovery key
 * external key
 
+20110818
+* updated libbfio
+* code clean up
+* added msvscpp build files
+* worked on WINAPI build
+
 20110817
 * worked on fuse mount
 

@@ -17,7 +17,8 @@ SUBDIRS = \
 	libsystem \
 	bdetools \
 	po \
-	manuals
+	manuals \
+	msvscpp
 
 GETTEXT_FILES = \
 	config.rpath \
