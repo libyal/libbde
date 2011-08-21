@@ -2,6 +2,7 @@ include_HEADERS = \
         libbde.h
 
 pkginclude_HEADERS = \
+        libbde/codepage.h \
         libbde/definitions.h \
         libbde/error.h \
         libbde/extern.h \

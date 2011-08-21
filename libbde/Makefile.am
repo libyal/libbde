@@ -20,10 +20,10 @@ libbde_la_SOURCES = \
 	libbde_aes.c libbde_aes.h \
 	libbde_aes_ccm_encrypted_key.c libbde_aes_ccm_encrypted_key.h \
 	libbde_array_type.c libbde_array_type.h \
+	libbde_codepage.h \
 	libbde_debug.c libbde_debug.h \
 	libbde_definitions.h \
 	libbde_diffuser.c libbde_diffuser.h \
-	libbde_empty_block.c libbde_empty_block.h \
 	libbde_encryption.c libbde_encryption.h \
 	libbde_error.c libbde_error.h \
 	libbde_extern.h \

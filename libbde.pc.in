@@ -7,6 +7,6 @@ Name: libbde
 Description: Library to support the Windows NT BitLocker Drive Encryption (BDE) format
 Version: @VERSION@
 Libs: -L${libdir} -lbde
-Libs.private: @libbde_pc_libs_private_libbfio@ @libbde_pc_libs_private_libfdata@ @libbde_pc_libs_private_libfdatetime@ @libbde_pc_libs_private_libfguid@ @libbde_pc_libs_private_libfvalue@ @libbde_pc_libs_private_libuna@
+Libs.private: @libbde_pc_libs_private_libbfio@ @libbde_pc_libs_private_libcrypto@ @libbde_pc_libs_private_libfdata@ @libbde_pc_libs_private_libfdatetime@ @libbde_pc_libs_private_libfguid@ @libbde_pc_libs_private_libfvalue@ @libbde_pc_libs_private_libuna@
 Cflags: -I${includedir}
 

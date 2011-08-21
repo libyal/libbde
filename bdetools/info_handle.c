@@ -251,7 +251,7 @@ int info_handle_set_recovery_password(
 }
 
 /* Opens the info handle
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 int info_handle_open(
      info_handle_t *info_handle,
@@ -259,6 +259,7 @@ int info_handle_open(
      liberror_error_t **error )
 {
 	static char *function = "info_handle_open";
+	int result            = 0;
 
 	if( info_handle == NULL )
 	{
@@ -272,18 +273,19 @@ int info_handle_open(
 		return( -1 );
 	}
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libbde_volume_open_wide(
-	     info_handle->input_volume,
-	     filename,
-	     LIBBDE_OPEN_READ,
-	     error ) != 1 )
+	result = libbde_volume_open_wide(
+	          info_handle->input_volume,
+	          filename,
+	          LIBBDE_OPEN_READ,
+	          error );
 #else
-	if( libbde_volume_open(
-	     info_handle->input_volume,
-	     filename,
-	     LIBBDE_OPEN_READ,
-	     error ) != 1 )
+	result = libbde_volume_open(
+	          info_handle->input_volume,
+	          filename,
+	          LIBBDE_OPEN_READ,
+	          error );
 #endif
+	if( result == -1 )
 	{
 		liberror_error_set(
 		 error,
@@ -294,7 +296,7 @@ int info_handle_open(
 
 		return( -1 );
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Closes the info handle

@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from a Windows NT BitLocker Drive Encryptrion (BDE) volume
+ * Shows information obtained from a Windows NT BitLocker Drive Encrypted (BDE) volume
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -56,7 +56,7 @@ void usage_fprint(
 		return;
 	}
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
-	                 " Drive Encryption (BDE) volume\n\n" );
+	                 " Drive Encrypted (BDE) volume\n\n" );
 
 #ifdef TODO
 	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -p password ] [ -r password ]\n"
@@ -129,6 +129,7 @@ int main( int argc, char * const argv[] )
 	libcstring_system_character_t *source                   = NULL;
 	char *program                                           = "bdeinfo";
 	libcstring_system_integer_t option                      = 0;
+	int result                                              = 0;
 	int verbose                                             = 0;
 
 	libsystem_notify_set_stream(
@@ -274,15 +275,25 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	if( info_handle_open(
-	     bdeinfo_info_handle,
-	     source,
-	     &error ) != 1 )
+	result = info_handle_open(
+	          bdeinfo_info_handle,
+	          source,
+	          &error );
+
+	if( result == -1 )
 	{
 		fprintf(
 		 stderr,
 		 "Unable to open: %" PRIs_LIBCSTRING_SYSTEM ".\n",
 		 source );
+
+		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to unlock keys.\n" );
 
 		goto on_error;
 	}
