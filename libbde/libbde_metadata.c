@@ -39,6 +39,7 @@
 #include "libbde_libfguid.h"
 #include "libbde_metadata.h"
 #include "libbde_metadata_entry.h"
+#include "libbde_password.h"
 #include "libbde_recovery.h"
 #include "libbde_volume_master_key.h"
 
@@ -1152,7 +1153,243 @@ int libbde_metadata_get_volume_master_key(
 
 		return( -1 );
 	}
-	if( io_handle->recovery_password_is_set != 0 )
+	if( io_handle->password_is_set != 0 )
+	{
+		if( metadata->external_key_volume_master_key == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid metadata - missing external key volume master key.",
+			 function );
+
+			return( -1 );
+		}
+		if( metadata->external_key_volume_master_key->stretch_key == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid metadata - invalid external key volume master key - missing stretch key.",
+			 function );
+
+			return( -1 );
+		}
+		if( metadata->external_key_volume_master_key->aes_ccm_encrypted_key == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid metadata - invalid external key volume master key - missing AES-CCM encrypted key.",
+			 function );
+
+			return( -1 );
+		}
+		if( memory_set(
+		     aes_ccm_key,
+		     0,
+		     32 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear AES-CCM key.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_password_calculate_key(
+		     io_handle->password_hash,
+		     metadata->external_key_volume_master_key->stretch_key->salt,
+		     aes_ccm_key,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine AES-CCM key.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: AES-CCM key:\n",
+			 function );
+			libnotify_print_data(
+			 aes_ccm_key,
+			 32 );
+		}
+#endif
+		if( metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: external key volume master key data size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		unencrypted_data_size = metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data_size;
+
+		unencrypted_data = (uint8_t *) memory_allocate(
+		                                unencrypted_data_size );
+
+		if( unencrypted_data == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create unencrypted data.",
+			 function );
+
+			goto on_error;
+		}
+		if( memory_set(
+		     unencrypted_data,
+		     0,
+		     unencrypted_data_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear unencrypted data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_initialize(
+		     &aes_context,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable initialize AES context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_set_encryption_key(
+		     aes_context,
+		     aes_ccm_key,
+		     256,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set encryption key in AES context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_aes_ccm_crypt(
+		     aes_context,
+		     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+		     metadata->external_key_volume_master_key->aes_ccm_encrypted_key->nonce,
+		     12,
+		     metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data,
+		     metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data_size,
+		     unencrypted_data,
+		     unencrypted_data_size,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+			 "%s: unable to decrypt data.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: unencrypted data:\n",
+			 function );
+			libnotify_print_data(
+			 unencrypted_data,
+			 unencrypted_data_size );
+		}
+#endif
+		/* TODO improve this check */
+		byte_stream_copy_to_uint16_little_endian(
+		 &( unencrypted_data[ 16 ] ),
+		 data_size );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 &( unencrypted_data[ 20 ] ),
+		 version );
+
+		if( version == 1 )
+		{
+			if( data_size == 0x2c )
+			{
+				if( memory_copy(
+				     volume_master_key,
+				     &( unencrypted_data[ 28 ] ),
+				     32 ) == NULL )
+				{
+					liberror_error_set(
+					 error,
+					 LIBERROR_ERROR_DOMAIN_MEMORY,
+					 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+					 "%s: unable to copy unencrypted volume master key.",
+					 function );
+
+					goto on_error;
+				}
+				result = 1;
+			}
+		}
+		if( libbde_aes_free(
+		     &aes_context,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable free context.",
+			 function );
+
+			goto on_error;
+		}
+		if( memory_set(
+		     unencrypted_data,
+		     0,
+		     unencrypted_data_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear unencrypted data.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 unencrypted_data );
+	}
+	if( ( result == 0 )
+	 && ( io_handle->recovery_password_is_set != 0 ) )
 	{
 		if( metadata->disk_password_volume_master_key == NULL )
 		{
@@ -1202,7 +1439,7 @@ int libbde_metadata_get_volume_master_key(
 			goto on_error;
 		}
 		if( libbde_recovery_calculate_key(
-		     io_handle->recovery_password,
+		     io_handle->recovery_password_hash,
 		     metadata->disk_password_volume_master_key->stretch_key->salt,
 		     aes_ccm_key,
 		     error ) != 1 )
@@ -1211,7 +1448,7 @@ int libbde_metadata_get_volume_master_key(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine AES-CCM recovery key.",
+			 "%s: unable to determine AES-CCM key.",
 			 function );
 
 			goto on_error;
@@ -1220,7 +1457,7 @@ int libbde_metadata_get_volume_master_key(
 		if( libnotify_verbose != 0 )
 		{
 			libnotify_printf(
-			 "%s: recovery key:\n",
+			 "%s: AES-CCM key:\n",
 			 function );
 			libnotify_print_data(
 			 aes_ccm_key,
@@ -1370,9 +1607,6 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-	}
-	if( unencrypted_data != NULL )
-	{
 		if( memory_set(
 		     unencrypted_data,
 		     0,

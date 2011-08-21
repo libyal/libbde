@@ -92,9 +92,17 @@ struct libbde_io_handle
 	 */
 	libbde_encryption_context_t *encryption_context;
 
-	/* The (binary) recovery password
+	/* The SHA-256 hash of the password
 	 */
-	uint8_t recovery_password[ 16 ];
+	uint8_t password_hash[ 32 ];
+
+	/* Value to indicate the password is set
+	 */
+	uint8_t password_is_set;
+
+	/* The SHA-256 hash of the (binary) recovery password
+	 */
+	uint8_t recovery_password_hash[ 32 ];
 
 	/* Value to indicate the recovery password is set
 	 */

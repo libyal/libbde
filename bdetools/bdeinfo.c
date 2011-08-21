@@ -58,11 +58,8 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
 	                 " Drive Encrypted (BDE) volume\n\n" );
 
-#ifdef TODO
-	fprintf( stream, "Usage: bdeinfo [ -k file ] [ -p password ] [ -r password ]\n"
+	fprintf( stream, "Usage: bdeinfo [ -p password ] [ -r password ]\n"
 	                 "               [ -hvV ] source\n\n" );
-#endif
-	fprintf( stream, "Usage: bdeinfo [ -r password ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
@@ -70,8 +67,8 @@ void usage_fprint(
 #ifdef TODO
 	fprintf( stream, "\t-k:     specify the file containing the external key.\n"
 	                 "\t        typically this file has the extension .BEK\n" );
-	fprintf( stream, "\t-p:     specify the password\n" );
 #endif
+	fprintf( stream, "\t-p:     specify the password\n" );
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
@@ -259,8 +256,19 @@ int main( int argc, char * const argv[] )
 		 "Password not yet supported.\n" );
 
 		goto on_error;
+
+		if( info_handle_set_password(
+		     bdeinfo_info_handle,
+		     option_password,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set password.\n" );
+
+			goto on_error;
+		}
 	}
-/* TODO make this a else if ? */
 	if( option_recovery_password != NULL )
 	{
 		if( info_handle_set_recovery_password(

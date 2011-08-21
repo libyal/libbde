@@ -49,7 +49,6 @@
 #endif
 
 #include "bdeoutput.h"
-#include "bdetools_libfdatetime.h"
 #include "bdetools_libbde.h"
 #include "mount_handle.h"
 
@@ -68,25 +67,15 @@ void usage_fprint(
 	fprintf( stream, "Use bdemount to mount a Windows NT BitLocker Drive Encryption (BDE)\n"
 	                 " volume\n\n" );
 
-#ifdef TODO
-	fprintf( stream, "Usage: bdemount [ -k file ] [ -p password ] [ -r password ]\n"
-	                 "                [ -hvV ] source mount_point\n\n" );
-#endif
-	fprintf( stream, "Usage: bdemount [ - o offset ] [ -r password ]\n"
+	fprintf( stream, "Usage: bdemount [ - o offset ] [ -p password ] [ -r password ]\n"
 	                 "                [ -hvV ] source mount_point\n\n" );
 
 	fprintf( stream, "\tsource:      the source file or device\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
 	fprintf( stream, "\t-h:          shows this help\n" );
-#ifdef TODO
-	fprintf( stream, "\t-k:          specify the file containing the external key.\n"
-	                 "\t             typically this file has the extension .BEK\n" );
-#endif
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
-#ifdef TODO
 	fprintf( stream, "\t-p:          specify the password\n" );
-#endif
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
 	fprintf( stream, "\t-v:          verbose output to stderr\n" );
 	fprintf( stream, "\t-V:          print version\n" );
@@ -792,8 +781,19 @@ int main( int argc, char * const argv[] )
 		 "Password not yet supported.\n" );
 
 		goto on_error;
+
+		if( mount_handle_set_password(
+		     bdemount_mount_handle,
+		     option_password,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set password.\n" );
+
+			goto on_error;
+		}
 	}
-/* TODO make this a else if ? */
 	if( option_recovery_password != NULL )
 	{
 		if( mount_handle_set_recovery_password(
@@ -930,7 +930,7 @@ int main( int argc, char * const argv[] )
 #else
 	fprintf(
 	 stderr,
-	 "No sub system to mount volume.\n" );
+	 "No sub system to mount BDE volume.\n" );
 
 	fprintf(
 	 stdout,

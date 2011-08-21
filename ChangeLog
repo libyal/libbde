@@ -1,12 +1,12 @@
 TODO
-* add clear key support
-* add external key support
-* debug print unencrypted data
-* what is entry type 0x000b ?
-* AES
-  - add support for MS Crypto API implementation
 * the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
-  - make sure to handle them correctly
+  - make sure to handle them correctly (partial)
+* AES
+  - add support for MS Crypto API implementation - add GetError
+  - WinXP no AES support ?
+* add password support (partial)
+* add clear key support
+* add start up key support
 * debug print more volume header info
 
 Optimizations
@@ -35,10 +35,12 @@ Format:
 * clear key
 * TPM encoded VMK ?
 * VMK date time - change password on USB encrypted drive
+* what is entry type 0x000b ?
 
 Test images:
 * for Windows Vista, Windows 7, To Go
 * clear key
+* start up key
 
 Validate test cases:
 * AES 128
@@ -58,6 +60,11 @@ Validate test cases:
 * bdemount now daemonizes
 * improved libfuse detection by configure
 * worked on manuals
+* open now distinguishes between failure and invalid keys
+* the library no longer stores the binary recovery key but its SHA256 hash
+* worked on password support
+* updated msvscpp build files
+* worked on WINAPI build
 
 20110819
 * worked on handling metadata blocks

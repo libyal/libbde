@@ -151,6 +151,34 @@ int libbde_io_handle_free(
 				result = -1;
 			}
 		}
+		if( memory_set(
+		     ( *io_handle )->password_hash,
+		     0,
+		     32 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear password hash.",
+			 function );
+
+			result = -1;
+		}
+		if( memory_set(
+		     ( *io_handle )->recovery_password_hash,
+		     0,
+		     32 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear recovery password hash.",
+			 function );
+
+			result = -1;
+		}
 		memory_free(
 		 *io_handle );
 

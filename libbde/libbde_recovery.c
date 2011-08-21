@@ -25,23 +25,26 @@
 #include <types.h>
 
 #include <liberror.h>
+#include <libnotify.h>
 
 #include "libbde_libfvalue.h"
 #include "libbde_libhmac.h"
 #include "libbde_recovery.h"
 
-/* Copies an UTF-8 formatted recovery password to a binary format
+/* Calculates the SHA256 hash of an UTF-8 formatted recovery password
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
  */
-int libbde_recovery_password_copy_utf8_to_binary(
+int libbde_utf8_recovery_password_calculate_hash(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     uint8_t binary_recovery_password[ 16 ],
+     uint8_t recovery_password_hash[ 32 ],
      liberror_error_t **error )
 {
+	uint8_t binary_recovery_password[ 16 ];
+
 	libfvalue_split_utf8_string_t *split_string = NULL;
 	uint8_t *string_segment                     = NULL;
-	static char *function                       = "libbde_recovery_password_copy_utf8_to_binary";
+	static char *function                       = "libbde_utf8_recovery_password_calculate_hash";
 	size_t string_segment_size                  = 0;
 	uint32_t value_32bit                        = 0;
 	int number_of_segments                      = 0;
@@ -152,6 +155,50 @@ int libbde_recovery_password_copy_utf8_to_binary(
 
 		goto on_error;
 	}
+	if( result == 1 )
+	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: binary recovery password:\n",
+			 function );
+			libnotify_print_data(
+			 binary_recovery_password,
+			 16 );
+		}
+#endif
+		if( libhmac_sha256_calculate(
+		     binary_recovery_password,
+		     16,
+		     recovery_password_hash,
+		     LIBHMAC_SHA256_HASH_SIZE,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to calculate recovery password hash.",
+			 function );
+
+			goto on_error;
+		}
+		if( memory_set(
+		     binary_recovery_password,
+		     0,
+		     16 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear binary recovery password.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	return( result );
 
 on_error:
@@ -161,21 +208,28 @@ on_error:
 		 &split_string,
 		 NULL );
 	}
+	memory_set(
+	 binary_recovery_password,
+	 0,
+	 16 );
+
 	return( -1 );
 }
 
-/* Copies an UTF-16 formatted recovery password to a binary format
+/* Calculates the SHA256 hash of an UTF-16 formatted recovery password
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
  */
-int libbde_recovery_password_copy_utf16_to_binary(
+int libbde_utf16_recovery_password_calculate_hash(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     uint8_t binary_recovery_password[ 16 ],
+     uint8_t recovery_password_hash[ 32 ],
      liberror_error_t **error )
 {
+	uint8_t binary_recovery_password[ 16 ];
+
 	libfvalue_split_utf16_string_t *split_string = NULL;
 	uint16_t *string_segment                     = NULL;
-	static char *function                        = "libbde_recovery_password_copy_utf16_to_binary";
+	static char *function                        = "libbde_utf16_recovery_password_calculate_hash";
 	size_t string_segment_size                   = 0;
 	uint32_t value_32bit                         = 0;
 	int number_of_segments                       = 0;
@@ -286,6 +340,50 @@ int libbde_recovery_password_copy_utf16_to_binary(
 
 		goto on_error;
 	}
+	if( result == 1 )
+	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: binary recovery password:\n",
+			 function );
+			libnotify_print_data(
+			 binary_recovery_password,
+			 16 );
+		}
+#endif
+		if( libhmac_sha256_calculate(
+		     binary_recovery_password,
+		     16,
+		     recovery_password_hash,
+		     LIBHMAC_SHA256_HASH_SIZE,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to calculate recovery password hash.",
+			 function );
+
+			goto on_error;
+		}
+		if( memory_set(
+		     binary_recovery_password,
+		     0,
+		     16 ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear binary recovery password.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	return( result );
 
 on_error:
@@ -295,6 +393,11 @@ on_error:
 		 &split_string,
 		 NULL );
 	}
+	memory_set(
+	 binary_recovery_password,
+	 0,
+	 16 );
+
 	return( -1 );
 }
 
@@ -302,7 +405,7 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_recovery_calculate_key(
-     const uint8_t binary_recovery_password[ 16 ],
+     const uint8_t recovery_password_hash[ 32 ],
      const uint8_t salt[ 16 ],
      uint8_t key[ 32 ],
      liberror_error_t **error )
@@ -325,18 +428,16 @@ int libbde_recovery_calculate_key(
 
 		return( -1 );
 	}
-	if( libhmac_sha256_calculate(
-	     binary_recovery_password,
-	     16,
-	     recovery_key_data.initial_sha256_hash,
-	     LIBHMAC_SHA256_HASH_SIZE,
-	     error ) != 1 )
+	if( memory_copy(
+	     &( recovery_key_data.initial_sha256_hash ),
+	     recovery_password_hash,
+	     32 ) == NULL )
 	{
 		liberror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to calculate initial SHA256.",
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy recovery password hash to recovery key data.",
 		 function );
 
 		return( -1 );

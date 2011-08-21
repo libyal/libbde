@@ -115,7 +115,7 @@ int mount_handle_initialize(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize input handle.",
+			 "%s: unable to initialize input volume.",
 			 function );
 
 			goto on_error;
@@ -171,7 +171,7 @@ int mount_handle_free(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free input handle.",
+			 "%s: unable to free input volume.",
 			 function );
 
 			result = -1;
@@ -227,11 +227,62 @@ int mount_handle_signal_abort(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to signal input handle to abort.",
+			 "%s: unable to signal input volume to abort.",
 			 function );
 
 			return( -1 );
 		}
+	}
+	return( 1 );
+}
+
+/* Sets the password
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_set_password(
+     mount_handle_t *mount_handle,
+     const libcstring_system_character_t *string,
+     liberror_error_t **error )
+{
+	static char *function = "mount_handle_set_password";
+	size_t string_length  = 0;
+
+	if( mount_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = libcstring_system_string_length(
+	                 string );
+
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+	if( libbde_volume_set_utf16_password(
+	     mount_handle->input_volume,
+	     (uint16_t *) string,
+	     string_length,
+	     error ) != 1 )
+#else
+	if( libbde_volume_set_utf8_password(
+	     mount_handle->input_volume,
+	     (uint8_t *) string,
+	     string_length,
+	     error ) != 1 )
+#endif
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set password.",
+		 function );
+
+		return( -1 );
 	}
 	return( 1 );
 }
@@ -262,7 +313,7 @@ int mount_handle_set_recovery_password(
 	                 string );
 
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libbde_volume_set_utf8_recovery_password(
+	if( libbde_volume_set_utf16_recovery_password(
 	     mount_handle->input_volume,
 	     (uint16_t *) string,
 	     string_length,
