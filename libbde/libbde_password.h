@@ -1,5 +1,5 @@
 /*
- * Recovery functions
+ * Password functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_RECOVERY_H )
-#define _LIBBDE_RECOVERY_H
+#if !defined( _LIBBDE_PASSWORD_H )
+#define _LIBBDE_PASSWORD_H
 
 #include <common.h>
 #include <types.h>
@@ -33,43 +33,34 @@
 extern "C" {
 #endif
 
-typedef struct libbde_recovery_key_data libbde_recovery_key_data_t;
+typedef struct libbde_password_key_data libbde_password_key_data_t;
 
-struct libbde_recovery_key_data
+struct libbde_password_key_data
 {
-	/* The last calculated SHA256 hash
-	 * This value contains the SHA256 hash calculated in the previous key iteration
-	 */
-	uint8_t last_sha256_hash[ LIBHMAC_SHA256_HASH_SIZE ];
-
-	/* The initial calculated SHA256 hash
-	 * This value contains the SHA256 hash calculated from the recovery password
-	 */
-	uint8_t initial_sha256_hash[ LIBHMAC_SHA256_HASH_SIZE ];
-
 	/* The salt
 	 */
 	uint8_t salt[ 16 ];
 
-	/* The key iteration count
+	/* The SHA256 hash
+	 * This value contains the SHA256 hash calculated in the previous key iteration
 	 */
-	uint64_t iteration_count;
+	uint8_t sha256_hash[ LIBHMAC_SHA256_HASH_SIZE ];
 };
 
-int libbde_utf8_recovery_password_calculate_hash(
+int libbde_utf8_password_calculate_hash(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     uint8_t recovery_password_hash[ 32 ],
+     uint8_t password_hash[ 32 ],
      liberror_error_t **error );
 
-int libbde_utf16_recovery_password_calculate_hash(
+int libbde_utf16_password_calculate_hash(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     uint8_t recovery_password_hash[ 32 ],
+     uint8_t password_hash[ 32 ],
      liberror_error_t **error );
 
-int libbde_recovery_calculate_key(
-     const uint8_t recovery_password_hash[ 32 ],
+int libbde_password_calculate_key(
+     const uint8_t password_hash[ 32 ],
      const uint8_t salt[ 16 ],
      uint8_t key[ 32 ],
      liberror_error_t **error );

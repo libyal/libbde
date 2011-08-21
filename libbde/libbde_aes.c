@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include <libcstring.h>
 #include <liberror.h>
 
 #if defined( WINAPI )
@@ -38,6 +39,7 @@
 #endif
 
 #include "libbde_aes.h"
+#include "libbde_error_string.h"
 
 #if defined( WINAPI )
 
@@ -451,7 +453,7 @@ int libbde_aes_initialize_tables(
 /* Initializes the AES key
  * Returns 1 if successful or -1 on error
  */
-int libbde_aes_initialize(
+int libbde_aes_key_initialize(
      libbde_aes_key_t **key,
      liberror_error_t **error )
 {
@@ -594,11 +596,11 @@ int libbde_aes_key_set(
 /* Frees an AES key
  * Returns 1 if successful or -1 on error
  */
-int libbde_aes_free(
-     libbde_aes_key **key,
+int libbde_aes_key_free(
+     libbde_aes_key_t **key,
      liberror_error_t **error )
 {
-	static char *function = "libbde_aes_free";
+	static char *function = "libbde_aes_key_free";
 	int result            = 1;
 
 	if( key == NULL )
@@ -692,14 +694,14 @@ int libbde_aes_initialize(
 		/* Request the AES crypt provider, fail back to the RSA crypt provider
 		*/
 		if( CryptAcquireContext(
-		     &( internal_context->crypt_provider ),
+		     &( ( *context )->crypt_provider ),
 		     NULL,
 		     NULL,
 		     PROV_RSA_AES,
 		     CRYPT_VERIFYCONTEXT ) == 0 )
 		{
 			if( CryptAcquireContext(
-			     &( internal_context->crypt_provider ),
+			     &( ( *context )->crypt_provider ),
 			     NULL,
 			     NULL,
 			     PROV_RSA_FULL,
@@ -715,7 +717,7 @@ int libbde_aes_initialize(
 				goto on_error;
 			}
 		}
-		if( internal_context->crypt_provider == 0 )
+		if( ( *context )->crypt_provider == 0 )
 		{
 			liberror_error_set(
 			 error,
@@ -803,16 +805,16 @@ int libbde_aes_free(
 	if( *context != NULL )
 	{
 #if defined( WINAPI )
-		if( internal_context->crypt_provider != 0 )
+		if( ( *context )->crypt_provider != 0 )
 		{
 			CryptReleaseContext(
-			 internal_context->crypt_provider,
+			 ( *context )->crypt_provider,
 			 0 );
 		}
-		if( internal_context->key != 0 )
+		if( ( *context )->key != 0 )
 		{
 			CryptDestroyKey(
-			 internal_context->key );
+			 ( *context )->key );
 		}
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
@@ -845,7 +847,10 @@ int libbde_aes_set_decryption_key(
 	static char *function           = "libbde_aes_set_decryption_key";
 
 #if defined( WINAPI )
+	libcstring_system_character_t error_string[ LIBBDE_ERROR_STRING_SIZE ];
+
 	libbde_aes_key_t *wincrypt_key  = NULL;
+	DWORD error_code                = 0;
 	DWORD wincrypt_key_size         = 0;
 
 #elif !defined( LIBBDE_HAVE_AES_SUPPORT )
@@ -920,20 +925,38 @@ int libbde_aes_set_decryption_key(
 	wincrypt_key_size = sizeof( libbde_aes_key_t ) - ( ( 256 - bit_size ) / 8 );
 
 	if( CryptImportKey(
-	     internal_context->crypt_provider,
+	     context->crypt_provider,
 	     (CONST BYTE *) &wincrypt_key,
 	     wincrypt_key_size,
-	     NULL,
+	     (HCRYPTKEY) NULL,
 	     0,
-	     &( internal_context->key ) ) != 1 )
+	     &( context->key ) ) == 0 )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create key object.",
-		 function );
+		error_code = GetLastError();
 
+		if( libbde_error_string_copy_from_error_number(
+		     error_string,
+		     LIBBDE_ERROR_STRING_SIZE,
+		     error_code,
+		     error ) == 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create key object with error: %" PRIs_LIBCSTRING_SYSTEM ".",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create key object.",
+			 function );
+		}
 		libbde_aes_key_free(
 		 &wincrypt_key,
 		 NULL );
@@ -1126,7 +1149,10 @@ int libbde_aes_set_encryption_key(
 	static char *function          = "libbde_aes_set_encryption_key";
 
 #if defined( WINAPI )
+	libcstring_system_character_t error_string[ LIBBDE_ERROR_STRING_SIZE ];
+
 	libbde_aes_key_t *wincrypt_key = NULL;
+	DWORD error_code               = 0;
 	DWORD wincrypt_key_size        = 0;
 
 #elif !defined( LIBBDE_HAVE_AES_SUPPORT )
@@ -1195,20 +1221,38 @@ int libbde_aes_set_encryption_key(
 	wincrypt_key_size = sizeof( libbde_aes_key_t ) - ( ( 256 - bit_size ) / 8 );
 
 	if( CryptImportKey(
-	     internal_context->crypt_provider,
+	     context->crypt_provider,
 	     (CONST BYTE *) &wincrypt_key,
 	     wincrypt_key_size,
-	     NULL,
+	     (HCRYPTKEY) NULL,
 	     0,
-	     &( internal_context->key ) ) != 1 )
+	     &( context->key ) ) == 0 )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create key object.",
-		 function );
+		error_code = GetLastError();
 
+		if( libbde_error_string_copy_from_error_number(
+		     error_string,
+		     LIBBDE_ERROR_STRING_SIZE,
+		     error_code,
+		     error ) == 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create key object with error: %" PRIs_LIBCSTRING_SYSTEM ".",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create key object.",
+			 function );
+		}
 		libbde_aes_key_free(
 		 &wincrypt_key,
 		 NULL );
@@ -1375,20 +1419,21 @@ int libbde_aes_cbc_crypt(
      size_t output_data_size,
      liberror_error_t **error )
 {
-	static char *function     = "libbde_aes_cbc_crypt";
+	static char *function       = "libbde_aes_cbc_crypt";
 
 #if defined( WINAPI )
-	DWORD cipher_mode         = CRYPT_MODE_CBC;
+	DWORD cipher_mode           = CRYPT_MODE_CBC;
+	DWORD safe_output_data_size = 0;
 
 #elif defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
 	uint8_t block_data[ EVP_MAX_BLOCK_LENGTH ];
 
-	const EVP_CIPHER *cipher  = NULL;
-	int safe_output_data_size = 0;
+	const EVP_CIPHER *cipher    = NULL;
+	int safe_output_data_size   = 0;
 
 #elif !defined( LIBBDE_HAVE_AES_SUPPORT )
-	size_t data_index         = 0;
-	uint8_t block_index       = 0;
+	size_t data_index           = 0;
+	uint8_t block_index         = 0;
 #endif
 
 	if( ( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
@@ -1459,8 +1504,19 @@ int libbde_aes_cbc_crypt(
 		return( -1 );
 	}
 #if defined( WINAPI )
+	if( input_data_size > (size_t) UINT32_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
 	if( CryptSetKeyParam(
-	     contect->key,
+	     context->key,
 	     KP_MODE,
 	     (BYTE*) &cipher_mode,
 	     0 ) == 0 )
@@ -1470,6 +1526,21 @@ int libbde_aes_cbc_crypt(
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set cipher mode key parameter.",
+		 function );
+
+		return( -1 );
+	}
+	if( CryptSetKeyParam(
+	     context->key,
+	     KP_IV,
+	     (BYTE*) initialization_vector,
+	     0 ) == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set initialization vector key parameter.",
 		 function );
 
 		return( -1 );
@@ -1488,18 +1559,18 @@ int libbde_aes_cbc_crypt(
 
 		return( -1 );
 	}
-	output_data_size = input_data_size;
+	safe_output_data_size = (DWORD) input_data_size;
 
 	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
 	{
 		if( CryptEncrypt(
 		     context->key,
-		     NULL,
+		     (HCRYPTHASH) NULL,
 		     TRUE,
 		     0,
 		     output_data,
-		     &output_data_size,
-		     input_data_size ) == 0 )
+		     &safe_output_data_size,
+		     (DWORD) input_data_size ) == 0 )
 		{
 			liberror_error_set(
 			 error,
@@ -1515,12 +1586,11 @@ int libbde_aes_cbc_crypt(
 	{
 		if( CryptDecrypt(
 		     context->key,
-		     NULL,
+		     (HCRYPTHASH) NULL,
 		     TRUE,
 		     0,
 		     output_data,
-		     &output_data_size,
-		     input_data_size ) == 0 )
+		     &safe_output_data_size ) == 0 )
 		{
 			liberror_error_set(
 			 error,
@@ -1880,7 +1950,7 @@ int libbde_aes_ccm_crypt(
 
 		return( -1 );
 	}
-	internal_initialization_vector[ 0 ] = 15 - initialization_vector_size - 1;
+	internal_initialization_vector[ 0 ] = 15 - (uint8_t) initialization_vector_size - 1;
 
 	while( data_index < input_data_size )
 	{
@@ -2086,7 +2156,8 @@ int libbde_aes_ecb_crypt(
 	int result                  = 1;
 
 #if defined( WINAPI )
-	DWORD cipher_mode           = CRYPT_MODE_EBC;
+	DWORD cipher_mode           = CRYPT_MODE_ECB;
+	DWORD safe_output_data_size = 0;
 
 #elif defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
 	uint8_t block_data[ EVP_MAX_BLOCK_LENGTH ];
@@ -2151,7 +2222,7 @@ int libbde_aes_ecb_crypt(
 	}
 #if defined( WINAPI )
 	if( CryptSetKeyParam(
-	     contect->key,
+	     context->key,
 	     KP_MODE,
 	     (BYTE*) &cipher_mode,
 	     0 ) == 0 )
@@ -2179,18 +2250,18 @@ int libbde_aes_ecb_crypt(
 
 		return( -1 );
 	}
-	output_data_size = input_data_size;
+	safe_output_data_size = input_data_size;
 
 	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
 	{
 		if( CryptEncrypt(
 		     context->key,
-		     NULL,
+		     (HCRYPTHASH) NULL,
 		     TRUE,
 		     0,
 		     output_data,
-		     &output_data_size,
-		     input_data_size ) == 0 )
+		     &safe_output_data_size,
+		     (DWORD) input_data_size ) == 0 )
 		{
 			liberror_error_set(
 			 error,
@@ -2206,12 +2277,11 @@ int libbde_aes_ecb_crypt(
 	{
 		if( CryptDecrypt(
 		     context->key,
-		     NULL,
+		     (HCRYPTHASH) NULL,
 		     TRUE,
 		     0,
 		     output_data,
-		     &output_data_size,
-		     input_data_size ) == 0 )
+		     &safe_output_data_size ) == 0 )
 		{
 			liberror_error_set(
 			 error,

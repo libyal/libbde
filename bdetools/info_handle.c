@@ -199,6 +199,57 @@ int info_handle_signal_abort(
 	return( 1 );
 }
 
+/* Sets the password
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_password(
+     info_handle_t *info_handle,
+     const libcstring_system_character_t *string,
+     liberror_error_t **error )
+{
+	static char *function = "info_handle_set_password";
+	size_t string_length  = 0;
+
+	if( info_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = libcstring_system_string_length(
+	                 string );
+
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+	if( libbde_volume_set_utf16_password(
+	     info_handle->input_volume,
+	     (uint16_t *) string,
+	     string_length,
+	     error ) != 1 )
+#else
+	if( libbde_volume_set_utf8_password(
+	     info_handle->input_volume,
+	     (uint8_t *) string,
+	     string_length,
+	     error ) != 1 )
+#endif
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set password.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Sets the recovery password
  * Returns 1 if successful or -1 on error
  */
@@ -225,7 +276,7 @@ int info_handle_set_recovery_password(
 	                 string );
 
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libbde_volume_set_utf8_recovery_password(
+	if( libbde_volume_set_utf16_recovery_password(
 	     info_handle->input_volume,
 	     (uint16_t *) string,
 	     string_length,

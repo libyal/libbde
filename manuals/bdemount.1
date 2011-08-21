@@ -3,16 +3,17 @@
 .Os libbde
 .Sh NAME
 .Nm bdeinfo
-.Nd determines information about a Windows NT BitLocker Drive Encrypted (BDE) volume
+.Nd mounts a Windows NT BitLocker Drive Encrypted (BDE) volume
 .Sh SYNOPSIS
 .Nm bdeinfo
+.Op Fl o Ar offset
 .Op Fl p Ar password
 .Op Fl r Ar password
 .Op Fl hvV
 .Va Ar source
 .Sh DESCRIPTION
 .Nm bdeinfo
-is a utility to determine information about a Windows NT BitLocker Drive Encrypted (BDE) volume
+is a utility to mount a Windows NT BitLocker Drive Encrypted (BDE) volume
 .Pp
 .Nm bdeinfo
 is part of the
@@ -28,6 +29,8 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl h
 shows this help
+.It Fl o Ar offset
+specify the volume offset
 .It Fl p Ar password
 specify the password
 .It Fl r Ar password
@@ -62,4 +65,4 @@ These man pages were written by Joachim Metz.
 Copyright 2011 Joachim Metz <jbmetz@users.sourceforge.net>.
 This is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 .Sh SEE ALSO
-.Xr bdemount 1
+.Xr bdeinfo 1

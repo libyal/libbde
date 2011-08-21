@@ -26,6 +26,7 @@ libbde_la_SOURCES = \
 	libbde_diffuser.c libbde_diffuser.h \
 	libbde_encryption.c libbde_encryption.h \
 	libbde_error.c libbde_error.h \
+	libbde_error_string.c libbde_error_string.h \
 	libbde_extern.h \
 	libbde_io_handle.c libbde_io_handle.h \
 	libbde_libbfio.h \
@@ -38,6 +39,7 @@ libbde_la_SOURCES = \
 	libbde_metadata.c libbde_metadata.h \
 	libbde_metadata_entry.c libbde_metadata_entry.h \
 	libbde_notify.c libbde_notify.h \
+	libbde_password.c libbde_password.h \
 	libbde_recovery.c libbde_recovery.h \
 	libbde_sector_data.c libbde_sector_data.h \
 	libbde_stretch_key.c libbde_stretch_key.h \

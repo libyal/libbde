@@ -272,11 +272,11 @@ int libbde_sector_data_read(
 	/* The BitLocker metadata areas are represented as zero byte blocks
 	 */
 	if( ( ( sector_data_offset >= io_handle->first_metadata_offset )
-	  &&  ( sector_data_offset < ( io_handle->first_metadata_offset + io_handle->metadata_size ) ) )
+	  &&  ( sector_data_offset < ( io_handle->first_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
 	 || ( ( sector_data_offset >= io_handle->second_metadata_offset )
-	  &&  ( sector_data_offset < ( io_handle->second_metadata_offset + io_handle->metadata_size ) ) )
+	  &&  ( sector_data_offset < ( io_handle->second_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
 	 || ( ( sector_data_offset >= io_handle->third_metadata_offset )
-	  &&  ( sector_data_offset < ( io_handle->third_metadata_offset + io_handle->metadata_size ) ) ) )
+	  &&  ( sector_data_offset < ( io_handle->third_metadata_offset + (off64_t) io_handle->metadata_size ) ) ) )
 	{
 		if( memory_set(
 		     sector_data->data,
@@ -298,7 +298,7 @@ int libbde_sector_data_read(
 	 || ( io_handle->version == LIBBDE_VERSION_TOGO ) )
 	{
 		if( ( sector_data_offset >= io_handle->volume_header_offset )
-		 && ( sector_data_offset < ( io_handle->volume_header_offset + io_handle->volume_header_size ) ) )
+		 && ( sector_data_offset < ( io_handle->volume_header_offset + (off64_t) io_handle->volume_header_size ) ) )
 		{
 			if( memory_set(
 			     sector_data->data,

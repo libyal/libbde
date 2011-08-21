@@ -33,6 +33,7 @@
 #include "libbde_libbfio.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
+#include "libbde_password.h"
 #include "libbde_recovery.h"
 #include "libbde_sector_data.h"
 #include "libbde_volume.h"
@@ -1840,6 +1841,142 @@ int libbde_volume_get_encryption_method(
 	return( 1 );
 }
 
+/* Sets an UTF-8 formatted password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if password is invalid or -1 on error
+ */
+int libbde_volume_set_utf8_password(
+     libbde_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     liberror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_set_utf8_password";
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->file_io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_utf8_password_calculate_hash(
+	     utf8_string,
+	     utf8_string_length,
+	     internal_volume->io_handle->password_hash,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set password hash.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume->io_handle->password_is_set = 1;
+
+	return( 1 );
+}
+
+/* Sets an UTF-16 formatted password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if password is invalid or -1 on error
+ */
+int libbde_volume_set_utf16_password(
+     libbde_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     liberror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_set_utf16_password";
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->file_io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_utf16_password_calculate_hash(
+	     utf16_string,
+	     utf16_string_length,
+	     internal_volume->io_handle->password_hash,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set password hash.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume->io_handle->password_is_set = 1;
+
+	return( 1 );
+}
+
 /* Sets an UTF-8 formatted recovery password
  * This function needs to be used before one of the open functions
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
@@ -1888,32 +2025,21 @@ int libbde_volume_set_utf8_recovery_password(
 
 		return( -1 );
 	}
-	if( libbde_recovery_password_copy_utf8_to_binary(
+	if( libbde_utf8_recovery_password_calculate_hash(
 	     utf8_string,
 	     utf8_string_length,
-	     internal_volume->io_handle->recovery_password,
+	     internal_volume->io_handle->recovery_password_hash,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set recovery password.",
+		 "%s: unable to set recovery password hash.",
 		 function );
 
 		return( -1 );
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
-	{
-		libnotify_printf(
-		 "%s: binary recovery password:\n",
-		 function );
-		libnotify_print_data(
-		 (uint8_t *) internal_volume->io_handle->recovery_password,
-		 16 );
-	}
-#endif
 	internal_volume->io_handle->recovery_password_is_set = 1;
 
 	return( 1 );
@@ -1967,32 +2093,21 @@ int libbde_volume_set_utf16_recovery_password(
 
 		return( -1 );
 	}
-	if( libbde_recovery_password_copy_utf16_to_binary(
+	if( libbde_utf16_recovery_password_calculate_hash(
 	     utf16_string,
 	     utf16_string_length,
-	     internal_volume->io_handle->recovery_password,
+	     internal_volume->io_handle->recovery_password_hash,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set recovery password.",
+		 "%s: unable to set recovery password hash.",
 		 function );
 
 		return( -1 );
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
-	{
-		libnotify_printf(
-		 "%s: binary recovery password:\n",
-		 function );
-		libnotify_print_data(
-		 (uint8_t *) internal_volume->io_handle->recovery_password,
-		 16 );
-	}
-#endif
 	internal_volume->io_handle->recovery_password_is_set = 1;
 
 	return( 1 );
