@@ -27,9 +27,6 @@
 
 #include <liberror.h>
 
-/* TODO */
-#define HAVE_OPENSSL_AES_H
-
 #if defined( WINAPI )
 #include <wincrypt.h>
 
@@ -70,37 +67,57 @@ enum LIBBDE_AES_CRYPT_MODES
 #endif
 
 #if defined( WINAPI )
+
+typedef struct libbde_aes_key libbde_aes_key_t;
+
+struct libbde_aes_key
+{
+	/* The public key structure (PUBLICKEYSTRUC) aka blob header (BLOBHEADER)
+	 */
+	PUBLICKEYSTRUC header;
+
+	/* The (key) data size
+	 */
+	DWORD data_size;
+
+	/* The (key) data
+	 */
+	BYTE data[ 32 ];
+};
+
+int libbde_aes_key_initialize(
+     libbde_aes_key_t **key,
+     liberror_error_t **error );
+
+int libbde_aes_key_set(
+     libbde_aes_key_t *key,
+     const uint8_t *key_data,
+     size_t bit_size,
+     liberror_error_t **error );
+
+int libbde_aes_key_free(
+     libbde_aes_key_t **key,
+     liberror_error_t **error );
+
+#endif
+
 typedef struct libbde_aes_context libbde_aes_context_t;
 
 struct libbde_aes_context
 {
+#if defined( WINAPI )
         HCRYPTPROV crypt_provider;
-        HCRYPTHASH hash;
-};
+        HCRYPTKEY key;
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-typedef struct libbde_aes_context libbde_aes_context_t;
-
-struct libbde_aes_context
-{
         AES_KEY key;
-};
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-typedef struct libbde_aes_context libbde_aes_context_t;
-
-struct libbde_aes_context
-{
 	EVP_CIPHER_CTX evp_context;
         uint8_t key[ 32 ];
 	size_t bit_size;
-};
 
 #else
-typedef struct libbde_aes_context libbde_aes_context_t;
-
-struct libbde_aes_context
-{
 	/* The number of round keys
 	 */
 	uint8_t number_of_round_keys;
@@ -112,11 +129,13 @@ struct libbde_aes_context
 	/* The round keys data
 	 */
 	uint32_t round_keys_data[ 68 ];
+
+#endif
 };
 
+#if !defined( LIBBDE_HAVE_AES_SUPPORT )
 int libbde_aes_initialize_tables(
      liberror_error_t **error );
-
 #endif
 
 int libbde_aes_initialize(
@@ -125,10 +144,6 @@ int libbde_aes_initialize(
 
 int libbde_aes_free(
      libbde_aes_context_t **context,
-     liberror_error_t **error );
-
-int libbde_aes_finalize(
-     libbde_aes_context_t *context,
      liberror_error_t **error );
 
 int libbde_aes_set_decryption_key(

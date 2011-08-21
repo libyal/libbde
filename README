@@ -1,3 +1,10 @@
+Building bdemount
+Fuse requires the _FILE_OFFSET_BITS=64 to be set use the following commands:
+CPPFLAGS="-D_FILE_OFFSET_BITS=64" ./configure
+make
+make isntall
+
+
 Mac OS X
 * missing libtoolize
 * building multiple architure binaries

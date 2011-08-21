@@ -66,6 +66,10 @@ struct libbde_io_handle
 	 */
 	off64_t third_metadata_offset;
 
+	/* The metadata (block) size
+	 */
+	size64_t metadata_size;
+
 	union
 	{
 		/* The MFT mirror cluster block number

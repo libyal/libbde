@@ -1357,19 +1357,6 @@ int libbde_metadata_get_volume_master_key(
 				result = 1;
 			}
 		}
-		if( libbde_aes_finalize(
-		     aes_context,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable finalize context.",
-			 function );
-
-			goto on_error;
-		}
 		if( libbde_aes_free(
 		     &aes_context,
 		     error ) != 1 )
@@ -1665,19 +1652,6 @@ int libbde_metadata_get_full_volume_encryption_key(
 			}
 			result = 1;
 		}
-	}
-	if( libbde_aes_finalize(
-	     aes_context,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable finalize context.",
-		 function );
-
-		goto on_error;
 	}
 	if( libbde_aes_free(
 	     &aes_context,

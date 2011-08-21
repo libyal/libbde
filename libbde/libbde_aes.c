@@ -446,6 +446,198 @@ int libbde_aes_initialize_tables(
 
 #endif /* !defined( LIBBDE_HAVE_AES_SUPPORT ) */
 
+#if defined( WINAPI )
+
+/* Initializes the AES key
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_initialize(
+     libbde_aes_key_t **key,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_aes_key_initialize";
+
+	if( key == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( *key == NULL )
+	{
+		*key = memory_allocate_structure(
+		        libbde_aes_key_t );
+
+		if( *key == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create key.",
+			 function );
+
+			goto on_error;
+		}
+		if( memory_set(
+		     *key,
+		     0,
+		     sizeof( libbde_aes_key_t ) ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear key.",
+			 function );
+
+			goto on_error;
+		}
+		( *key )->header.bType    = PLAINTEXTKEYBLOB;
+		( *key )->header.bVersion = CUR_BLOB_VERSION;
+	}
+	return( 1 );
+
+on_error:
+	if( *key != NULL )
+	{
+		memory_free(
+		 *key );
+
+		*key = NULL;
+	}
+	return( -1 );
+}
+
+/* Sets the AES key
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_key_set(
+     libbde_aes_key_t *key,
+     const uint8_t *key_data,
+     size_t bit_size,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_aes_key_set";
+
+	if( key == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key data.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( bit_size != 128 )
+	 && ( bit_size != 192 )
+	 && ( bit_size != 256 ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported key bit size.",
+		 function );
+
+		return( -1 );
+	}
+	if( bit_size == 128 )
+	{
+		key->header.aiKeyAlg = CALG_AES_128;
+	}
+	else if( bit_size == 192 )
+	{
+		key->header.aiKeyAlg = CALG_AES_192;
+	}
+	else if( bit_size == 256 )
+	{
+		key->header.aiKeyAlg = CALG_AES_256;
+	}
+	key->data_size = bit_size / 8;
+
+	if( memory_copy(
+	     key->data,
+	     key_data,
+	     key->data_size ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy key.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Frees an AES key
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_aes_free(
+     libbde_aes_key **key,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_aes_free";
+	int result            = 1;
+
+	if( key == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( *key != NULL )
+	{
+		if( memory_set(
+		     *key,
+		     0,
+		     sizeof( libbde_aes_key_t ) ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear key.",
+			 function );
+
+			result = -1;
+		}
+		memory_free(
+		 *key );
+
+		*key = NULL;
+	}
+	return( result );
+}
+
+#endif /* defined( WINAPI ) */
+
 /* Initializes the AES context
  * Returns 1 if successful or -1 on error
  */
@@ -497,7 +689,43 @@ int libbde_aes_initialize(
 			goto on_error;
 		}
 #if defined( WINAPI )
-		/* TODO */
+		/* Request the AES crypt provider, fail back to the RSA crypt provider
+		*/
+		if( CryptAcquireContext(
+		     &( internal_context->crypt_provider ),
+		     NULL,
+		     NULL,
+		     PROV_RSA_AES,
+		     CRYPT_VERIFYCONTEXT ) == 0 )
+		{
+			if( CryptAcquireContext(
+			     &( internal_context->crypt_provider ),
+			     NULL,
+			     NULL,
+			     PROV_RSA_FULL,
+			     CRYPT_VERIFYCONTEXT ) == 0 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create AES or RSA crypt provider.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		if( internal_context->crypt_provider == 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: unable to create crypt provider.",
+			 function );
+
+			goto on_error;
+		}
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 		/* No additional initialization necessary */
@@ -517,7 +745,7 @@ int libbde_aes_initialize(
 			 "%s: unable to set padding in context.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 
 #else
@@ -533,7 +761,7 @@ int libbde_aes_initialize(
 				 "%s: unable to initialize tables.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			libbde_aes_tables_initialized = 1;
 		}
@@ -575,47 +803,33 @@ int libbde_aes_free(
 	if( *context != NULL )
 	{
 #if defined( WINAPI )
-	/* TODO */
+		if( internal_context->crypt_provider != 0 )
+		{
+			CryptReleaseContext(
+			 internal_context->crypt_provider,
+			 0 );
+		}
+		if( internal_context->key != 0 )
+		{
+			CryptDestroyKey(
+			 internal_context->key );
+		}
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
-	/* No additional clean up necessary */
+		/* No additional clean up necessary */
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_EVP_H )
-	EVP_CIPHER_CTX_cleanup(
-	 &( ( *context )->evp_context ) );
+		EVP_CIPHER_CTX_cleanup(
+		 &( ( *context )->evp_context ) );
 
 #else
-	/* No additional clean up necessary */
+		/* No additional clean up necessary */
 #endif
 		memory_free(
 		 *context );
 
 		*context = NULL;
 	}
-	return( 1 );
-}
-
-/* Finalizes the AES context
- * Returns 1 if successful or -1 on error
- */
-int libbde_aes_finalize(
-     libbde_aes_context_t *context,
-     liberror_error_t **error )
-{
-	static char *function = "libbde_aes_finalize";
-
-	if( context == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid context.",
-		 function );
-
-		return( -1 );
-	}
-/* TODO what should be in finalize ? */
 	return( 1 );
 }
 
@@ -630,7 +844,11 @@ int libbde_aes_set_decryption_key(
 {
 	static char *function           = "libbde_aes_set_decryption_key";
 
-#if !defined( LIBBDE_HAVE_AES_SUPPORT )
+#if defined( WINAPI )
+	libbde_aes_key_t *wincrypt_key  = NULL;
+	DWORD wincrypt_key_size         = 0;
+
+#elif !defined( LIBBDE_HAVE_AES_SUPPORT )
 	libbde_aes_context_t encryption_context;
 
 	uint32_t *encryption_round_keys = NULL;
@@ -667,7 +885,74 @@ int libbde_aes_set_decryption_key(
 		return( -1 );
 	}
 #if defined( WINAPI )
-	/* TODO */
+	if( libbde_aes_key_initialize(
+	     &wincrypt_key,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create wincrypt key.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_aes_key_set(
+	     wincrypt_key,
+	     key,
+	     bit_size,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set wincrypt key.",
+		 function );
+
+		libbde_aes_key_free(
+		 &wincrypt_key,
+		 NULL );
+
+		return( -1 );
+	}
+	wincrypt_key_size = sizeof( libbde_aes_key_t ) - ( ( 256 - bit_size ) / 8 );
+
+	if( CryptImportKey(
+	     internal_context->crypt_provider,
+	     (CONST BYTE *) &wincrypt_key,
+	     wincrypt_key_size,
+	     NULL,
+	     0,
+	     &( internal_context->key ) ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create key object.",
+		 function );
+
+		libbde_aes_key_free(
+		 &wincrypt_key,
+		 NULL );
+
+		return( -1 );
+	}
+	if( libbde_aes_key_free(
+	     &wincrypt_key,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free wincrypt key.",
+		 function );
+
+		return( -1 );
+	}
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 	if( AES_set_decrypt_key(
@@ -838,12 +1123,16 @@ int libbde_aes_set_encryption_key(
      size_t bit_size,
      liberror_error_t **error )
 {
-	static char *function    = "libbde_aes_set_encryption_key";
+	static char *function          = "libbde_aes_set_encryption_key";
 
-#if !defined( LIBBDE_HAVE_AES_SUPPORT )
-	uint32_t *round_keys     = NULL;
-	size_t key_index         = 0;
-	int round_constant_index = 0;
+#if defined( WINAPI )
+	libbde_aes_key_t *wincrypt_key = NULL;
+	DWORD wincrypt_key_size        = 0;
+
+#elif !defined( LIBBDE_HAVE_AES_SUPPORT )
+	uint32_t *round_keys           = NULL;
+	size_t key_index               = 0;
+	int round_constant_index       = 0;
 #endif
 
 	if( context == NULL )
@@ -871,7 +1160,74 @@ int libbde_aes_set_encryption_key(
 		return( -1 );
 	}
 #if defined( WINAPI )
-/* TODO */
+	if( libbde_aes_key_initialize(
+	     &wincrypt_key,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create wincrypt key.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_aes_key_set(
+	     wincrypt_key,
+	     key,
+	     bit_size,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set wincrypt key.",
+		 function );
+
+		libbde_aes_key_free(
+		 &wincrypt_key,
+		 NULL );
+
+		return( -1 );
+	}
+	wincrypt_key_size = sizeof( libbde_aes_key_t ) - ( ( 256 - bit_size ) / 8 );
+
+	if( CryptImportKey(
+	     internal_context->crypt_provider,
+	     (CONST BYTE *) &wincrypt_key,
+	     wincrypt_key_size,
+	     NULL,
+	     0,
+	     &( internal_context->key ) ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create key object.",
+		 function );
+
+		libbde_aes_key_free(
+		 &wincrypt_key,
+		 NULL );
+
+		return( -1 );
+	}
+	if( libbde_aes_key_free(
+	     &wincrypt_key,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free wincrypt key.",
+		 function );
+
+		return( -1 );
+	}
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 	if( AES_set_encrypt_key(
@@ -1005,7 +1361,7 @@ int libbde_aes_set_encryption_key(
 	return( 1 );
 }
 
-/* De- or encrypts a block of data using AES-CBC
+/* De- or encrypts a block of data using AES-CBC (Cipher Block Chaining)
  * This function expects the input to be a multitude of 16 bytes
  * Returns 1 if successful or -1 on error
  */
@@ -1021,14 +1377,16 @@ int libbde_aes_cbc_crypt(
 {
 	static char *function     = "libbde_aes_cbc_crypt";
 
-#if defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
+#if defined( WINAPI )
+	DWORD cipher_mode         = CRYPT_MODE_CBC;
+
+#elif defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
 	uint8_t block_data[ EVP_MAX_BLOCK_LENGTH ];
 
 	const EVP_CIPHER *cipher  = NULL;
 	int safe_output_data_size = 0;
-#endif
 
-#if !defined( LIBBDE_HAVE_AES_SUPPORT )
+#elif !defined( LIBBDE_HAVE_AES_SUPPORT )
 	size_t data_index         = 0;
 	uint8_t block_index       = 0;
 #endif
@@ -1101,7 +1459,79 @@ int libbde_aes_cbc_crypt(
 		return( -1 );
 	}
 #if defined( WINAPI )
-/* TODO */
+	if( CryptSetKeyParam(
+	     contect->key,
+	     KP_MODE,
+	     (BYTE*) &cipher_mode,
+	     0 ) == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set cipher mode key parameter.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_copy(
+	     output_data,
+	     input_data,
+	     input_data_size ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy input data to output data.",
+		 function );
+
+		return( -1 );
+	}
+	output_data_size = input_data_size;
+
+	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+	{
+		if( CryptEncrypt(
+		     context->key,
+		     NULL,
+		     TRUE,
+		     0,
+		     output_data,
+		     &output_data_size,
+		     input_data_size ) == 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+			 "%s: unable to encrypt output data.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	else
+	{
+		if( CryptDecrypt(
+		     context->key,
+		     NULL,
+		     TRUE,
+		     0,
+		     output_data,
+		     &output_data_size,
+		     input_data_size ) == 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+			 "%s: unable to decrypt output data.",
+			 function );
+
+			return( -1 );
+		}
+	}
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 	AES_cbc_encrypt(
@@ -1172,7 +1602,7 @@ int libbde_aes_cbc_crypt(
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to initialize cipher.",
 		 function );
 
@@ -1239,7 +1669,7 @@ int libbde_aes_cbc_crypt(
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_GENERIC,
+				 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 				 "%s: unable to encrypt output data.",
 				 function );
 
@@ -1307,7 +1737,9 @@ int libbde_aes_cbc_crypt(
 	return( 1 );
 }
 
-/* Decrypts AES encrypted data
+/* TODO encryption currently not supported */
+
+/* De- or encrypts a block of data using AES-CCM (Counter with CBC-MAC)
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_ccm_crypt(
@@ -1491,7 +1923,7 @@ int libbde_aes_ccm_crypt(
 }
 
 #ifdef TODO
-/* De- or encrypts a block of data using AES-CFB
+/* De- or encrypts a block of data using AES-CFB (Cipher Feedback Mode)
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_cfb_crypt(
@@ -1597,7 +2029,6 @@ int libbde_aes_cfb_crypt(
 
 		return( -1 );
 	}
-/* TODO test */
 	for( data_index = 0;
 	     data_index < input_data_size;
 	     data_index++ )
@@ -1636,12 +2067,11 @@ int libbde_aes_cfb_crypt(
 		}
 		*initialization_vector_index = ( *initialization_vector_index + 1 ) & 0x0f;
 	}
-/* TODO test */
 	return( 1 );
 }
-#endif
+#endif /* defined( TODO ) */
 
-/* De- or encrypts a 16-byte block using AES-ECB
+/* De- or encrypts a 16-byte block using AES-ECB (Electronic CodeBook)
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_ecb_crypt(
@@ -1656,14 +2086,16 @@ int libbde_aes_ecb_crypt(
 	static char *function       = "libbde_aes_ecb_crypt";
 	int result                  = 1;
 
-#if defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
+#if defined( WINAPI )
+	DWORD cipher_mode           = CRYPT_MODE_EBC;
+
+#elif defined( HAVE_LIBCRYPTO ) && !defined( HAVE_OPENSSL_AES_H ) && defined( HAVE_OPENSSL_EVP_H )
 	uint8_t block_data[ EVP_MAX_BLOCK_LENGTH ];
 
 	const EVP_CIPHER *cipher    = NULL;
 	int safe_output_data_size   = 0;
-#endif
 
-#if !defined( LIBBDE_HAVE_AES_SUPPORT )
+#elif !defined( LIBBDE_HAVE_AES_SUPPORT )
 	uint32_t cipher_values_32bit[ 4 ];
 	uint32_t values_32bit[ 4 ];
 
@@ -1719,7 +2151,80 @@ int libbde_aes_ecb_crypt(
 		return( -1 );
 	}
 #if defined( WINAPI )
-	/* TODO */
+	if( CryptSetKeyParam(
+	     contect->key,
+	     KP_MODE,
+	     (BYTE*) &cipher_mode,
+	     0 ) == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set cipher mode key parameter.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_copy(
+	     output_data,
+	     input_data,
+	     input_data_size ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy input data to output data.",
+		 function );
+
+		return( -1 );
+	}
+	output_data_size = input_data_size;
+
+	if( mode == LIBBDE_AES_CRYPT_MODE_ENCRYPT )
+	{
+		if( CryptEncrypt(
+		     context->key,
+		     NULL,
+		     TRUE,
+		     0,
+		     output_data,
+		     &output_data_size,
+		     input_data_size ) == 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+			 "%s: unable to encrypt output data.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	else
+	{
+		if( CryptDecrypt(
+		     context->key,
+		     NULL,
+		     TRUE,
+		     0,
+		     output_data,
+		     &output_data_size,
+		     input_data_size ) == 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+			 "%s: unable to decrypt output data.",
+			 function );
+
+			return( -1 );
+		}
+	}
+
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
 	AES_ecb_encrypt(
@@ -1788,7 +2293,7 @@ int libbde_aes_ecb_crypt(
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to initialize cipher.",
 		 function );
 
