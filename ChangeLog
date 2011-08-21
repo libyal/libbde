@@ -1,4 +1,5 @@
 TODO
+* sync libhmac with stand alone version
 * libbde allow to open volume if bfio handle is already open?
 * bdemount:
   - create a mount handle seek offset and read function
@@ -54,6 +55,9 @@ Validate test cases:
 * AES 256 diffuser
 * recovery key
 * external key
+
+20110819
+* worked on handling metadata blocks
 
 20110818
 * updated libbfio

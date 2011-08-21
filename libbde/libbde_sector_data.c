@@ -269,8 +269,52 @@ int libbde_sector_data_read(
 		 sector_data_offset );
 	}
 #endif
+	/* The BitLocker metadata areas are represented as zero byte blocks
+	 */
+	if( ( ( sector_data_offset >= io_handle->first_metadata_offset )
+	  &&  ( sector_data_offset < ( io_handle->first_metadata_offset + io_handle->metadata_size ) ) )
+	 || ( ( sector_data_offset >= io_handle->second_metadata_offset )
+	  &&  ( sector_data_offset < ( io_handle->second_metadata_offset + io_handle->metadata_size ) ) )
+	 || ( ( sector_data_offset >= io_handle->third_metadata_offset )
+	  &&  ( sector_data_offset < ( io_handle->third_metadata_offset + io_handle->metadata_size ) ) ) )
+	{
+		if( memory_set(
+		     sector_data->data,
+		     0,
+		     sector_data->data_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear data.",
+			 function );
+
+			return( -1 );
+		}
+		return( 1 );
+	}
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 	{
+		if( ( sector_data_offset >= io_handle->volume_header_offset )
+		 && ( sector_data_offset < ( io_handle->volume_header_offset + io_handle->volume_header_size ) ) )
+		{
+			if( memory_set(
+			     sector_data->data,
+			     0,
+			     sector_data->data_size ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 "%s: unable to clear data.",
+				 function );
+
+				return( -1 );
+			}
+			return( 1 );
+		}
 		/* Normally the first 8192 bytes are stored in another location on the volume
 		 */
 		if( (size64_t) sector_data_offset < io_handle->volume_header_size )
@@ -332,8 +376,8 @@ int libbde_sector_data_read(
 		 sector_data->data_size );
 	}
 #endif
-	if( ( sector_data_offset == io_handle->volume_header_offset )
-	 && ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA ) )
+	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
+	 && ( sector_data_offset == io_handle->volume_header_offset ) )
 	{
 		if( memory_copy(
 		     sector_data->data,

@@ -97,6 +97,7 @@ int libbde_io_handle_initialize(
 			goto on_error;
 		}
 		( *io_handle )->bytes_per_sector = 512;
+		( *io_handle )->metadata_size    = 65536;
 	}
 	return( 1 );
 
