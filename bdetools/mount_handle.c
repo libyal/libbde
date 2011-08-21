@@ -288,7 +288,7 @@ int mount_handle_set_recovery_password(
 }
 
 /* Opens the mount handle
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 int mount_handle_open(
      mount_handle_t *mount_handle,
@@ -297,6 +297,7 @@ int mount_handle_open(
 {
 	static char *function  = "mount_handle_open";
 	size_t filename_length = 0;
+	int result             = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -350,27 +351,13 @@ int mount_handle_open(
 
 		return( -1 );
 	}
-/* TODO
-	if( libbfio_handle_open(
-	     mount_handle->input_file_io_handle,
-	     LIBBFIO_OPEN_READ,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open input file IO handle.",
-		 function );
+	result = libbde_volume_open_file_io_handle(
+	          mount_handle->input_volume,
+	          mount_handle->input_file_io_handle,
+	          LIBBDE_OPEN_READ,
+	          error );
 
-		return( -1 );
-	}
-*/
-	if( libbde_volume_open_file_io_handle(
-	     mount_handle->input_volume,
-	     mount_handle->input_file_io_handle,
-	     LIBBDE_OPEN_READ,
-	     error ) != 1 )
+	if( result == -1 )
 	{
 		liberror_error_set(
 		 error,
@@ -381,7 +368,7 @@ int mount_handle_open(
 
 		return( -1 );
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Closes the mount handle
@@ -418,5 +405,128 @@ int mount_handle_close(
 		return( -1 );
 	}
 	return( 0 );
+}
+
+/* Read a buffer from the input volume
+ * Return the number of bytes read if successful or -1 on error
+ */
+ssize_t mount_handle_read_buffer(
+         mount_handle_t *mount_handle,
+         uint8_t *buffer,
+         size_t size,
+         liberror_error_t **error )
+{
+	static char *function = "mount_handle_read_buffer";
+	ssize_t read_count    = 0;
+
+	if( mount_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	read_count = libbde_volume_read_buffer(
+	              mount_handle->input_volume,
+	              buffer,
+	              size,
+	              error );
+
+	if( read_count == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read buffer from input volume.",
+		 function );
+
+		return( -1 );
+	}
+	return( read_count );
+}
+
+/* Seeks a specific offset from the input volume
+ * Return the offset if successful or -1 on error
+ */
+off64_t mount_handle_seek_offset(
+         mount_handle_t *mount_handle,
+         off64_t offset,
+         int whence,
+         liberror_error_t **error )
+{
+	static char *function = "mount_handle_seek_offset";
+
+	if( mount_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	offset = libbde_volume_seek_offset(
+	          mount_handle->input_volume,
+	          offset,
+	          SEEK_SET,
+	          error );
+
+	if( offset == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek offset in input volume.",
+		 function );
+
+		return( -1 );
+	}
+	return( offset );
+}
+
+/* Retrieves the size of the input volume
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_get_size(
+     mount_handle_t *mount_handle,
+     size64_t *size,
+     liberror_error_t **error )
+{
+	static char *function = "mount_handle_get_size";
+
+	if( mount_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_volume_get_size(
+	     mount_handle->input_volume,
+	     size,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve size from input volume.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
 }
 

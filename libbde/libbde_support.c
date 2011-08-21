@@ -22,6 +22,9 @@
 #include <common.h>
 #include <types.h>
 
+#include <liberror.h>
+
+#include "libbde_codepage.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_support.h"
@@ -34,6 +37,93 @@ const char *libbde_get_version(
              void )
 {
 	return( (const char *) LIBBDE_VERSION_STRING );
+}
+
+/* Returns the access flags for reading
+ */
+int libbde_get_access_flags_read(
+     void )
+{
+	return( (int) LIBBDE_ACCESS_FLAG_READ );
+}
+
+/* Retrieves the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_get_codepage(
+     int *codepage,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_get_codepage";
+
+	if( codepage == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid codepage.",
+		 function );
+
+		return( -1 );
+	}
+	*codepage = libcstring_narrow_system_string_codepage;
+
+	return( 1 );
+}
+
+/* Sets the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_set_codepage(
+     int codepage,
+     liberror_error_t **error )
+{
+	static char *function = "libbde_set_codepage";
+
+	if( ( codepage != LIBBDE_CODEPAGE_ASCII )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_1 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_2 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_3 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_4 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_5 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_6 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_7 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_8 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_9 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_10 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_11 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_13 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_14 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_15 )
+	 && ( codepage != LIBBDE_CODEPAGE_ISO_8859_16 )
+	 && ( codepage != LIBBDE_CODEPAGE_KOI8_R )
+	 && ( codepage != LIBBDE_CODEPAGE_KOI8_U )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_874 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1250 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1251 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1252 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1253 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1254 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1256 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1257 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1258 )
+	 && ( codepage != 0 ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported codepage.",
+		 function );
+
+		return( -1 );
+	}
+	libcstring_narrow_system_string_codepage = codepage;
+
+	return( 1 );
 }
 
 #endif /* !defined( HAVE_LOCAL_LIBBDE ) */

@@ -194,10 +194,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbde\libbde_empty_block.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libbde\libbde_encryption.c"
 				>
 			</File>
@@ -272,6 +268,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_codepage.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_debug.h"
 				>
 			</File>
@@ -281,10 +281,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_diffuser.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbde\libbde_empty_block.h"
 				>
 			</File>
 			<File

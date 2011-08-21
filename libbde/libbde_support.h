@@ -40,6 +40,20 @@ LIBBDE_EXTERN \
 const char *libbde_get_version(
              void );
 
+LIBBDE_EXTERN \
+int libbde_get_access_flags_read(
+     void );
+
+LIBBDE_EXTERN \
+int libbde_get_codepage(
+     int *codepage,
+     liberror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_set_codepage(
+     int codepage,
+     liberror_error_t **error );
+
 #endif /* !defined( HAVE_LOCAL_LIBBDE ) */
 
 LIBBDE_EXTERN \

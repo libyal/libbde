@@ -22,6 +22,7 @@
 #if !defined( _LIBBDE_H )
 #define _LIBBDE_H
 
+#include <libbde/codepage.h>
 #include <libbde/definitions.h>
 #include <libbde/error.h>
 #include <libbde/extern.h>
@@ -47,6 +48,30 @@ extern "C" {
 LIBBDE_EXTERN \
 const char *libbde_get_version(
              void );
+
+/* Returns the access flags for reading
+ */
+LIBBDE_EXTERN \
+int libbde_get_access_flags_read(
+     void );
+
+/* Retrieves the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_get_codepage(
+     int *codepage,
+     libbde_error_t **error );
+
+/* Sets the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_set_codepage(
+     int codepage,
+     libbde_error_t **error );
 
 /* Determines if a volume is a VSS volume (check for the VSS identifier)
  * Returns 1 if true, 0 if not or -1 on error
@@ -184,7 +209,7 @@ int libbde_volume_signal_abort(
      libbde_error_t **error );
 
 /* Opens a volume
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_open(
@@ -195,7 +220,7 @@ int libbde_volume_open(
 
 #if defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE )
 /* Opens a volume
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_open_wide(
@@ -207,7 +232,7 @@ int libbde_volume_open_wide(
 
 #if defined( LIBBDE_HAVE_BFIO )
 /* Opens a volume using a Basic File IO (bfio) handle
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_open_file_io_handle(

@@ -83,6 +83,18 @@ int mount_handle_close(
      mount_handle_t *mount_handle,
      liberror_error_t **error );
 
+ssize_t mount_handle_read_buffer(
+         mount_handle_t *mount_handle,
+         uint8_t *buffer,
+         size_t size,
+         liberror_error_t **error );
+
+off64_t mount_handle_seek_offset(
+         mount_handle_t *mount_handle,
+         off64_t offset,
+         int whence,
+         liberror_error_t **error );
+
 int mount_handle_get_size(
      mount_handle_t *mount_handle,
      size64_t *size,

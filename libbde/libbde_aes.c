@@ -1596,7 +1596,7 @@ int libbde_aes_cbc_crypt(
 	     cipher,
 	     NULL,
 	     (unsigned char *) context->key,
-	     NULL,
+	     (unsigned char *) initialization_vector,
 	     mode ) != 1 )
 	{
 		liberror_error_set(
@@ -1737,8 +1737,6 @@ int libbde_aes_cbc_crypt(
 	return( 1 );
 }
 
-/* TODO encryption currently not supported */
-
 /* De- or encrypts a block of data using AES-CCM (Counter with CBC-MAC)
  * Returns 1 if successful or -1 on error
  */
@@ -1771,6 +1769,7 @@ int libbde_aes_ccm_crypt(
 
 		return( -1 );
 	}
+/* TODO encryption currently not supported */
 	if( mode != LIBBDE_AES_CRYPT_MODE_DECRYPT )
 	{
 		liberror_error_set(

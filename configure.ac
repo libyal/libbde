@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110819],
+ [20110821],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -91,6 +91,12 @@ COMMON_ARG_WITH(
  [openssl],
  [openssl],
  [search for openssl in includedir and libdir or in the specified DIR, or no if not to use openssl],
+ [auto-detect],
+ [DIR])
+COMMON_ARG_WITH(
+ [fuse],
+ [fuse],
+ [search for fuse in includedir and libdir or in the specified DIR, or no if not to use fuse],
  [auto-detect],
  [DIR])
 
@@ -476,9 +482,36 @@ AS_IF(
  [test "x$ac_cv_cypher_aes" = xno],
  [ac_cv_cypher_aes=local])
 
+AS_IF(
+ [test "x$ac_cv_libcrypto" = xyes],
+ [AC_SUBST(
+  [libewf_pc_libs_private_libcrypto],
+  [-lcrypto])
+ ])
+
+AS_IF(
+ [test "x$ac_cv_libcrypto" = xyes],
+ [AC_SUBST(
+  [libewf_spec_requires_libcrypto],
+  [openssl])
+ AC_SUBST(
+  [libewf_spec_build_requires_libcrypto],
+  [openssl-devel])
+ ])
+
 dnl TODO move the open ssl checks here ?
 
 dnl Check for libfuse Filesystem in Userspace (FUSE) support
+AS_IF(
+ [test "x$ac_cv_with_fuse" != xno && test "x$ac_cv_with_fuse" != xauto-detect],
+ [AS_IF(
+  [test -d "$ac_cv_with_fuse"],
+  [CFLAGS="$CFLAGS -I${ac_cv_with_fuse}/include"
+  LDFLAGS="$LDFLAGS -L${ac_cv_with_fuse}/lib"],
+  [AC_MSG_WARN([no such directory: $ac_cv_with_fuse])
+  ])
+ ])
+ 
 AS_IF(
  [test "x$ac_cv_enable_winapi" = xno],
  [AC_CHECK_HEADERS([fuse.h])
@@ -487,11 +520,38 @@ AS_IF(
   [test "x$ac_cv_header_fuse_h" = xyes],
   [AC_CHECK_LIB(
    fuse,
-   fuse_main,
+   fuse_daemonize,
    [],
-   [ac_libbde_have_fuse_support=no])
+   [ac_cv_libfuse=no])
+  AC_CHECK_LIB(
+   fuse,
+   fuse_destroy,
+   [ac_libbde_dummy=yes],
+   [ac_cv_libfuse=no])
+  AC_CHECK_LIB(
+   fuse,
+   fuse_mount,
+   [ac_libbde_dummy=yes],
+   [ac_cv_libfuse=no])
+  AC_CHECK_LIB(
+   fuse,
+   fuse_new,
+   [ac_libbde_dummy=yes],
+   [ac_cv_libfuse=no])
   ])
  ])
+
+AS_IF(
+ [test "x$ac_cv_libfuse" = xyes],
+ [AC_SUBST(
+  [libewf_spec_requires_libfuse],
+  [openssl])
+ AC_SUBST(
+  [libewf_spec_build_requires_libfuse],
+  [openssl-devel])
+ ])
+
+dnl TODO add check for -D_FILE_OFFSET_BITS=64
 
 dnl Check if bdetools should be build as static executables
 AS_IF(
@@ -525,7 +585,7 @@ AS_IF(
 
 dnl Check if requires and build requires should be set in spec file
 AS_IF(
- [test "x$ac_cv_libuna" = xyes || test "x$ac_cv_libbfio" = xyes || test "x$ac_cv_libfdata" = xyes || test "x$ac_cv_libfdatetime" = xyes || test "x$ac_cv_libfguid" = xyes || test "x$ac_cv_libfvalue" = xyes || test "x$ac_cv_libhmac" = xyes],
+ [test "x$ac_cv_libuna" = xyes || test "x$ac_cv_libbfio" = xyes || test "x$ac_cv_libfdata" = xyes || test "x$ac_cv_libfdatetime" = xyes || test "x$ac_cv_libfguid" = xyes || test "x$ac_cv_libfvalue" = xyes || test "x$ac_cv_libhmac" = xyes || test "x$ac_cv_libcrypto" = xyes],
  [AC_SUBST(
   [libbde_spec_requires],
   [Requires:])
@@ -620,6 +680,7 @@ Building:
    libhmac support:                          $ac_cv_libhmac
    SHA256 support:                           $ac_cv_libhmac_sha256
    AES support:                              $ac_cv_cypher_aes
+   FUSE support:                             $ac_cv_libfuse
 
 Features:
    Wide character type support:              $ac_cv_enable_wide_character_type

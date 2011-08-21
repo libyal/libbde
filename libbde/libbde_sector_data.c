@@ -294,7 +294,8 @@ int libbde_sector_data_read(
 		}
 		return( 1 );
 	}
-	if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+	 || ( io_handle->version == LIBBDE_VERSION_TOGO ) )
 	{
 		if( ( sector_data_offset >= io_handle->volume_header_offset )
 		 && ( sector_data_offset < ( io_handle->volume_header_offset + io_handle->volume_header_size ) ) )

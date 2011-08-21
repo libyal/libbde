@@ -297,8 +297,8 @@ int bdemount_fuse_read(
 
 		goto on_error;
 	}
-	if( libbde_volume_seek_offset(
-	     bdemount_mount_handle->input_volume,
+	if( mount_handle_seek_offset(
+	     bdemount_mount_handle,
 	     (off64_t) offset,
 	     SEEK_SET,
 	     &error ) == -1 )
@@ -307,16 +307,16 @@ int bdemount_fuse_read(
 		 &error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek offset in input volume.",
+		 "%s: unable to seek offset in mount handle.",
 		 function );
 
 		result = -EIO;
 
 		goto on_error;
 	}
-	read_count = libbde_volume_read_buffer(
-	              bdemount_mount_handle->input_volume,
-	              buffer,
+	read_count = mount_handle_read_buffer(
+	              bdemount_mount_handle,
+	              (uint8_t *) buffer,
 	              size,
 	              &error );
 
@@ -326,7 +326,7 @@ int bdemount_fuse_read(
 		 &error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read from input volume.",
+		 "%s: unable to read from mount handle.",
 		 function );
 
 		result = -EIO;
@@ -561,8 +561,8 @@ int bdemount_fuse_getattr(
 			stat_info->st_mode  = S_IFREG | 0444;
 			stat_info->st_nlink = 1;
 
-			if( libbde_volume_get_size(
-			     bdemount_mount_handle->input_volume,
+			if( mount_handle_get_size(
+			     bdemount_mount_handle,
 			     &volume_size,
 			     &error ) != 1 )
 			{
@@ -638,14 +638,13 @@ int main( int argc, char * const argv[] )
 	char *program                                           = "bdemount";
 	libcstring_system_integer_t option                      = 0;
 	size_t string_length                                    = 0;
+	int result                                              = 0;
 	int verbose                                             = 0;
 
 #if defined( HAVE_FUSE_H )
 	struct fuse_operations bdemount_fuse_operations;
 	struct fuse_chan *bdemount_fuse_channel                 = NULL;
 	struct fuse *bdemount_fuse_handle                       = NULL;
-
-	int result                                              = 0;
 #endif
 
 	libsystem_notify_set_stream(
@@ -833,15 +832,25 @@ int main( int argc, char * const argv[] )
 			 bdemount_mount_handle->volume_offset );
 		}
 	}
-	if( mount_handle_open(
-	     bdemount_mount_handle,
-	     source,
-	     &error ) != 1 )
+	result = mount_handle_open(
+	          bdemount_mount_handle,
+	          source,
+	          &error );
+
+	if( result == -1 )
 	{
 		fprintf(
 		 stderr,
 		 "Unable to open: %" PRIs_LIBCSTRING_SYSTEM ".\n",
 		 source );
+
+		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to unlock keys.\n" );
 
 		goto on_error;
 	}
@@ -889,6 +898,15 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+	if( fuse_daemonize(
+	     0 ) != 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to daemonize fuse.\n" );
+
+		goto on_error;
+	}
 	result = fuse_loop(
 	          bdemount_fuse_handle );
 
@@ -896,12 +914,31 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to run fuse.\n" );
+		 "Unable to run fuse loop.\n" );
 
 		goto on_error;
 	}
-#endif
+	fuse_destroy(
+	 bdemount_fuse_handle );
+
+	fprintf(
+	 stdout,
+	 "%s: SUCCESS\n",
+	 program );
+
 	return( EXIT_SUCCESS );
+#else
+	fprintf(
+	 stderr,
+	 "No sub system to mount volume.\n" );
+
+	fprintf(
+	 stdout,
+	 "%s: FAILED\n",
+	 program );
+
+	return( EXIT_FAILURE );
+#endif
 
 on_error:
 	if( error != NULL )
@@ -911,6 +948,13 @@ on_error:
 		liberror_error_free(
 		 &error );
 	}
+#if defined( HAVE_FUSE_H )
+	if( bdemount_fuse_handle != NULL )
+	{
+		fuse_destroy(
+		 bdemount_fuse_handle );
+	}
+#endif
 	if( bdemount_mount_handle != NULL )
 	{
 		mount_handle_free(

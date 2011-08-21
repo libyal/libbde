@@ -314,7 +314,7 @@ int libbde_volume_signal_abort(
 }
 
 /* Opens a volume
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 int libbde_volume_open(
      libbde_volume_t *volume,
@@ -325,6 +325,7 @@ int libbde_volume_open(
 	libbfio_handle_t *file_io_handle          = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open";
+	int result                                = 0;
 
 	if( volume == NULL )
 	{
@@ -418,11 +419,13 @@ int libbde_volume_open(
 
 		goto on_error;
 	}
-	if( libbde_volume_open_file_io_handle(
-	     volume,
-	     file_io_handle,
-	     access_flags,
-	     error ) != 1 )
+	result = libbde_volume_open_file_io_handle(
+	          volume,
+	          file_io_handle,
+	          access_flags,
+	          error );
+
+	if( result == -1 )
 	{
 		liberror_error_set(
 		 error,
@@ -436,7 +439,7 @@ int libbde_volume_open(
 	}
 	internal_volume->file_io_handle_created_in_library = 1;
 
-	return( 1 );
+	return( result );
 
 on_error:
 	if( file_io_handle != NULL )
@@ -451,7 +454,7 @@ on_error:
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 /* Opens a volume
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 int libbde_volume_open_wide(
      libbde_volume_t *volume,
@@ -462,6 +465,7 @@ int libbde_volume_open_wide(
 	libbfio_handle_t *file_io_handle          = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open_wide";
+	int result                                = 0;
 
 	if( volume == NULL )
 	{
@@ -555,11 +559,13 @@ int libbde_volume_open_wide(
 
 		goto on_error;
 	}
-	if( libbde_volume_open_file_io_handle(
-	     volume,
-	     file_io_handle,
-	     access_flags,
-	     error ) != 1 )
+	result = libbde_volume_open_file_io_handle(
+	          volume,
+	          file_io_handle,
+	          access_flags,
+	          error );
+
+	if( result == -1 )
 	{
 		liberror_error_set(
 		 error,
@@ -573,7 +579,7 @@ int libbde_volume_open_wide(
 	}
 	internal_volume->file_io_handle_created_in_library = 1;
 
-	return( 1 );
+	return( result );
 
 on_error:
 	if( file_io_handle != NULL )
@@ -588,7 +594,7 @@ on_error:
 #endif
 
 /* Opens a volume using a Basic File IO (bfio) handle
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 int libbde_volume_open_file_io_handle(
      libbde_volume_t *volume,
@@ -599,6 +605,8 @@ int libbde_volume_open_file_io_handle(
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open_file_io_handle";
 	int bfio_access_flags                     = 0;
+	int file_io_handle_is_open                = 0;
+	int result                                = 0;
 
 	if( volume == NULL )
 	{
@@ -662,25 +670,45 @@ int libbde_volume_open_file_io_handle(
 	{
 		bfio_access_flags = LIBBFIO_ACCESS_FLAG_READ;
 	}
+	file_io_handle_is_open = libbfio_handle_is_open(
+	                          file_io_handle,
+	                          error );
+
+	if( file_io_handle_is_open == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open file.",
+		 function );
+
+		return( -1 );
+	}
+	else if( file_io_handle_is_open == 0 )
+	{
+		if( libbfio_handle_open(
+		     file_io_handle,
+		     bfio_access_flags,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_OPEN_FAILED,
+			 "%s: unable to open file IO handle.",
+			 function );
+
+			return( -1 );
+		}
+	}
 	internal_volume->file_io_handle = file_io_handle;
 
-	if( libbfio_handle_open(
-	     internal_volume->file_io_handle,
-	     bfio_access_flags,
-	     error ) != 1 )
-	{
-                liberror_error_set(
-                 error,
-                 LIBERROR_ERROR_DOMAIN_IO,
-                 LIBERROR_IO_ERROR_OPEN_FAILED,
-                 "%s: unable to open file IO handle.",
-                 function );
+	result = libbde_volume_open_read(
+	          internal_volume,
+	          error );
 
-                return( -1 );
-	}
-	if( libbde_volume_open_read(
-	     internal_volume,
-	     error ) != 1 )
+	if( result == -1 )
 	{
 		liberror_error_set(
 		 error,
@@ -689,9 +717,15 @@ int libbde_volume_open_file_io_handle(
 		 "%s: unable to read from volume handle.",
 		 function );
 
+		if( file_io_handle_is_open == 0 )
+		{
+			libbfio_handle_close(
+			 file_io_handle,
+			 error );
+		}
 		return( -1 );
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Closes a volume
@@ -807,7 +841,7 @@ int libbde_volume_close(
 }
 
 /* Opens a volume for reading
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
 int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
@@ -1034,68 +1068,60 @@ int libbde_volume_open_read(
 			return( -1 );
 		}
 	}
-	if( result != 1 )
+	if( result != 0 )
 	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read keys from metadata.",
-		 function );
+		/* TODO clone function ? */
+		if( libfdata_vector_initialize(
+		     &( internal_volume->sectors_vector ),
+		     (size64_t) internal_volume->io_handle->bytes_per_sector,
+		     (intptr_t *) internal_volume->io_handle,
+		     NULL,
+		     NULL,
+		     &libbde_io_handle_read_sector,
+		     LIBFDATA_FLAG_IO_HANDLE_NON_MANAGED,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create sectors vector.",
+			 function );
 
-		return( -1 );
-	}
-	/* TODO clone function ? */
-	if( libfdata_vector_initialize(
-	     &( internal_volume->sectors_vector ),
-	     (size64_t) internal_volume->io_handle->bytes_per_sector,
-	     (intptr_t *) internal_volume->io_handle,
-	     NULL,
-	     NULL,
-	     &libbde_io_handle_read_sector,
-	     LIBFDATA_FLAG_IO_HANDLE_NON_MANAGED,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create sectors vector.",
-		 function );
+			return( -1 );
+		}
+		if( libfdata_vector_append_segment(
+		     internal_volume->sectors_vector,
+		     0,
+		     internal_volume->size,
+		     0,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to append segment to sectors vector.",
+			 function );
 
-		return( -1 );
-	}
-	if( libfdata_vector_append_segment(
-	     internal_volume->sectors_vector,
-	     0,
-	     internal_volume->size,
-	     0,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append segment to sectors vector.",
-		 function );
+			return( -1 );
+		}
+		if( libfdata_cache_initialize(
+		     &( internal_volume->sectors_cache ),
+		     LIBBDE_MAXIMUM_CACHE_ENTRIES_SECTORS,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create sectors cache.",
+			 function );
 
-		return( -1 );
+			return( -1 );
+		}
 	}
-	if( libfdata_cache_initialize(
-	     &( internal_volume->sectors_cache ),
-	     LIBBDE_MAXIMUM_CACHE_ENTRIES_SECTORS,
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create sectors cache.",
-		 function );
-
-		return( -1 );
-	}
-	return( 1 );
+	return( result );
 }
 
 /* Reads the keys from the metadata when opening the volume for reading
