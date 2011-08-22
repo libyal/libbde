@@ -40,6 +40,7 @@ bdemount_LDADD  = \
 	../liberror/liberror.la \
 	../libbde/libbde.la \
 	../libsystem/libsystem.la \
+	@LIBFUSE_LIBADD@ \
 	@MEMWATCH_LIBADD@
 
 MAINTAINERCLEANFILES = \
