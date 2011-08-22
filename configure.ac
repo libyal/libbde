@@ -94,9 +94,9 @@ COMMON_ARG_WITH(
  [auto-detect],
  [DIR])
 COMMON_ARG_WITH(
- [fuse],
- [fuse],
- [search for fuse in includedir and libdir or in the specified DIR, or no if not to use fuse],
+ [libfuse],
+ [libfuse],
+ [search for libfuse in includedir and libdir or in the specified DIR, or no if not to use libfuse],
  [auto-detect],
  [DIR])
 
@@ -502,47 +502,7 @@ AS_IF(
 dnl TODO move the open ssl checks here ?
 
 dnl Check for libfuse Filesystem in Userspace (FUSE) support
-AS_IF(
- [test "x$ac_cv_with_fuse" != xno && test "x$ac_cv_with_fuse" != xauto-detect],
- [AS_IF(
-  [test -d "$ac_cv_with_fuse"],
-  [CFLAGS="$CFLAGS -I${ac_cv_with_fuse}/include"
-  LDFLAGS="$LDFLAGS -L${ac_cv_with_fuse}/lib"],
-  [AC_MSG_WARN([no such directory: $ac_cv_with_fuse])
-  ])
- ])
-
-ac_cv_libfuse=no
- 
-AS_IF(
- [test "x$ac_cv_enable_winapi" = xno],
- [AC_CHECK_HEADERS([fuse.h])
-
- AS_IF(
-  [test "x$ac_cv_header_fuse_h" = xyes],
-  [ac_cv_libfuse=yes
-  AC_CHECK_LIB(
-   fuse,
-   fuse_daemonize,
-   [],
-   [ac_cv_libfuse=no])
-  AC_CHECK_LIB(
-   fuse,
-   fuse_destroy,
-   [ac_libbde_dummy=yes],
-   [ac_cv_libfuse=no])
-  AC_CHECK_LIB(
-   fuse,
-   fuse_mount,
-   [ac_libbde_dummy=yes],
-   [ac_cv_libfuse=no])
-  AC_CHECK_LIB(
-   fuse,
-   fuse_new,
-   [ac_libbde_dummy=yes],
-   [ac_cv_libfuse=no])
-  ])
- ])
+AC_CHECK_LIBFUSE
 
 AS_IF(
  [test "x$ac_cv_libfuse" = xyes],

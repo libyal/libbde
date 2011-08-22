@@ -832,7 +832,7 @@ int main( int argc, char * const argv[] )
 			 bdemount_mount_handle->volume_offset );
 		}
 	}
-	result = mount_handle_open(
+	result = mount_handle_open_input(
 	          bdemount_mount_handle,
 	          source,
 	          &error );

@@ -79,7 +79,7 @@ int mount_handle_set_recovery_password(
      const libcstring_system_character_t *string,
      liberror_error_t **error );
 
-int mount_handle_open(
+int mount_handle_open_input(
      mount_handle_t *mount_handle,
      const libcstring_system_character_t *filename,
      liberror_error_t **error );
