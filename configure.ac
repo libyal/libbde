@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110821],
+ [20110822],
  [jbmetz@users.sourceforge.net])
 
 AC_CONFIG_SRCDIR(
@@ -511,6 +511,8 @@ AS_IF(
   [AC_MSG_WARN([no such directory: $ac_cv_with_fuse])
   ])
  ])
+
+ac_cv_libfuse=no
  
 AS_IF(
  [test "x$ac_cv_enable_winapi" = xno],
@@ -518,7 +520,8 @@ AS_IF(
 
  AS_IF(
   [test "x$ac_cv_header_fuse_h" = xyes],
-  [AC_CHECK_LIB(
+  [ac_cv_libfuse=yes
+  AC_CHECK_LIB(
    fuse,
    fuse_daemonize,
    [],
@@ -545,10 +548,10 @@ AS_IF(
  [test "x$ac_cv_libfuse" = xyes],
  [AC_SUBST(
   [libewf_spec_requires_libfuse],
-  [openssl])
+  [libfuse])
  AC_SUBST(
   [libewf_spec_build_requires_libfuse],
-  [openssl-devel])
+  [libfuse-devel])
  ])
 
 dnl TODO add check for -D_FILE_OFFSET_BITS=64
