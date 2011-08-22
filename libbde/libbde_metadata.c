@@ -242,7 +242,6 @@ int libbde_metadata_read(
 	ssize_t read_count                                    = 0;
 	uint64_t volume_header_offset                         = 0;
 	uint64_t volume_header_size                           = 0;
-	uint64_t volume_size                                  = 0;
 	uint32_t metadata_header_size                         = 0;
 	uint32_t metadata_size                                = 0;
 	uint32_t metadata_size_copy                           = 0;
@@ -393,7 +392,7 @@ int libbde_metadata_read(
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_size,
-		 volume_size );
+		 metadata->volume_size );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_header_offset,
@@ -457,7 +456,7 @@ int libbde_metadata_read(
 			libnotify_printf(
 			 "%s: volume size\t\t\t\t\t: %" PRIu64 "\n",
 			 function,
-			 volume_size );
+			 metadata->volume_size );
 
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->unknown3,

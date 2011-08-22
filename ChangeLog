@@ -1,4 +1,5 @@
 TODO
+* fix fuse status print
 * the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
   - make sure to handle them correctly (partial)
 * AES
@@ -49,6 +50,10 @@ Validate test cases:
 * AES 256 diffuser
 * recovery key
 * external key
+
+20110822
+* remove seek end volume size detection to rely on metadata
+* small changes to configure for fuse
 
 20110821
 * worked on handling metadata blocks

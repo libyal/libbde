@@ -895,35 +895,6 @@ int libbde_volume_open_read(
 
 		return( -1 );
 	}
-	if( libbfio_handle_seek_offset(
-	     internal_volume->file_io_handle,
-	     0,
-	     SEEK_END,
-	     error ) < 0 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek end of volume.",
-		 function );
-
-		return( -1 );
-	}
-	if( libbfio_handle_get_offset(
-	     internal_volume->file_io_handle,
-	     (off64_t *) &( internal_volume->size ),
-	     error ) != 1 )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume size.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -1140,6 +1111,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	static char *function        = "libbde_volume_open_read_keys_from_metadata";
 	off64_t volume_header_offset = 0;
 	size64_t volume_header_size  = 0;
+	size64_t volume_size         = 0;
 	uint32_t encryption_method   = 0;
 	int result                   = 0;
 
@@ -1218,6 +1190,7 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		return( -1 );
 	}
+	volume_size          = metadata->volume_size;
 	volume_header_offset = metadata->volume_header_offset;
 	volume_header_size   = metadata->volume_header_size;
 	encryption_method    = metadata->encryption_method;
@@ -1262,6 +1235,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	}
 	if( result != 0 )
 	{
+		internal_volume->size                            = volume_size;
 		internal_volume->io_handle->volume_header_offset = volume_header_offset;
 		internal_volume->io_handle->volume_header_size   = volume_header_size;
 

@@ -48,6 +48,10 @@ struct libbde_metadata
 	 */
 	uint32_t encryption_method;
 
+	/* The volume size
+	 */
+	size64_t volume_size;
+
 	union
 	{
 		/* The MFT mirror cluster block number
