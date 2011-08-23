@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 #define LIBBDE_HAVE_AES_SUPPORT
 
 #elif defined( HAVE_LIBCRYPTO ) && defined( HAVE_OPENSSL_AES_H )
@@ -66,7 +66,7 @@ enum LIBBDE_AES_CRYPT_MODES
 
 #endif
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 
 typedef struct libbde_aes_key libbde_aes_key_t;
 
@@ -105,7 +105,7 @@ typedef struct libbde_aes_context libbde_aes_context_t;
 
 struct libbde_aes_context
 {
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
         HCRYPTPROV crypt_provider;
         HCRYPTKEY key;
 
