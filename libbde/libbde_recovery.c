@@ -459,7 +459,7 @@ int libbde_recovery_calculate_key(
 	/* The recovery key is the SHA256 digest hash after 0x100000 key iterations
 	 */
 	for( recovery_key_data.iteration_count = 0;
-	     recovery_key_data.iteration_count < 0xfffff;
+	     recovery_key_data.iteration_count < 0x000fffffUL;
 	     recovery_key_data.iteration_count += 1 )
 	{
 		if( libhmac_sha256_calculate(

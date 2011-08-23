@@ -304,7 +304,7 @@ int libbde_password_calculate_key(
 	/* The password key is the SHA256 digest hash after 0x10000 key iterations
 	 */
 	for( iteration_count = 0;
-	     iteration_count < 0xffff;
+	     iteration_count < 0x0000ffffUL;
 	     iteration_count += 1 )
 	{
 		if( libhmac_sha256_calculate(

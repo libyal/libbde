@@ -41,13 +41,13 @@
 #include "libbde_aes.h"
 #include "libbde_error_string.h"
 
-#if defined( WINAPI )
+#if defined( WINAPI )&& ( WINVER >= 0x0600 )
 
 #if !defined( PROV_RSA_AES )
 #define PROV_RSA_AES		24
 #endif
 
-#endif /* defined( WINAPI ) */
+#endif /* defined( WINAPI ) && ( WINVER >= 0x0600 ) */
 
 #if !defined( LIBBDE_HAVE_AES_SUPPORT )
 
@@ -448,7 +448,7 @@ int libbde_aes_initialize_tables(
 
 #endif /* !defined( LIBBDE_HAVE_AES_SUPPORT ) */
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 
 /* Initializes the AES key
  * Returns 1 if successful or -1 on error
@@ -638,7 +638,7 @@ int libbde_aes_key_free(
 	return( result );
 }
 
-#endif /* defined( WINAPI ) */
+#endif /* defined( WINAPI ) && ( WINVER >= 0x0600 ) */
 
 /* Initializes the AES context
  * Returns 1 if successful or -1 on error
@@ -648,6 +648,12 @@ int libbde_aes_initialize(
      liberror_error_t **error )
 {
 	static char *function = "libbde_aes_context_initialize";
+
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
+	libcstring_system_character_t error_string[ LIBBDE_ERROR_STRING_SIZE ];
+
+	DWORD error_code      = 0;
+#endif
 
 	if( context == NULL )
 	{
@@ -690,28 +696,49 @@ int libbde_aes_initialize(
 
 			goto on_error;
 		}
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 		/* Request the AES crypt provider, fail back to the RSA crypt provider
 		*/
 		if( CryptAcquireContext(
 		     &( ( *context )->crypt_provider ),
 		     NULL,
-		     NULL,
+		     MS_ENH_RSA_AES_PROV,
 		     PROV_RSA_AES,
-		     CRYPT_VERIFYCONTEXT ) == 0 )
+		     CRYPT_NEWKEYSET ) == 0 )
 		{
+/* TODO fallback for XP
 			if( CryptAcquireContext(
 			     &( ( *context )->crypt_provider ),
 			     NULL,
-			     NULL,
-			     PROV_RSA_FULL,
-			     CRYPT_VERIFYCONTEXT ) == 0 )
+			     MS_ENH_RSA_AES_PROV_XP,
+			     PROV_RSA_AES,
+			     CRYPT_NEWKEYSET ) == 0 )
+*/
+			error_code = GetLastError();
+
+			if( libbde_error_string_copy_from_error_number(
+			     error_string,
+			     LIBBDE_ERROR_STRING_SIZE,
+			     error_code,
+			     error ) == 1 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create AES or RSA crypt provider.",
+				 "%s: unable to create AES crypt provider with error: %" PRIs_LIBCSTRING_SYSTEM ".",
+				 function,
+				 error_string );
+
+				goto on_error;
+			}
+			else
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create AES crypt provider.",
 				 function );
 
 				goto on_error;
@@ -804,7 +831,7 @@ int libbde_aes_free(
 	}
 	if( *context != NULL )
 	{
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 		if( ( *context )->crypt_provider != 0 )
 		{
 			CryptReleaseContext(
@@ -846,7 +873,7 @@ int libbde_aes_set_decryption_key(
 {
 	static char *function           = "libbde_aes_set_decryption_key";
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	libcstring_system_character_t error_string[ LIBBDE_ERROR_STRING_SIZE ];
 
 	libbde_aes_key_t *wincrypt_key  = NULL;
@@ -889,7 +916,7 @@ int libbde_aes_set_decryption_key(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	if( libbde_aes_key_initialize(
 	     &wincrypt_key,
 	     error ) != 1 )
@@ -1148,7 +1175,7 @@ int libbde_aes_set_encryption_key(
 {
 	static char *function          = "libbde_aes_set_encryption_key";
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	libcstring_system_character_t error_string[ LIBBDE_ERROR_STRING_SIZE ];
 
 	libbde_aes_key_t *wincrypt_key = NULL;
@@ -1185,7 +1212,7 @@ int libbde_aes_set_encryption_key(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	if( libbde_aes_key_initialize(
 	     &wincrypt_key,
 	     error ) != 1 )
@@ -1421,7 +1448,7 @@ int libbde_aes_cbc_crypt(
 {
 	static char *function       = "libbde_aes_cbc_crypt";
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	DWORD cipher_mode           = CRYPT_MODE_CBC;
 	DWORD safe_output_data_size = 0;
 
@@ -1503,7 +1530,7 @@ int libbde_aes_cbc_crypt(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	if( input_data_size > (size_t) UINT32_MAX )
 	{
 		liberror_error_set(
@@ -2155,7 +2182,7 @@ int libbde_aes_ecb_crypt(
 	static char *function       = "libbde_aes_ecb_crypt";
 	int result                  = 1;
 
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	DWORD cipher_mode           = CRYPT_MODE_ECB;
 	DWORD safe_output_data_size = 0;
 
@@ -2220,7 +2247,7 @@ int libbde_aes_ecb_crypt(
 
 		return( -1 );
 	}
-#if defined( WINAPI )
+#if defined( WINAPI ) && ( WINVER >= 0x0600 )
 	if( CryptSetKeyParam(
 	     context->key,
 	     KP_MODE,
