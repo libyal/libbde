@@ -240,6 +240,9 @@ int libbde_metadata_read(
 	static char *function                                 = "libbde_metadata_read";
 	size_t read_size                                      = 4096;
 	ssize_t read_count                                    = 0;
+	uint64_t first_metadata_offset                        = 0;
+	uint64_t second_metadata_offset                       = 0;
+	uint64_t third_metadata_offset                        = 0;
 	uint64_t volume_header_offset                         = 0;
 	uint64_t volume_header_size                           = 0;
 	uint32_t metadata_header_size                         = 0;
@@ -254,7 +257,6 @@ int libbde_metadata_read(
 
 	libfdatetime_filetime_t *filetime                     = NULL;
 	libfguid_identifier_t *guid                           = NULL;
-	uint64_t value_64bit                                  = 0;
 	uint32_t value_32bit                                  = 0;
 	uint16_t value_16bit                                  = 0;
 	int result                                            = 0;
@@ -398,6 +400,18 @@ int libbde_metadata_read(
 		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_header_offset,
 		 metadata->volume_header_offset );
 	}
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->first_metadata_offset,
+	 first_metadata_offset );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->second_metadata_offset,
+	 second_metadata_offset );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->third_metadata_offset,
+	 third_metadata_offset );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -474,34 +488,25 @@ int libbde_metadata_read(
 			 function,
 			 value_32bit );
 		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->first_metadata_offset,
-		 value_64bit );
 		libnotify_printf(
 		 "%s: first metadata offset\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 first_metadata_offset );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->second_metadata_offset,
-		 value_64bit );
 		libnotify_printf(
 		 "%s: second metadata offset\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 second_metadata_offset );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->third_metadata_offset,
-		 value_64bit );
 		libnotify_printf(
 		 "%s: third metadata offset\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 third_metadata_offset );
 
 		if( metadata->version == 1 )
 		{
 			libnotify_printf(
-			 "%s: MFT mirror cluster block\t\t\t: 0x%08" PRIx64 "\n",
+			 "%s: MFT mirror cluster block\t\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 metadata->mft_mirror_cluster_block_number );
 		}
@@ -768,6 +773,50 @@ int libbde_metadata_read(
 		 "\n" );
 	}
 #endif
+	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
+	{
+		if( io_handle->second_metadata_offset == 0 )
+		{
+			io_handle->second_metadata_offset = second_metadata_offset;
+		}
+		if( io_handle->third_metadata_offset == 0 )
+		{
+			io_handle->third_metadata_offset = third_metadata_offset;
+		}
+	}
+	if( io_handle->first_metadata_offset != first_metadata_offset )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_INPUT,
+		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 "%s: value mismatch for first metadata offset.",
+		 function );
+
+		goto on_error;
+	}
+	if( io_handle->second_metadata_offset != second_metadata_offset )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_INPUT,
+		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 "%s: value mismatch for second metadata offset.",
+		 function );
+
+		goto on_error;
+	}
+	if( io_handle->third_metadata_offset != third_metadata_offset )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_INPUT,
+		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 "%s: value mismatch for third metadata offset.",
+		 function );
+
+		goto on_error;
+	}
 	if( metadata_header_size != sizeof( bde_metadata_header_v1_t ) )
 	{
 		liberror_error_set(

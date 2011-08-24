@@ -56,7 +56,7 @@ enum LIBBDE_VERSIONS
 {
 	LIBBDE_VERSION_WINDOWS_VISTA			= 6,
 	LIBBDE_VERSION_WINDOWS_7			= 7,
-	LIBBDE_VERSION_TOGO				= (int) 'T'
+	LIBBDE_VERSION_TO_GO				= (int) 'T'
 };
 
 /* The encryption methods
