@@ -1235,7 +1235,14 @@ int libbde_volume_open_read_keys_from_metadata(
 	}
 	if( result != 0 )
 	{
-		internal_volume->size                            = volume_size;
+		if( internal_volume->io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
+		{
+			internal_volume->size = internal_volume->io_handle->volume_size;
+		}
+		else
+		{
+			internal_volume->size = volume_size;
+		}
 		internal_volume->io_handle->volume_header_offset = volume_header_offset;
 		internal_volume->io_handle->volume_header_size   = volume_header_size;
 

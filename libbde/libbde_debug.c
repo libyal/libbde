@@ -138,11 +138,11 @@ const char *libbde_debug_print_volume_master_key_type(
 {
 	switch( volume_master_key_type )
 	{
+		case LIBBDE_VMK_TYPE_TPM_PROTECTED:
+			return( "TPM protected" );
+
 		case LIBBDE_VMK_TYPE_RECOVERY_KEY_PROTECTED:
 			return( "recovery key protected" );
-
-		case LIBBDE_VMK_TYPE_TPM_PROTECTED:
-			return( "TMP protected" );
 
 		case LIBBDE_VMK_TYPE_EXTERNAL_KEY_PROTECTED:
 			return( "external key protected" );

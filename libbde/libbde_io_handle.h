@@ -54,6 +54,10 @@ struct libbde_io_handle
 	 */
 	uint16_t bytes_per_sector;
 
+	/* The sectors per cluster block
+	 */
+	uint8_t sectors_per_cluster_block;
+
 	/* The first metadata offset
 	 */
 	off64_t first_metadata_offset;
@@ -69,6 +73,10 @@ struct libbde_io_handle
 	/* The metadata (block) size
 	 */
 	size64_t metadata_size;
+
+	/* The volume size
+	 */
+	size64_t volume_size;
 
 	union
 	{

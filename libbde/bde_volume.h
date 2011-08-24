@@ -49,15 +49,65 @@ struct bde_volume_header_windows_vista
 	 */
 	uint8_t bytes_per_sector[ 2 ];
 
-	/* Unknown
-	 * Consists of 43 bytes
+	/* The number of sectors per cluster block
+	 * Consists of 1 byte
 	 */
-	uint8_t unknown1[ 43 ];
+	uint8_t sectors_per_cluster_block;
 
-	/* The first FVE metadata offset
+	/* Unknown
+	 * Consists of 7 bytes
+	 */
+	uint8_t unknown1[ 7 ];
+
+	/* The media descriptor
+	 * Consists of 1 byte
+	 */
+	uint8_t media_descriptor;
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown2[ 2 ];
+
+	/* The number of sectors per track
+	 * Consists of 2 bytes
+	 */
+	uint8_t sectors_per_track[ 2 ];
+
+	/* The number of heads
+	 * Consists of 2 bytes
+	 */
+	uint8_t number_of_heads[ 2 ];
+
+	/* The number of hidden sectors
+	 * Consists of 4 bytes
+	 */
+	uint8_t number_of_hidden_sectors[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown3[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown4[ 4 ];
+
+	/* The total number of sectors
 	 * Consists of 8 bytes
 	 */
-	uint8_t first_metadata_offset[ 8 ];
+	uint8_t total_number_of_sectors[ 8 ];
+
+	/* The master file table (MFT) cluster block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t mft_cluster_block_number[ 8 ];
+
+	/* The first FVE metadata cluster block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t first_metadata_cluster_block_number[ 8 ];
 };
 
 typedef struct bde_volume_header_windows_7 bde_volume_header_windows_7_t;
@@ -80,10 +130,15 @@ struct bde_volume_header_windows_7
 	 */
 	uint8_t bytes_per_sector[ 2 ];
 
-	/* Unknown
-	 * Consists of 147 bytes
+	/* The number of sectors per cluster block
+	 * Consists of 1 byte
 	 */
-	uint8_t unknown1[ 147 ];
+	uint8_t sectors_per_cluster_block;
+
+	/* Unknown
+	 * Consists of 146 bytes
+	 */
+	uint8_t unknown1[ 146 ];
 
 	/* The identifier
 	 * Consists of 16 bytes
