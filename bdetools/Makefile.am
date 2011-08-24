@@ -52,4 +52,6 @@ distclean: clean
 splint:
 	@echo "Running splint on bdeinfo ..." 
 	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(bdeinfo_SOURCES) 
+	@echo "Running splint on bdemount ..." 
+	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(bdemount_SOURCES) 
 
