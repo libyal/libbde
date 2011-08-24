@@ -31,6 +31,7 @@
 #include <libsystem.h>
 
 #include "bdetools_libbde.h"
+#include "bdetools_libfdatetime.h"
 #include "info_handle.h"
 
 #define INFO_HANDLE_NOTIFY_STREAM		stdout

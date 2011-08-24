@@ -77,7 +77,8 @@ void usage_fprint(
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
 	fprintf( stream, "\t-p:          specify the password\n" );
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
-	fprintf( stream, "\t-v:          verbose output to stderr\n" );
+	fprintf( stream, "\t-v:          verbose output to stderr\n"
+	                 "\t             bdemount will remain running in the foregroud\n" );
 	fprintf( stream, "\t-V:          print version\n" );
 }
 
@@ -380,34 +381,6 @@ int bdemount_fuse_readdir(
 
 		goto on_error;
 	}
-#ifdef X
-	if( file_info == NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file info.",
-		 function );
-
-		result = -EINVAL;
-
-		goto on_error;
-	}
-	if( file_info->fh == (uint64_t) NULL )
-	{
-		liberror_error_set(
-		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file info - missing file handle.",
-		 function );
-
-		result = -EBADF;
-
-		goto on_error;
-	}
-#endif
 	if( filler(
 	     buffer,
 	     ".",
@@ -898,14 +871,17 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( fuse_daemonize(
-	     0 ) != 0 )
+	if( verbose == 0 )
 	{
-		fprintf(
-		 stderr,
-		 "Unable to daemonize fuse.\n" );
+		if( fuse_daemonize(
+		     0 ) != 0 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to daemonize fuse.\n" );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 	result = fuse_loop(
 	          bdemount_fuse_handle );
