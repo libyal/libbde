@@ -1,5 +1,5 @@
 /*
- * AES-CCM Encrypted Key metadata entry functions
+ * AES-CCM encrypted key metadata entry functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -177,6 +177,17 @@ int libbde_aes_ccm_encrypted_key_read(
 
 		return( -1 );
 	}
+	if( metadata_entry->value_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid metadata entry - missing value data.",
+		 function );
+
+		return( -1 );
+	}
 	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_AES_CCM_ENCRYPTED_KEY )
 	{
 		liberror_error_set(
@@ -192,7 +203,7 @@ int libbde_aes_ccm_encrypted_key_read(
 	value_data      = metadata_entry->value_data;
 	value_data_size = metadata_entry->value_data_size;
 
-	if( value_data_size < 28 )
+	if( value_data_size < sizeof( bde_metadata_entry_aes_ccm_encrypted_key_header_t ) )
 	{
 		liberror_error_set(
 		 error,
@@ -221,7 +232,7 @@ int libbde_aes_ccm_encrypted_key_read(
 		}
 		if( libfdatetime_filetime_copy_from_byte_stream(
 		     filetime,
-		     ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->nonce_time,
+		     ( (bde_metadata_entry_aes_ccm_encrypted_key_header_t *) value_data )->nonce_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     error ) != 1 )
@@ -282,7 +293,7 @@ int libbde_aes_ccm_encrypted_key_read(
 			goto on_error;
 		}
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_entry_aes_ccm_encrypted_data_t *) value_data )->nonce_counter,
+		 ( (bde_metadata_entry_aes_ccm_encrypted_key_header_t *) value_data )->nonce_counter,
 		 value_32bit );
 		libnotify_printf(
 		 "%s: nonce counter\t\t\t: %" PRIu32 "\n",
@@ -304,8 +315,8 @@ int libbde_aes_ccm_encrypted_key_read(
 
 		return( -1 );
 	}
-	value_data      += sizeof( bde_metadata_entry_aes_ccm_encrypted_data_t );
-	value_data_size -= sizeof( bde_metadata_entry_aes_ccm_encrypted_data_t );
+	value_data      += sizeof( bde_metadata_entry_aes_ccm_encrypted_key_header_t );
+	value_data_size -= sizeof( bde_metadata_entry_aes_ccm_encrypted_key_header_t );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )

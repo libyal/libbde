@@ -37,6 +37,10 @@ typedef struct libbde_stretch_key libbde_stretch_key_t;
 
 struct libbde_stretch_key
 {
+	/* The encryption method
+	 */
+	uint32_t encryption_method;
+
 	/* The salt
 	 */
 	uint8_t salt[ 16 ];

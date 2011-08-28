@@ -28,6 +28,7 @@
 #include <liberror.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
+#include "libbde_key.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_stretch_key.h"
 
@@ -47,6 +48,10 @@ struct libbde_volume_master_key
 	/* The type
 	 */
 	uint32_t type;
+
+	/* The key
+	 */
+	libbde_key_t *key;
 
 	/* The string metadata entry
 	 */

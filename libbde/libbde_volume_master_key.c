@@ -32,6 +32,7 @@
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
+#include "libbde_key.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_metadata_entry.h"
@@ -157,6 +158,22 @@ int libbde_volume_master_key_free(
 	}
 	if( *volume_master_key != NULL )
 	{
+		if( ( *volume_master_key )->key != NULL )
+		{
+			if( libbde_key_free(
+			     &( ( *volume_master_key )->key ),
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free key.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( ( *volume_master_key )->stretch_key != NULL )
 		{
 			if( libbde_stretch_key_free(
@@ -220,6 +237,7 @@ int libbde_volume_master_key_read(
      liberror_error_t **error )
 {
 	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
+	libbde_key_t *key                                     = NULL;
 	libbde_metadata_entry_t *property_metadata_entry      = NULL;
 	libbde_stretch_key_t *stretch_key                     = NULL;
 	uint8_t *value_data                                   = NULL;
@@ -502,7 +520,59 @@ int libbde_volume_master_key_read(
 		value_data      += read_count;
 		value_data_size -= read_count;
 
-		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_UNICODE_STRING )
+		if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_KEY )
+		{
+			if( libbde_key_initialize(
+			     &key,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create key.",
+				 function );
+
+				goto on_error;
+			}
+			if( libbde_key_read(
+			     key,
+			     property_metadata_entry,
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_IO,
+				 LIBERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read key metadata entry.",
+				 function );
+
+				goto on_error;
+			}
+			if( volume_master_key->key == NULL )
+			{
+				volume_master_key->key = key;
+
+				key = NULL;
+			}
+			if( key != NULL )
+			{
+				if( libbde_key_free(
+				     &key,
+				     error ) != 1 )
+				{
+					liberror_error_set(
+					 error,
+					 LIBERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable to free key.",
+					 function );
+
+					goto on_error;
+				}
+			}
+		}
+		else if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_UNICODE_STRING )
 		{
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libbde_metadata_entry_read_string(

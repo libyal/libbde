@@ -1,5 +1,5 @@
 /*
- * Sector data functions
+ * Key metadata entry functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -19,55 +19,48 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_SECTOR_DATA_H )
-#define _LIBBDE_SECTOR_DATA_H
+#if !defined( _LIBBDE_KEY_H )
+#define _LIBBDE_KEY_H
 
 #include <common.h>
 #include <types.h>
 
 #include <liberror.h>
 
-#include "libbde_encryption.h"
-#include "libbde_io_handle.h"
-#include "libbde_libbfio.h"
+#include "libbde_metadata_entry.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libbde_sector_data libbde_sector_data_t;
+typedef struct libbde_key libbde_key_t;
 
-struct libbde_sector_data
+struct libbde_key
 {
-	/* The encrypted data
+	/* The encryption method
 	 */
-	uint8_t *encrypted_data;
+	uint32_t encryption_method;
 
-	/* The data
+	/* The (key) data
 	 */
 	uint8_t *data;
 
-	/* The data size
+	/* The (key) data size
 	 */
 	size_t data_size;
 };
 
-int libbde_sector_data_initialize(
-     libbde_sector_data_t **sector_data,
-     size_t data_size,
+int libbde_key_initialize(
+     libbde_key_t **key,
      liberror_error_t **error );
 
-int libbde_sector_data_free(
-     libbde_sector_data_t *sector_data,
+int libbde_key_free(
+     libbde_key_t **key,
      liberror_error_t **error );
 
-int libbde_sector_data_read(
-     libbde_sector_data_t *sector_data,
-     libbde_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     off64_t sector_offset,
-     libbde_encryption_context_t *encryption_context,
-     uint8_t zero_metadata,
+int libbde_key_read(
+     libbde_key_t *key,
+     libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

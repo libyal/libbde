@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-extern const uint8_t *bde_signature;
+extern const char bde_signature[ 8 ];
 
 typedef struct libbde_io_handle libbde_io_handle_t;
 
@@ -77,6 +77,10 @@ struct libbde_io_handle
 	/* The volume size
 	 */
 	size64_t volume_size;
+
+	/* The encrtypted volume size
+	 */
+	size64_t encrypted_volume_size;
 
 	union
 	{
@@ -144,6 +148,11 @@ int libbde_io_handle_read_sector(
      off64_t element_data_offset,
      size64_t element_data_size,
      uint8_t read_flags,
+     liberror_error_t **error );
+
+int libbde_io_handle_read_unencrypted_volume_header(
+     libbde_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

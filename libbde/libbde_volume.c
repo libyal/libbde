@@ -915,7 +915,7 @@ int libbde_volume_open_read(
 		 "%s: unable to read volume header.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
@@ -938,7 +938,7 @@ int libbde_volume_open_read(
 		 "%s: unable to read primary metadata.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
@@ -961,7 +961,7 @@ int libbde_volume_open_read(
 		 "%s: unable to read secondary metadata.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
@@ -984,7 +984,7 @@ int libbde_volume_open_read(
 		 "%s: unable to read tertiary metadata.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	result = libbde_volume_open_read_keys_from_metadata(
 	          internal_volume,
@@ -1000,7 +1000,7 @@ int libbde_volume_open_read(
 		 "%s: unable to read keys from primary metadata.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( result == 0 )
 	{
@@ -1018,7 +1018,7 @@ int libbde_volume_open_read(
 			 "%s: unable to read keys from secondary metadata.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	if( result == 0 )
@@ -1037,11 +1037,44 @@ int libbde_volume_open_read(
 			 "%s: unable to read keys from tertiary metadata.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	if( result != 0 )
 	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "Reading unencrypted volume header:\n" );
+		}
+#endif
+		if( libbde_io_handle_read_unencrypted_volume_header(
+		     internal_volume->io_handle,
+		     internal_volume->file_io_handle,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read unencrypted volume header.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: volume size\t\t\t\t\t: %" PRIu64 "\n",
+			 function,
+			 internal_volume->io_handle->volume_size );
+
+			libnotify_printf(
+			 "\n" );
+		}
+#endif
 		/* TODO clone function ? */
 		if( libfdata_vector_initialize(
 		     &( internal_volume->sectors_vector ),
@@ -1060,12 +1093,12 @@ int libbde_volume_open_read(
 			 "%s: unable to create sectors vector.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( libfdata_vector_append_segment(
 		     internal_volume->sectors_vector,
 		     0,
-		     internal_volume->size,
+		     internal_volume->io_handle->volume_size,
 		     0,
 		     error ) != 1 )
 		{
@@ -1076,7 +1109,7 @@ int libbde_volume_open_read(
 			 "%s: unable to append segment to sectors vector.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( libfdata_cache_initialize(
 		     &( internal_volume->sectors_cache ),
@@ -1090,10 +1123,25 @@ int libbde_volume_open_read(
 			 "%s: unable to create sectors cache.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	return( result );
+
+on_error:
+	if( internal_volume->sectors_cache != NULL )
+	{
+		libfdata_cache_free(
+		 &( internal_volume->sectors_cache ),
+		 NULL );
+	}
+	if( internal_volume->sectors_vector != NULL )
+	{
+		libfdata_vector_free(
+		 &( internal_volume->sectors_vector ),
+		 NULL );
+	}
+	return( -1 );
 }
 
 /* Reads the keys from the metadata when opening the volume for reading
@@ -1108,12 +1156,12 @@ int libbde_volume_open_read_keys_from_metadata(
 	uint8_t tweak_key[ 32 ];
 	uint8_t volume_master_key[ 32 ];
 
-	static char *function        = "libbde_volume_open_read_keys_from_metadata";
-	off64_t volume_header_offset = 0;
-	size64_t volume_header_size  = 0;
-	size64_t volume_size         = 0;
-	uint32_t encryption_method   = 0;
-	int result                   = 0;
+	static char *function          = "libbde_volume_open_read_keys_from_metadata";
+	off64_t volume_header_offset   = 0;
+	size64_t volume_header_size    = 0;
+	size64_t encrypted_volume_size = 0;
+	uint32_t encryption_method     = 0;
+	int result                     = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1190,10 +1238,10 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		return( -1 );
 	}
-	volume_size          = metadata->volume_size;
-	volume_header_offset = metadata->volume_header_offset;
-	volume_header_size   = metadata->volume_header_size;
-	encryption_method    = metadata->encryption_method;
+	encrypted_volume_size = metadata->encrypted_volume_size;
+	volume_header_offset  = metadata->volume_header_offset;
+	volume_header_size    = metadata->volume_header_size;
+	encryption_method     = metadata->encryption_method;
 
 	result = libbde_metadata_get_volume_master_key(
 	          metadata,
@@ -1235,16 +1283,9 @@ int libbde_volume_open_read_keys_from_metadata(
 	}
 	if( result != 0 )
 	{
-		if( internal_volume->io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
-		{
-			internal_volume->size = internal_volume->io_handle->volume_size;
-		}
-		else
-		{
-			internal_volume->size = volume_size;
-		}
-		internal_volume->io_handle->volume_header_offset = volume_header_offset;
-		internal_volume->io_handle->volume_header_size   = volume_header_size;
+		internal_volume->io_handle->encrypted_volume_size = encrypted_volume_size;
+		internal_volume->io_handle->volume_header_offset  = volume_header_offset;
+		internal_volume->io_handle->volume_header_size    = volume_header_size;
 
 		if( libbde_encryption_initialize(
 		     &( internal_volume->io_handle->encryption_context ),
@@ -1462,13 +1503,13 @@ ssize_t libbde_volume_read_buffer(
 
 		return( -1 );
 	}
-	if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->size )
+	if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->io_handle->volume_size )
 	{
 		return( 0 );
 	}
-	if( (size64_t) ( internal_volume->io_handle->current_offset + buffer_size ) >= internal_volume->size )
+	if( (size64_t) ( internal_volume->io_handle->current_offset + buffer_size ) >= internal_volume->io_handle->volume_size )
 	{
-		buffer_size = (size_t) ( internal_volume->size - internal_volume->io_handle->current_offset );
+		buffer_size = (size_t) ( internal_volume->io_handle->volume_size - internal_volume->io_handle->current_offset );
 	}
 	sector_data_offset = (size_t) ( internal_volume->io_handle->current_offset % internal_volume->io_handle->bytes_per_sector );
 
@@ -1536,7 +1577,7 @@ ssize_t libbde_volume_read_buffer(
 
 		internal_volume->io_handle->current_offset += (off64_t) read_size;
 
-		if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->size )
+		if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->io_handle->volume_size )
 		{
 			break;
 		}
@@ -1715,7 +1756,7 @@ off64_t libbde_volume_seek_offset(
 	}
 	else if( whence == SEEK_END )
 	{	
-		offset += (off64_t) internal_volume->size;
+		offset += (off64_t) internal_volume->io_handle->volume_size;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
@@ -1766,6 +1807,17 @@ int libbde_volume_get_size(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	if( size == NULL )
 	{
 		liberror_error_set(
@@ -1777,7 +1829,7 @@ int libbde_volume_get_size(
 
 		return( -1 );
 	}
-	*size = internal_volume->size;
+	*size = internal_volume->io_handle->volume_size;
 
 	return( 1 );
 }

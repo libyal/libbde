@@ -138,6 +138,9 @@ const char *libbde_debug_print_volume_master_key_type(
 {
 	switch( volume_master_key_type )
 	{
+		case LIBBDE_VMK_TYPE_CLEAR_KEY_PROTECTED:
+			return( "clear key protected" );
+
 		case LIBBDE_VMK_TYPE_TPM_PROTECTED:
 			return( "TPM protected" );
 

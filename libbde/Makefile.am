@@ -29,6 +29,7 @@ libbde_la_SOURCES = \
 	libbde_error_string.c libbde_error_string.h \
 	libbde_extern.h \
 	libbde_io_handle.c libbde_io_handle.h \
+	libbde_key.c libbde_key.h \
 	libbde_libbfio.h \
 	libbde_libfdata.h \
 	libbde_libfdatetime.h \
