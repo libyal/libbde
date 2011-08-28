@@ -156,17 +156,17 @@ AC_CHECK_LIBUNA
 AS_IF(
  [test "x$ac_cv_libuna" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libuna],
+  [libbde_pc_libs_private_libuna],
   [-luna])
  ])
 
 AS_IF(
  [test "x$ac_cv_libuna" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libuna],
+  [libbde_spec_requires_libuna],
   [libuna])
  AC_SUBST(
-  [libewf_spec_build_requires_libuna],
+  [libbde_spec_build_requires_libuna],
   [libuna-devel])
  ])
 
@@ -198,17 +198,17 @@ AC_CHECK_LIBBFIO
 AS_IF(
  [test "x$ac_cv_libbfio" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libbfio],
+  [libbde_pc_libs_private_libbfio],
   [-lbfio])
  ])
 
 AS_IF(
  [test "x$ac_cv_libbfio" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libbfio],
+  [libbde_spec_requires_libbfio],
   [libbfio])
  AC_SUBST(
-  [libewf_spec_build_requires_libbfio],
+  [libbde_spec_build_requires_libbfio],
   [libbfio-devel])
  ])
 
@@ -244,17 +244,17 @@ AC_CHECK_LIBFDATA
 AS_IF(
  [test "x$ac_cv_libfdata" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libfdata],
+  [libbde_pc_libs_private_libfdata],
   [-lfdata])
  ])
 
 AS_IF(
  [test "x$ac_cv_libfdata" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libfdata],
+  [libbde_spec_requires_libfdata],
   [libfdata])
  AC_SUBST(
-  [libewf_spec_build_requires_libfdata],
+  [libbde_spec_build_requires_libfdata],
   [libfdata-devel])
  ])
 
@@ -286,17 +286,17 @@ AC_CHECK_LIBFDATETIME
 AS_IF(
  [test "x$ac_cv_libfdatetime" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libfdatetime],
+  [libbde_pc_libs_private_libfdatetime],
   [-lfdatetime])
  ])
 
 AS_IF(
  [test "x$ac_cv_libfdatetime" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libfdatetime],
+  [libbde_spec_requires_libfdatetime],
   [libfdatetime])
  AC_SUBST(
-  [libewf_spec_build_requires_libfdatetime],
+  [libbde_spec_build_requires_libfdatetime],
   [libfdatetime-devel])
  ])
 
@@ -328,17 +328,17 @@ AC_CHECK_LIBFGUID
 AS_IF(
  [test "x$ac_cv_libfguid" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libfguid],
+  [libbde_pc_libs_private_libfguid],
   [-lfguid])
  ])
 
 AS_IF(
  [test "x$ac_cv_libfguid" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libfguid],
+  [libbde_spec_requires_libfguid],
   [libfguid])
  AC_SUBST(
-  [libewf_spec_build_requires_libfguid],
+  [libbde_spec_build_requires_libfguid],
   [libfguid-devel])
  ])
 
@@ -370,17 +370,17 @@ AC_CHECK_LIBFVALUE
 AS_IF(
  [test "x$ac_cv_libfvalue" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libfvalue],
+  [libbde_pc_libs_private_libfvalue],
   [-lfvalue])
  ])
 
 AS_IF(
  [test "x$ac_cv_libfvalue" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libfvalue],
+  [libbde_spec_requires_libfvalue],
   [libfvalue])
  AC_SUBST(
-  [libewf_spec_build_requires_libfvalue],
+  [libbde_spec_build_requires_libfvalue],
   [libfvalue-devel])
  ])
 
@@ -422,10 +422,10 @@ AC_CHECK_LIBHMAC
 AS_IF(
  [test "x$ac_cv_libhmac" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libhmac],
+  [libbde_spec_requires_libhmac],
   [libhmac])
  AC_SUBST(
-  [libewf_spec_build_requires_libhmac],
+  [libbde_spec_build_requires_libhmac],
   [libhmac-devel])
  ])
 
@@ -485,17 +485,17 @@ AS_IF(
 AS_IF(
  [test "x$ac_cv_libcrypto" = xyes],
  [AC_SUBST(
-  [libewf_pc_libs_private_libcrypto],
+  [libbde_pc_libs_private_libcrypto],
   [-lcrypto])
  ])
 
 AS_IF(
  [test "x$ac_cv_libcrypto" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libcrypto],
+  [libbde_spec_requires_libcrypto],
   [openssl])
  AC_SUBST(
-  [libewf_spec_build_requires_libcrypto],
+  [libbde_spec_build_requires_libcrypto],
   [openssl-devel])
  ])
 
@@ -507,10 +507,10 @@ AC_CHECK_LIBFUSE
 AS_IF(
  [test "x$ac_cv_libfuse" = xyes],
  [AC_SUBST(
-  [libewf_spec_requires_libfuse],
+  [libbde_spec_requires_libfuse],
   [libfuse])
  AC_SUBST(
-  [libewf_spec_build_requires_libfuse],
+  [libbde_spec_build_requires_libfuse],
   [libfuse-devel])
  ])
 
