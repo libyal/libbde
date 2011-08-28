@@ -55,6 +55,9 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 
+20110828
+* updated libbfio
+
 20110826
 * worked on support for partial encrypted volumes
 
