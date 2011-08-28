@@ -42,10 +42,6 @@ typedef struct libbde_internal_volume libbde_internal_volume_t;
 
 struct libbde_internal_volume
 {
-	/* The (volume) size
-	 */
-	size64_t size;
-
 	/* The encryption method
 	 */
 	uint32_t encryption_method;

@@ -43,7 +43,8 @@ const uint8_t bde_boot_entry_point_vista[ 3 ] = { 0xeb, 0x52, 0x90 };
 const uint8_t bde_boot_entry_point_win7[ 3 ]  = { 0xeb, 0x58, 0x90 };
 const uint8_t bde_identifier[ 16 ]            = { 0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
 
-const uint8_t *bde_signature = (uint8_t *) "-FVE-FS-";
+const char bde_signature[ 8 ]                         = "-FVE-FS-";
+const char bde_ntfs_volume_file_system_signature[ 8 ] = "NTFS    ";
 
 /* Initialize an IO handle
  * Make sure the value io_handle is pointing to is set to NULL
@@ -310,7 +311,7 @@ int libbde_io_handle_read_volume_header(
 			io_handle->version = LIBBDE_VERSION_WINDOWS_7;
 		}
 		else if( memory_compare(
-		          ( (bde_volume_header_togo_t *) volume_header_data )->identifier,
+		          ( (bde_volume_header_to_go_t *) volume_header_data )->identifier,
 		          bde_identifier,
 		          16 ) == 0 )
 		{
@@ -361,20 +362,30 @@ int libbde_io_handle_read_volume_header(
 	 ( (bde_volume_header_windows_vista_t *) volume_header_data )->bytes_per_sector,
 	 io_handle->bytes_per_sector );
 
-	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
-	 || ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 ) )
+	io_handle->sectors_per_cluster_block = ( (bde_volume_header_windows_vista_t *) volume_header_data )->sectors_per_cluster_block;
+
+	byte_stream_copy_to_uint16_little_endian(
+	 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_16bit,
+	 total_number_of_sectors );
+
+	if( total_number_of_sectors == 0 )
 	{
-		io_handle->sectors_per_cluster_block = ( (bde_volume_header_windows_vista_t *) volume_header_data )->sectors_per_cluster_block;
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_32bit,
+		 total_number_of_sectors );
 	}
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors,
-		 total_number_of_sectors );
-
-		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->first_metadata_cluster_block_number,
 		 io_handle->first_metadata_offset );
+
+		if( total_number_of_sectors == 0 )
+		{
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_64bit,
+			 total_number_of_sectors );
+		}
 	}
 	else if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 	{
@@ -393,15 +404,15 @@ int libbde_io_handle_read_volume_header(
 	else if( io_handle->version == LIBBDE_VERSION_TO_GO )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_togo_t *) volume_header_data )->first_metadata_offset,
+		 ( (bde_volume_header_to_go_t *) volume_header_data )->first_metadata_offset,
 		 io_handle->first_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_togo_t *) volume_header_data )->second_metadata_offset,
+		 ( (bde_volume_header_to_go_t *) volume_header_data )->second_metadata_offset,
 		 io_handle->second_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_volume_header_togo_t *) volume_header_data )->third_metadata_offset,
+		 ( (bde_volume_header_to_go_t *) volume_header_data )->third_metadata_offset,
 		 io_handle->third_metadata_offset );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -431,69 +442,73 @@ int libbde_io_handle_read_volume_header(
 		 function,
 		 io_handle->bytes_per_sector );
 
-		if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
-		 || ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 ) )
-		{
-			libnotify_printf(
-			 "%s: sectors per cluster block\t\t: %" PRIu8 "\n",
-			 function,
-			 io_handle->sectors_per_cluster_block );
-		}
+		libnotify_printf(
+		 "%s: sectors per cluster block\t\t: %" PRIu8 "\n",
+		 function,
+		 io_handle->sectors_per_cluster_block );
+
+		libnotify_printf(
+		 "%s: unknown1\n",
+		 function );
+		libnotify_print_data(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown1,
+		 5 );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_16bit,
+		 value_16bit );
+		libnotify_printf(
+		 "%s: total number of sectors (16-bit)\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		libnotify_printf(
+		 "%s: media descriptor\t\t\t: 0x%02" PRIx8 "\n",
+		 function,
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->media_descriptor );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown2,
+		 value_16bit );
+		libnotify_printf(
+		 "%s: unknown2\t\t\t\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->sectors_per_track,
+		 value_16bit );
+		libnotify_printf(
+		 "%s: sectors per track\t\t\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->number_of_heads,
+		 value_16bit );
+		libnotify_printf(
+		 "%s: number of heads\t\t\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->number_of_hidden_sectors,
+		 value_32bit );
+		libnotify_printf(
+		 "%s: number of hidden sectors\t\t: %" PRIu32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_32bit,
+		 value_32bit );
+		libnotify_printf(
+		 "%s: total number of sectors (32-bit)\t: %" PRIu32 "\n",
+		 function,
+		 value_32bit );
+
 		if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 		{
-			libnotify_printf(
-			 "%s: unknown1\n",
-			 function );
-			libnotify_print_data(
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown1,
-			 7 );
-
-			libnotify_printf(
-			 "%s: media descriptor\t\t\t: 0x%02" PRIx8 "\n",
-			 function,
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->media_descriptor );
-
-			byte_stream_copy_to_uint16_little_endian(
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown2,
-			 value_16bit );
-			libnotify_printf(
-			 "%s: unknown2\t\t\t\t: %" PRIu16 "\n",
-			 function,
-			 value_16bit );
-
-			byte_stream_copy_to_uint16_little_endian(
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->sectors_per_track,
-			 value_16bit );
-			libnotify_printf(
-			 "%s: sectors per track\t\t\t: %" PRIu16 "\n",
-			 function,
-			 value_16bit );
-
-			byte_stream_copy_to_uint16_little_endian(
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->number_of_heads,
-			 value_16bit );
-			libnotify_printf(
-			 "%s: number of heads\t\t\t: %" PRIu16 "\n",
-			 function,
-			 value_16bit );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->number_of_hidden_sectors,
-			 value_32bit );
-			libnotify_printf(
-			 "%s: number of hidden sectors\t\t: %" PRIu32 "\n",
-			 function,
-			 value_32bit );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown3,
-			 value_32bit );
-			libnotify_printf(
-			 "%s: unknown3\t\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
-			 function,
-			 value_32bit,
-			 value_32bit );
-
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown4,
 			 value_32bit );
@@ -503,10 +518,13 @@ int libbde_io_handle_read_volume_header(
 			 value_32bit,
 			 value_32bit );
 
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_64bit,
+			 value_64bit );
 			libnotify_printf(
-			 "%s: total number of sectors\t\t: %" PRIu64 "\n",
+			 "%s: total number of sectors (64-bit)\t: %" PRIu64 "\n",
 			 function,
-			 total_number_of_sectors );
+			 value_64bit );
 
 			byte_stream_copy_to_uint64_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->mft_cluster_block_number,
@@ -520,15 +538,99 @@ int libbde_io_handle_read_volume_header(
 			 "%s: first metadata cluster block\t: 0x%08" PRIx64 "\n",
 			 function,
 			 io_handle->first_metadata_offset );
-		}
-		else if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
-		{
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->mft_entry_size,
+			 value_32bit );
 			libnotify_printf(
-			 "%s: unknown1:\n",
+			 "%s: MFT entry size\t\t\t: %" PRIu32 "\n",
+			 function,
+			 value_32bit );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->index_entry_size,
+			 value_32bit );
+			libnotify_printf(
+			 "%s: index entry size\t\t: %" PRIu32 "\n",
+			 function,
+			 value_32bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->volume_serial_number,
+			 value_64bit );
+			libnotify_printf(
+			 "%s: volume serial number\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 value_64bit );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->checksum,
+			 value_32bit );
+			libnotify_printf(
+			 "%s: checksum\t\t\t: 0x%08" PRIx32 "\n",
+			 function,
+			 value_32bit );
+
+			libnotify_printf(
+			 "%s: bootcode\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown1,
-			 146 );
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->bootcode,
+			 426 );
+		}
+		else if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+		      || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
+		{
+			libnotify_printf(
+			 "%s: unknown4:\n",
+			 function );
+			libnotify_print_data(
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown4,
+			 31 );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_serial_number,
+			 value_64bit );
+			libnotify_printf(
+			 "%s: volume serial number\t\t: 0x%08" PRIx32 "\n",
+			 function,
+			 value_32bit );
+
+			libnotify_printf(
+			 "%s: volume label\t\t\t: %c%c%c%c%c%c%c%c%c%c%c\n",
+			 function,
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 0 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 1 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 2 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 3 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 4 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 5 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 6 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 7 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 8 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 9 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 10 ] );
+
+			libnotify_printf(
+			 "%s: file system signature\t\t: %c%c%c%c%c%c%c%c\n",
+			 function,
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 0 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 1 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 2 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 3 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 4 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 5 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 6 ],
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 7 ] );
+		}
+		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+		{
+			libnotify_printf(
+			 "%s: bootcode\n",
+			 function );
+			libnotify_print_data(
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->bootcode,
+			 47 );
 
 			if( libfguid_identifier_initialize(
 			     &guid,
@@ -605,11 +707,11 @@ int libbde_io_handle_read_volume_header(
 		else if( io_handle->version == LIBBDE_VERSION_TO_GO )
 		{
 			libnotify_printf(
-			 "%s: unknown1:\n",
+			 "%s: bootcode\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_volume_header_togo_t *) volume_header_data )->unknown1,
-			 411 );
+			 ( (bde_volume_header_to_go_t *) volume_header_data )->bootcode,
+			 335 );
 
 			if( libfguid_identifier_initialize(
 			     &guid,
@@ -626,7 +728,7 @@ int libbde_io_handle_read_volume_header(
 			}
 			if( libfguid_identifier_copy_from_byte_stream(
 			     guid,
-			     ( (bde_volume_header_togo_t *) volume_header_data )->identifier,
+			     ( (bde_volume_header_to_go_t *) volume_header_data )->identifier,
 			     16,
 			     LIBFGUID_ENDIAN_LITTLE,
 			     error ) != 1 )
@@ -701,17 +803,45 @@ int libbde_io_handle_read_volume_header(
 			 function,
 			 io_handle->third_metadata_offset );
 		}
+		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+		{
+			libnotify_printf(
+			 "%s: unknown5:\n",
+			 function );
+			libnotify_print_data(
+			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown5,
+			 310 );
+		}
+		else if( io_handle->version == LIBBDE_VERSION_TO_GO )
+		{
+			libnotify_printf(
+			 "%s: unknown5:\n",
+			 function );
+			libnotify_print_data(
+			 ( (bde_volume_header_to_go_t *) volume_header_data )->unknown5,
+			 46 );
+		}
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->sector_signature,
+		 value_16bit );
+		libnotify_printf(
+		 "%s: sector signature\t\t\t: 0x%04" PRIx16 "\n",
+		 function,
+		 value_16bit );
+
 		libnotify_printf(
 		 "\n" );
 	}
 #endif
+	if( total_number_of_sectors != 0 )
+	{
+		io_handle->volume_size  = total_number_of_sectors + 1;
+		io_handle->volume_size *= io_handle->bytes_per_sector;
+	}
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
 		io_handle->first_metadata_offset *= io_handle->sectors_per_cluster_block;
 		io_handle->first_metadata_offset *= io_handle->bytes_per_sector;
-
-		io_handle->volume_size  = total_number_of_sectors;
-		io_handle->volume_size *= io_handle->bytes_per_sector;
 
 		io_handle->metadata_size = 16384;
 	}
@@ -797,6 +927,7 @@ int libbde_io_handle_read_sector(
 	     file_io_handle,
 	     element_data_offset,
 	     ( (libbde_io_handle_t *) io_handle )->encryption_context,
+	     1,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -826,6 +957,156 @@ int libbde_io_handle_read_sector(
 
 		return( -1 );
 	}
+	return( 1 );
+
+on_error:
+	if( sector_data != NULL )
+	{
+		libbde_sector_data_free(
+		 sector_data,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Reads the unencrypted volume header
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_io_handle_read_unencrypted_volume_header(
+     libbde_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     liberror_error_t **error )
+{
+	libbde_sector_data_t *sector_data = NULL;
+	uint8_t *volume_header_data       = NULL;
+	static char *function             = "libbde_io_handle_read_unencrypted_volume_header";
+	off64_t volume_header_offset      = 0;
+	uint64_t total_number_of_sectors  = 0;
+
+	if( io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+	 || ( io_handle->version == LIBBDE_VERSION_WINDOWS_TO_GO ) )
+	{
+		volume_header_offset = io_handle->volume_header_offset;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "%s: reading unencrypted volume header at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
+		 function,
+		 file_offset,
+		 file_offset );
+	}
+#endif
+	if( libbde_sector_data_initialize(
+	     &sector_data,
+	     io_handle->bytes_per_sector,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create sector data.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_sector_data_read(
+	     sector_data,
+	     io_handle,
+	     file_io_handle,
+	     file_offset,
+	     io_handle->encryption_context,
+	     0,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read volume header sector data.",
+		 function );
+
+		goto on_error;
+	}
+	volume_header_data = sector_data->data;
+
+	if( io_handle->volume_size == 0 )
+	{
+		if( memory_compare(
+		     &( volume_header_data[ 3 ] ),
+		     bde_ntfs_volume_file_system_signature,
+		     8 ) == 0 )
+		{
+			byte_stream_copy_to_uint16_little_endian(
+			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_16bit,
+			 total_number_of_sectors );
+
+			if( total_number_of_sectors == 0 )
+			{
+				byte_stream_copy_to_uint32_little_endian(
+				 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_32bit,
+				 total_number_of_sectors );
+			}
+			if( total_number_of_sectors == 0 )
+			{
+				byte_stream_copy_to_uint64_little_endian(
+				 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_64bit,
+				 total_number_of_sectors );
+			}
+			if( total_number_of_sectors == 0 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing total number of sectors.",
+				 function );
+
+				goto on_error;
+			}
+			io_handle->volume_size  = total_number_of_sectors + 1;
+			io_handle->volume_size *= io_handle->bytes_per_sector;
+		}
+		else
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: unsupported volume signature.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libbde_sector_data_free(
+	     sector_data,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free sector data.",
+		 function );
+
+		goto on_error;
+	}
+	sector_data = NULL;
+
 	return( 1 );
 
 on_error:

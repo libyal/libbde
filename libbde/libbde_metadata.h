@@ -48,9 +48,9 @@ struct libbde_metadata
 	 */
 	uint32_t encryption_method;
 
-	/* The volume size
+	/* The encrypted volume size
 	 */
-	size64_t volume_size;
+	size64_t encrypted_volume_size;
 
 	union
 	{
@@ -78,6 +78,10 @@ struct libbde_metadata
 	/* The creation date and time
 	 */
 	uint64_t creation_time;
+
+	/* The clear key protected volume master key
+	 */
+	libbde_volume_master_key_t *clear_key_volume_master_key;
 
 	/* The disk password protected volume master key
 	 */

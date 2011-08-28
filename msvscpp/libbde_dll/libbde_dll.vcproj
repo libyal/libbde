@@ -208,6 +208,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_key.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_metadata.c"
 				>
 			</File>
@@ -307,6 +311,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_io_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_key.h"
 				>
 			</File>
 			<File

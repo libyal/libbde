@@ -13,12 +13,12 @@ AC_DEFUN([AC_CHECK_LIBFUSE],
    ])
   ])
 
+ dnl Check for headers
  AS_IF(
   [test x"$ac_cv_with_libfuse" != xno],
-  [dnl Check for headers
-  AC_CHECK_HEADERS([fuse.h])
-  ])
+  [AC_CHECK_HEADERS([fuse.h]) ])
 
+ dnl libfuse sometimes requires -D_FILE_OFFSET_BITS=64 to be set
  AS_IF(
   [test "x$ac_cv_header_fuse_h" = xno],
   [AS_UNSET([ac_cv_header_fuse_h])

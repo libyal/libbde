@@ -1,5 +1,5 @@
 /*
- * Stretch Key metadata entry functions
+ * Key metadata entry functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -29,58 +29,58 @@
 
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
+#include "libbde_key.h"
 #include "libbde_metadata_entry.h"
-#include "libbde_stretch_key.h"
 
 #include "bde_metadata.h"
 
-/* Initialize a stretch key
- * Make sure the value stretch key is pointing to is set to NULL
+/* Initialize a key
+ * Make sure the value key is pointing to is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libbde_stretch_key_initialize(
-     libbde_stretch_key_t **stretch_key,
+int libbde_key_initialize(
+     libbde_key_t **key,
      liberror_error_t **error )
 {
-	static char *function = "libbde_stretch_key_initialize";
+	static char *function = "libbde_key_initialize";
 
-	if( stretch_key == NULL )
+	if( key == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid stretch key.",
+		 "%s: invalid key.",
 		 function );
 
 		return( -1 );
 	}
-	if( *stretch_key == NULL )
+	if( *key == NULL )
 	{
-		*stretch_key = memory_allocate_structure(
-		                libbde_stretch_key_t );
+		*key = memory_allocate_structure(
+		        libbde_key_t );
 
-		if( *stretch_key == NULL )
+		if( *key == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create stretch key.",
+			 "%s: unable to create key.",
 			 function );
 
 			goto on_error;
 		}
 		if( memory_set(
-		     *stretch_key,
+		     *key,
 		     0,
-		     sizeof( libbde_stretch_key_t ) ) == NULL )
+		     sizeof( libbde_key_t ) ) == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear stretch key.",
+			 "%s: unable to clear key.",
 			 function );
 
 			goto on_error;
@@ -89,70 +89,70 @@ int libbde_stretch_key_initialize(
 	return( 1 );
 
 on_error:
-	if( *stretch_key != NULL )
+	if( *key != NULL )
 	{
 		memory_free(
-		 *stretch_key );
+		 *key );
 
-		*stretch_key = NULL;
+		*key = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees a stretch key
+/* Frees a key
  * Returns 1 if successful or -1 on error
  */
-int libbde_stretch_key_free(
-     libbde_stretch_key_t **stretch_key,
+int libbde_key_free(
+     libbde_key_t **key,
      liberror_error_t **error )
 {
-	static char *function = "libbde_stretch_key_free";
+	static char *function = "libbde_key_free";
 
-	if( stretch_key == NULL )
+	if( key == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid stretch key.",
+		 "%s: invalid key.",
 		 function );
 
 		return( -1 );
 	}
-	if( *stretch_key != NULL )
+	if( *key != NULL )
 	{
-		if( ( *stretch_key )->data != NULL )
+		if( ( *key )->data != NULL )
 		{
 			memory_free(
-			 ( *stretch_key )->data );
+			 ( *key )->data );
 		}
 		memory_free(
-		 *stretch_key );
+		 *key );
 
-		*stretch_key = NULL;
+		*key = NULL;
 	}
 	return( 1 );
 }
 
-/* Reads a stretch key from the metadata entry
+/* Reads a key from the metadata entry
  * Returns 1 if successful or -1 on error
  */
-int libbde_stretch_key_read(
-     libbde_stretch_key_t *stretch_key,
+int libbde_key_read(
+     libbde_key_t *key,
      libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error )
 {
 	uint8_t *value_data    = NULL;
-	static char *function  = "libbde_stretch_key_read";
+	static char *function  = "libbde_key_read";
 	size_t value_data_size = 0;
 
-	if( stretch_key == NULL )
+	if( key == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid stretch key.",
+		 "%s: invalid key.",
 		 function );
 
 		return( -1 );
@@ -179,7 +179,7 @@ int libbde_stretch_key_read(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_STRETCH_KEY )
+	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_KEY )
 	{
 		liberror_error_set(
 		 error,
@@ -194,7 +194,7 @@ int libbde_stretch_key_read(
 	value_data      = metadata_entry->value_data;
 	value_data_size = metadata_entry->value_data_size;
 
-	if( value_data_size < sizeof( bde_metadata_entry_stretch_key_header_t ) )
+	if( value_data_size < sizeof( bde_metadata_entry_key_header_t ) )
 	{
 		liberror_error_set(
 		 error,
@@ -206,57 +206,39 @@ int libbde_stretch_key_read(
 		return( -1 );
 	}
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_entry_stretch_key_header_t *) value_data )->encryption_method,
-	 stretch_key->encryption_method );
+	 ( (bde_metadata_entry_key_header_t *) value_data )->encryption_method,
+	 key->encryption_method );
 
-	if( memory_copy(
-	     stretch_key->salt,
-	     ( (bde_metadata_entry_stretch_key_header_t *) value_data )->salt,
-	     16 ) == NULL )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy salt to stretch key.",
-		 function );
-
-		goto on_error;
-	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "%s: encryption method\t\t\t\t: %" PRIu32 "\n",
+		 "%s: encryption method\t\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
 		 function,
-		 stretch_key->encryption_method );
-
-		libnotify_printf(
-		 "%s: salt:\n",
-		 function );
-		libnotify_print_data(
-		 ( (bde_metadata_entry_stretch_key_header_t *) value_data )->salt,
-		 16 );
+		 key->encryption_method,
+		 libbde_debug_print_encryption_method(
+		  key->encryption_method ) );
 	}
 #endif
-	value_data      += sizeof( bde_metadata_entry_stretch_key_header_t );
-	value_data_size -= sizeof( bde_metadata_entry_stretch_key_header_t );
+	value_data      += sizeof( bde_metadata_entry_key_header_t );
+	value_data_size -= sizeof( bde_metadata_entry_key_header_t );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "%s: encrypted data:\n",
+		 "%s: key data:\n",
 		 function );
 		libnotify_print_data(
 		 value_data,
 		 value_data_size );
 	}
 #endif
-	stretch_key->data = (uint8_t *) memory_allocate(
-	                                 sizeof( uint8_t ) * value_data_size );
 
-	if( stretch_key->data == NULL )
+	key->data = (uint8_t *) memory_allocate(
+	                         sizeof( uint8_t ) * value_data_size );
+
+	if( key->data == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -268,7 +250,7 @@ int libbde_stretch_key_read(
 		goto on_error;
 	}
 	if( memory_copy(
-	     stretch_key->data,
+	     key->data,
 	     value_data,
 	     value_data_size ) == NULL )
 	{
@@ -276,22 +258,22 @@ int libbde_stretch_key_read(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
 		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy data to stretch key.",
+		 "%s: unable to copy data to key.",
 		 function );
 
 		goto on_error;
 	}
-	stretch_key->data_size = value_data_size;
+	key->data_size = value_data_size;
 	
 	return( 1 );
 
 on_error:
-	if( stretch_key->data != NULL )
+	if( key->data != NULL )
 	{
 		memory_free(
-		 stretch_key->data );
+		 key->data );
 
-		stretch_key->data = NULL;
+		key->data = NULL;
 	}
 	return( -1 );
 }

@@ -115,10 +115,10 @@ struct bde_metadata_block_header_v2
 	 */
 	uint8_t unknown2[ 2 ];
 
-	/* The volume size
+	/* The encrypted volume size
 	 * Consists of 8 bytes
 	 */
-	uint8_t volume_size[ 8 ];
+	uint8_t encrypted_volume_size[ 8 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
@@ -223,9 +223,34 @@ struct bde_metadata_entry_v1
 
 };
 
-typedef struct bde_metadata_entry_aes_ccm_encrypted_data bde_metadata_entry_aes_ccm_encrypted_data_t;
+typedef struct bde_metadata_entry_key_header bde_metadata_entry_key_header_t;
 
-struct bde_metadata_entry_aes_ccm_encrypted_data
+struct bde_metadata_entry_key_header
+{
+	/* The encryption method
+	 * Consists of 4 bytes
+	 */
+	uint8_t encryption_method[ 4 ];
+};
+
+typedef struct bde_metadata_entry_stretch_key_header bde_metadata_entry_stretch_key_header_t;
+
+struct bde_metadata_entry_stretch_key_header
+{
+	/* The encryption method
+	 * Consists of 4 bytes
+	 */
+	uint8_t encryption_method[ 4 ];
+
+	/* The salt
+	 * Consists of 16 bytes
+	 */
+	uint8_t salt[ 16 ];
+};
+
+typedef struct bde_metadata_entry_aes_ccm_encrypted_key_header bde_metadata_entry_aes_ccm_encrypted_key_header_t;
+
+struct bde_metadata_entry_aes_ccm_encrypted_key_header
 {
 	/* The nonce date and time
 	 * Consists of 8 bytes

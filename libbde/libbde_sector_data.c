@@ -210,6 +210,7 @@ int libbde_sector_data_read(
      libbfio_handle_t *file_io_handle,
      off64_t sector_data_offset,
      libbde_encryption_context_t *encryption_context,
+     uint8_t zero_metadata,
      liberror_error_t **error )
 {
 	static char *function = "libbde_sector_data_read";
@@ -269,36 +270,16 @@ int libbde_sector_data_read(
 		 sector_data_offset );
 	}
 #endif
-	/* The BitLocker metadata areas are represented as zero byte blocks
-	 */
-	if( ( ( sector_data_offset >= io_handle->first_metadata_offset )
-	  &&  ( sector_data_offset < ( io_handle->first_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
-	 || ( ( sector_data_offset >= io_handle->second_metadata_offset )
-	  &&  ( sector_data_offset < ( io_handle->second_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
-	 || ( ( sector_data_offset >= io_handle->third_metadata_offset )
-	  &&  ( sector_data_offset < ( io_handle->third_metadata_offset + (off64_t) io_handle->metadata_size ) ) ) )
+	if( zero_metadata != 0 )
 	{
-		if( memory_set(
-		     sector_data->data,
-		     0,
-		     sector_data->data_size ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear data.",
-			 function );
-
-			return( -1 );
-		}
-		return( 1 );
-	}
-	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
-	 || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
-	{
-		if( ( sector_data_offset >= io_handle->volume_header_offset )
-		 && ( sector_data_offset < ( io_handle->volume_header_offset + (off64_t) io_handle->volume_header_size ) ) )
+		/* The BitLocker metadata areas are represented as zero byte blocks
+		 */
+		if( ( ( sector_data_offset >= io_handle->first_metadata_offset )
+		  &&  ( sector_data_offset < ( io_handle->first_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
+		 || ( ( sector_data_offset >= io_handle->second_metadata_offset )
+		  &&  ( sector_data_offset < ( io_handle->second_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
+		 || ( ( sector_data_offset >= io_handle->third_metadata_offset )
+		  &&  ( sector_data_offset < ( io_handle->third_metadata_offset + (off64_t) io_handle->metadata_size ) ) ) )
 		{
 			if( memory_set(
 			     sector_data->data,
@@ -315,6 +296,32 @@ int libbde_sector_data_read(
 				return( -1 );
 			}
 			return( 1 );
+		}
+	}
+	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
+	 || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
+	{
+		if( zero_metadata != 0 )
+		{
+			if( ( sector_data_offset >= io_handle->volume_header_offset )
+			 && ( sector_data_offset < ( io_handle->volume_header_offset + (off64_t) io_handle->volume_header_size ) ) )
+			{
+				if( memory_set(
+				     sector_data->data,
+				     0,
+				     sector_data->data_size ) == NULL )
+				{
+					liberror_error_set(
+					 error,
+					 LIBERROR_ERROR_DOMAIN_MEMORY,
+					 LIBERROR_MEMORY_ERROR_SET_FAILED,
+					 "%s: unable to clear data.",
+					 function );
+
+					return( -1 );
+				}
+				return( 1 );
+			}
 		}
 		/* Normally the first 8192 bytes are stored in another location on the volume
 		 */
@@ -423,6 +430,26 @@ int libbde_sector_data_read(
 			byte_stream_copy_from_uint64_little_endian(
 			 &( sector_data->data[ 56 ] ),
 			 io_handle->mft_mirror_cluster_block_number );
+		}
+	}
+	/* Check if the offset is outside the encrypted part of the volume
+	 */
+	else if( ( io_handle->encrypted_volume_size != 0 )
+	      && ( sector_data_offset >= io_handle->encrypted_volume_size ) )
+	{
+		if( memory_copy(
+		     sector_data->data,
+		     sector_data->encrypted_data,
+		     sector_data->data_size ) == NULL )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_MEMORY,
+			 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy encrypted data.",
+			 function );
+
+			return( -1 );
 		}
 	}
 	else
