@@ -28,6 +28,7 @@
 #include <liberror.h>
 
 #include "libbde_array_type.h"
+#include "libbde_external_key.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_volume_master_key.h"
@@ -78,6 +79,10 @@ struct libbde_metadata
 	/* The creation date and time
 	 */
 	uint64_t creation_time;
+
+	/* The startup key external key
+	 */
+	libbde_external_key_t *startup_key_external_key;
 
 	/* The clear key protected volume master key
 	 */

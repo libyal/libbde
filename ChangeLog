@@ -1,6 +1,5 @@
 TODO
-* add external key structure
-* size of a Windows 7 volume
+* add support of start up key protected VMK
 * check metadata number_of_volume_header_sectors ?
 * the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
   - make sure to handle them correctly (partial)
@@ -53,6 +52,7 @@ Validate test cases:
 
 20110829
 * worked on support for startup key
+* updated configure
 
 20110828
 * updated libbfio
