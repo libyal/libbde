@@ -73,6 +73,9 @@ const char *libbde_debug_print_entry_type(
 		case LIBBDE_ENTRY_TYPE_VALIDATION:
 			return( "Validation" );
 
+		case LIBBDE_ENTRY_TYPE_STARTUP_KEY:
+			return( "Startup key" );
+
 		case LIBBDE_ENTRY_TYPE_DESCRIPTION:
 			return( "Description" );
 
@@ -131,24 +134,27 @@ const char *libbde_debug_print_value_type(
 	return( "_UNKNOWN_" );
 }
 
-/* Prints the volume master key type
+/* Prints the key protection type
  */
-const char *libbde_debug_print_volume_master_key_type(
-             uint32_t volume_master_key_type )
+const char *libbde_debug_print_key_protection_type(
+             uint32_t key_protection_type )
 {
-	switch( volume_master_key_type )
+	switch( key_protection_type )
 	{
-		case LIBBDE_VMK_TYPE_CLEAR_KEY_PROTECTED:
+		case LIBBDE_KEY_PROTECTION_TYPE_CLEAR_KEY:
 			return( "clear key protected" );
 
-		case LIBBDE_VMK_TYPE_TPM_PROTECTED:
+		case LIBBDE_KEY_PROTECTION_TYPE_TPM:
 			return( "TPM protected" );
 
-		case LIBBDE_VMK_TYPE_RECOVERY_KEY_PROTECTED:
-			return( "recovery key protected" );
+		case LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY:
+			return( "startup key protected" );
 
-		case LIBBDE_VMK_TYPE_EXTERNAL_KEY_PROTECTED:
-			return( "external key protected" );
+		case LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD:
+			return( "recovery password protected" );
+
+		case LIBBDE_KEY_PROTECTION_TYPE_PASSWORD:
+			return( "password protected" );
 	}
 	return( "_UNKNOWN_" );
 }

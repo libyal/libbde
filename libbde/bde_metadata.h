@@ -274,16 +274,33 @@ struct bde_metadata_entry_volume_master_key_header
 	 */
 	uint8_t identifier[ 16 ];
 
-	/* The unknown date and time
+	/* The (last) modification date and time
 	 * Consists of 8 bytes
 	 * Contains a filetime
 	 */
-	uint8_t unknown_time[ 8 ];
+	uint8_t modification_time[ 8 ];
 
-	/* Type
+	/* The protection type
 	 * Consists of 4 bytes
 	 */
-	uint8_t type[ 4 ];
+	uint8_t protection_type[ 4 ];
+};
+
+typedef struct bde_metadata_entry_external_key_header bde_metadata_entry_external_key_header_t;
+
+struct bde_metadata_entry_external_key_header
+{
+	/* The identfier
+	 * Consists of 16 bytes
+	 * Contains a GUID
+	 */
+	uint8_t identifier[ 16 ];
+
+	/* The (last) modification date and time
+	 * Consists of 8 bytes
+	 * Contains a filetime
+	 */
+	uint8_t modification_time[ 8 ];
 };
 
 #if defined( __cplusplus )

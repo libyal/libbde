@@ -1,4 +1,4 @@
-.Dd August 21, 2011
+.Dd August 29, 2011
 .Dt bdeinfo
 .Os libbde
 .Sh NAME
@@ -8,6 +8,7 @@
 .Nm bdeinfo
 .Op Fl p Ar password
 .Op Fl r Ar password
+.Op Fl s Ar filename
 .Op Fl hvV
 .Va Ar source
 .Sh DESCRIPTION
@@ -32,6 +33,9 @@ shows this help
 specify the password
 .It Fl r Ar password
 specify the recovery password
+.It Fl s Ar filename
+specify the file containing the startup key.
+typically this file has the extension .BEK
 .It Fl v
 verbose output to stderr
 .It Fl V

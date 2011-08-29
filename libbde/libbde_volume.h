@@ -58,6 +58,10 @@ struct libbde_internal_volume
 	 */
 	libbde_metadata_t *tertiary_metadata;
 
+	/* The metadata stored in a startup key file
+	 */
+	libbde_metadata_t *external_key_metadata;
+
 	/* The sectors vector
 	 */
 	libfdata_vector_t *sectors_vector;
@@ -208,6 +212,26 @@ int libbde_volume_set_utf16_recovery_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     liberror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_read_startup_key(
+     libbde_volume_t *volume,
+     const char *filename,
+     liberror_error_t **error );
+
+#if defined( HAVE_WIDE_CHARACTER_TYPE )
+LIBBDE_EXTERN \
+int libbde_volume_read_startup_key_wide(
+     libbde_volume_t *volume,
+     const wchar_t *filename,
+     liberror_error_t **error );
+#endif
+
+LIBBDE_EXTERN \
+int libbde_volume_read_startup_key_file_io_handle(
+     libbde_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

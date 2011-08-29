@@ -227,9 +227,11 @@ int libbde_stretch_key_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "%s: encryption method\t\t\t\t: %" PRIu32 "\n",
+		 "%s: encryption method\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
 		 function,
-		 stretch_key->encryption_method );
+		 stretch_key->encryption_method,
+		 libbde_debug_print_encryption_method(
+		  stretch_key->encryption_method ) );
 
 		libnotify_printf(
 		 "%s: salt:\n",

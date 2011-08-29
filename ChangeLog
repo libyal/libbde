@@ -1,4 +1,5 @@
 TODO
+* add external key structure
 * size of a Windows 7 volume
 * check metadata number_of_volume_header_sectors ?
 * the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
@@ -7,8 +8,6 @@ TODO
   - add support for MS Crypto API implementation - add GetError
   - WinXP no AES support ?
 * add password support (partial)
-* add clear key support
-* add start up key support
 * debug print more volume header info
 
 Optimizations
@@ -16,9 +15,8 @@ Optimizations
   or pass values 32bit
 
 Library
-* add external (start up) key support
-* "clear key" - unprotected VMK - support
-* use metadata volume size instead of end offset check ?
+* add external (startup) key support
+* add password support
 
 Release:
 * check debug output aligment
@@ -42,9 +40,6 @@ Format:
 
 Test images:
 * for Windows Vista, Windows 7, To Go
-* start up key
-* external key
-* password
 
 Validate test cases:
 * AES 128
@@ -54,6 +49,10 @@ Validate test cases:
 * recovery key
 * clear key
 * partial encrypted volume
+* startup key
+
+20110829
+* worked on support for startup key
 
 20110828
 * updated libbfio

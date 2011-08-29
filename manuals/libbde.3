@@ -1,4 +1,4 @@
-.Dd August 21, 2011
+.Dd August 29, 2011
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -27,7 +27,7 @@ Available when compiled with wide character string support:
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libbde_check_file_signature_file_io_handle "libbfio_handle_t *bfio_handle, libbde_error_t **error"
+.Fn libbde_check_file_signature_file_io_handle "libbfio_handle_t *file_io_handle, libbde_error_t **error"
 .Pp
 Notify functions
 .Ft void
@@ -80,14 +80,20 @@ Volume functions
 .Fn libbde_volume_set_utf8_recovery_password "libbde_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_set_utf16_recovery_password "libbde_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_read_starup_key"libbde_volume_t *volume, const char *filename, libbde_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
 .Fn libbde_volume_open_wide "libbde_volume_t *volume, const wchar_t *filename, int flags, libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_read_starup_key_wide "libbde_volume_t *volume, const wchar_t *filename, libbde_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libbde_volume_open_volume_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, int flags, libbde_error_t **error"
+.Fn libbde_volume_open_file_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, int flags, libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_read_starup_key_file_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, libbde_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libbde_get_version

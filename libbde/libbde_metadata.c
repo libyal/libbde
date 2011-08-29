@@ -33,6 +33,7 @@
 #include "libbde_array_type.h"
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
+#include "libbde_external_key.h"
 #include "libbde_io_handle.h"
 #include "libbde_key.h"
 #include "libbde_libbfio.h"
@@ -169,33 +170,49 @@ int libbde_metadata_free(
 				result = -1;
 			}
 		}
-		if( ( *metadata )->disk_password_volume_master_key != NULL )
+		if( ( *metadata )->startup_key_volume_master_key != NULL )
 		{
 			if( libbde_volume_master_key_free(
-			     &( ( *metadata )->disk_password_volume_master_key ),
+			     &( ( *metadata )->startup_key_volume_master_key ),
 			     error ) != 1 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free disk password volume master key.",
+				 "%s: unable to free startup key volume master key.",
 				 function );
 
 				result = -1;
 			}
 		}
-		if( ( *metadata )->external_key_volume_master_key != NULL )
+		if( ( *metadata )->recovery_password_volume_master_key != NULL )
 		{
 			if( libbde_volume_master_key_free(
-			     &( ( *metadata )->external_key_volume_master_key ),
+			     &( ( *metadata )->recovery_password_volume_master_key ),
 			     error ) != 1 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free external key volume master key.",
+				 "%s: unable to free recovery password volume master key.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( ( *metadata )->password_volume_master_key != NULL )
+		{
+			if( libbde_volume_master_key_free(
+			     &( ( *metadata )->password_volume_master_key ),
+			     error ) != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free password volume master key.",
 				 function );
 
 				result = -1;
@@ -239,45 +256,32 @@ int libbde_metadata_free(
 	return( result );
 }
 
-/* Reads the metadata
+/* Reads a metadata block at the specified offset
  * Returns 1 if successful or -1 on error
  */
-int libbde_metadata_read(
+int libbde_metadata_read_block(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     const uint8_t *startup_key_identifier,
+     size_t startup_key_identifier_size,
      liberror_error_t **error )
 {
-	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
-	libbde_metadata_entry_t *metadata_entry               = NULL;
-	libbde_volume_master_key_t *volume_master_key         = NULL;
-	uint8_t *fve_metadata                                 = NULL;
-	uint8_t *fve_metadata_block                           = NULL;
-	static char *function                                 = "libbde_metadata_read";
-	size_t read_size                                      = 4096;
-	ssize_t read_count                                    = 0;
-	uint64_t first_metadata_offset                        = 0;
-	uint64_t second_metadata_offset                       = 0;
-	uint64_t third_metadata_offset                        = 0;
-	uint64_t volume_header_offset                         = 0;
-	uint64_t volume_header_size                           = 0;
-	uint32_t metadata_header_size                         = 0;
-	uint32_t metadata_size                                = 0;
-	uint32_t metadata_size_copy                           = 0;
-	uint32_t number_of_volume_header_sectors              = 0;
-	uint32_t version                                      = 0;
-	int metadata_entry_index                              = 0;
+	uint8_t *fve_metadata_block              = NULL;
+	static char *function                    = "libbde_metadata_read_block";
+	size_t fve_metadata_block_offset         = 0;
+	size_t read_size                         = 4096;
+	ssize_t read_count                       = 0;
+	uint64_t first_metadata_offset           = 0;
+	uint64_t second_metadata_offset          = 0;
+	uint64_t third_metadata_offset           = 0;
+	uint32_t metadata_size                   = 0;
+	uint32_t number_of_volume_header_sectors = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t filetime_string[ 32 ];
-	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
-
-	libfdatetime_filetime_t *filetime                     = NULL;
-	libfguid_identifier_t *guid                           = NULL;
-	uint32_t value_32bit                                  = 0;
-	uint16_t value_16bit                                  = 0;
-	int result                                            = 0;
+	uint32_t value_32bit                     = 0;
+	uint16_t value_16bit                     = 0;
 #endif
 
 	if( metadata == NULL )
@@ -359,8 +363,6 @@ int libbde_metadata_read(
 
 		goto on_error;
 	}
-	fve_metadata = fve_metadata_block;
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -368,12 +370,12 @@ int libbde_metadata_read(
 		 "%s: FVE metadata block header:\n",
 		 function );
 		libnotify_print_data(
-		 fve_metadata,
+		 fve_metadata_block,
 		 sizeof( bde_metadata_block_header_v1_t ) );
 	}
 #endif
 	if( memory_compare(
-	     fve_metadata,
+	     fve_metadata_block,
 	     bde_signature,
 	     8 ) != 0 )
 	{
@@ -387,7 +389,7 @@ int libbde_metadata_read(
 		goto on_error;
 	}
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->version,
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->version,
 	 metadata->version );
 
 	if( ( metadata->version != 1 )
@@ -405,76 +407,76 @@ int libbde_metadata_read(
 	if( metadata->version == 1 )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->mft_mirror_cluster_block,
+		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->mft_mirror_cluster_block,
 		 metadata->mft_mirror_cluster_block_number );
 	}
 	else if( metadata->version == 2 )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->encrypted_volume_size,
+		 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->encrypted_volume_size,
 		 metadata->encrypted_volume_size );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->volume_header_offset,
+		 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->volume_header_offset,
 		 metadata->volume_header_offset );
 
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_block_header_v2_t *) fve_metadata )->number_of_volume_header_sectors,
+		 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->number_of_volume_header_sectors,
 		 number_of_volume_header_sectors );
 	}
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->first_metadata_offset,
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->first_metadata_offset,
 	 first_metadata_offset );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->second_metadata_offset,
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->second_metadata_offset,
 	 second_metadata_offset );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata )->third_metadata_offset,
+	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->third_metadata_offset,
 	 third_metadata_offset );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "%s: signature\t\t\t\t\t\t: %c%c%c%c%c%c%c%c\n",
+		 "%s: signature\t\t\t\t\t: %c%c%c%c%c%c%c%c\n",
 		 function,
-		 fve_metadata[ 0 ],
-		 fve_metadata[ 1 ],
-		 fve_metadata[ 2 ],
-		 fve_metadata[ 3 ],
-		 fve_metadata[ 4 ],
-		 fve_metadata[ 5 ],
-		 fve_metadata[ 6 ],
-		 fve_metadata[ 7 ] );
+		 fve_metadata_block[ 0 ],
+		 fve_metadata_block[ 1 ],
+		 fve_metadata_block[ 2 ],
+		 fve_metadata_block[ 3 ],
+		 fve_metadata_block[ 4 ],
+		 fve_metadata_block[ 5 ],
+		 fve_metadata_block[ 6 ],
+		 fve_metadata_block[ 7 ] );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->size,
+		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->size,
 		 value_16bit );
 		libnotify_printf(
-		 "%s: size\t\t\t\t\t\t: %" PRIu16 "\n",
+		 "%s: size\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
 		libnotify_printf(
-		 "%s: version\t\t\t\t\t\t: %" PRIu16 "\n",
+		 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 metadata->version );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->unknown1,
+		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown1,
 		 value_16bit );
 		libnotify_printf(
-		 "%s: unknown1\t\t\t\t\t\t: %" PRIu16 "\n",
+		 "%s: unknown1\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata )->unknown2,
+		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown2,
 		 value_16bit );
 		libnotify_printf(
-		 "%s: unknown2\t\t\t\t\t\t: %" PRIu16 "\n",
+		 "%s: unknown2\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
@@ -484,55 +486,55 @@ int libbde_metadata_read(
 			 "%s: unknown3:\n",
 			 function );
 			libnotify_print_data(
-			 ( (bde_metadata_block_header_v1_t *) fve_metadata )->unknown3,
+			 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown3,
 			 16 );
 		}
 		else if( metadata->version == 2 )
 		{
 			libnotify_printf(
-			 "%s: encrypted volume size\t\t\t\t: %" PRIu64 "\n",
+			 "%s: encrypted volume size\t\t\t: %" PRIu64 "\n",
 			 function,
 			 metadata->encrypted_volume_size );
 
 			byte_stream_copy_to_uint32_little_endian(
-			 ( (bde_metadata_block_header_v2_t *) fve_metadata )->unknown3,
+			 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->unknown3,
 			 value_32bit );
 			libnotify_printf(
-			 "%s: unknown3\t\t\t\t\t\t: %" PRIu32 "\n",
+			 "%s: unknown3\t\t\t\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
 
 			libnotify_printf(
-			 "%s: number of volume header sectors\t\t\t: %" PRIu32 "\n",
+			 "%s: number of volume header sectors\t\t: %" PRIu32 "\n",
 			 function,
 			 number_of_volume_header_sectors );
 		}
 		libnotify_printf(
-		 "%s: first metadata offset\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: first metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 first_metadata_offset );
 
 		libnotify_printf(
-		 "%s: second metadata offset\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: second metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 second_metadata_offset );
 
 		libnotify_printf(
-		 "%s: third metadata offset\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: third metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 third_metadata_offset );
 
 		if( metadata->version == 1 )
 		{
 			libnotify_printf(
-			 "%s: MFT mirror cluster block\t\t\t\t: 0x%08" PRIx64 "\n",
+			 "%s: MFT mirror cluster block\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 metadata->mft_mirror_cluster_block_number );
 		}
 		else if( metadata->version == 2 )
 		{
 			libnotify_printf(
-			 "%s: volume header offset\t\t\t\t: 0x%08" PRIx64 "\n",
+			 "%s: volume header offset\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 metadata->volume_header_offset );
 		}
@@ -540,10 +542,206 @@ int libbde_metadata_read(
 		 "\n" );
 	}
 #endif
-/* TODO what about size value ? */
-	fve_metadata += sizeof( bde_metadata_block_header_v1_t );
-	read_size    -= sizeof( bde_metadata_block_header_v1_t );
+	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
+	{
+		if( io_handle->second_metadata_offset == 0 )
+		{
+			io_handle->second_metadata_offset = second_metadata_offset;
+		}
+		if( io_handle->third_metadata_offset == 0 )
+		{
+			io_handle->third_metadata_offset = third_metadata_offset;
+		}
+	}
+	if( io_handle->first_metadata_offset != first_metadata_offset )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_INPUT,
+		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 "%s: value mismatch for first metadata offset.",
+		 function );
 
+		goto on_error;
+	}
+	if( io_handle->second_metadata_offset != second_metadata_offset )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_INPUT,
+		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 "%s: value mismatch for second metadata offset.",
+		 function );
+
+		goto on_error;
+	}
+	if( io_handle->third_metadata_offset != third_metadata_offset )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_INPUT,
+		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 "%s: value mismatch for third metadata offset.",
+		 function );
+
+		goto on_error;
+	}
+/* TODO validate size value ? */
+
+	fve_metadata_block_offset += sizeof( bde_metadata_block_header_v1_t );
+	read_size                 -= sizeof( bde_metadata_block_header_v1_t );
+
+	read_count = libbde_metadata_read_header(
+	              metadata,
+	              &( fve_metadata_block[ fve_metadata_block_offset ] ),
+	              read_size,
+	              &metadata_size,
+	              error );
+
+	if( read_count == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read metadata header.",
+		 function );
+
+		goto on_error;
+	}
+	fve_metadata_block_offset += read_count;
+	read_size                 -= read_count;
+
+	if( ( metadata_size < sizeof( bde_metadata_header_v1_t ) )
+	 || ( metadata_size > read_size ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: metadata size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	read_count = libbde_metadata_read_entries(
+	              metadata,
+	              &( fve_metadata_block[ fve_metadata_block_offset ] ),
+	              (size_t) metadata_size - sizeof( bde_metadata_header_v1_t ),
+	              startup_key_identifier,
+	              startup_key_identifier_size,
+	              error );
+
+	if( read_count == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read metadata header.",
+		 function );
+
+		goto on_error;
+	}
+	fve_metadata_block_offset += read_count;
+	read_size                 -= read_count;
+
+	memory_free(
+	 fve_metadata_block );
+
+	fve_metadata_block = NULL;
+
+	return( 1 );
+
+on_error:
+	if( fve_metadata_block != NULL )
+	{
+		memory_free(
+		 fve_metadata_block );
+	}
+	return( -1 );
+}
+
+/* Reads a metadata header
+ * Returns the number of byte read if successful or -1 on error
+ */
+ssize_t libbde_metadata_read_header(
+         libbde_metadata_t *metadata,
+         uint8_t *header_data,
+         size_t header_data_size,
+         uint32_t *metadata_size,
+         liberror_error_t **error )
+{
+	static char *function             = "libbde_metadata_read_header";
+	uint32_t metadata_header_size     = 0;
+	uint32_t metadata_size_copy       = 0;
+	uint32_t version                  = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	libcstring_system_character_t filetime_string[ 32 ];
+	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
+
+	libfdatetime_filetime_t *filetime = NULL;
+	libfguid_identifier_t *guid       = NULL;
+	uint32_t value_32bit              = 0;
+	int result                        = 0;
+#endif
+
+	if( metadata == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( header_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid header data.",
+		 function );
+
+		return( -1 );
+	}
+	if( header_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid header data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( header_data_size < sizeof( bde_metadata_header_v1_t ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: header data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( metadata_size == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata size.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -551,29 +749,29 @@ int libbde_metadata_read(
 		 "%s: FVE metadata header:\n",
 		 function );
 		libnotify_print_data(
-		 fve_metadata,
+		 header_data,
 		 sizeof( bde_metadata_header_v1_t ) );
 	}
 #endif
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) fve_metadata )->metadata_size,
-	 metadata_size );
+	 ( (bde_metadata_header_v1_t *) header_data )->metadata_size,
+	 *metadata_size );
 
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) fve_metadata )->version,
+	 ( (bde_metadata_header_v1_t *) header_data )->version,
 	 version );
 
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) fve_metadata )->metadata_header_size,
+	 ( (bde_metadata_header_v1_t *) header_data )->metadata_header_size,
 	 metadata_header_size );
 
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) fve_metadata )->metadata_size_copy,
+	 ( (bde_metadata_header_v1_t *) header_data )->metadata_size_copy,
 	 metadata_size_copy );
 
 	if( memory_copy(
 	     metadata->volume_identifier,
-	     ( (bde_metadata_header_v1_t *) fve_metadata )->volume_identifier,
+	     ( (bde_metadata_header_v1_t *) header_data )->volume_identifier,
 	     16 ) == NULL )
 	{
 		liberror_error_set(
@@ -586,11 +784,11 @@ int libbde_metadata_read(
 		goto on_error;
 	}
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) fve_metadata )->encryption_method,
+	 ( (bde_metadata_header_v1_t *) header_data )->encryption_method,
 	 metadata->encryption_method );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_header_v1_t *) fve_metadata )->creation_time,
+	 ( (bde_metadata_header_v1_t *) header_data )->creation_time,
 	 metadata->creation_time );
 
 	if( version != 1 )
@@ -608,17 +806,17 @@ int libbde_metadata_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "%s: metadata size\t\t\t\t\t: %" PRIu32 "\n",
+		 "%s: metadata size\t\t\t\t: %" PRIu32 "\n",
 		 function,
-		 metadata_size );
+		 *metadata_size );
 
 		libnotify_printf(
-		 "%s: version\t\t\t\t\t\t: %" PRIu32 "\n",
+		 "%s: version\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 version );
 
 		libnotify_printf(
-		 "%s: metadata header size\t\t\t\t: %" PRIu32 "\n",
+		 "%s: metadata header size\t\t\t: %" PRIu32 "\n",
 		 function,
 		 metadata_header_size );
 
@@ -681,7 +879,7 @@ int libbde_metadata_read(
 			goto on_error;
 		}
 		libnotify_printf(
-		 "%s: volume identifier\t\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+		 "%s: volume identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 		 function,
 		 guid_string );
 
@@ -699,7 +897,7 @@ int libbde_metadata_read(
 			goto on_error;
 		}
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_header_v1_t *) fve_metadata )->next_nonce_counter,
+		 ( (bde_metadata_header_v1_t *) header_data )->next_nonce_counter,
 		 value_32bit );
 		libnotify_printf(
 		 "%s: next nonce counter\t\t\t\t: 0x%08" PRIx32 "\n",
@@ -707,7 +905,7 @@ int libbde_metadata_read(
 		 value_32bit );
 
 		libnotify_printf(
-		 "%s: encryption method\t\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
+		 "%s: encryption method\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
 		 function,
 		 metadata->encryption_method,
 		 libbde_debug_print_encryption_method(
@@ -728,7 +926,7 @@ int libbde_metadata_read(
 		}
 		if( libfdatetime_filetime_copy_from_byte_stream(
 		     filetime,
-		     ( (bde_metadata_header_v1_t *) fve_metadata )->creation_time,
+		     ( (bde_metadata_header_v1_t *) header_data )->creation_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     error ) != 1 )
@@ -771,7 +969,7 @@ int libbde_metadata_read(
 			goto on_error;
 		}
 		libnotify_printf(
-		 "%s: creation time\t\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 "%s: creation time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
 		 function,
 		 filetime_string );
 
@@ -792,50 +990,6 @@ int libbde_metadata_read(
 		 "\n" );
 	}
 #endif
-	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
-	{
-		if( io_handle->second_metadata_offset == 0 )
-		{
-			io_handle->second_metadata_offset = second_metadata_offset;
-		}
-		if( io_handle->third_metadata_offset == 0 )
-		{
-			io_handle->third_metadata_offset = third_metadata_offset;
-		}
-	}
-	if( io_handle->first_metadata_offset != first_metadata_offset )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
-		 "%s: value mismatch for first metadata offset.",
-		 function );
-
-		goto on_error;
-	}
-	if( io_handle->second_metadata_offset != second_metadata_offset )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
-		 "%s: value mismatch for second metadata offset.",
-		 function );
-
-		goto on_error;
-	}
-	if( io_handle->third_metadata_offset != third_metadata_offset )
-	{
-		liberror_error_set(
-		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
-		 "%s: value mismatch for third metadata offset.",
-		 function );
-
-		goto on_error;
-	}
 	if( metadata_header_size != sizeof( bde_metadata_header_v1_t ) )
 	{
 		liberror_error_set(
@@ -847,7 +1001,7 @@ int libbde_metadata_read(
 
 		goto on_error;
 	}
-	if( metadata_size != metadata_size_copy )
+	if( *metadata_size != metadata_size_copy )
 	{
 		liberror_error_set(
 		 error,
@@ -858,8 +1012,7 @@ int libbde_metadata_read(
 
 		goto on_error;
 	}
-	if( ( metadata_size < sizeof( bde_metadata_header_v1_t ) )
-	 || ( metadata_size > read_size ) )
+	if( *metadata_size < sizeof( bde_metadata_header_v1_t ) )
 	{
 		liberror_error_set(
 		 error,
@@ -870,10 +1023,83 @@ int libbde_metadata_read(
 
 		goto on_error;
 	}
-	fve_metadata  += sizeof( bde_metadata_header_v1_t );
-	metadata_size -= sizeof( bde_metadata_header_v1_t );
+	return( sizeof( bde_metadata_header_v1_t ) );
 
-	while( metadata_size > sizeof( bde_metadata_header_v1_t ) )
+on_error:
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( guid != NULL )
+	{
+		libfguid_identifier_free(
+		 &guid,
+		 NULL );
+	}
+	if( filetime != NULL )
+	{
+		libfdatetime_filetime_free(
+		 &filetime,
+		 NULL );
+	}
+#endif
+	return( -1 );
+}
+
+
+/* Reads a metadata entries
+ * Returns the number of byte read if successful or -1 on error
+ */
+ssize_t libbde_metadata_read_entries(
+         libbde_metadata_t *metadata,
+         uint8_t *entries_data,
+         size_t entries_data_size,
+         const uint8_t *startup_key_identifier,
+         size_t startup_key_identifier_size,
+         liberror_error_t **error )
+{
+	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
+	libbde_external_key_t *external_key                   = NULL;
+	libbde_metadata_entry_t *metadata_entry               = NULL;
+	libbde_volume_master_key_t *volume_master_key         = NULL;
+	static char *function                                 = "libbde_metadata_read_entries";
+	size_t entries_data_offset                            = 0;
+	ssize_t read_count                                    = 0;
+	uint64_t volume_header_offset                         = 0;
+	uint64_t volume_header_size                           = 0;
+	int metadata_entry_index                              = 0;
+
+	if( metadata == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( entries_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid entries data.",
+		 function );
+
+		return( -1 );
+	}
+	if( entries_data_size > (size_t) SSIZE_MAX )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid entries data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	while( entries_data_size >= sizeof( bde_metadata_entry_v1_t ) )
 	{
 		if( libbde_metadata_entry_initialize(
 		     &metadata_entry,
@@ -890,8 +1116,8 @@ int libbde_metadata_read(
 		}
 		read_count = libbde_metadata_entry_read(
 			      metadata_entry,
-			      fve_metadata,
-			      metadata_size,
+			      &( entries_data[ entries_data_offset ] ),
+			      entries_data_size,
 			      error );
 
 		if( read_count == -1 )
@@ -905,8 +1131,8 @@ int libbde_metadata_read(
 
 			goto on_error;
 		}
-		fve_metadata  += read_count;
-		metadata_size -= read_count;
+		entries_data_offset += read_count;
+		entries_data_size   -= read_count;
 
 		switch( metadata_entry->type )
 		{
@@ -938,7 +1164,7 @@ int libbde_metadata_read(
 
 					goto on_error;
 				}
-				if( volume_master_key->type == LIBBDE_VMK_TYPE_CLEAR_KEY_PROTECTED )
+				if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_CLEAR_KEY )
 				{
 					if( metadata->clear_key_volume_master_key == NULL )
 					{
@@ -947,20 +1173,29 @@ int libbde_metadata_read(
 						volume_master_key = NULL;
 					}
 				}
-				else if( volume_master_key->type == LIBBDE_VMK_TYPE_RECOVERY_KEY_PROTECTED )
+				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY )
 				{
-					if( metadata->disk_password_volume_master_key == NULL )
+					if( metadata->startup_key_volume_master_key == NULL )
 					{
-						metadata->disk_password_volume_master_key = volume_master_key;
+						metadata->startup_key_volume_master_key = volume_master_key;
 
 						volume_master_key = NULL;
 					}
 				}
-				else if( volume_master_key->type == LIBBDE_VMK_TYPE_EXTERNAL_KEY_PROTECTED )
+				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD )
 				{
-					if( metadata->external_key_volume_master_key == NULL )
+					if( metadata->recovery_password_volume_master_key == NULL )
 					{
-						metadata->external_key_volume_master_key = volume_master_key;
+						metadata->recovery_password_volume_master_key = volume_master_key;
+
+						volume_master_key = NULL;
+					}
+				}
+				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_PASSWORD )
+				{
+					if( metadata->password_volume_master_key == NULL )
+					{
+						metadata->password_volume_master_key = volume_master_key;
 
 						volume_master_key = NULL;
 					}
@@ -1042,6 +1277,52 @@ int libbde_metadata_read(
 				}
 				break;
 
+			case LIBBDE_ENTRY_TYPE_STARTUP_KEY:
+				if( libbde_external_key_initialize(
+				     &external_key,
+				     error ) != 1 )
+				{
+					liberror_error_set(
+					 error,
+					 LIBERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 "%s: unable to create external key.",
+					 function );
+
+					goto on_error;
+				}
+				if( libbde_external_key_read(
+				     external_key,
+				     metadata_entry,
+				     error ) != 1 )
+				{
+					liberror_error_set(
+					 error,
+					 LIBERROR_ERROR_DOMAIN_IO,
+					 LIBERROR_IO_ERROR_READ_FAILED,
+					 "%s: unable to read external key from property metadata entry.",
+					 function );
+
+					goto on_error;
+				}
+				if( external_key != NULL )
+				{
+					if( libbde_external_key_free(
+					     &external_key,
+					     error ) != 1 )
+					{
+						liberror_error_set(
+						 error,
+						 LIBERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+						 "%s: unable to free external key.",
+						 function );
+
+						goto on_error;
+					}
+				}
+				break;
+
 			case LIBBDE_ENTRY_TYPE_DESCRIPTION:
 #if defined( HAVE_DEBUG_OUTPUT )
 				if( libbde_metadata_entry_read_string(
@@ -1087,12 +1368,12 @@ int libbde_metadata_read(
 					if( libnotify_verbose != 0 )
 					{
 						libnotify_printf(
-						 "%s: offset\t\t\t\t\t\t: 0x%" PRIx64 "\n",
+						 "%s: offset\t\t\t\t\t: 0x%" PRIx64 "\n",
 						 function,
 						 volume_header_offset );
 
 						libnotify_printf(
-						 "%s: size\t\t\t\t\t\t: %" PRIu64 "\n",
+						 "%s: size\t\t\t\t\t: %" PRIu64 "\n",
 						 function,
 						 volume_header_size );
 
@@ -1135,32 +1416,25 @@ int libbde_metadata_read(
 		}
 		metadata_entry = NULL;
 	}
-	memory_free(
-	 fve_metadata_block );
-
-	fve_metadata_block = NULL;
-
-	return( 1 );
+	return( (ssize_t) entries_data_offset );
 
 on_error:
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( guid != NULL )
-	{
-		libfguid_identifier_free(
-		 &guid,
-		 NULL );
-	}
-	if( filetime != NULL )
-	{
-		libfdatetime_filetime_free(
-		 &filetime,
-		 NULL );
-	}
-#endif
 	if( aes_ccm_encrypted_key != NULL )
 	{
 		libbde_aes_ccm_encrypted_key_free(
 		 &aes_ccm_encrypted_key,
+		 NULL );
+	}
+	if( external_key != NULL )
+	{
+		libbde_external_key_free(
+		 &external_key,
+		 NULL );
+	}
+	if( volume_master_key != NULL )
+	{
+		libbde_volume_master_key_free(
+		 &volume_master_key,
 		 NULL );
 	}
 	if( metadata_entry != NULL )
@@ -1168,11 +1442,6 @@ on_error:
 		libbde_metadata_entry_free(
 		 metadata_entry,
 		 NULL );
-	}
-	if( fve_metadata_block != NULL )
-	{
-		memory_free(
-		 fve_metadata_block );
 	}
 	return( -1 );
 }
@@ -1183,7 +1452,8 @@ on_error:
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
-     uint8_t volume_master_key[ 32 ],
+     uint8_t *volume_master_key,
+     size_t volume_master_key_size,
      liberror_error_t **error )
 {
 	uint8_t aes_ccm_key[ 32 ];
@@ -1225,6 +1495,17 @@ int libbde_metadata_get_volume_master_key(
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume master key.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_master_key_size < 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid volume master key value too small.",
 		 function );
 
 		return( -1 );
@@ -1295,7 +1576,7 @@ int libbde_metadata_get_volume_master_key(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: disk password volume master key - AES-CCM encrypted key data size value out of bounds.",
+			 "%s: recovery password volume master key - AES-CCM encrypted key data size value out of bounds.",
 			 function );
 
 			goto on_error;
@@ -1453,35 +1734,35 @@ int libbde_metadata_get_volume_master_key(
 	{
 		if( io_handle->password_is_set != 0 )
 		{
-			if( metadata->external_key_volume_master_key == NULL )
+			if( metadata->password_volume_master_key == NULL )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - missing external key volume master key.",
+				 "%s: invalid metadata - missing password volume master key.",
 				 function );
 
 				return( -1 );
 			}
-			if( metadata->external_key_volume_master_key->stretch_key == NULL )
+			if( metadata->password_volume_master_key->stretch_key == NULL )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - invalid external key volume master key - missing stretch key.",
+				 "%s: invalid metadata - invalid password volume master key - missing stretch key.",
 				 function );
 
 				return( -1 );
 			}
-			if( metadata->external_key_volume_master_key->aes_ccm_encrypted_key == NULL )
+			if( metadata->password_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - invalid external key volume master key - missing AES-CCM encrypted key.",
+				 "%s: invalid metadata - invalid password volume master key - missing AES-CCM encrypted key.",
 				 function );
 
 				return( -1 );
@@ -1502,7 +1783,7 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( libbde_password_calculate_key(
 			     io_handle->password_hash,
-			     metadata->external_key_volume_master_key->stretch_key->salt,
+			     metadata->password_volume_master_key->stretch_key->salt,
 			     aes_ccm_key,
 			     error ) != 1 )
 			{
@@ -1526,18 +1807,18 @@ int libbde_metadata_get_volume_master_key(
 				 32 );
 			}
 #endif
-			if( metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+			if( metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: external key volume master key - AES-CCM encrypted key data size value out of bounds.",
+				 "%s: password volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
 				goto on_error;
 			}
-			unencrypted_data_size = metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data_size;
+			unencrypted_data_size = metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size;
 
 			unencrypted_data = (uint8_t *) memory_allocate(
 							unencrypted_data_size );
@@ -1598,10 +1879,10 @@ int libbde_metadata_get_volume_master_key(
 			if( libbde_aes_ccm_crypt(
 			     aes_context,
 			     LIBBDE_AES_CRYPT_MODE_DECRYPT,
-			     metadata->external_key_volume_master_key->aes_ccm_encrypted_key->nonce,
+			     metadata->password_volume_master_key->aes_ccm_encrypted_key->nonce,
 			     12,
-			     metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data,
-			     metadata->external_key_volume_master_key->aes_ccm_encrypted_key->data_size,
+			     metadata->password_volume_master_key->aes_ccm_encrypted_key->data,
+			     metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size,
 			     unencrypted_data,
 			     unencrypted_data_size,
 			     error ) != 1 )
@@ -1691,35 +1972,35 @@ int libbde_metadata_get_volume_master_key(
 	{
 		if( io_handle->recovery_password_is_set != 0 )
 		{
-			if( metadata->disk_password_volume_master_key == NULL )
+			if( metadata->recovery_password_volume_master_key == NULL )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - missing disk password volume master key.",
+				 "%s: invalid metadata - missing recovery password volume master key.",
 				 function );
 
 				return( -1 );
 			}
-			if( metadata->disk_password_volume_master_key->stretch_key == NULL )
+			if( metadata->recovery_password_volume_master_key->stretch_key == NULL )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - invalid disk password volume master key - missing stretch key.",
+				 "%s: invalid metadata - invalid recovery password volume master key - missing stretch key.",
 				 function );
 
 				return( -1 );
 			}
-			if( metadata->disk_password_volume_master_key->aes_ccm_encrypted_key == NULL )
+			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - invalid disk password volume master key - missing AES-CCM encrypted key.",
+				 "%s: invalid metadata - invalid recovery password volume master key - missing AES-CCM encrypted key.",
 				 function );
 
 				return( -1 );
@@ -1740,7 +2021,7 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( libbde_recovery_calculate_key(
 			     io_handle->recovery_password_hash,
-			     metadata->disk_password_volume_master_key->stretch_key->salt,
+			     metadata->recovery_password_volume_master_key->stretch_key->salt,
 			     aes_ccm_key,
 			     error ) != 1 )
 			{
@@ -1764,18 +2045,18 @@ int libbde_metadata_get_volume_master_key(
 				 32 );
 			}
 #endif
-			if( metadata->disk_password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
 			{
 				liberror_error_set(
 				 error,
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: disk password volume master key - AES-CCM encrypted key data size value out of bounds.",
+				 "%s: recovery password volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
 				goto on_error;
 			}
-			unencrypted_data_size = metadata->disk_password_volume_master_key->aes_ccm_encrypted_key->data_size;
+			unencrypted_data_size = metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size;
 
 			unencrypted_data = (uint8_t *) memory_allocate(
 							unencrypted_data_size );
@@ -1836,10 +2117,10 @@ int libbde_metadata_get_volume_master_key(
 			if( libbde_aes_ccm_crypt(
 			     aes_context,
 			     LIBBDE_AES_CRYPT_MODE_DECRYPT,
-			     metadata->disk_password_volume_master_key->aes_ccm_encrypted_key->nonce,
+			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->nonce,
 			     12,
-			     metadata->disk_password_volume_master_key->aes_ccm_encrypted_key->data,
-			     metadata->disk_password_volume_master_key->aes_ccm_encrypted_key->data_size,
+			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data,
+			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size,
 			     unencrypted_data,
 			     unencrypted_data_size,
 			     error ) != 1 )
@@ -1951,9 +2232,12 @@ on_error:
  */
 int libbde_metadata_get_full_volume_encryption_key(
      libbde_metadata_t *metadata,
-     uint8_t volume_master_key[ 32 ],
-     uint8_t full_volume_encryption_key[ 32 ],
-     uint8_t tweak_key[ 32 ],
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
+     uint8_t *full_volume_encryption_key,
+     size_t full_volume_encryption_key_size,
+     uint8_t *tweak_key,
+     size_t tweak_key_size,
      liberror_error_t **error )
 {
 	uint8_t *unencrypted_data         = NULL;
@@ -1997,6 +2281,28 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
+	if( volume_master_key == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume master key.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_master_key_size < 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid volume master key value too small.",
+		 function );
+
+		return( -1 );
+	}
 	if( full_volume_encryption_key == NULL )
 	{
 		liberror_error_set(
@@ -2008,6 +2314,17 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		return( -1 );
 	}
+	if( full_volume_encryption_key_size < 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid full volume encryption key value too small.",
+		 function );
+
+		return( -1 );
+	}
 	if( tweak_key == NULL )
 	{
 		liberror_error_set(
@@ -2015,6 +2332,17 @@ int libbde_metadata_get_full_volume_encryption_key(
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid TWEAK key.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key_size < 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid TWEAK key value too small.",
 		 function );
 
 		return( -1 );

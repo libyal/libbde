@@ -28,6 +28,7 @@
 #include <liberror.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
+#include "libbde_array_type.h"
 #include "libbde_key.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_stretch_key.h"
@@ -45,9 +46,9 @@ struct libbde_volume_master_key
 	 */
 	uint8_t identifier[ 16 ];
 
-	/* The type
+	/* The protection type
 	 */
-	uint32_t type;
+	uint32_t protection_type;
 
 	/* The key
 	 */

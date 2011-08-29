@@ -1,5 +1,5 @@
 /*
- * Volume Master Key (VMK) metadata entry functions
+ * External Key metadata entry functions
  *
  * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
  *
@@ -28,78 +28,75 @@
 #include <liberror.h>
 #include <libnotify.h>
 
-#include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_array_type.h"
-#include "libbde_debug.h"
 #include "libbde_definitions.h"
+#include "libbde_external_key.h"
 #include "libbde_io_handle.h"
 #include "libbde_key.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_metadata_entry.h"
-#include "libbde_stretch_key.h"
-#include "libbde_volume_master_key.h"
 
 #include "bde_metadata.h"
 
-/* Initialize a volume master key
- * Make sure the value volume master key is pointing to is set to NULL
+/* Initialize a external key
+ * Make sure the value external key is pointing to is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libbde_volume_master_key_initialize(
-     libbde_volume_master_key_t **volume_master_key,
+int libbde_external_key_initialize(
+     libbde_external_key_t **external_key,
      liberror_error_t **error )
 {
-	static char *function = "libbde_volume_master_key_initialize";
+	static char *function = "libbde_external_key_initialize";
 
-	if( volume_master_key == NULL )
+	if( external_key == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume master key.",
+		 "%s: invalid external key.",
 		 function );
 
 		return( -1 );
 	}
-	if( *volume_master_key == NULL )
+	if( *external_key == NULL )
 	{
-		*volume_master_key = memory_allocate_structure(
-		                      libbde_volume_master_key_t );
+		*external_key = memory_allocate_structure(
+		                 libbde_external_key_t );
 
-		if( *volume_master_key == NULL )
+		if( *external_key == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create volume master key.",
+			 "%s: unable to create external key.",
 			 function );
 
 			goto on_error;
 		}
 		if( memory_set(
-		     *volume_master_key,
+		     *external_key,
 		     0,
-		     sizeof( libbde_volume_master_key_t ) ) == NULL )
+		     sizeof( libbde_external_key_t ) ) == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear volume master key.",
+			 "%s: unable to clear external key.",
 			 function );
 
 			memory_free(
-			 *volume_master_key );
+			 *external_key );
 
-			*volume_master_key = NULL;
+			*external_key = NULL;
 
 			return( -1 );
 		}
 		if( libbde_array_initialize(
-		     &( ( *volume_master_key )->entries_array ),
+		     &( ( *external_key )->entries_array ),
 		     0,
 		     error ) != 1 )
 		{
@@ -116,43 +113,43 @@ int libbde_volume_master_key_initialize(
 	return( 1 );
 
 on_error:
-	if( *volume_master_key != NULL )
+	if( *external_key != NULL )
 	{
 		memory_free(
-		 *volume_master_key );
+		 *external_key );
 
-		*volume_master_key = NULL;
+		*external_key = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees a volume master key
+/* Frees a external key
  * Returns 1 if successful or -1 on error
  */
-int libbde_volume_master_key_free(
-     libbde_volume_master_key_t **volume_master_key,
+int libbde_external_key_free(
+     libbde_external_key_t **external_key,
      liberror_error_t **error )
 {
-	static char *function = "libbde_volume_master_key_free";
+	static char *function = "libbde_external_key_free";
 	int result            = 1;
 
-	if( volume_master_key == NULL )
+	if( external_key == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume master key.",
+		 "%s: invalid external key.",
 		 function );
 
 		return( -1 );
 	}
-	if( *volume_master_key != NULL )
+	if( *external_key != NULL )
 	{
-		if( ( *volume_master_key )->key != NULL )
+		if( ( *external_key )->key != NULL )
 		{
 			if( libbde_key_free(
-			     &( ( *volume_master_key )->key ),
+			     &( ( *external_key )->key ),
 			     error ) != 1 )
 			{
 				liberror_error_set(
@@ -165,40 +162,8 @@ int libbde_volume_master_key_free(
 				result = -1;
 			}
 		}
-		if( ( *volume_master_key )->stretch_key != NULL )
-		{
-			if( libbde_stretch_key_free(
-			     &( ( *volume_master_key )->stretch_key ),
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free stretch key.",
-				 function );
-
-				result = -1;
-			}
-		}
-		if( ( *volume_master_key )->aes_ccm_encrypted_key != NULL )
-		{
-			if( libbde_aes_ccm_encrypted_key_free(
-			     &( ( *volume_master_key )->aes_ccm_encrypted_key ),
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free AES-CCM encrypted key.",
-				 function );
-
-				result = -1;
-			}
-		}
 		if( libbde_array_free(
-		     &( ( *volume_master_key )->entries_array ),
+		     &( ( *external_key )->entries_array ),
 		     (int(*)(intptr_t *, liberror_error_t **)) &libbde_metadata_entry_free,
 		     error ) != 1 )
 		{
@@ -212,47 +177,45 @@ int libbde_volume_master_key_free(
 			result = -1;
 		}
 		memory_free(
-		 *volume_master_key );
+		 *external_key );
 
-		*volume_master_key = NULL;
+		*external_key = NULL;
 	}
 	return( result );
 }
 
-/* Reads a volume master key from the metadata entry
+/* Reads a external key from the metadata entry
  * Returns 1 if successful or -1 on error
  */
-int libbde_volume_master_key_read(
-     libbde_volume_master_key_t *volume_master_key,
+int libbde_external_key_read(
+     libbde_external_key_t *external_key,
      libbde_metadata_entry_t *metadata_entry,
      liberror_error_t **error )
 {
-	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
-	libbde_key_t *key                                     = NULL;
-	libbde_metadata_entry_t *property_metadata_entry      = NULL;
-	libbde_stretch_key_t *stretch_key                     = NULL;
-	uint8_t *value_data                                   = NULL;
-	static char *function                                 = "libbde_volume_master_key_read";
-	size_t value_data_size                                = 0;
-	ssize_t read_count                                    = 0;
-	int property_metadata_entry_index                     = 0;
+	libbde_key_t *key                                = NULL;
+	libbde_metadata_entry_t *property_metadata_entry = NULL;
+	uint8_t *value_data                              = NULL;
+	static char *function                            = "libbde_external_key_read";
+	size_t value_data_size                           = 0;
+	ssize_t read_count                               = 0;
+	int property_metadata_entry_index                = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 32 ];
 	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
 
-	libfdatetime_filetime_t *filetime                     = NULL;
-	libfguid_identifier_t *guid                           = NULL;
-	int result                                            = 0;
+	libfdatetime_filetime_t *filetime                = NULL;
+	libfguid_identifier_t *guid                      = NULL;
+	int result                                       = 0;
 #endif
 
-	if( volume_master_key == NULL )
+	if( external_key == NULL )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume master key.",
+		 "%s: invalid external key.",
 		 function );
 
 		return( -1 );
@@ -268,7 +231,7 @@ int libbde_volume_master_key_read(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_VOLUME_MASTER_KEY )
+	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_EXTERNAL_KEY )
 	{
 		liberror_error_set(
 		 error,
@@ -283,7 +246,7 @@ int libbde_volume_master_key_read(
 	value_data      = metadata_entry->value_data;
 	value_data_size = metadata_entry->value_data_size;
 
-	if( value_data_size < sizeof( bde_metadata_entry_volume_master_key_header_t ) )
+	if( value_data_size < sizeof( bde_metadata_entry_external_key_header_t ) )
 	{
 		liberror_error_set(
 		 error,
@@ -295,8 +258,8 @@ int libbde_volume_master_key_read(
 		return( -1 );
 	}
 	if( memory_copy(
-	     volume_master_key->identifier,
-	     ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->identifier,
+	     external_key->identifier,
+	     ( (bde_metadata_entry_external_key_header_t *) value_data )->identifier,
 	     16 ) == NULL )
 	{
 		liberror_error_set(
@@ -308,10 +271,6 @@ int libbde_volume_master_key_read(
 
 		goto on_error;
 	}
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->protection_type,
-	 volume_master_key->protection_type );
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -330,7 +289,7 @@ int libbde_volume_master_key_read(
 		}
 		if( libfguid_identifier_copy_from_byte_stream(
 		     guid,
-		     ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->identifier,
+		     ( (bde_metadata_entry_external_key_header_t *) value_data )->identifier,
 		     16,
 		     LIBFGUID_ENDIAN_LITTLE,
 		     error ) != 1 )
@@ -369,7 +328,7 @@ int libbde_volume_master_key_read(
 			goto on_error;
 		}
 		libnotify_printf(
-		 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+		 "%s: identifier\t\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 		 function,
 		 guid_string );
 
@@ -402,7 +361,7 @@ int libbde_volume_master_key_read(
 		}
 		if( libfdatetime_filetime_copy_from_byte_stream(
 		     filetime,
-		     ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->modification_time,
+		     ( (bde_metadata_entry_external_key_header_t *) value_data )->modification_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     error ) != 1 )
@@ -445,7 +404,7 @@ int libbde_volume_master_key_read(
 			goto on_error;
 		}
 		libnotify_printf(
-		 "%s: modification time\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 "%s: modification time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
 		 function,
 		 filetime_string );
 
@@ -463,18 +422,11 @@ int libbde_volume_master_key_read(
 			goto on_error;
 		}
 		libnotify_printf(
-		 "%s: protection type\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
-		 function,
-		 volume_master_key->protection_type,
-		 libbde_debug_print_key_protection_type(
-		  volume_master_key->protection_type ) );
-
-		libnotify_printf(
 		 "\n" );
 	}
 #endif
-	value_data      += sizeof( bde_metadata_entry_volume_master_key_header_t );
-	value_data_size -= sizeof( bde_metadata_entry_volume_master_key_header_t );
+	value_data      += sizeof( bde_metadata_entry_external_key_header_t );
+	value_data_size -= sizeof( bde_metadata_entry_external_key_header_t );
 
 	while( value_data_size >= sizeof( bde_metadata_entry_v1_t ) )
 	{
@@ -540,9 +492,9 @@ int libbde_volume_master_key_read(
 
 				goto on_error;
 			}
-			if( volume_master_key->key == NULL )
+			if( external_key->key == NULL )
 			{
-				volume_master_key->key = key;
+				external_key->key = key;
 
 				key = NULL;
 			}
@@ -580,117 +532,13 @@ int libbde_volume_master_key_read(
 				goto on_error;
 			}
 #endif
-			if( volume_master_key->string_entry == NULL )
+			if( external_key->string_entry == NULL )
 			{
-				volume_master_key->string_entry = property_metadata_entry;
-			}
-		}
-		else if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_STRETCH_KEY )
-		{
-			if( libbde_stretch_key_initialize(
-			     &stretch_key,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create stretch key.",
-				 function );
-
-				goto on_error;
-			}
-			if( libbde_stretch_key_read(
-			     stretch_key,
-			     property_metadata_entry,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_IO,
-				 LIBERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read stretch key metadata entry.",
-				 function );
-
-				goto on_error;
-			}
-			if( volume_master_key->stretch_key == NULL )
-			{
-				volume_master_key->stretch_key = stretch_key;
-
-				stretch_key = NULL;
-			}
-			if( stretch_key != NULL )
-			{
-				if( libbde_stretch_key_free(
-				     &stretch_key,
-				     error ) != 1 )
-				{
-					liberror_error_set(
-					 error,
-					 LIBERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free stretch key.",
-					 function );
-
-					goto on_error;
-				}
-			}
-		}
-		else if( property_metadata_entry->value_type == LIBBDE_VALUE_TYPE_AES_CCM_ENCRYPTED_KEY )
-		{
-			if( libbde_aes_ccm_encrypted_key_initialize(
-			     &aes_ccm_encrypted_key,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create AES-CCM encrypted key.",
-				 function );
-
-				goto on_error;
-			}
-			if( libbde_aes_ccm_encrypted_key_read(
-			     aes_ccm_encrypted_key,
-			     property_metadata_entry,
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_IO,
-				 LIBERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read AES-CCM encrypted key from property metadata entry.",
-				 function );
-
-				goto on_error;
-			}
-			if( volume_master_key->aes_ccm_encrypted_key == NULL )
-			{
-				volume_master_key->aes_ccm_encrypted_key = aes_ccm_encrypted_key;
-
-				aes_ccm_encrypted_key = NULL;
-			}
-			if( aes_ccm_encrypted_key != NULL )
-			{
-				if( libbde_aes_ccm_encrypted_key_free(
-				     &aes_ccm_encrypted_key,
-				     error ) != 1 )
-				{
-					liberror_error_set(
-					 error,
-					 LIBERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free AES-CCM encrypted key.",
-					 function );
-
-					goto on_error;
-				}
+				external_key->string_entry = property_metadata_entry;
 			}
 		}
 		if( libbde_array_append_entry(
-		     volume_master_key->entries_array,
+		     external_key->entries_array,
 		     &property_metadata_entry_index,
 		     (intptr_t *) property_metadata_entry,
 		     error ) != 1 )
@@ -737,18 +585,6 @@ on_error:
 		 NULL );
 	}
 #endif
-	if( aes_ccm_encrypted_key != NULL )
-	{
-		libbde_aes_ccm_encrypted_key_free(
-		 &aes_ccm_encrypted_key,
-		 NULL );
-	}
-	if( stretch_key != NULL )
-	{
-		libbde_stretch_key_free(
-		 &stretch_key,
-		 NULL );
-	}
 	if( key != NULL )
 	{
 		libbde_key_free(

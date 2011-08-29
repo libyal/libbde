@@ -83,13 +83,17 @@ struct libbde_metadata
 	 */
 	libbde_volume_master_key_t *clear_key_volume_master_key;
 
-	/* The disk password protected volume master key
+	/* The startup key protected volume master key
 	 */
-	libbde_volume_master_key_t *disk_password_volume_master_key;
+	libbde_volume_master_key_t *startup_key_volume_master_key;
 
-	/* The external key protected volume master key
+	/* The recovery password protected volume master key
 	 */
-	libbde_volume_master_key_t *external_key_volume_master_key;
+	libbde_volume_master_key_t *recovery_password_volume_master_key;
+
+	/* The password protected volume master key
+	 */
+	libbde_volume_master_key_t *password_volume_master_key;
 
 	/* The full volume encryption key
 	 */
@@ -108,24 +112,45 @@ int libbde_metadata_free(
      libbde_metadata_t **metadata,
      liberror_error_t **error );
 
-int libbde_metadata_read(
+int libbde_metadata_read_block(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     const uint8_t *startup_key_identifier,
+     size_t startup_key_identifier_size,
      liberror_error_t **error );
+
+ssize_t libbde_metadata_read_header(
+         libbde_metadata_t *metadata,
+         uint8_t *header_data,
+         size_t header_data_size,
+         uint32_t *metadata_size,
+         liberror_error_t **error );
+
+ssize_t libbde_metadata_read_entries(
+         libbde_metadata_t *metadata,
+         uint8_t *entries_data,
+         size_t entries_data_size,
+         const uint8_t *startup_key_identifier,
+         size_t startup_key_identifier_size,
+         liberror_error_t **error );
 
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
-     uint8_t volume_master_key[ 32 ],
+     uint8_t *volume_master_key,
+     size_t volume_master_key_size,
      liberror_error_t **error );
 
 int libbde_metadata_get_full_volume_encryption_key(
      libbde_metadata_t *metadata,
-     uint8_t volume_master_key[ 32 ],
-     uint8_t full_volume_encryption_key[ 32 ],
-     uint8_t tweak_key[ 32 ],
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
+     uint8_t *full_volume_encryption_key,
+     size_t full_volume_encryption_key_size,
+     uint8_t *tweak_key,
+     size_t tweak_key_size,
      liberror_error_t **error );
 
 #if defined( __cplusplus )
