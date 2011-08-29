@@ -338,6 +338,51 @@ int mount_handle_set_recovery_password(
 	return( 1 );
 }
 
+/* Reads the startup key from a .BEK file
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_read_startup_key(
+     mount_handle_t *mount_handle,
+     const libcstring_system_character_t *filename,
+     liberror_error_t **error )
+{
+	static char *function = "mount_handle_read_startup_key";
+
+	if( mount_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+	if( libbde_volume_read_startup_key_wide(
+	     mount_handle->input_volume,
+	     filename,
+	     error ) != 1 )
+#else
+	if( libbde_volume_read_startup_key(
+	     mount_handle->input_volume,
+	     filename,
+	     error ) != 1 )
+#endif
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read startup key.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Opens the mount handle
  * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */

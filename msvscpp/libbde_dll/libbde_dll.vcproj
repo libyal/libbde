@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_external_key.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_io_handle.c"
 				>
 			</File>
@@ -307,6 +311,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_extern.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_external_key.h"
 				>
 			</File>
 			<File

@@ -57,18 +57,16 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
 	                 " Drive Encrypted (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -p password ] [ -r password ]\n"
+	fprintf( stream, "Usage: bdeinfo [ -p password ] [ -r password ] [ -s filename ]\n"
 	                 "               [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
-#ifdef TODO
-	fprintf( stream, "\t-k:     specify the file containing the external key.\n"
-	                 "\t        typically this file has the extension .BEK\n" );
-#endif
 	fprintf( stream, "\t-p:     specify the password\n" );
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
+	fprintf( stream, "\t-s:     specify the file containing the startup key.\n"
+	                 "\t        typically this file has the extension .BEK\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -118,15 +116,15 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_error_t *error                                   = NULL;
-	libcstring_system_character_t *option_external_key_file = NULL;
-	libcstring_system_character_t *option_password          = NULL;
-	libcstring_system_character_t *option_recovery_password = NULL;
-	libcstring_system_character_t *source                   = NULL;
-	char *program                                           = "bdeinfo";
-	libcstring_system_integer_t option                      = 0;
-	int result                                              = 0;
-	int verbose                                             = 0;
+	libbde_error_t *error                                      = NULL;
+	libcstring_system_character_t *option_password             = NULL;
+	libcstring_system_character_t *option_recovery_password    = NULL;
+	libcstring_system_character_t *option_startup_key_filename = NULL;
+	libcstring_system_character_t *source                      = NULL;
+	char *program                                              = "bdeinfo";
+	libcstring_system_integer_t option                         = 0;
+	int result                                                 = 0;
+	int verbose                                                = 0;
 
 	libsystem_notify_set_stream(
 	 stderr,
@@ -153,12 +151,10 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-/* TODO add option to pass extenal password/key, what about BEK file */
-
 	while( ( option = libsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hk:p:r:vV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "hp:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -180,11 +176,6 @@ int main( int argc, char * const argv[] )
 
 				return( EXIT_SUCCESS );
 
-			case (libcstring_system_integer_t) 'k':
-				option_external_key_file = optarg;
-
-				break;
-
 			case (libcstring_system_integer_t) 'p':
 				option_password = optarg;
 
@@ -192,6 +183,11 @@ int main( int argc, char * const argv[] )
 
 			case (libcstring_system_integer_t) 'r':
 				option_recovery_password = optarg;
+
+				break;
+
+			case (libcstring_system_integer_t) 's':
+				option_startup_key_filename = optarg;
 
 				break;
 
@@ -238,15 +234,6 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( option_external_key_file != NULL )
-	{
-/* TODO */
-		fprintf(
-		 stderr,
-		 "External key file not yet supported.\n" );
-
-		goto on_error;
-	}
 	if( option_password != NULL )
 	{
 /* TODO */
@@ -278,6 +265,20 @@ int main( int argc, char * const argv[] )
 			fprintf(
 			 stderr,
 			 "Unable to set recovery password.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_startup_key_filename != NULL )
+	{
+		if( info_handle_read_startup_key(
+		     bdeinfo_info_handle,
+		     option_startup_key_filename,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to read startup key.\n" );
 
 			goto on_error;
 		}

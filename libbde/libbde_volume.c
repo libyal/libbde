@@ -38,6 +38,8 @@
 #include "libbde_sector_data.h"
 #include "libbde_volume.h"
 
+#include "bde_metadata.h"
+
 /* Initialize a volume
  * Make sure the value volume is pointing to is set to NULL
  * Returns 1 if successful or -1 on error
@@ -326,6 +328,7 @@ int libbde_volume_open(
 	libbfio_handle_t *file_io_handle          = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open";
+	size_t filename_length                    = 0;
 	int result                                = 0;
 
 	if( volume == NULL )
@@ -375,6 +378,20 @@ int libbde_volume_open(
 
 		return( -1 );
 	}
+	filename_length = libcstring_narrow_string_length(
+	                   filename );
+
+	if( filename_length == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		goto on_error;
+	}
 	if( libbfio_file_initialize(
 	     &file_io_handle,
 	     error ) != 1 )
@@ -407,8 +424,7 @@ int libbde_volume_open(
 	if( libbfio_file_set_name(
 	     file_io_handle,
 	     filename,
-	     libcstring_narrow_string_length(
-	      filename ) + 1,
+	     filename_length,
 	     error ) != 1 )
 	{
                 liberror_error_set(
@@ -466,6 +482,7 @@ int libbde_volume_open_wide(
 	libbfio_handle_t *file_io_handle          = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open_wide";
+	size_t filename_length                    = 0;
 	int result                                = 0;
 
 	if( volume == NULL )
@@ -515,6 +532,20 @@ int libbde_volume_open_wide(
 
 		return( -1 );
 	}
+	filename_length = libcstring_wide_string_length(
+	                   filename );
+
+	if( filename_length == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		goto on_error;
+	}
 	if( libbfio_file_initialize(
 	     &file_io_handle,
 	     error ) != 1 )
@@ -547,8 +578,7 @@ int libbde_volume_open_wide(
 	if( libbfio_file_set_name_wide(
 	     file_io_handle,
 	     filename,
-	     libcstring_wide_string_length(
-	      filename ) + 1,
+	     filename_length,
 	     error ) != 1 )
 	{
                 liberror_error_set(
@@ -848,8 +878,10 @@ int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
      liberror_error_t **error )
 {
-	static char *function = "libbde_volume_open_read";
-	int result            = 0;
+	uint8_t *startup_key_identifier    = NULL;
+	static char *function              = "libbde_volume_open_read";
+	size_t startup_key_identifier_size = 0;
+	int result                         = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -895,6 +927,10 @@ int libbde_volume_open_read(
 
 		return( -1 );
 	}
+	if( ( internal_volume->external_key_metadata != NULL )
+	 && ( ) )
+	{
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
 	{
@@ -921,21 +957,23 @@ int libbde_volume_open_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "Reading BitLocker primary metadata:\n" );
+		 "Reading BitLocker primary metadata block:\n" );
 	}
 #endif
-	if( libbde_metadata_read(
+	if( libbde_metadata_read_block(
 	     internal_volume->primary_metadata,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->first_metadata_offset,
+	     NULL,
+	     0,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read primary metadata.",
+		 "%s: unable to read primary metadata block.",
 		 function );
 
 		goto on_error;
@@ -944,21 +982,23 @@ int libbde_volume_open_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "Reading BitLocker secondary metadata:\n" );
+		 "Reading BitLocker secondary metadata block:\n" );
 	}
 #endif
-	if( libbde_metadata_read(
+	if( libbde_metadata_read_block(
 	     internal_volume->secondary_metadata,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->second_metadata_offset,
+	     NULL,
+	     0,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read secondary metadata.",
+		 "%s: unable to read secondary metadata block.",
 		 function );
 
 		goto on_error;
@@ -967,21 +1007,23 @@ int libbde_volume_open_read(
 	if( libnotify_verbose != 0 )
 	{
 		libnotify_printf(
-		 "Reading BitLocker tertiary metadata:\n" );
+		 "Reading BitLocker tertiary metadata block:\n" );
 	}
 #endif
-	if( libbde_metadata_read(
+	if( libbde_metadata_read_block(
 	     internal_volume->tertiary_metadata,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->third_metadata_offset,
+	     NULL,
+	     0,
 	     error ) != 1 )
 	{
 		liberror_error_set(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read tertiary metadata.",
+		 "%s: unable to read tertiary metadata block.",
 		 function );
 
 		goto on_error;
@@ -1247,6 +1289,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	          metadata,
 	          internal_volume->io_handle,
 	          volume_master_key,
+	          32,
 	          error );
 
 	if( result == -1 )
@@ -1265,8 +1308,11 @@ int libbde_volume_open_read_keys_from_metadata(
 		result = libbde_metadata_get_full_volume_encryption_key(
 		          metadata,
 		          volume_master_key,
+		          32,
 		          full_volume_encryption_key,
+		          32,
 		          tweak_key,
+		          32,
 		          error );
 
 		if( result == -1 )
@@ -2144,5 +2190,505 @@ int libbde_volume_set_utf16_recovery_password(
 	internal_volume->io_handle->recovery_password_is_set = 1;
 
 	return( 1 );
+}
+
+/* Sets the startup key from a .BEK file
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_read_startup_key(
+     libbde_volume_t *volume,
+     const char *filename,
+     liberror_error_t **error )
+{
+	libbfio_handle_t *file_io_handle = NULL;
+	static char *function            = "libbde_volume_read_startup_key";
+	size_t filename_length           = 0;
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	filename_length = libcstring_narrow_string_length(
+	                   filename );
+
+	if( filename_length == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbfio_file_initialize(
+	     &file_io_handle,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbfio_file_set_name(
+	     file_io_handle,
+	     filename,
+	     filename_length,
+	     error ) != 1 )
+	{
+                liberror_error_set(
+                 error,
+                 LIBERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 "%s: unable to set filename in file IO handle.",
+                 function );
+
+		goto on_error;
+	}
+	if( libbde_volume_read_startup_key_file_io_handle(
+	     volume,
+	     file_io_handle,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open startup key file: %s.",
+		 function,
+		 filename );
+
+		goto on_error;
+	}
+	if( libbfio_handle_free(
+	     &file_io_handle,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
+		 NULL );
+	}
+        return( -1 );
+}
+
+#if defined( HAVE_WIDE_CHARACTER_TYPE )
+
+/* Sets the startup key from a .BEK file
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_read_startup_key_wide(
+     libbde_volume_t *volume,
+     const wchar_t *filename,
+     liberror_error_t **error )
+{
+	libbfio_handle_t *file_io_handle = NULL;
+	static char *function            = "libbde_volume_read_startup_key_wide";
+	size_t filename_length           = 0;
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	filename_length = libcstring_wide_string_length(
+	                   filename );
+
+	if( filename_length == 0 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbfio_file_initialize(
+	     &file_io_handle,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbfio_file_set_name_wide(
+	     file_io_handle,
+	     filename,
+	     filename_length,
+	     error ) != 1 )
+	{
+                liberror_error_set(
+                 error,
+                 LIBERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 "%s: unable to set filename in file IO handle.",
+                 function );
+
+		goto on_error;
+	}
+	if( libbde_volume_read_startup_key_file_io_handle(
+	     volume,
+	     file_io_handle,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open startup key file: %ls.",
+		 function,
+		 filename );
+
+		goto on_error;
+	}
+	if( libbfio_handle_free(
+	     &file_io_handle,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
+		 NULL );
+	}
+        return( -1 );
+}
+
+#endif
+
+/* Sets the startup key from a .BEK file using a Basic File IO (bfio) handle
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_read_startup_key_file_io_handle(
+     libbde_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
+     liberror_error_t **error )
+{
+	bde_metadata_header_v1_t file_header;
+
+	libbde_internal_volume_t *internal_volume = NULL;
+	uint8_t *metadata_entries_data            = NULL;
+	static char *function                     = "libbde_volume_read_startup_key_wide";
+	ssize_t read_count                        = 0;
+	uint32_t metadata_size                    = 0;
+	int file_io_handle_is_open                = 0;
+
+	if( volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->file_io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->external_key_metadata != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - external key metadata already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( file_io_handle == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	file_io_handle_is_open = libbfio_handle_is_open(
+	                          file_io_handle,
+	                          error );
+
+	if( file_io_handle_is_open == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open file.",
+		 function );
+
+		return( -1 );
+	}
+	else if( file_io_handle_is_open == 0 )
+	{
+		if( libbfio_handle_open(
+		     file_io_handle,
+		     LIBBFIO_OPEN_READ,
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_OPEN_FAILED,
+			 "%s: unable to open file.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( libbfio_handle_seek_offset(
+	     file_io_handle,
+	     0,
+	     SEEK_SET,
+	     error ) == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek file header offset: 0.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->external_key_metadata ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create external key metadata.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libnotify_verbose != 0 )
+	{
+		libnotify_printf(
+		 "Reading BitLocker External Key (BEK) metadata:\n" );
+	}
+#endif
+	read_count = libbfio_handle_read(
+	              file_io_handle,
+	              (uint8_t *) &file_header,
+	              sizeof( bde_metadata_header_v1_t ),
+	              error );
+
+	if( read_count != sizeof( bde_metadata_header_v1_t ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read file header.",
+		 function );
+
+		goto on_error;
+	}
+	read_count = libbde_metadata_read_header(
+	              internal_volume->external_key_metadata,
+	              (uint8_t *) &file_header,
+	              sizeof( bde_metadata_header_v1_t ),
+	              &metadata_size,
+	              error );
+
+	if( read_count == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read external key metadata header.",
+		 function );
+
+		goto on_error;
+	}
+	if( metadata_size < sizeof( bde_metadata_header_v1_t ) )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: metadata size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	metadata_size -= sizeof( bde_metadata_header_v1_t );
+
+	metadata_entries_data = (uint8_t *) memory_allocate(
+	                                     sizeof( uint8_t ) * metadata_size );
+
+	if( metadata_entries_data == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to metadata entries data.",
+		 function );
+
+		goto on_error;
+	}
+	read_count = libbfio_handle_read(
+	              file_io_handle,
+	              metadata_entries_data,
+	              (size_t) metadata_size,
+	              error );
+
+	if( read_count != (size_t) metadata_size )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read metadata entries data.",
+		 function );
+
+		goto on_error;
+	}
+	read_count = libbde_metadata_read_entries(
+	              internal_volume->external_key_metadata,
+	              metadata_entries_data,
+	              (size_t) metadata_size,
+	              NULL,
+	              0,
+	              error );
+
+	if( read_count == -1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read external key metadata entries.",
+		 function );
+
+		goto on_error;
+	}
+	memory_free(
+	 metadata_entries_data );
+
+	metadata_entries_data = NULL;
+
+	if( file_io_handle_is_open == 0 )
+	{
+		if( libbfio_handle_close(
+		     file_io_handle,
+		     error ) != 0 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_IO,
+			 LIBERROR_IO_ERROR_CLOSE_FAILED,
+			 "%s: unable to close file.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( 1 );
+
+on_error:
+	if( metadata_entries_data != NULL )
+	{
+		memory_free(
+		 metadata_entries_data );
+	}
+	if( internal_volume->external_key_metadata != NULL )
+	{
+		libbde_metadata_free(
+		 &( internal_volume->external_key_metadata ),
+		 NULL );
+	}
+	if( file_io_handle_is_open == 0 )
+	{
+		libbfio_handle_close(
+		 file_io_handle,
+		 error );
+	}
+	return( -1 );
 }
 

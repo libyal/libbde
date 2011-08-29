@@ -68,7 +68,7 @@ void usage_fprint(
 	                 " volume\n\n" );
 
 	fprintf( stream, "Usage: bdemount [ - o offset ] [ -p password ] [ -r password ]\n"
-	                 "                [ -hvV ] source mount_point\n\n" );
+	                 "                [ -s filename ] [ -hvV ] source mount_point\n\n" );
 
 	fprintf( stream, "\tsource:      the source file or device\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
@@ -77,6 +77,8 @@ void usage_fprint(
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
 	fprintf( stream, "\t-p:          specify the password\n" );
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
+	fprintf( stream, "\t-s:          specify the file containing the startup key.\n"
+	                 "\t             typically this file has the extension .BEK\n" );
 	fprintf( stream, "\t-v:          verbose output to stderr\n"
 	                 "\t             bdemount will remain running in the foregroud\n" );
 	fprintf( stream, "\t-V:          print version\n" );
@@ -590,23 +592,23 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_error_t *error                                   = NULL;
-	libcstring_system_character_t *mount_point              = NULL;
-	libcstring_system_character_t *option_external_key_file = NULL;
-	libcstring_system_character_t *option_password          = NULL;
-	libcstring_system_character_t *option_recovery_password = NULL;
-	libcstring_system_character_t *option_volume_offset     = NULL;
-	libcstring_system_character_t *source                   = NULL;
-	char *program                                           = "bdemount";
-	libcstring_system_integer_t option                      = 0;
-	size_t string_length                                    = 0;
-	int result                                              = 0;
-	int verbose                                             = 0;
+	libbde_error_t *error                                      = NULL;
+	libcstring_system_character_t *mount_point                 = NULL;
+	libcstring_system_character_t *option_password             = NULL;
+	libcstring_system_character_t *option_recovery_password    = NULL;
+	libcstring_system_character_t *option_startup_key_filename = NULL;
+	libcstring_system_character_t *option_volume_offset        = NULL;
+	libcstring_system_character_t *source                      = NULL;
+	char *program                                              = "bdemount";
+	libcstring_system_integer_t option                         = 0;
+	size_t string_length                                       = 0;
+	int result                                                 = 0;
+	int verbose                                                = 0;
 
 #if defined( HAVE_FUSE_H )
 	struct fuse_operations bdemount_fuse_operations;
-	struct fuse_chan *bdemount_fuse_channel                 = NULL;
-	struct fuse *bdemount_fuse_handle                       = NULL;
+	struct fuse_chan *bdemount_fuse_channel                    = NULL;
+	struct fuse *bdemount_fuse_handle                          = NULL;
 #endif
 
 	libsystem_notify_set_stream(
@@ -639,7 +641,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = libsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hk:o:p:r:vV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -661,11 +663,6 @@ int main( int argc, char * const argv[] )
 
 				return( EXIT_SUCCESS );
 
-			case (libcstring_system_integer_t) 'k':
-				option_external_key_file = optarg;
-
-				break;
-
 			case (libcstring_system_integer_t) 'o':
 				option_volume_offset = optarg;
 
@@ -678,6 +675,11 @@ int main( int argc, char * const argv[] )
 
 			case (libcstring_system_integer_t) 'r':
 				option_recovery_password = optarg;
+
+				break;
+
+			case (libcstring_system_integer_t) 's':
+				option_startup_key_filename = optarg;
 
 				break;
 
@@ -737,15 +739,6 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( option_external_key_file != NULL )
-	{
-/* TODO */
-		fprintf(
-		 stderr,
-		 "External key file not yet supported.\n" );
-
-		goto on_error;
-	}
 	if( option_password != NULL )
 	{
 /* TODO */
@@ -777,6 +770,20 @@ int main( int argc, char * const argv[] )
 			fprintf(
 			 stderr,
 			 "Unable to set recovery password.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_startup_key_filename != NULL )
+	{
+		if( mount_handle_read_startup_key(
+		     bdemount_mount_handle,
+		     option_startup_key_filename,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to read startup key.\n" );
 
 			goto on_error;
 		}

@@ -70,6 +70,11 @@ int info_handle_set_recovery_password(
      const libcstring_system_character_t *string,
      liberror_error_t **error );
 
+int info_handle_read_startup_key(
+     info_handle_t *info_handle,
+     const libcstring_system_character_t *filename,
+     liberror_error_t **error );
+
 int info_handle_open(
      info_handle_t *info_handle,
      const libcstring_system_character_t *filename,

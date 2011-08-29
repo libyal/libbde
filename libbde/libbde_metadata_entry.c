@@ -165,7 +165,7 @@ ssize_t libbde_metadata_entry_read(
 
 		return( -1 );
 	}
-	if( fve_metadata_size < sizeof( bde_metadata_header_v1_t ) )
+	if( fve_metadata_size < sizeof( bde_metadata_entry_v1_t ) )
 	{
 		liberror_error_set(
 		 error,

@@ -995,7 +995,7 @@ int libbde_io_handle_read_unencrypted_volume_header(
 		goto on_error;
 	}
 	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
-	 || ( io_handle->version == LIBBDE_VERSION_WINDOWS_TO_GO ) )
+	 || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
 	{
 		volume_header_offset = io_handle->volume_header_offset;
 	}
@@ -1005,8 +1005,8 @@ int libbde_io_handle_read_unencrypted_volume_header(
 		libnotify_printf(
 		 "%s: reading unencrypted volume header at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
-		 file_offset,
-		 file_offset );
+		 volume_header_offset,
+		 volume_header_offset );
 	}
 #endif
 	if( libbde_sector_data_initialize(
@@ -1027,7 +1027,7 @@ int libbde_io_handle_read_unencrypted_volume_header(
 	     sector_data,
 	     io_handle,
 	     file_io_handle,
-	     file_offset,
+	     volume_header_offset,
 	     io_handle->encryption_context,
 	     0,
 	     error ) != 1 )
