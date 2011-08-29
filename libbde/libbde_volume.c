@@ -928,8 +928,10 @@ int libbde_volume_open_read(
 		return( -1 );
 	}
 	if( ( internal_volume->external_key_metadata != NULL )
-	 && ( ) )
+	 && ( internal_volume->external_key_metadata->startup_key_external_key != NULL ) )
 	{
+		startup_key_identifier      = internal_volume->external_key_metadata->startup_key_external_key->identifier;
+		startup_key_identifier_size = 16;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libnotify_verbose != 0 )
@@ -965,8 +967,8 @@ int libbde_volume_open_read(
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->first_metadata_offset,
-	     NULL,
-	     0,
+	     startup_key_identifier,
+	     startup_key_identifier_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -990,8 +992,8 @@ int libbde_volume_open_read(
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->second_metadata_offset,
-	     NULL,
-	     0,
+	     startup_key_identifier,
+	     startup_key_identifier_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -1015,8 +1017,8 @@ int libbde_volume_open_read(
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
 	     internal_volume->io_handle->third_metadata_offset,
-	     NULL,
-	     0,
+	     startup_key_identifier,
+	     startup_key_identifier_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(
