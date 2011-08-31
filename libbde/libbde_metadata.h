@@ -144,6 +144,8 @@ ssize_t libbde_metadata_read_entries(
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
+     const uint8_t *external_key,
+     size_t external_key_size,
      uint8_t *volume_master_key,
      size_t volume_master_key_size,
      liberror_error_t **error );
