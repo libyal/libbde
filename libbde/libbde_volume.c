@@ -1200,10 +1200,12 @@ int libbde_volume_open_read_keys_from_metadata(
 	uint8_t tweak_key[ 32 ];
 	uint8_t volume_master_key[ 32 ];
 
+	uint8_t *external_key          = NULL;
 	static char *function          = "libbde_volume_open_read_keys_from_metadata";
 	off64_t volume_header_offset   = 0;
 	size64_t volume_header_size    = 0;
 	size64_t encrypted_volume_size = 0;
+	size_t external_key_size       = 0;
 	uint32_t encryption_method     = 0;
 	int result                     = 0;
 
@@ -1282,6 +1284,13 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		return( -1 );
 	}
+	if( ( internal_volume->external_key_metadata != NULL )
+	 && ( internal_volume->external_key_metadata->startup_key_external_key != NULL )
+	 && ( internal_volume->external_key_metadata->startup_key_external_key->key != NULL ) )
+	{
+		external_key      = internal_volume->external_key_metadata->startup_key_external_key->key->data;
+		external_key_size = internal_volume->external_key_metadata->startup_key_external_key->key->data_size;
+	}
 	encrypted_volume_size = metadata->encrypted_volume_size;
 	volume_header_offset  = metadata->volume_header_offset;
 	volume_header_size    = metadata->volume_header_size;
@@ -1290,6 +1299,8 @@ int libbde_volume_open_read_keys_from_metadata(
 	result = libbde_metadata_get_volume_master_key(
 	          metadata,
 	          internal_volume->io_handle,
+	          external_key,
+	          external_key_size,
 	          volume_master_key,
 	          32,
 	          error );

@@ -50,6 +50,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20110830
+* worked on support for startup key
+
 20110829
 * worked on support for startup key
 * updated configure

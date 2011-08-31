@@ -1374,7 +1374,7 @@ ssize_t libbde_metadata_read_entries(
 			case LIBBDE_ENTRY_TYPE_VOLUME_HEADER_BLOCK:
 				if( metadata_entry->value_type == LIBBDE_VALUE_TYPE_OFFSET_AND_SIZE )
 				{
-/* TODO move to separate function and check fo size */
+/* TODO move to separate function and check for the size */
 					if( metadata_entry->value_data_size < 16 )
 					{
 						liberror_error_set(
@@ -1482,6 +1482,8 @@ on_error:
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
+     const uint8_t *external_key,
+     size_t external_key_size,
      uint8_t *volume_master_key,
      size_t volume_master_key_size,
      liberror_error_t **error )
@@ -1762,7 +1764,8 @@ int libbde_metadata_get_volume_master_key(
 	}
 	if( result == 0 )
 	{
-/* TODO */
+		if( ( external_key != NULL )
+		 && ( external_key_size == 32 ) )
 		{
 			if( metadata->startup_key_volume_master_key == NULL )
 			{
@@ -1771,17 +1774,6 @@ int libbde_metadata_get_volume_master_key(
 				 LIBERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - missing startup key volume master key.",
-				 function );
-
-				return( -1 );
-			}
-			if( metadata->startup_key_volume_master_key->stretch_key == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - invalid startup key volume master key - missing stretch key.",
 				 function );
 
 				return( -1 );
@@ -1811,8 +1803,20 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			/* TODO */
+			if( memory_copy(
+			     aes_ccm_key,
+			     external_key,
+			     32 ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy AES-CCM key.",
+				 function );
 
+				goto on_error;
+			}
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libnotify_verbose != 0 )
 			{
