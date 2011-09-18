@@ -1,14 +1,16 @@
 Creating a DLL using MinGW
 
-To compile a libvshadow DLL using mingw you'll need:
-* mingw
+To compile a libbde DLL using MinGW you'll need:
+* MinGW with Windows Crypto API (libadvapi32)
 
-To build a DLL using mingw use:
+To build a DLL using MinGW use:
 mingw32-configure --enable-winapi=yes
 mingw32-make
 
-It is recommended that you use WINAPI support but it is possible to compile
-libvshadow without it (--enable-winapi=no)
+It is recommended that you use WINAPI support but it is possible to compile 
+libnde without it (--enable-winapi=no). Without WINAPI support libnde will
+need a MinGW build of openssl libcrypto for MD5 and SHA1 support.
+The default behaviour is that libbde will try to auto-detect MinGW and enable WINAPI support.
 
 If mingw32-configure and mingw32-make are not available you'll need to build
 it by hand. For this you can use a script similar to the following:
@@ -28,5 +30,5 @@ CC=$CC CXX=$CXX AR=$AR OBJDUMP=$OBJDUMP RANLIB=$RANLIB STRIP=$STRIP ./configure 
 CC=$CC CXX=$CXX AR=$AR OBJDUMP=$OBJDUMP RANLIB=$RANLIB STRIP=$STRIP CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" make
 
 You should end up with the following DLL:
-libvshadow-<version>/libvshadow/.libs/libvshadow-1.dll
+libbde-<version>/libbde/.libs/libbde-2.dll
 

@@ -1,22 +1,21 @@
 /*
  * Encryption functions
  *
- * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
+ * Copyright (C) 2011, Google Inc.
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * This software is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include <common.h>
@@ -25,10 +24,10 @@
 
 #include <liberror.h>
 
-#include "libbde_aes.h"
 #include "libbde_definitions.h"
 #include "libbde_diffuser.h"
 #include "libbde_encryption.h"
+#include "libbde_libcaes.h"
 
 /* Initialize an encryption context
  * Make sure the value encryption context is pointing to is set to NULL
@@ -87,7 +86,7 @@ int libbde_encryption_initialize(
 
 			return( -1 );
 		}
-		if( libbde_aes_initialize(
+		if( libcaes_initialize(
 		     &( ( *context )->fvek_decryption_context ),
 		     error ) != 1 )
 		{
@@ -100,7 +99,7 @@ int libbde_encryption_initialize(
 
 			goto on_error;
 		}
-		if( libbde_aes_initialize(
+		if( libcaes_initialize(
 		     &( ( *context )->fvek_encryption_context ),
 		     error ) != 1 )
 		{
@@ -113,7 +112,7 @@ int libbde_encryption_initialize(
 
 			goto on_error;
 		}
-		if( libbde_aes_initialize(
+		if( libcaes_initialize(
 		     &( ( *context )->tweak_decryption_context ),
 		     error ) != 1 )
 		{
@@ -126,7 +125,7 @@ int libbde_encryption_initialize(
 
 			goto on_error;
 		}
-		if( libbde_aes_initialize(
+		if( libcaes_initialize(
 		     &( ( *context )->tweak_encryption_context ),
 		     error ) != 1 )
 		{
@@ -148,19 +147,19 @@ on_error:
 	{
 		if( ( *context )->tweak_decryption_context != NULL )
 		{
-			libbde_aes_free(
+			libcaes_free(
 			 &( ( *context )->tweak_decryption_context ),
 			 NULL );
 		}
 		if( ( *context )->fvek_encryption_context != NULL )
 		{
-			libbde_aes_free(
+			libcaes_free(
 			 &( ( *context )->fvek_encryption_context ),
 			 NULL );
 		}
 		if( ( *context )->fvek_decryption_context != NULL )
 		{
-			libbde_aes_free(
+			libcaes_free(
 			 &( ( *context )->fvek_decryption_context ),
 			 NULL );
 		}
@@ -195,7 +194,7 @@ int libbde_encryption_free(
 	}
 	if( *context != NULL )
 	{
-		if( libbde_aes_free(
+		if( libcaes_free(
 		     &( ( *context )->fvek_decryption_context ),
 		     error ) != 1 )
 		{
@@ -208,7 +207,7 @@ int libbde_encryption_free(
 
 			result = -1;
 		}
-		if( libbde_aes_free(
+		if( libcaes_free(
 		     &( ( *context )->fvek_encryption_context ),
 		     error ) != 1 )
 		{
@@ -221,7 +220,7 @@ int libbde_encryption_free(
 
 			result = -1;
 		}
-		if( libbde_aes_free(
+		if( libcaes_free(
 		     &( ( *context )->tweak_decryption_context ),
 		     error ) != 1 )
 		{
@@ -234,7 +233,7 @@ int libbde_encryption_free(
 
 			result = -1;
 		}
-		if( libbde_aes_free(
+		if( libcaes_free(
 		     &( ( *context )->tweak_encryption_context ),
 		     error ) != 1 )
 		{
@@ -290,7 +289,7 @@ int libbde_encryption_set_keys(
 	}
 	/* The volume master key is always 256-bit in size
 	 */
-	if( libbde_aes_set_decryption_key(
+	if( libcaes_set_decryption_key(
 	     context->fvek_decryption_context,
 	     full_volume_encryption_key,
 	     key_bit_size,
@@ -305,7 +304,7 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( libbde_aes_set_encryption_key(
+	if( libcaes_set_encryption_key(
 	     context->fvek_encryption_context,
 	     full_volume_encryption_key,
 	     key_bit_size,
@@ -325,7 +324,7 @@ int libbde_encryption_set_keys(
 	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		if( libbde_aes_set_decryption_key(
+		if( libcaes_set_decryption_key(
 		     context->tweak_decryption_context,
 		     tweak_key,
 		     key_bit_size,
@@ -340,7 +339,7 @@ int libbde_encryption_set_keys(
 
 			return( -1 );
 		}
-		if( libbde_aes_set_encryption_key(
+		if( libcaes_set_encryption_key(
 		     context->tweak_encryption_context,
 		     tweak_key,
 		     key_bit_size,
@@ -452,9 +451,9 @@ int libbde_encryption_crypt(
 	/* The block key for the initialization vector is encrypted
 	 * with the FVEK
 	 */
-	if( libbde_aes_ecb_crypt(
+	if( libcaes_ecb_crypt(
 	     context->fvek_encryption_context,
-	     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+	     LIBCAES_CRYPT_MODE_ENCRYPT,
 	     block_key_data,
 	     16,
 	     initialization_vector,
@@ -476,9 +475,9 @@ int libbde_encryption_crypt(
 		/* The block key for the sector key data is encrypted
 		 * with the TWEAK key
 		 */
-		if( libbde_aes_ecb_crypt(
+		if( libcaes_ecb_crypt(
 		     context->tweak_encryption_context,
-		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
 		     16,
 		     sector_key_data,
@@ -498,9 +497,9 @@ int libbde_encryption_crypt(
 		 */
 		block_key_data[ 15 ] = 0x80;
 
-		if( libbde_aes_ecb_crypt(
+		if( libcaes_ecb_crypt(
 		     context->tweak_encryption_context,
-		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
 		     16,
 		     &( sector_key_data[ 16 ] ),
@@ -553,10 +552,11 @@ int libbde_encryption_crypt(
 				return( -1 );
 			}
 		}
-		if( libbde_aes_cbc_crypt(
+		if( libcaes_cbc_crypt(
 		     context->fvek_encryption_context,
-		     LIBBDE_AES_CRYPT_MODE_ENCRYPT,
+		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     initialization_vector,
+		     16,
 		     input_data,
 		     input_data_size,
 		     output_data,
@@ -575,10 +575,11 @@ int libbde_encryption_crypt(
 	}
 	else
 	{
-		if( libbde_aes_cbc_crypt(
+		if( libcaes_cbc_crypt(
 		     context->fvek_decryption_context,
-		     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     initialization_vector,
+		     16,
 		     input_data,
 		     input_data_size,
 		     output_data,

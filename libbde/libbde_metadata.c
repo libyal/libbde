@@ -1,22 +1,21 @@
 /*
  * Metadata functions
  *
- * Copyright (C) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
+ * Copyright (C) 2011, Google Inc.
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * This software is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include <common.h>
@@ -28,7 +27,6 @@
 #include <liberror.h>
 #include <libnotify.h>
 
-#include "libbde_aes.h"
 #include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_array_type.h"
 #include "libbde_debug.h"
@@ -37,6 +35,7 @@
 #include "libbde_io_handle.h"
 #include "libbde_key.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcaes.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_metadata.h"
@@ -1490,13 +1489,13 @@ int libbde_metadata_get_volume_master_key(
 {
 	uint8_t aes_ccm_key[ 32 ];
 
-	uint8_t *unencrypted_data         = NULL;
-	libbde_aes_context_t *aes_context = NULL;
-	static char *function             = "libbde_metadata_get_volume_master_key";
-	size_t unencrypted_data_size      = 0;
-	uint32_t data_size                = 0;
-	uint32_t version                  = 0;
-	int result                        = 0;
+	libcaes_context_t *aes_context = NULL;
+	uint8_t *unencrypted_data      = NULL;
+	static char *function          = "libbde_metadata_get_volume_master_key";
+	size_t unencrypted_data_size   = 0;
+	uint32_t data_size             = 0;
+	uint32_t version               = 0;
+	int result                     = 0;
 
 	if( metadata == NULL )
 	{
@@ -1643,7 +1642,7 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-		if( libbde_aes_initialize(
+		if( libcaes_initialize(
 		     &aes_context,
 		     error ) != 1 )
 		{
@@ -1656,7 +1655,7 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-		if( libbde_aes_set_encryption_key(
+		if( libcaes_set_encryption_key(
 		     aes_context,
 		     aes_ccm_key,
 		     256,
@@ -1671,9 +1670,9 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-		if( libbde_aes_ccm_crypt(
+		if( libcaes_ccm_crypt(
 		     aes_context,
-		     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->nonce,
 		     12,
 		     metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data,
@@ -1732,7 +1731,7 @@ int libbde_metadata_get_volume_master_key(
 				result = 1;
 			}
 		}
-		if( libbde_aes_free(
+		if( libcaes_free(
 		     &aes_context,
 		     error ) != 1 )
 		{
@@ -1869,7 +1868,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_initialize(
+			if( libcaes_initialize(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -1882,7 +1881,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_set_encryption_key(
+			if( libcaes_set_encryption_key(
 			     aes_context,
 			     aes_ccm_key,
 			     256,
@@ -1897,9 +1896,9 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_ccm_crypt(
+			if( libcaes_ccm_crypt(
 			     aes_context,
-			     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->nonce,
 			     12,
 			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data,
@@ -1958,7 +1957,7 @@ int libbde_metadata_get_volume_master_key(
 					result = 1;
 				}
 			}
-			if( libbde_aes_free(
+			if( libcaes_free(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2107,7 +2106,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_initialize(
+			if( libcaes_initialize(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2120,7 +2119,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_set_encryption_key(
+			if( libcaes_set_encryption_key(
 			     aes_context,
 			     aes_ccm_key,
 			     256,
@@ -2135,9 +2134,9 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_ccm_crypt(
+			if( libcaes_ccm_crypt(
 			     aes_context,
-			     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->password_volume_master_key->aes_ccm_encrypted_key->nonce,
 			     12,
 			     metadata->password_volume_master_key->aes_ccm_encrypted_key->data,
@@ -2196,7 +2195,7 @@ int libbde_metadata_get_volume_master_key(
 					result = 1;
 				}
 			}
-			if( libbde_aes_free(
+			if( libcaes_free(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2345,7 +2344,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_initialize(
+			if( libcaes_initialize(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2358,7 +2357,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_set_encryption_key(
+			if( libcaes_set_encryption_key(
 			     aes_context,
 			     aes_ccm_key,
 			     256,
@@ -2373,9 +2372,9 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_aes_ccm_crypt(
+			if( libcaes_ccm_crypt(
 			     aes_context,
-			     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->nonce,
 			     12,
 			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data,
@@ -2434,7 +2433,7 @@ int libbde_metadata_get_volume_master_key(
 					result = 1;
 				}
 			}
-			if( libbde_aes_free(
+			if( libcaes_free(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2479,7 +2478,7 @@ on_error:
 	}
 	if( aes_context != NULL )
 	{
-		libbde_aes_free(
+		libcaes_free(
 		 &aes_context,
 		 NULL );
 	}
@@ -2499,13 +2498,13 @@ int libbde_metadata_get_full_volume_encryption_key(
      size_t tweak_key_size,
      liberror_error_t **error )
 {
-	uint8_t *unencrypted_data         = NULL;
-	libbde_aes_context_t *aes_context = NULL;
-	static char *function             = "libbde_metadata_get_full_volume_encryption_key";
-	size_t unencrypted_data_size      = 0;
-	uint32_t data_size                = 0;
-	uint32_t version                  = 0;
-	int result                        = 0;
+	uint8_t *unencrypted_data      = NULL;
+	libcaes_context_t *aes_context = NULL;
+	static char *function          = "libbde_metadata_get_full_volume_encryption_key";
+	size_t unencrypted_data_size   = 0;
+	uint32_t data_size             = 0;
+	uint32_t version               = 0;
+	int result                     = 0;
 
 	if( metadata == NULL )
 	{
@@ -2636,7 +2635,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libbde_aes_initialize(
+	if( libcaes_initialize(
 	     &aes_context,
 	     error ) != 1 )
 	{
@@ -2649,7 +2648,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libbde_aes_set_encryption_key(
+	if( libcaes_set_encryption_key(
 	     aes_context,
 	     volume_master_key,
 	     256,
@@ -2664,9 +2663,9 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libbde_aes_ccm_crypt(
+	if( libcaes_ccm_crypt(
 	     aes_context,
-	     LIBBDE_AES_CRYPT_MODE_DECRYPT,
+	     LIBCAES_CRYPT_MODE_DECRYPT,
 	     metadata->full_volume_encryption_key->nonce,
 	     12,
 	     metadata->full_volume_encryption_key->data,
@@ -2775,7 +2774,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 			result = 1;
 		}
 	}
-	if( libbde_aes_free(
+	if( libcaes_free(
 	     &aes_context,
 	     error ) != 1 )
 	{
@@ -2821,7 +2820,7 @@ on_error:
 	}
 	if( aes_context != NULL )
 	{
-		libbde_aes_free(
+		libcaes_free(
 		 &aes_context,
 		 NULL );
 	}

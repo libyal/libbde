@@ -1,4 +1,7 @@
 Acknowledgements: libbde
 
-Copyright (c) 2011, Joachim Metz <jbmetz@users.sourceforge.net>
+Copyright (C) 2011, Google Inc.
+
+Note that both libbde and bdetools are released under Apache License, Version 2.0.
+The support libraries are released under the GNU Lesser General Public License, Version 3.
 

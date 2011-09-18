@@ -11,13 +11,13 @@ AM_CPPFLAGS = \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFVALUE_CPPFLAGS@ \
 	@LIBHMAC_CPPFLAGS@ \
+	@LIBCAES_CPPFLAGS@ \
 	@MEMWATCH_CPPFLAGS@
 
 lib_LTLIBRARIES = libbde.la
 
 libbde_la_SOURCES = \
 	libbde.c \
-	libbde_aes.c libbde_aes.h \
 	libbde_aes_ccm_encrypted_key.c libbde_aes_ccm_encrypted_key.h \
 	libbde_array_type.c libbde_array_type.h \
 	libbde_codepage.h \
@@ -26,12 +26,12 @@ libbde_la_SOURCES = \
 	libbde_diffuser.c libbde_diffuser.h \
 	libbde_encryption.c libbde_encryption.h \
 	libbde_error.c libbde_error.h \
-	libbde_error_string.c libbde_error_string.h \
 	libbde_extern.h \
 	libbde_external_key.c libbde_external_key.h \
 	libbde_io_handle.c libbde_io_handle.h \
 	libbde_key.c libbde_key.h \
 	libbde_libbfio.h \
+	libbde_libcaes.h \
 	libbde_libfdata.h \
 	libbde_libfdatetime.h \
 	libbde_libfguid.h \
@@ -64,6 +64,7 @@ libbde_la_LIBADD = \
 	@LIBFGUID_LIBADD@ \
 	@LIBFVALUE_LIBADD@ \
 	@LIBHMAC_LIBADD@ \
+	@LIBCAES_LIBADD@ \
 	@LIBCRYPTO_LIBADD@ \
 	@LIBDL_LIBADD@
 
