@@ -35,7 +35,6 @@
 #endif
 
 #include "libbde_error_string.h"
-#include "libbde_libuna.h"
 
 /* Retrieves a descriptive string of the error number
  * Returns 1 if successful or -1 on error

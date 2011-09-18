@@ -1,17 +1,17 @@
 Name: libbde
 Version: @VERSION@
 Release: 1
-Summary: Library to support the Windows NT BitLocker Drive Encryption (BDE) format
+Summary: Library to support the BitLocker Drive Encryption (BDE) format
 Group: System Environment/Libraries
-License: LGPL
+License: Apache
 Source: %{name}-%{version}.tar.gz
-URL: http://libbde.sourceforge.net
+URL: http://code.google.com/p/libbde
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-@libbde_spec_requires@ @libbde_spec_requires_libbfio@ @libewf_spec_build_requires_libcrypto@ @libbde_spec_requires_libfdata@ @libbde_spec_requires_libfdatetime@ @libbde_spec_requires_libfguid@ @libbde_spec_requires_libfvalue@ @libbde_spec_requires_libuna@
+@libbde_spec_requires@ @libbde_spec_requires_libbfio@ @libewf_spec_requires_libcrypto@ @libbde_spec_requires_libfdata@ @libbde_spec_requires_libfdatetime@ @libbde_spec_requires_libfguid@ @libbde_spec_requires_libfvalue@ @libbde_spec_requires_libuna@
 @libbde_spec_build_requires@ @libbde_spec_build_requires_libbfio@ @libewf_spec_build_requires_libcrypto@ @libbde_spec_build_requires_libfdata@ @libbde_spec_build_requires_libfdatetime@ @libbde_spec_build_requires_libfguid@ @libbde_spec_build_requires_libfvalue@ @libbde_spec_build_requires_libuna@
 
 %description
-libbde is a library to support the Windows NT BitLocker Drive Encryption (BDE) format
+libbde is a library to support the BitLocker Drive Encryption (BDE) format
 
 %package devel
 Summary: Header files and libraries for developing applications for libbde
@@ -22,12 +22,13 @@ Requires: libbde = %{version}-%{release}
 Header files and libraries for developing applications for libbde.
 
 %package tools
-Summary: Several tools for accessing Windows NT BitLocker encrypted volumes
+Summary: Several tools for accessing BitLocker encrypted volumes
 Group: Applications/System
-Requires: libbde = %{version}-%{release} @libewf_spec_build_requires_libfuse@
+Requires: libbde = %{version}-%{release} @libewf_spec_requires_libfuse@
+@libbde_spec_tools_build_requires@ @libewf_spec_build_requires_libfuse@
 
 %description tools
-Several tools for accessing the Windows NT BitLocker encrypted volumes
+Several tools for accessing the BitLocker encrypted volumes
 
 %prep
 %setup -q
@@ -49,12 +50,12 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README
+%doc AUTHORS COPYING LICENSE.lgpl NEWS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
 %files devel
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README README.mingw ChangeLog
+%doc AUTHORS COPYING LICENSE.lgpl NEWS README README.mingw README.static ChangeLog
 %{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so
@@ -66,9 +67,10 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(644,root,root,755)
 %doc AUTHORS COPYING NEWS README
 %attr(755,root,root) %{_bindir}/bdeinfo
+%attr(755,root,root) %{_bindir}/bdemount
 %{_mandir}/man1/*
 
 %changelog
-* Wed Mar 18 2011 Joachim Metz <jbmetz@users.sourceforge.net> 20110318-1
+* Sun Sep 18 2011 Joachim Metz <joachim.metz@gmail.com> 20110918-1
 - Initial version
 
