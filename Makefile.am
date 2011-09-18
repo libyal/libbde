@@ -13,6 +13,7 @@ SUBDIRS = \
 	libfguid \
 	libfvalue \
 	libhmac \
+	libcaes \
 	libbde \
 	libsystem \
 	bdetools \
@@ -32,7 +33,9 @@ SPEC_FILES = \
 	libbde.spec.in
 
 EXTRA_DIST = \
+	LICENSE.lgpl \
 	README.mingw \
+	README.static \
 	$(GETTEXT_FILES) \
 	$(PKGCONFIG_FILES) \
         $(SPEC_FILES)
@@ -62,6 +65,7 @@ library:
 	(cd $(srcdir)/libfguid && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfvalue && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libhmac && $(MAKE) $(AM_MAKEFLAGS))
+	(cd $(srcdir)/libcaes && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libbde && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) $(AM_MAKEFLAGS))
 
@@ -88,6 +92,7 @@ splint:
 	(cd $(srcdir)/libfguid && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfvalue && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libhmac && $(MAKE) splint $(AM_MAKEFLAGS))
+	(cd $(srcdir)/libcaes && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libbde && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libsystem && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/bdetools && $(MAKE) splint $(AM_MAKEFLAGS))

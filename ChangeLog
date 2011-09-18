@@ -1,11 +1,9 @@
 TODO
-* add support of start up key protected VMK
-* check metadata number_of_volume_header_sectors ?
-* the volume header is stored unencrypted (partially encrypted?) on disk also the BDE metadata
-  - make sure to handle them correctly (partial)
-* AES
+* liibcaes
   - add support for MS Crypto API implementation - add GetError
   - WinXP no AES support ?
+  - msvscpp add libcaes
+* check metadata number_of_volume_header_sectors ?
 * add password support (partial)
 * debug print more volume header info
 
@@ -14,14 +12,11 @@ Optimizations
   or pass values 32bit
 
 Library
-* add external (startup) key support
 * add password support
 
 Release:
-* check debug output aligment
+* check debug output alignment
 * automated tests
-* manuals
-  - bdemount
 * msvscpp build
 * check TODOs
 
@@ -49,6 +44,9 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20110918
+* preparations for release
 
 20110830
 * worked on support for startup key

@@ -88,6 +88,12 @@ COMMON_ARG_WITH(
  [auto-detect],
  [DIR])
 COMMON_ARG_WITH(
+ [libcaes],
+ [libcaes],
+ [search for libcaes in includedir and libdir or in the specified DIR, or no if to use local version],
+ [auto-detect],
+ [DIR])
+COMMON_ARG_WITH(
  [openssl],
  [openssl],
  [search for openssl in includedir and libdir or in the specified DIR, or no if not to use openssl],
@@ -124,19 +130,9 @@ AC_CHECK_WINAPI
 dnl Check for type definitions
 AC_CHECK_LOCAL_TYPES
 
-dnl TODO move to sub m4 file, add comment where it's used or remove
-AC_STRUCT_TM
-
 dnl Check for headers
 
 dnl Check for functions
-dnl Date and time functions used in libfdata/libfdata_date_time.h
-AC_CHECK_FUNCS(
- [time],
- [],
- [AC_MSG_FAILURE(
-  [Missing function: time],
-  [1]) ])
 
 dnl Check for printf conversion specifier support
 AC_CHECK_FUNC_PRINTF_JD
@@ -276,6 +272,10 @@ AS_IF(
  ac_cv_libfdata=local
  ])
 
+AS_IF(
+ [test "x$ac_cv_libfdata" = xlocal],
+ [AC_CHECK_LOCAL_LIBFDATA])
+
 AM_CONDITIONAL(
  [HAVE_LOCAL_LIBFDATA],
  [test "x$ac_cv_libfdata" = xlocal])
@@ -407,16 +407,6 @@ AM_CONDITIONAL(
  [test "x$ac_cv_libfvalue" = xlocal])
 
 dnl Check for enabling libhmac for message digest hash function support
-AS_IF(
- [test "x$ac_cv_with_openssl" != xno && test "x$ac_cv_with_openssl" != xauto-detect],
- [AS_IF(
-  [test -d "$ac_cv_with_openssl"],
-  [CFLAGS="$CFLAGS -I${ac_cv_with_openssl}/include"
-  LDFLAGS="$LDFLAGS -L${ac_cv_with_openssl}/lib"],
-  [AC_MSG_WARN([no such directory: $ac_cv_with_openssl])
-  ])
- ])
- 
 AC_CHECK_LIBHMAC
 
 AS_IF(
@@ -455,33 +445,59 @@ AS_IF(
  [test "x$ac_cv_libhmac" = xlocal],
  [AC_CHECK_LOCAL_LIBHMAC])
 
-dnl Check for crypto support
-ac_cv_cypher_aes=no
+dnl Check for enabling libcaes for AES cipher function support
+AC_CHECK_LIBCAES
 
-dnl Check for Windows crypto API support
 AS_IF(
- [test "x$ac_cv_enable_winapi" = xyes],
- [AC_CHECK_LOCAL_LIBBDE_WINCRYPT])
-
-dnl Check for libcrypto (openssl) support
-AS_IF(
- [test "x$ac_cv_with_openssl" != xno],
- [dnl Check for libcrypto (openssl) EVP support
- AS_IF(
-  [test "x$ac_cv_cypher_aes" = xno],
-  [AC_CHECK_LIBBDE_OPENSSL_EVP])
-
- dnl Check for libcrypto (openssl) AES support
- AS_IF(
-  [test "x$ac_cv_cypher_aes" = xno],
-  [AC_CHECK_LIBBDE_OPENSSL_AES])
+ [test "x$ac_cv_libcaes" = xyes],
+ [AC_SUBST(
+  [libbde_spec_requires_libcaes],
+  [libcaes])
+ AC_SUBST(
+  [libbde_spec_build_requires_libcaes],
+  [libcaes-devel])
  ])
 
-dnl Fallback to local versions if necessary
 AS_IF(
- [test "x$ac_cv_cypher_aes" = xno],
- [ac_cv_cypher_aes=local])
+ [test "x$ac_cv_libcaes" != xyes],
+ [AC_DEFINE(
+  [HAVE_LOCAL_LIBCAES],
+  [1],
+  [Define to 1 if the local version of libcaes is used.])
+ AC_SUBST(
+  [HAVE_LOCAL_LIBCAES],
+  [1])
+ AC_SUBST(
+  [LIBCAES_CPPFLAGS],
+  [-I../libcaes])
+ AC_SUBST(
+  [LIBCAES_LIBADD],
+  [../libcaes/libcaes.la])
+ ac_cv_libcaes=local
+ ])
 
+AM_CONDITIONAL(
+ [HAVE_LOCAL_LIBCAES],
+ [test "x$ac_cv_libcaes" = xlocal])
+
+AS_IF(
+ [test "x$ac_cv_libcaes" = xlocal],
+ [AC_CHECK_LOCAL_LIBCAES])
+
+dnl Check for libfuse Filesystem in Userspace (FUSE) support
+AC_CHECK_LIBFUSE
+
+AS_IF(
+ [test "x$ac_cv_libfuse" = xyes],
+ [AC_SUBST(
+  [libbde_spec_requires_libfuse],
+  [libfuse])
+ AC_SUBST(
+  [libbde_spec_build_requires_libfuse],
+  [libfuse-devel])
+ ])
+
+dnl Set-up openssl if necessary
 AS_IF(
  [test "x$ac_cv_libcrypto" = xyes],
  [AC_SUBST(
@@ -498,23 +514,6 @@ AS_IF(
   [libbde_spec_build_requires_libcrypto],
   [openssl-devel])
  ])
-
-dnl TODO move the open ssl checks here ?
-
-dnl Check for libfuse Filesystem in Userspace (FUSE) support
-AC_CHECK_LIBFUSE
-
-AS_IF(
- [test "x$ac_cv_libfuse" = xyes],
- [AC_SUBST(
-  [libbde_spec_requires_libfuse],
-  [libfuse])
- AC_SUBST(
-  [libbde_spec_build_requires_libfuse],
-  [libfuse-devel])
- ])
-
-dnl TODO add check for -D_FILE_OFFSET_BITS=64
 
 dnl Check if bdetools should be build as static executables
 AS_IF(
@@ -554,14 +553,15 @@ AS_IF(
   [Requires:])
  AC_SUBST(
   [libbde_spec_build_requires],
-  [BuildRequires:]) ],
+  [BuildRequires:])
+ ])
+
+AS_IF(
+ [test "x$ac_cv_libfuse" = xyes],
  [AC_SUBST(
-  [libbde_spec_requires],
-  [])
- AC_SUBST(
-  [libbde_spec_build_requires],
-  [])
- ac_libbde_dummy=yes])
+  [libbde_spec_tools_build_requires],
+  [BuildRequires:])
+ ])
 
 dnl Set memwatch support
 ac_libbde_have_memwatch=no
@@ -608,6 +608,7 @@ AC_CONFIG_FILES([libfdatetime/Makefile])
 AC_CONFIG_FILES([libfguid/Makefile])
 AC_CONFIG_FILES([libfvalue/Makefile])
 AC_CONFIG_FILES([libhmac/Makefile])
+AC_CONFIG_FILES([libcaes/Makefile])
 AC_CONFIG_FILES([libbde/Makefile])
 AC_CONFIG_FILES([libsystem/Makefile])
 AC_CONFIG_FILES([bdetools/Makefile])
@@ -642,7 +643,8 @@ Building:
    libfvalue support:                        $ac_cv_libfvalue
    libhmac support:                          $ac_cv_libhmac
    SHA256 support:                           $ac_cv_libhmac_sha256
-   AES support:                              $ac_cv_cypher_aes
+   libcaes support:                          $ac_cv_libcaes
+   AES support:                              $ac_cv_libcaes_aes
    FUSE support:                             $ac_cv_libfuse
 
 Features:

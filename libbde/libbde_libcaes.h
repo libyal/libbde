@@ -1,5 +1,5 @@
 /*
- * The libfvalue header wrapper
+ * The internal libcaes header
  *
  * Copyright (C) 2011, Google Inc.
  *
@@ -18,36 +18,33 @@
  * limitations under the License.
  */
 
-#if !defined( _LIBBDE_LIBFVALUE_H )
-#define _LIBBDE_LIBFVALUE_H
+#if !defined( _LIBBDE_LIBCAES_H )
+#define _LIBBDE_LIBCAES_H
 
 #include <common.h>
 
-/* Define HAVE_LOCAL_LIBFVALUE for local use of libfvalue
+/* Define HAVE_LOCAL_LIBCAES for local use of libcaes
  */
-#if defined( HAVE_LOCAL_LIBFVALUE )
+#if defined( HAVE_LOCAL_LIBCAES )
 
-#include <libfvalue_codepage.h>
-#include <libfvalue_definitions.h>
-#include <libfvalue_split_string.h>
-#include <libfvalue_string.h>
-#include <libfvalue_table.h>
-#include <libfvalue_types.h>
-#include <libfvalue_value.h>
+#include <libcaes_context.h>
+#include <libcaes_definitions.h>
+#include <libcaes_support.h>
+#include <libcaes_types.h>
 
-#elif defined( HAVE_LIBFVALUE_H )
+#elif defined( HAVE_LIBCAES_H )
 
-/* If libtool DLL support is enabled set LIBFVALUE_DLL_IMPORT
- * before including libfvalue.h
+/* If libtool DLL support is enabled set LIBCAES_DLL_IMPORT
+ * before including libcaes.h
  */
 #if defined( _WIN32 ) && defined( DLL_IMPORT )
-#define LIBFVALUE_DLL_IMPORT
+#define LIBCAES_DLL_IMPORT
 #endif
 
-#include <libfvalue.h>
+#include <libcaes.h>
 
 #else
-#error Missing libfvalue.h
+#error Missing libcaes.h
 #endif
 
 #endif
