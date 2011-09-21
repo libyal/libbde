@@ -1,36 +1,40 @@
 TODO
-* liibcaes
+* updated msvscpp files - add libcaes
+* libcaes
   - add support for MS Crypto API implementation - add GetError
   - WinXP no AES support ?
-  - msvscpp add libcaes
 * check metadata number_of_volume_header_sectors ?
 * add password support (partial)
 * debug print more volume header info
 
 Optimizations
-* combine difusers in a single function
-  or pass values 32bit
+* pass values 32-bit to aes
 
 Library
 * add password support
 
+Test suite:
+* add test scripts
+
 Release:
 * check debug output alignment
-* automated tests
+* automated tests - test suite
 * msvscpp build
 * check TODOs
 
 Tools:
 * bdeinfo
 * bdeexport
+* bdemount
+  - implement ImDisk version for WINAPI
+  - implement native MacOS-X version
 
 Format:
 * validation
-* clear key
 * TPM encoded VMK ?
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
-* why does windows hide the last 4096 bytes of the volume?
+* why does Windows hide the last 4096 bytes of the volume?
 
 Test images:
 * for Windows Vista, Windows 7, To Go
@@ -44,6 +48,11 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20110921
+* preparations for release
+* updated libbfio - added support for device file size
+* updated libhmac
 
 20110918
 * preparations for release
