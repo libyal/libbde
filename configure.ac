@@ -2,8 +2,8 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110830],
- [jbmetz@users.sourceforge.net])
+ [20110921],
+ [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
  [include/libbde.h.in])

@@ -64,10 +64,9 @@ void bdeoutput_copyright_fprint(
 	}
 	fprintf(
 	 stream,
-	 "Copyright (c) 2011, Joachim Metz <%s>.\n"
+	 "Copyright (C) 2011, Google Inc.\n"
 	 "This is free software; see the source for copying conditions. There is NO\n"
-	 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n",
-	 PACKAGE_BUGREPORT );
+	 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n" );
 }
 
 /* Prints the version information
