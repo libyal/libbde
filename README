@@ -1,0 +1,19 @@
+Dependencies
+libbde requires:
+* libcrypto (OpenSSL) or Windows Crypto API from the Windows Platform SDK
+  (optional but recommended)
+
+bdemount requires:
+* libfuse
+  (optional but recommended)
+
+
+Solaris
+To build libbde on Solaris make sure that /usr/ccs/bin and /usr/swf/bin are defined in the PATH environment variable
+
+
+Also see:
+* README.dll
+* README.mingw
+* README.static
+
