@@ -55,7 +55,7 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files devel
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING LICENSE.lgpl NEWS README README.mingw README.static ChangeLog
+%doc AUTHORS COPYING LICENSE.lgpl NEWS README README.dll README.mingw README.static ChangeLog
 %{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so
