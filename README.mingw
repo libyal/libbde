@@ -8,7 +8,7 @@ mingw32-configure --enable-winapi=yes
 mingw32-make
 
 It is recommended that you use WINAPI support but it is possible to compile 
-libnde without it (--enable-winapi=no). Without WINAPI support libnde will
+libbde without it (--enable-winapi=no). Without WINAPI support libbde will
 need a MinGW build of openssl libcrypto for MD5 and SHA1 support.
 The default behaviour is that libbde will try to auto-detect MinGW and enable WINAPI support.
 
@@ -30,5 +30,9 @@ CC=$CC CXX=$CXX AR=$AR OBJDUMP=$OBJDUMP RANLIB=$RANLIB STRIP=$STRIP ./configure 
 CC=$CC CXX=$CXX AR=$AR OBJDUMP=$OBJDUMP RANLIB=$RANLIB STRIP=$STRIP CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" make
 
 You should end up with the following DLL:
-libbde-<version>/libbde/.libs/libbde-2.dll
+libbde-<version>/libbde/.libs/libbde-1.dll
+
+And the following executables:
+libbde-<version>/bdetools/.libs/bdeinfo.exe
+libbde-<version>/bdetools/.libs/bdemount.exe
 

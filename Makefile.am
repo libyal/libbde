@@ -34,6 +34,7 @@ SPEC_FILES = \
 
 EXTRA_DIST = \
 	LICENSE.lgpl \
+	README.dll \
 	README.mingw \
 	README.static \
 	$(GETTEXT_FILES) \
