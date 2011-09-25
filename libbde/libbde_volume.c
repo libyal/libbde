@@ -2630,7 +2630,7 @@ int libbde_volume_read_startup_key_file_io_handle(
 	              (size_t) metadata_size,
 	              error );
 
-	if( read_count != (size_t) metadata_size )
+	if( read_count != (ssize_t) metadata_size )
 	{
 		liberror_error_set(
 		 error,
