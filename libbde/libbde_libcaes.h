@@ -28,6 +28,7 @@
 #if defined( HAVE_LOCAL_LIBCAES )
 
 #include <libcaes_context.h>
+#include <libcaes_crypt.h>
 #include <libcaes_definitions.h>
 #include <libcaes_support.h>
 #include <libcaes_types.h>

@@ -1642,7 +1642,7 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-		if( libcaes_initialize(
+		if( libcaes_context_initialize(
 		     &aes_context,
 		     error ) != 1 )
 		{
@@ -1655,8 +1655,9 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-		if( libcaes_set_encryption_key(
+		if( libcaes_crypt_set_key(
 		     aes_context,
+		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     aes_ccm_key,
 		     256,
 		     error ) != 1 )
@@ -1670,7 +1671,7 @@ int libbde_metadata_get_volume_master_key(
 
 			goto on_error;
 		}
-		if( libcaes_ccm_crypt(
+		if( libcaes_crypt_ccm(
 		     aes_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -1731,7 +1732,7 @@ int libbde_metadata_get_volume_master_key(
 				result = 1;
 			}
 		}
-		if( libcaes_free(
+		if( libcaes_context_free(
 		     &aes_context,
 		     error ) != 1 )
 		{
@@ -1868,7 +1869,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_initialize(
+			if( libcaes_context_initialize(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -1881,8 +1882,9 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_set_encryption_key(
+			if( libcaes_crypt_set_key(
 			     aes_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     aes_ccm_key,
 			     256,
 			     error ) != 1 )
@@ -1896,7 +1898,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_ccm_crypt(
+			if( libcaes_crypt_ccm(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -1957,7 +1959,7 @@ int libbde_metadata_get_volume_master_key(
 					result = 1;
 				}
 			}
-			if( libcaes_free(
+			if( libcaes_context_free(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2106,7 +2108,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_initialize(
+			if( libcaes_context_initialize(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2119,8 +2121,9 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_set_encryption_key(
+			if( libcaes_crypt_set_key(
 			     aes_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     aes_ccm_key,
 			     256,
 			     error ) != 1 )
@@ -2134,7 +2137,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_ccm_crypt(
+			if( libcaes_crypt_ccm(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->password_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -2195,7 +2198,7 @@ int libbde_metadata_get_volume_master_key(
 					result = 1;
 				}
 			}
-			if( libcaes_free(
+			if( libcaes_context_free(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2344,7 +2347,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_initialize(
+			if( libcaes_context_initialize(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2357,8 +2360,9 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_set_encryption_key(
+			if( libcaes_crypt_set_key(
 			     aes_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     aes_ccm_key,
 			     256,
 			     error ) != 1 )
@@ -2372,7 +2376,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_ccm_crypt(
+			if( libcaes_crypt_ccm(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -2433,7 +2437,7 @@ int libbde_metadata_get_volume_master_key(
 					result = 1;
 				}
 			}
-			if( libcaes_free(
+			if( libcaes_context_free(
 			     &aes_context,
 			     error ) != 1 )
 			{
@@ -2478,7 +2482,7 @@ on_error:
 	}
 	if( aes_context != NULL )
 	{
-		libcaes_free(
+		libcaes_context_free(
 		 &aes_context,
 		 NULL );
 	}
@@ -2635,7 +2639,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libcaes_initialize(
+	if( libcaes_context_initialize(
 	     &aes_context,
 	     error ) != 1 )
 	{
@@ -2648,8 +2652,9 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libcaes_set_encryption_key(
+	if( libcaes_crypt_set_key(
 	     aes_context,
+	     LIBCAES_CRYPT_MODE_ENCRYPT,
 	     volume_master_key,
 	     256,
 	     error ) != 1 )
@@ -2663,7 +2668,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libcaes_ccm_crypt(
+	if( libcaes_crypt_ccm(
 	     aes_context,
 	     LIBCAES_CRYPT_MODE_DECRYPT,
 	     metadata->full_volume_encryption_key->nonce,
@@ -2774,7 +2779,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 			result = 1;
 		}
 	}
-	if( libcaes_free(
+	if( libcaes_context_free(
 	     &aes_context,
 	     error ) != 1 )
 	{
@@ -2820,7 +2825,7 @@ on_error:
 	}
 	if( aes_context != NULL )
 	{
-		libcaes_free(
+		libcaes_context_free(
 		 &aes_context,
 		 NULL );
 	}

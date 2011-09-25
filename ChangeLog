@@ -2,6 +2,8 @@ TODO
 * libcaes
   - add support for MS Crypto API implementation - add GetError
   - WinXP no AES support ?
+  - WINAPI initialize provider only once - where to stick the init functions ?
+  - wincrypt and EVP - make sure to pass block sized blocks ?
 * check metadata number_of_volume_header_sectors ?
 * add password support (partial)
 * debug print more volume header info

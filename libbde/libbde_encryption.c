@@ -86,7 +86,7 @@ int libbde_encryption_initialize(
 
 			return( -1 );
 		}
-		if( libcaes_initialize(
+		if( libcaes_context_initialize(
 		     &( ( *context )->fvek_decryption_context ),
 		     error ) != 1 )
 		{
@@ -99,7 +99,7 @@ int libbde_encryption_initialize(
 
 			goto on_error;
 		}
-		if( libcaes_initialize(
+		if( libcaes_context_initialize(
 		     &( ( *context )->fvek_encryption_context ),
 		     error ) != 1 )
 		{
@@ -112,7 +112,7 @@ int libbde_encryption_initialize(
 
 			goto on_error;
 		}
-		if( libcaes_initialize(
+		if( libcaes_context_initialize(
 		     &( ( *context )->tweak_decryption_context ),
 		     error ) != 1 )
 		{
@@ -125,7 +125,7 @@ int libbde_encryption_initialize(
 
 			goto on_error;
 		}
-		if( libcaes_initialize(
+		if( libcaes_context_initialize(
 		     &( ( *context )->tweak_encryption_context ),
 		     error ) != 1 )
 		{
@@ -147,19 +147,19 @@ on_error:
 	{
 		if( ( *context )->tweak_decryption_context != NULL )
 		{
-			libcaes_free(
+			libcaes_context_free(
 			 &( ( *context )->tweak_decryption_context ),
 			 NULL );
 		}
 		if( ( *context )->fvek_encryption_context != NULL )
 		{
-			libcaes_free(
+			libcaes_context_free(
 			 &( ( *context )->fvek_encryption_context ),
 			 NULL );
 		}
 		if( ( *context )->fvek_decryption_context != NULL )
 		{
-			libcaes_free(
+			libcaes_context_free(
 			 &( ( *context )->fvek_decryption_context ),
 			 NULL );
 		}
@@ -194,7 +194,7 @@ int libbde_encryption_free(
 	}
 	if( *context != NULL )
 	{
-		if( libcaes_free(
+		if( libcaes_context_free(
 		     &( ( *context )->fvek_decryption_context ),
 		     error ) != 1 )
 		{
@@ -207,7 +207,7 @@ int libbde_encryption_free(
 
 			result = -1;
 		}
-		if( libcaes_free(
+		if( libcaes_context_free(
 		     &( ( *context )->fvek_encryption_context ),
 		     error ) != 1 )
 		{
@@ -220,7 +220,7 @@ int libbde_encryption_free(
 
 			result = -1;
 		}
-		if( libcaes_free(
+		if( libcaes_context_free(
 		     &( ( *context )->tweak_decryption_context ),
 		     error ) != 1 )
 		{
@@ -233,7 +233,7 @@ int libbde_encryption_free(
 
 			result = -1;
 		}
-		if( libcaes_free(
+		if( libcaes_context_free(
 		     &( ( *context )->tweak_encryption_context ),
 		     error ) != 1 )
 		{
@@ -289,8 +289,9 @@ int libbde_encryption_set_keys(
 	}
 	/* The volume master key is always 256-bit in size
 	 */
-	if( libcaes_set_decryption_key(
+	if( libcaes_crypt_set_key(
 	     context->fvek_decryption_context,
+	     LIBCAES_CRYPT_MODE_DECRYPT,
 	     full_volume_encryption_key,
 	     key_bit_size,
 	     error ) != 1 )
@@ -304,8 +305,9 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( libcaes_set_encryption_key(
+	if( libcaes_crypt_set_key(
 	     context->fvek_encryption_context,
+	     LIBCAES_CRYPT_MODE_ENCRYPT,
 	     full_volume_encryption_key,
 	     key_bit_size,
 	     error ) != 1 )
@@ -324,8 +326,9 @@ int libbde_encryption_set_keys(
 	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		if( libcaes_set_decryption_key(
+		if( libcaes_crypt_set_key(
 		     context->tweak_decryption_context,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     tweak_key,
 		     key_bit_size,
 		     error ) != 1 )
@@ -339,8 +342,9 @@ int libbde_encryption_set_keys(
 
 			return( -1 );
 		}
-		if( libcaes_set_encryption_key(
+		if( libcaes_crypt_set_key(
 		     context->tweak_encryption_context,
+		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     tweak_key,
 		     key_bit_size,
 		     error ) != 1 )
@@ -451,7 +455,7 @@ int libbde_encryption_crypt(
 	/* The block key for the initialization vector is encrypted
 	 * with the FVEK
 	 */
-	if( libcaes_ecb_crypt(
+	if( libcaes_crypt_ecb(
 	     context->fvek_encryption_context,
 	     LIBCAES_CRYPT_MODE_ENCRYPT,
 	     block_key_data,
@@ -475,7 +479,7 @@ int libbde_encryption_crypt(
 		/* The block key for the sector key data is encrypted
 		 * with the TWEAK key
 		 */
-		if( libcaes_ecb_crypt(
+		if( libcaes_crypt_ecb(
 		     context->tweak_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
@@ -497,7 +501,7 @@ int libbde_encryption_crypt(
 		 */
 		block_key_data[ 15 ] = 0x80;
 
-		if( libcaes_ecb_crypt(
+		if( libcaes_crypt_ecb(
 		     context->tweak_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
@@ -552,7 +556,7 @@ int libbde_encryption_crypt(
 				return( -1 );
 			}
 		}
-		if( libcaes_cbc_crypt(
+		if( libcaes_crypt_cbc(
 		     context->fvek_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     initialization_vector,
@@ -575,7 +579,7 @@ int libbde_encryption_crypt(
 	}
 	else
 	{
-		if( libcaes_cbc_crypt(
+		if( libcaes_crypt_cbc(
 		     context->fvek_decryption_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     initialization_vector,
