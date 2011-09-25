@@ -42,8 +42,8 @@ const uint8_t bde_boot_entry_point_vista[ 3 ] = { 0xeb, 0x52, 0x90 };
 const uint8_t bde_boot_entry_point_win7[ 3 ]  = { 0xeb, 0x58, 0x90 };
 const uint8_t bde_identifier[ 16 ]            = { 0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
 
-const char bde_signature[ 8 ]                         = "-FVE-FS-";
-const char bde_ntfs_volume_file_system_signature[ 8 ] = "NTFS    ";
+const char *bde_signature                         = "-FVE-FS-";
+const char *bde_ntfs_volume_file_system_signature = "NTFS    ";
 
 /* Initialize an IO handle
  * Make sure the value io_handle is pointing to is set to NULL

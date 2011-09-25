@@ -434,7 +434,7 @@ int libbde_sector_data_read(
 	/* Check if the offset is outside the encrypted part of the volume
 	 */
 	else if( ( io_handle->encrypted_volume_size != 0 )
-	      && ( sector_data_offset >= io_handle->encrypted_volume_size ) )
+	      && ( sector_data_offset >= (off64_t) io_handle->encrypted_volume_size ) )
 	{
 		if( memory_copy(
 		     sector_data->data,

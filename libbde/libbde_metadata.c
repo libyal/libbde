@@ -552,7 +552,7 @@ int libbde_metadata_read_block(
 			io_handle->third_metadata_offset = third_metadata_offset;
 		}
 	}
-	if( io_handle->first_metadata_offset != first_metadata_offset )
+	if( (uint64_t) io_handle->first_metadata_offset != first_metadata_offset )
 	{
 		liberror_error_set(
 		 error,
@@ -563,7 +563,7 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	if( io_handle->second_metadata_offset != second_metadata_offset )
+	if( (uint64_t) io_handle->second_metadata_offset != second_metadata_offset )
 	{
 		liberror_error_set(
 		 error,
@@ -574,7 +574,7 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	if( io_handle->third_metadata_offset != third_metadata_offset )
+	if( (uint64_t) io_handle->third_metadata_offset != third_metadata_offset )
 	{
 		liberror_error_set(
 		 error,
