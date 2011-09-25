@@ -23,7 +23,6 @@ Cygwin with the following packages:
 * libtool
 * gettext
 * libiconv
-* zlib-devel
 * openssl-devel (optional but recommended)
 * libuuid-devel (optional but recommended)
 
@@ -48,11 +47,6 @@ To create a DLL using Microsoft Visual Studio C++ you'll need:
   Microsoft website
 * Microsoft Windows SDK (if not already included) for the Windows Crypto API
   The Windows SDK is available on the Microsoft website
-* The zlib 1.2.5 source package including from the zlib project site:
-  http://www.gzip.org/zlib/
-
-Extract the contents of the zlib DLL package to:
-libbde-<version>/msvscpp/zlib-1.2.5
 
 Make sure to check if your build environment defines the correct WINVER for your build.
 The code uses WINAPI version specific functions based on WINVER.
@@ -74,8 +68,6 @@ libbde/.libs/libbde-<version>.dll
 
 Using the DLL
 Make sure you use define LIBEWF_DLL_IMPORT before including <libbde.h>,
-
-During runtime the libbde DLL also needs the zlib DLL. 
 
 When the DLL was build with Microsoft Visual Studio, you'll also need the Microsoft Visual Studio redistributable DLLs
 to run on other platforms than the build platform.

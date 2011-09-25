@@ -2,6 +2,7 @@ EXTRA_DIST = \
 	bdeinfo/bdeinfo.vcproj \
 	libbde_dll/libbde_dll.vcproj \
 	libbfio/libbfio.vcproj \
+	libcaes/libcaes.vcproj \
 	libcstring/libcstring.vcproj \
 	liberror/liberror.vcproj \
 	libfdata/libfdata.vcproj \

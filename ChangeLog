@@ -1,5 +1,4 @@
 TODO
-* updated msvscpp files - add libcaes
 * libcaes
   - add support for MS Crypto API implementation - add GetError
   - WinXP no AES support ?
@@ -48,6 +47,10 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20110925
+* updated msvscpp files
+* fixes for WINAPI build
 
 20110921
 * preparations for release

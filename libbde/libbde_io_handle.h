@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-extern const char bde_signature[ 8 ];
+extern const char* bde_signature;
 
 typedef struct libbde_io_handle libbde_io_handle_t;
 
