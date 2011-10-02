@@ -4,7 +4,7 @@ dnl Function to detect if libcaes is available
 AC_DEFUN([AC_CHECK_LIBCAES],
  [dnl Check if parameters were provided
  AS_IF(
-  [test x"$ac_cv_with_libcaes" != x && test "x$ac_cv_with_libcaes" != xno && test "x$ac_cv_with_libcaes" != xauto-detect],
+  [test "x$ac_cv_with_libcaes" != x && test "x$ac_cv_with_libcaes" != xno && test "x$ac_cv_with_libcaes" != xauto-detect],
   [AS_IF(
    [test -d "$ac_cv_with_libcaes"],
    [CFLAGS="$CFLAGS -I${ac_cv_with_libcaes}/include"
@@ -14,7 +14,7 @@ AC_DEFUN([AC_CHECK_LIBCAES],
   ])
 
  AS_IF(
-  [test x"$ac_cv_with_libcaes" != xno],
+  [test "x$ac_cv_with_libcaes" != xno],
   [dnl Check for headers
   AC_CHECK_HEADERS([libcaes.h])
 
@@ -149,7 +149,7 @@ dnl Function to detect if libcaes dependencies are available
 AC_DEFUN([AC_CHECK_LOCAL_LIBCAES],
  [dnl Check if parameters were provided 
  AS_IF(
-  [test x"$ac_cv_with_openssl" != x && test "x$ac_cv_with_openssl" != xno && test "x$ac_cv_with_openssl" != xauto-detect],
+  [test "x$ac_cv_with_openssl" != x && test "x$ac_cv_with_openssl" != xno && test "x$ac_cv_with_openssl" != xauto-detect],
   [AS_IF(
    [test -d "$ac_cv_with_openssl"],
    [CFLAGS="$CFLAGS -I${ac_cv_with_openssl}/include"
