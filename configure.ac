@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20110925],
+ [20111002],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -133,6 +133,12 @@ AC_CHECK_LOCAL_TYPES
 dnl Check for headers
 
 dnl Check for functions
+
+dnl System functions
+AS_IF(
+ [test "x$ac_cv_enable_winapi" = xno],
+ [AC_CHECK_FUNCS([getegid geteuid])
+ ])
 
 dnl Check for printf conversion specifier support
 AC_CHECK_FUNC_PRINTF_JD
@@ -584,7 +590,7 @@ CFLAGS="$CFLAGS -Wall";
 
 dnl Check if DLL support is needed in bdetools
 AS_IF(
- [test x"$enable_shared" = xyes],
+ [test "x$enable_shared" = xyes],
  [AS_CASE(
   [$host],
   [*cygwin* | *mingw*],
