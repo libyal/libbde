@@ -50,6 +50,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111002
+* updated configure
+* added geteuid and getegid check
+
 20110925
 * updated msvscpp files
 * fixes for WINAPI build
