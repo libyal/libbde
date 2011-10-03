@@ -570,10 +570,10 @@ AS_IF(
  ])
 
 dnl Set memwatch support
-ac_libbde_have_memwatch=no
+ac_cv_have_memwatch=no
 
 AS_IF(
- [test "x$ac_libbde_have_memwatch" != xno ],
+ [test "x$ac_cv_have_memwatch" != xno ],
  [AC_SUBST(
   [MEMWATCH_CPPFLAGS],
   ["-DMEMWATCH -DMEMWATCH_STDIO"])
@@ -583,7 +583,7 @@ AS_IF(
 
 AM_CONDITIONAL(
  [HAVE_MEMWATCH],
- [test "x$ac_libbde_have_memwatch" != xno])
+ [test "x$ac_cv_have_memwatch" != xno])
 
 dnl Set additional compiler flags
 CFLAGS="$CFLAGS -Wall";
