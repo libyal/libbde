@@ -1,6 +1,5 @@
 TODO
 * libcaes
-  - add support for MS Crypto API implementation - add GetError
   - WinXP no AES support ?
   - WINAPI initialize provider only once - where to stick the init functions ?
   - wincrypt and EVP - make sure to pass block sized blocks ?
@@ -49,6 +48,9 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20111003
+* worked on libcaes
 
 20111002
 * updated configure
