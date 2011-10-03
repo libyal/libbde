@@ -1,5 +1,5 @@
 Libbde supports two types of static compilation
-* static libary
+* static library
 * static excutables
 
 Creating a static library
