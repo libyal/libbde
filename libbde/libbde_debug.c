@@ -136,7 +136,7 @@ const char *libbde_debug_print_value_type(
 /* Prints the key protection type
  */
 const char *libbde_debug_print_key_protection_type(
-             uint32_t key_protection_type )
+             uint16_t key_protection_type )
 {
 	switch( key_protection_type )
 	{

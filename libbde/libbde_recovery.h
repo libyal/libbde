@@ -58,19 +58,24 @@ struct libbde_recovery_key_data
 int libbde_utf8_recovery_password_calculate_hash(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     uint8_t recovery_password_hash[ 32 ],
+     uint8_t *recovery_password_hash,
+     size_t recovery_password_hash_size,
      liberror_error_t **error );
 
 int libbde_utf16_recovery_password_calculate_hash(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     uint8_t recovery_password_hash[ 32 ],
+     uint8_t *recovery_password_hash,
+     size_t recovery_password_hash_size,
      liberror_error_t **error );
 
 int libbde_recovery_calculate_key(
-     const uint8_t recovery_password_hash[ 32 ],
-     const uint8_t salt[ 16 ],
-     uint8_t key[ 32 ],
+     const uint8_t *recovery_password_hash,
+     size_t recovery_password_hash_size,
+     const uint8_t *salt,
+     size_t salt_size,
+     uint8_t *key,
+     size_t key_size,
      liberror_error_t **error );
 
 #if defined( __cplusplus )

@@ -100,11 +100,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\liberror"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBFDATETIME"
-				RuntimeLibrary="2"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="3"
 				WarningLevel="4"
-				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
 			<Tool
@@ -168,6 +170,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfdatetime\libfdatetime_posix_time.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfdatetime\libfdatetime_support.c"
 				>
 			</File>
@@ -203,6 +209,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdatetime\libfdatetime_nsf_timedate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfdatetime\libfdatetime_posix_time.h"
 				>
 			</File>
 			<File

@@ -47,7 +47,7 @@ struct libbde_volume_master_key
 
 	/* The protection type
 	 */
-	uint32_t protection_type;
+	uint16_t protection_type;
 
 	/* The key
 	 */

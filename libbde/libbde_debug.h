@@ -44,7 +44,7 @@ const char *libbde_debug_print_value_type(
              uint16_t value_type );
 
 const char *libbde_debug_print_key_protection_type(
-             uint32_t key_protection_type );
+             uint16_t key_protection_type );
 
 int libbde_debug_print_read_offsets(
      libbfio_handle_t *file_io_handle,

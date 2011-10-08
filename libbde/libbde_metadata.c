@@ -1607,7 +1607,7 @@ int libbde_metadata_get_volume_master_key(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: recovery password volume master key - AES-CCM encrypted key data size value out of bounds.",
+			 "%s: clear key volume master key - AES-CCM encrypted key data size value out of bounds.",
 			 function );
 
 			goto on_error;
@@ -2043,8 +2043,11 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( libbde_password_calculate_key(
 			     io_handle->password_hash,
+			     32,
 			     metadata->password_volume_master_key->stretch_key->salt,
+			     16,
 			     aes_ccm_key,
+			     32,
 			     error ) != 1 )
 			{
 				liberror_error_set(
@@ -2282,8 +2285,11 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( libbde_recovery_calculate_key(
 			     io_handle->recovery_password_hash,
+			     32,
 			     metadata->recovery_password_volume_master_key->stretch_key->salt,
+			     16,
 			     aes_ccm_key,
+			     32,
 			     error ) != 1 )
 			{
 				liberror_error_set(

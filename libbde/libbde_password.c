@@ -36,13 +36,36 @@
 int libbde_utf8_password_calculate_hash(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     uint8_t password_hash[ 32 ],
+     uint8_t *password_hash,
+     size_t password_hash_size,
      liberror_error_t **error )
 {
 	uint8_t *utf16_stream    = NULL;
 	static char *function    = "libbde_utf8_password_calculate_hash";
 	size_t utf16_stream_size = 0;
 
+	if( password_hash == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid password hash.",
+		 function );
+
+		return( -1 );
+	}
+	if( password_hash_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: password hash size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( libuna_utf16_stream_size_from_utf8(
 	     utf8_string,
 	     utf8_string_length,
@@ -89,11 +112,24 @@ int libbde_utf8_password_calculate_hash(
 
 		goto on_error;
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libnotify_verbose != 0 )
+		{
+			libnotify_printf(
+			 "%s: password:\n",
+			 function );
+			libnotify_print_data(
+			 utf16_stream,
+			 utf16_stream_size );
+		}
+#endif
+	/* Ignore the byte-order mark in the UTF16 stream
+	 */
 	if( libhmac_sha256_calculate(
 	     &( utf16_stream[ 2 ] ),
-	     utf16_stream_size - 4,
+	     utf16_stream_size - 2,
 	     password_hash,
-	     LIBHMAC_SHA256_HASH_SIZE,
+	     password_hash_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -143,13 +179,36 @@ on_error:
 int libbde_utf16_password_calculate_hash(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     uint8_t password_hash[ 32 ],
+     uint8_t *password_hash,
+     size_t password_hash_size,
      liberror_error_t **error )
 {
 	uint8_t *utf16_stream    = NULL;
 	static char *function    = "libbde_utf16_password_calculate_hash";
 	size_t utf16_stream_size = 0;
 
+	if( password_hash == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid password hash.",
+		 function );
+
+		return( -1 );
+	}
+	if( password_hash_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: password hash size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( libuna_utf16_stream_size_from_utf16(
 	     utf16_string,
 	     utf16_string_length,
@@ -196,11 +255,13 @@ int libbde_utf16_password_calculate_hash(
 
 		goto on_error;
 	}
+	/* Ignore the byte-order mark in the UTF16 stream
+	 */
 	if( libhmac_sha256_calculate(
 	     &( utf16_stream[ 2 ] ),
-	     utf16_stream_size - 4,
+	     utf16_stream_size - 2,
 	     password_hash,
-	     LIBHMAC_SHA256_HASH_SIZE,
+	     password_hash_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -248,16 +309,84 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_password_calculate_key(
-     const uint8_t password_hash[ 32 ],
-     const uint8_t salt[ 16 ],
-     uint8_t key[ 32 ],
+     const uint8_t *password_hash,
+     size_t password_hash_size,
+     const uint8_t *salt,
+     size_t salt_size,
+     uint8_t *key,
+     size_t key_size,
      liberror_error_t **error )
 {
 	libbde_password_key_data_t password_key_data;
 
-	static char *function    = "libbde_password_calculate_key";
-	uint32_t iteration_count = 0;
+	static char *function = "libbde_password_calculate_key";
 
+	if( password_hash == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid password hash.",
+		 function );
+
+		return( -1 );
+	}
+	if( password_hash_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: password hash size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( salt == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid salt.",
+		 function );
+
+		return( -1 );
+	}
+	if( salt_size != 16 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: salt size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( key == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: key size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( memory_set(
 	     &password_key_data,
 	     0,
@@ -273,9 +402,9 @@ int libbde_password_calculate_key(
 		return( -1 );
 	}
 	if( memory_copy(
-	     &( password_key_data.sha256_hash ),
+	     &( password_key_data.initial_sha256_hash ),
 	     password_hash,
-	     32 ) == NULL )
+	     password_hash_size ) == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -289,7 +418,7 @@ int libbde_password_calculate_key(
 	if( memory_copy(
 	     &( password_key_data.salt ),
 	     salt,
-	     16 ) == NULL )
+	     salt_size ) == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -300,16 +429,16 @@ int libbde_password_calculate_key(
 
 		return( -1 );
 	}
-	/* The password key is the SHA256 digest hash after 0x10000 key iterations
+	/* The password key is the SHA256 digest hash after 0x100000 key iterations
 	 */
-	for( iteration_count = 0;
-	     iteration_count < 0x0000ffffUL;
-	     iteration_count += 1 )
+	for( password_key_data.iteration_count = 0;
+	     password_key_data.iteration_count < 0x000fffffUL;
+	     password_key_data.iteration_count += 1 )
 	{
 		if( libhmac_sha256_calculate(
 		     (uint8_t *) &password_key_data,
 		     sizeof( libbde_password_key_data_t ),
-		     password_key_data.sha256_hash,
+		     password_key_data.last_sha256_hash,
 		     LIBHMAC_SHA256_HASH_SIZE,
 		     error ) != 1 )
 		{
@@ -327,7 +456,7 @@ int libbde_password_calculate_key(
 	     (uint8_t *) &password_key_data,
 	     sizeof( libbde_password_key_data_t ),
 	     key,
-	     32,
+	     key_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(

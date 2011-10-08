@@ -1,6 +1,6 @@
 dnl Functions for libfdata
 dnl
-dnl Version: 20111007
+dnl Version: 20111008
 
 dnl Function to detect if libfdata is available
 dnl ac_libfdata_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -56,7 +56,7 @@ AC_DEFUN([AX_LIBFDATA_CHECK_LIB],
  ])
 
 dnl Function to detect if libfdata dependencies are available
-AC_DEFUN([AC_CHECK_LOCAL_LIBFDATA],
+AC_DEFUN([AX_LIBFDATA_CHECK_LOCAL],
  [dnl Types used in libfdata/libfdata_date_time.h
  AC_STRUCT_TM
 

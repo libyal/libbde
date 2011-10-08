@@ -36,7 +36,8 @@
 int libbde_utf8_recovery_password_calculate_hash(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     uint8_t recovery_password_hash[ 32 ],
+     uint8_t *recovery_password_hash,
+     size_t recovery_password_hash_size,
      liberror_error_t **error )
 {
 	uint8_t binary_recovery_password[ 16 ];
@@ -50,6 +51,28 @@ int libbde_utf8_recovery_password_calculate_hash(
 	int result                                  = 0;
 	int segment_index                           = 0;
 
+	if( recovery_password_hash == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid recovery password hash.",
+		 function );
+
+		return( -1 );
+	}
+	if( recovery_password_hash_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: recovery password hash size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( libfvalue_utf8_string_split(
 	     utf8_string,
 	     utf8_string_length + 1,
@@ -171,7 +194,7 @@ int libbde_utf8_recovery_password_calculate_hash(
 		     binary_recovery_password,
 		     16,
 		     recovery_password_hash,
-		     LIBHMAC_SHA256_HASH_SIZE,
+		     recovery_password_hash_size,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -221,7 +244,8 @@ on_error:
 int libbde_utf16_recovery_password_calculate_hash(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     uint8_t recovery_password_hash[ 32 ],
+     uint8_t *recovery_password_hash,
+     size_t recovery_password_hash_size,
      liberror_error_t **error )
 {
 	uint8_t binary_recovery_password[ 16 ];
@@ -235,6 +259,28 @@ int libbde_utf16_recovery_password_calculate_hash(
 	int result                                   = 0;
 	int segment_index                            = 0;
 
+	if( recovery_password_hash == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid recovery password hash.",
+		 function );
+
+		return( -1 );
+	}
+	if( recovery_password_hash_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: recovery password hash size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( libfvalue_utf16_string_split(
 	     utf16_string,
 	     utf16_string_length + 1,
@@ -356,7 +402,7 @@ int libbde_utf16_recovery_password_calculate_hash(
 		     binary_recovery_password,
 		     16,
 		     recovery_password_hash,
-		     LIBHMAC_SHA256_HASH_SIZE,
+		     recovery_password_hash_size,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -404,15 +450,84 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_recovery_calculate_key(
-     const uint8_t recovery_password_hash[ 32 ],
-     const uint8_t salt[ 16 ],
-     uint8_t key[ 32 ],
+     const uint8_t *recovery_password_hash,
+     size_t recovery_password_hash_size,
+     const uint8_t *salt,
+     size_t salt_size,
+     uint8_t *key,
+     size_t key_size,
      liberror_error_t **error )
 {
 	libbde_recovery_key_data_t recovery_key_data;
 
 	static char *function = "libbde_recovery_calculate_key";
 
+	if( recovery_password_hash == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid recovery password hash.",
+		 function );
+
+		return( -1 );
+	}
+	if( recovery_password_hash_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: recovery password hash size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( salt == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid salt.",
+		 function );
+
+		return( -1 );
+	}
+	if( salt_size != 16 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: salt size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( key == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_size != 32 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: key size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( memory_set(
 	     &recovery_key_data,
 	     0,
@@ -430,7 +545,7 @@ int libbde_recovery_calculate_key(
 	if( memory_copy(
 	     &( recovery_key_data.initial_sha256_hash ),
 	     recovery_password_hash,
-	     32 ) == NULL )
+	     recovery_password_hash_size ) == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -444,7 +559,7 @@ int libbde_recovery_calculate_key(
 	if( memory_copy(
 	     &( recovery_key_data.salt ),
 	     salt,
-	     16 ) == NULL )
+	     salt_size ) == NULL )
 	{
 		liberror_error_set(
 		 error,
@@ -482,7 +597,7 @@ int libbde_recovery_calculate_key(
 	     (uint8_t *) &recovery_key_data,
 	     sizeof( libbde_recovery_key_data_t ),
 	     key,
-	     32,
+	     key_size,
 	     error ) != 1 )
 	{
 		liberror_error_set(
