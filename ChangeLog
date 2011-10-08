@@ -49,6 +49,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111007
+* updated configure.ac and m4 files
+
 20111003
 * worked on libcaes
 
