@@ -242,6 +242,7 @@ int libbde_volume_master_key_read(
 
 	libfdatetime_filetime_t *filetime                     = NULL;
 	libfguid_identifier_t *guid                           = NULL;
+	uint16_t value_16bit                                  = 0;
 	int result                                            = 0;
 #endif
 
@@ -307,7 +308,7 @@ int libbde_volume_master_key_read(
 
 		goto on_error;
 	}
-	byte_stream_copy_to_uint32_little_endian(
+	byte_stream_copy_to_uint16_little_endian(
 	 ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->protection_type,
 	 volume_master_key->protection_type );
 
@@ -461,8 +462,16 @@ int libbde_volume_master_key_read(
 
 			goto on_error;
 		}
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_metadata_entry_volume_master_key_header_t *) value_data )->unknown1,
+		 value_16bit );
 		libnotify_printf(
-		 "%s: protection type\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
+		 "%s: unknown1\t\t\t\t\t: %" PRIu16 "\n",
+		 function,
+		 value_16bit );
+
+		libnotify_printf(
+		 "%s: protection type\t\t\t\t: 0x%04" PRIx16 " (%s)\n",
 		 function,
 		 volume_master_key->protection_type,
 		 libbde_debug_print_key_protection_type(

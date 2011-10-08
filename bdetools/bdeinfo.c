@@ -62,7 +62,7 @@ void usage_fprint(
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
-	fprintf( stream, "\t-p:     specify the password\n" );
+	fprintf( stream, "\t-p:     specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-s:     specify the file containing the startup key.\n"
 	                 "\t        typically this file has the extension .BEK\n" );
@@ -235,7 +235,6 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_password != NULL )
 	{
-/* TODO */
 		fprintf(
 		 stderr,
 		 "Password not yet supported.\n" );

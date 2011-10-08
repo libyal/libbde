@@ -29,8 +29,11 @@
 
 #include <libfdatetime_date_time_values.h>
 #include <libfdatetime_definitions.h>
+#include <libfdatetime_error.h>
 #include <libfdatetime_fat_date_time.h>
 #include <libfdatetime_filetime.h>
+#include <libfdatetime_nsf_timedate.h>
+#include <libfdatetime_posix_time.h>
 #include <libfdatetime_types.h>
 
 #elif defined( HAVE_LIBFDATETIME_H )

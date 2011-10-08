@@ -279,10 +279,15 @@ struct bde_metadata_entry_volume_master_key_header
 	 */
 	uint8_t modification_time[ 8 ];
 
-	/* The protection type
-	 * Consists of 4 bytes
+	/* Unknown
+	 * Consists of 2 bytes
 	 */
-	uint8_t protection_type[ 4 ];
+	uint8_t unknown1[ 2 ];
+
+	/* The protection type
+	 * Consists of 2 bytes
+	 */
+	uint8_t protection_type[ 2 ];
 };
 
 typedef struct bde_metadata_entry_external_key_header bde_metadata_entry_external_key_header_t;

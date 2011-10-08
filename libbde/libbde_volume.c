@@ -1984,6 +1984,7 @@ int libbde_volume_set_utf8_password(
 	     utf8_string,
 	     utf8_string_length,
 	     internal_volume->io_handle->password_hash,
+	     32,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -2052,6 +2053,7 @@ int libbde_volume_set_utf16_password(
 	     utf16_string,
 	     utf16_string_length,
 	     internal_volume->io_handle->password_hash,
+	     32,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -2120,6 +2122,7 @@ int libbde_volume_set_utf8_recovery_password(
 	     utf8_string,
 	     utf8_string_length,
 	     internal_volume->io_handle->recovery_password_hash,
+	     32,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -2188,6 +2191,7 @@ int libbde_volume_set_utf16_recovery_password(
 	     utf16_string,
 	     utf16_string_length,
 	     internal_volume->io_handle->recovery_password_hash,
+	     32,
 	     error ) != 1 )
 	{
 		liberror_error_set(
