@@ -1,13 +1,13 @@
 include_HEADERS = \
-        libbde.h
+	libbde.h
 
 pkginclude_HEADERS = \
-        libbde/codepage.h \
-        libbde/definitions.h \
-        libbde/error.h \
-        libbde/extern.h \
-        libbde/features.h \
-        libbde/types.h
+	libbde/codepage.h \
+	libbde/definitions.h \
+	libbde/error.h \
+	libbde/extern.h \
+	libbde/features.h \
+	libbde/types.h
 
 EXTRA_DIST = \
 	libbde.h.in \

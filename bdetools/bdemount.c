@@ -74,7 +74,7 @@ void usage_fprint(
 
 	fprintf( stream, "\t-h:          shows this help\n" );
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
-	fprintf( stream, "\t-p:          specify the password\n" );
+	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
 	fprintf( stream, "\t-s:          specify the file containing the startup key.\n"
 	                 "\t             typically this file has the extension .BEK\n" );
@@ -562,9 +562,14 @@ int bdemount_fuse_getattr(
 	}
 	if( result == 0 )
 	{
-		stat_info->st_atime = 0;
-		stat_info->st_mtime = 0;
-		stat_info->st_ctime = 0;
+		stat_info->st_atime = libsystem_date_time_time(
+		                       NULL );
+
+		stat_info->st_mtime = libsystem_date_time_time(
+		                       NULL );
+
+		stat_info->st_ctime = libsystem_date_time_time(
+		                       NULL );
 
 #if defined( HAVE_GETEUID )
 		stat_info->st_uid = geteuid();

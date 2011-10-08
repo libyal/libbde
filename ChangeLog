@@ -49,6 +49,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111008
+* updated common
+* updated libhmac, libsystem, libuna, libfdatetime
+
 20111007
 * updated configure.ac and m4 files
 
