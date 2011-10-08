@@ -1,11 +1,11 @@
-Libbde supports two types of static compilation
+Libbde supports the following types of static compilation:
 * static library
 * static excutables
 
 Creating a static library
 
 Use the following command to tell configure you want to make a static library:
-./configure --enable-shared=no --with-openssl=no
+./configure --enable-shared=no
 
 
 Creating static executables
@@ -16,5 +16,5 @@ Make sure you have a static version of:
 Some distrubions provide separate packages for static versions of libraries
 
 Use the following command to tell configure you want to make a static executables:
-./configure --enable-static-executables=yes --with-openssl=no
+./configure --enable-static-executables=yes
 
