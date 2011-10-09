@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="libfdata"
-	ProjectGUID="{264AD185-50D7-4C55-AADC-9DE7BB788BAA}"
+	ProjectGUID="{F94DCC2D-2B49-453E-89B3-FD81992677D0}"
 	RootNamespace="libfdata"
 	TargetFrameworkVersion="131072"
 	>
@@ -100,9 +100,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\liberror;..\..\libnotify;..\..\libbfio"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFDATA"
-				RuntimeLibrary="2"
+				BasicRuntimeChecks="3"
+				SmallerTypeCheck="true"
+				RuntimeLibrary="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 				CompileAs="1"
@@ -156,15 +159,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdata\libfdata_block_reference.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_buffer.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_buffer_reference.c"
 				>
 			</File>
 			<File
@@ -193,10 +188,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_range.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_reference.c"
 				>
 			</File>
 			<File
@@ -230,15 +221,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdata\libfdata_block_reference.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_buffer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_buffer_reference.h"
 				>
 			</File>
 			<File
@@ -247,10 +230,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_cache_value.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_date_time.h"
 				>
 			</File>
 			<File
@@ -286,10 +265,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdata\libfdata_reference.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_support.h"
 				>
 			</File>
@@ -303,10 +278,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_unused.h"
 				>
 			</File>
 			<File

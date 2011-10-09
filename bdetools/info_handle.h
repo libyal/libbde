@@ -74,7 +74,7 @@ int info_handle_read_startup_key(
      const libcstring_system_character_t *filename,
      liberror_error_t **error );
 
-int info_handle_open(
+int info_handle_open_input(
      info_handle_t *info_handle,
      const libcstring_system_character_t *filename,
      liberror_error_t **error );

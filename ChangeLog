@@ -4,14 +4,14 @@ TODO
   - WINAPI initialize provider only once - where to stick the init functions ?
   - wincrypt and EVP - make sure to pass block sized blocks ?
 * check metadata number_of_volume_header_sectors ?
-* add password support (partial)
 * debug print more volume header info
 
 Optimizations
 * pass values 32-bit to aes
 
 Library
-* add password support
+* add support for smart card + pin?
+* add support for TPM ?
 
 Test suite:
 * add test scripts
@@ -49,9 +49,15 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111009
+* updated pc and spec file
+* changes to libcaes for WINAPI build
+* added password support
+
 20111008
 * updated common
 * updated libhmac, libsystem, libuna, libfdatetime
+* updated msvscpp files
 
 20111007
 * updated configure.ac and m4 files

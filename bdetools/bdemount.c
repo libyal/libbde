@@ -54,7 +54,7 @@
 mount_handle_t *bdemount_mount_handle = NULL;
 int bdemount_abort                    = 0;
 
-/* Prints the executable usage mountrmation
+/* Prints the executable usage information
  */
 void usage_fprint(
       FILE *stream )
@@ -86,10 +86,12 @@ void usage_fprint(
 /* Signal handler for bdemount
  */
 void bdemount_signal_handler(
-      libsystem_signal_t signal )
+      libsystem_signal_t signal LIBSYSTEM_ATTRIBUTE_UNUSED )
 {
 	liberror_error_t *error = NULL;
 	static char *function   = "bdemount_signal_handler";
+
+	LIBSYSTEM_UNREFERENCED_PARAMETER( signal )
 
 	bdemount_abort = 1;
 
@@ -344,13 +346,16 @@ int bdemount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
-     off_t offset,
-     struct fuse_file_info *file_info )
+     off_t offset LIBSYSTEM_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info LIBSYSTEM_ATTRIBUTE_UNUSED )
 {
 	liberror_error_t *error = NULL;
 	static char *function   = "bdemount_fuse_readdir";
 	size_t path_length      = 0;
 	int result              = 0;
+
+	LIBSYSTEM_UNREFERENCED_PARAMETER( offset )
+	LIBSYSTEM_UNREFERENCED_PARAMETER( file_info )
 
 	if( path == NULL )
 	{
@@ -754,13 +759,6 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_password != NULL )
 	{
-/* TODO */
-		fprintf(
-		 stderr,
-		 "Password not yet supported.\n" );
-
-		goto on_error;
-
 		if( mount_handle_set_password(
 		     bdemount_mount_handle,
 		     option_password,
