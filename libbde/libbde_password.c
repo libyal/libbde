@@ -401,6 +401,7 @@ int libbde_password_calculate_key(
 
 		return( -1 );
 	}
+/* TODO
 	if( memory_copy(
 	     &( password_key_data.initial_sha256_hash ),
 	     password_hash,
@@ -411,6 +412,23 @@ int libbde_password_calculate_key(
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
 		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
 		 "%s: unable to copy password hash to password key data.",
+		 function );
+
+		return( -1 );
+	}
+*/
+	if( libhmac_sha256_calculate(
+	     password_hash,
+	     password_hash_size,
+	     password_key_data.initial_sha256_hash,
+	     LIBHMAC_SHA256_HASH_SIZE,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to calculate SHA256.",
 		 function );
 
 		return( -1 );
