@@ -7,8 +7,8 @@ License: Apache
 Source: %{name}-%{version}.tar.gz
 URL: http://code.google.com/p/libbde
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-@libbde_spec_requires@ @libbde_spec_requires_libbfio@ @libewf_spec_requires_libcrypto@ @libbde_spec_requires_libfdata@ @libbde_spec_requires_libfdatetime@ @libbde_spec_requires_libfguid@ @libbde_spec_requires_libfvalue@ @libbde_spec_requires_libuna@
-@libbde_spec_build_requires@ @libbde_spec_build_requires_libbfio@ @libewf_spec_build_requires_libcrypto@ @libbde_spec_build_requires_libfdata@ @libbde_spec_build_requires_libfdatetime@ @libbde_spec_build_requires_libfguid@ @libbde_spec_build_requires_libfvalue@ @libbde_spec_build_requires_libuna@
+@libbde_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_lifguid_spec_requires@ @ax_libfvalue_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@
+@libbde_spec_build_requires@ @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfvalue_spec_build_requires@ @ax_libuna_spec_build_requires@
 
 %description
 libbde is a library to support the BitLocker Drive Encryption (BDE) format
@@ -24,8 +24,8 @@ Header files and libraries for developing applications for libbde.
 %package tools
 Summary: Several tools for accessing BitLocker encrypted volumes
 Group: Applications/System
-Requires: libbde = %{version}-%{release} @libewf_spec_requires_libfuse@
-@libbde_spec_tools_build_requires@ @libewf_spec_build_requires_libfuse@
+Requires: libbde = %{version}-%{release} @ax_libfuse_spec_requires@
+@libbde_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
 
 %description tools
 Several tools for accessing the BitLocker encrypted volumes
@@ -71,6 +71,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_mandir}/man1/*
 
 %changelog
+* Sun Oct  9 2011 Joachim Metz <joachim.metz@gmail.com> 20111009-1
+- Changes for configure update and README files
+
 * Sun Sep 18 2011 Joachim Metz <joachim.metz@gmail.com> 20110918-1
 - Initial version
 

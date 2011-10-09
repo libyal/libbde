@@ -349,12 +349,12 @@ int info_handle_read_startup_key(
 /* Opens the info handle
  * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
-int info_handle_open(
+int info_handle_open_input(
      info_handle_t *info_handle,
      const libcstring_system_character_t *filename,
      liberror_error_t **error )
 {
-	static char *function = "info_handle_open";
+	static char *function = "info_handle_open_input";
 	int result            = 0;
 
 	if( info_handle == NULL )

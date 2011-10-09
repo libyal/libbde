@@ -73,10 +73,12 @@ void usage_fprint(
 /* Signal handler for bdeinfo
  */
 void bdeinfo_signal_handler(
-      libsystem_signal_t signal )
+      libsystem_signal_t signal LIBSYSTEM_ATTRIBUTE_UNUSED )
 {
 	liberror_error_t *error = NULL;
 	static char *function   = "bdeinfo_signal_handler";
+
+	LIBSYSTEM_UNREFERENCED_PARAMETER( signal )
 
 	bdeinfo_abort = 1;
 
@@ -235,12 +237,6 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_password != NULL )
 	{
-		fprintf(
-		 stderr,
-		 "Password not yet supported.\n" );
-
-		goto on_error;
-
 		if( info_handle_set_password(
 		     bdeinfo_info_handle,
 		     option_password,
@@ -281,7 +277,7 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	result = info_handle_open(
+	result = info_handle_open_input(
 	          bdeinfo_info_handle,
 	          source,
 	          &error );
