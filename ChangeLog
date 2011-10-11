@@ -49,6 +49,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111011
+* implemented OSXFuse support
+
 20111009
 * updated pc and spec file
 * changes to libcaes for WINAPI build

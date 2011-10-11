@@ -41,11 +41,17 @@
 
 #include <libsystem.h>
 
-#if defined( HAVE_FUSE_H )
+#if defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H )
 #define FUSE_USE_VERSION	26
 
+#if defined( HAVE_FUSE_H )
 #include <fuse.h>
+
+#elif defined( HAVE_OSXFUSE_FUSE_H )
+#include <osxfuse/fuse.h>
 #endif
+
+#endif /* defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H ) */
 
 #include "bdeoutput.h"
 #include "bdetools_libbde.h"
@@ -122,7 +128,7 @@ void bdemount_signal_handler(
 	}
 }
 
-#if defined( HAVE_FUSE_H )
+#if defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H )
 
 #if ( SIZEOF_OFF_T != 8 ) && ( SIZEOF_OFF_T != 4 )
 #error Size of off_t not supported
@@ -541,7 +547,7 @@ int bdemount_fuse_getattr(
 				 "%s: unsupported to retrieve volume size.",
 				 function );
 
-				result = -EBADFD;
+				result = -ENODEV;
 
 				goto on_error;
 			}
@@ -600,7 +606,7 @@ on_error:
 	return( result );
 }
 
-#endif /* defined( HAVE_FUSE_H ) */
+#endif /* defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H ) */
 
 /* The main program
  */
@@ -623,7 +629,7 @@ int main( int argc, char * const argv[] )
 	int result                                                 = 0;
 	int verbose                                                = 0;
 
-#if defined( HAVE_FUSE_H )
+#if defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H )
 	struct fuse_operations bdemount_fuse_operations;
 	struct fuse_chan *bdemount_fuse_channel                    = NULL;
 	struct fuse *bdemount_fuse_handle                          = NULL;
@@ -845,7 +851,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-#if defined( HAVE_FUSE_H )
+#if defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H )
 	if( memory_set(
 	     &bdemount_fuse_operations,
 	     0,
@@ -932,7 +938,7 @@ on_error:
 		liberror_error_free(
 		 &error );
 	}
-#if defined( HAVE_FUSE_H )
+#if defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H )
 	if( bdemount_fuse_handle != NULL )
 	{
 		fuse_destroy(
