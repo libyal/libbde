@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20111011],
+ [20111012],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -133,7 +133,7 @@ CFLAGS="$CFLAGS -Wall";
 
 dnl Check if DLL support is needed in bdetools
 AS_IF(
- [test "x$enable_shared" = xyes],
+ [test "x$enable_shared" = xyes && text "x$ac_cv_enable_static_executables" = xno],
  [AS_CASE(
   [$host],
   [*cygwin* | *mingw*],

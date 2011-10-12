@@ -49,6 +49,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111012
+* update for Cygwin static executable support
+* update for libfuse detection
+
 20111011
 * implemented OSXFuse support
 

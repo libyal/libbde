@@ -42,9 +42,7 @@
  * before including libfdatetime.h
  */
 #if defined( _WIN32 ) && defined( DLL_IMPORT )
-#if !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFDATETIME_DLL_IMPORT
-#endif
 #endif
 
 #include <libfdatetime.h>
