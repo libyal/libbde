@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20111012],
+ [20111020],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -58,6 +58,9 @@ AX_LIBUNA_CHECK_ENABLE
 dnl Check for enabling libbfio for basic file IO support
 AX_LIBBFIO_CHECK_ENABLE
 
+dnl Check for enabling libfdata for file and memory data block support
+AX_LIBFDATA_CHECK_ENABLE
+
 dnl Check for enabling libfdatetime for file date and time support
 AX_LIBFDATETIME_CHECK_ENABLE
 
@@ -66,9 +69,6 @@ AX_LIBFGUID_CHECK_ENABLE
 
 dnl Check for enabling libfvalue for file value support
 AX_LIBFVALUE_CHECK_ENABLE
-
-dnl Check for enabling libfdata for file and memory data block support
-AX_LIBFDATA_CHECK_ENABLE
 
 dnl Check for enabling libhmac for message digest hash function support
 AX_LIBHMAC_CHECK_ENABLE
@@ -133,7 +133,7 @@ CFLAGS="$CFLAGS -Wall";
 
 dnl Check if DLL support is needed in bdetools
 AS_IF(
- [test "x$enable_shared" = xyes && text "x$ac_cv_enable_static_executables" = xno],
+ [test "x$enable_shared" = xyes && test "x$ac_cv_enable_static_executables" = xno],
  [AS_CASE(
   [$host],
   [*cygwin* | *mingw*],

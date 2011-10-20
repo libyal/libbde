@@ -12,9 +12,10 @@ Creating static executables
 
 Make sure you have a static version of:
 * glibc
+* libfuse (can be disabled by --with-libfuse=no)
 
 Some distrubions provide separate packages for static versions of libraries
 
 Use the following command to tell configure you want to make a static executables:
-./configure --enable-static-executables=yes
+./configure --enable-static-executables=yes --with-libfuse=no
 
