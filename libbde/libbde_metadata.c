@@ -41,7 +41,6 @@
 #include "libbde_metadata.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_password.h"
-#include "libbde_recovery.h"
 #include "libbde_volume_master_key.h"
 
 #include "bde_metadata.h"
@@ -2283,7 +2282,7 @@ int libbde_metadata_get_volume_master_key(
 
 				goto on_error;
 			}
-			if( libbde_recovery_calculate_key(
+			if( libbde_password_calculate_key(
 			     io_handle->recovery_password_hash,
 			     32,
 			     metadata->recovery_password_volume_master_key->stretch_key->salt,
