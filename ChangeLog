@@ -49,6 +49,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111022
+* updated libfdatetime
+
 20111020
 * updated README.static
 * combined recovery and user password iteration code
