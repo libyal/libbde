@@ -5,6 +5,7 @@ TODO
   - wincrypt and EVP - make sure to pass block sized blocks ?
 * check metadata number_of_volume_header_sectors ?
 * debug print more volume header info
+* remove libfvalue ?
 
 Optimizations
 * pass values 32-bit to aes
@@ -48,6 +49,11 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20111102
+* updated m4 files
+* updated libcstring, libsystem, libuna, libbfio, libfdatetime, libfvalue,
+  libhmac
 
 20111022
 * updated libfdatetime

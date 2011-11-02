@@ -135,6 +135,7 @@ int main( int argc, char * const argv[] )
 
         if( libsystem_initialize(
              "bdetools",
+             _IONBF,
              &error ) != 1 )
 	{
 		fprintf(
