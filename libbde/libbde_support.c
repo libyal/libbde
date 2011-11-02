@@ -101,6 +101,8 @@ int libbde_set_codepage(
 	 && ( codepage != LIBBDE_CODEPAGE_KOI8_R )
 	 && ( codepage != LIBBDE_CODEPAGE_KOI8_U )
 	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_874 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_932 )
+	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_936 )
 	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1250 )
 	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1251 )
 	 && ( codepage != LIBBDE_CODEPAGE_WINDOWS_1252 )
