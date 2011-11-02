@@ -1,6 +1,6 @@
 dnl Functions for libhmac
 dnl
-dnl Version: 20111007
+dnl Version: 20111030
 
 dnl Function to detect if libhmac is available
 dnl ac_libhmac_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -17,7 +17,8 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LIB],
   ])
 
  AS_IF(
-  [test "x$ac_cv_with_libhmac" != xno],
+  [test "x$ac_cv_with_libhmac" = xno],
+  [ac_cv_libhmac=no],
   [dnl Check for headers
   AC_CHECK_HEADERS([libhmac.h])
 
@@ -31,7 +32,71 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LIB],
     [ac_cv_libhmac_dummy=yes],
     [ac_cv_libhmac=no])
 
-    dnl TODO check if all LIBHMAC functions are available
+   dnl MD5 functions
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_md5_initialize,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_md5_update,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_md5_finalize,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_md5_free,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+
+   dnl SHA1 functions
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha1_initialize,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha1_update,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha1_finalize,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha1_free,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+
+   dnl SHA256 functions
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha256_initialize,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha256_update,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha256_finalize,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
+   AC_CHECK_LIB(
+    hmac,
+    libhmac_sha256_free,
+    [ac_cv_libhmac_dummy=yes],
+    [ac_cv_libhmac=no])
    ])
   ])
 

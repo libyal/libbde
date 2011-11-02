@@ -643,6 +643,7 @@ int main( int argc, char * const argv[] )
 
         if( libsystem_initialize(
              "bdetools",
+             _IONBF,
              &error ) != 1 )
 	{
 		fprintf(
@@ -659,8 +660,6 @@ int main( int argc, char * const argv[] )
 	bdeoutput_version_fprint(
 	 stdout,
 	 program );
-
-/* TODO add option to pass extenal password/key, what about BEK file */
 
 	while( ( option = libsystem_getopt(
 	                   argc,
