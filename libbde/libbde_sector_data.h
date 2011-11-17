@@ -57,7 +57,7 @@ int libbde_sector_data_initialize(
      liberror_error_t **error );
 
 int libbde_sector_data_free(
-     libbde_sector_data_t *sector_data,
+     libbde_sector_data_t **sector_data,
      liberror_error_t **error );
 
 int libbde_sector_data_read(

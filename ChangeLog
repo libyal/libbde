@@ -1,4 +1,6 @@
 TODO
+* code clean up bdetools
+* bdeinfo add offset support
 * libcaes
   - WinXP no AES support ?
   - WINAPI initialize provider only once - where to stick the init functions ?
@@ -49,6 +51,10 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20111117
+* updated libcstring, libsystem, libfdatetime, libfvalue, libhmac, libfguid,
+  libfdata
 
 20111102
 * updated m4 files

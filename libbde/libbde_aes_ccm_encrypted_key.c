@@ -55,36 +55,44 @@ int libbde_aes_ccm_encrypted_key_initialize(
 
 		return( -1 );
 	}
+	if( *aes_ccm_encrypted_key != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid AES-CCM encrypted key value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*aes_ccm_encrypted_key = memory_allocate_structure(
+	                          libbde_aes_ccm_encrypted_key_t );
+
 	if( *aes_ccm_encrypted_key == NULL )
 	{
-		*aes_ccm_encrypted_key = memory_allocate_structure(
-		                          libbde_aes_ccm_encrypted_key_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create AES-CCM encrypted key.",
+		 function );
 
-		if( *aes_ccm_encrypted_key == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create AES-CCM encrypted key.",
-			 function );
+		goto on_error;
+	}
+	if( memory_set(
+	     *aes_ccm_encrypted_key,
+	     0,
+	     sizeof( libbde_aes_ccm_encrypted_key_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear AES-CCM encrypted key.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     *aes_ccm_encrypted_key,
-		     0,
-		     sizeof( libbde_aes_ccm_encrypted_key_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear AES-CCM encrypted key.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 

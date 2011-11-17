@@ -61,90 +61,102 @@ int libbde_volume_initialize(
 
 		return( -1 );
 	}
-	if( *volume == NULL )
+	if( *volume != NULL )
 	{
-		internal_volume = memory_allocate_structure(
-		                   libbde_internal_volume_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume value already set.",
+		 function );
 
-		if( internal_volume == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create volume.",
-			 function );
-
-			goto on_error;
-		}
-		if( memory_set(
-		     internal_volume,
-		     0,
-		     sizeof( libbde_internal_volume_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear volume.",
-			 function );
-
-			goto on_error;
-		}
-		if( libbde_metadata_initialize(
-		     &( internal_volume->primary_metadata ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create primary metadata.",
-			 function );
-
-			goto on_error;
-		}
-		if( libbde_metadata_initialize(
-		     &( internal_volume->secondary_metadata ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create secondary metadata.",
-			 function );
-
-			goto on_error;
-		}
-		if( libbde_metadata_initialize(
-		     &( internal_volume->tertiary_metadata ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create tertiary metadata.",
-			 function );
-
-			goto on_error;
-		}
-		if( libbde_io_handle_initialize(
-		     &( internal_volume->io_handle ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create IO handle.",
-			 function );
-
-			goto on_error;
-		}
-		*volume = (libbde_volume_t *) internal_volume;
+		return( -1 );
 	}
+	internal_volume = memory_allocate_structure(
+	                   libbde_internal_volume_t );
+
+	if( internal_volume == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create volume.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     internal_volume,
+	     0,
+	     sizeof( libbde_internal_volume_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear volume.",
+		 function );
+
+		memory_free(
+		 internal_volume );
+
+		return( -1 );
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->primary_metadata ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create primary metadata.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->secondary_metadata ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create secondary metadata.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->tertiary_metadata ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create tertiary metadata.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_io_handle_initialize(
+	     &( internal_volume->io_handle ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	*volume = (libbde_volume_t *) internal_volume;
+
 	return( 1 );
 
 on_error:
