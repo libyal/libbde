@@ -62,55 +62,63 @@ int libbde_volume_master_key_initialize(
 
 		return( -1 );
 	}
+	if( *volume_master_key != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume master key value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*volume_master_key = memory_allocate_structure(
+	                      libbde_volume_master_key_t );
+
 	if( *volume_master_key == NULL )
 	{
-		*volume_master_key = memory_allocate_structure(
-		                      libbde_volume_master_key_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create volume master key.",
+		 function );
 
-		if( *volume_master_key == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create volume master key.",
-			 function );
+		goto on_error;
+	}
+	if( memory_set(
+	     *volume_master_key,
+	     0,
+	     sizeof( libbde_volume_master_key_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear volume master key.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     *volume_master_key,
-		     0,
-		     sizeof( libbde_volume_master_key_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear volume master key.",
-			 function );
+		memory_free(
+		 *volume_master_key );
 
-			memory_free(
-			 *volume_master_key );
+		*volume_master_key = NULL;
 
-			*volume_master_key = NULL;
+		return( -1 );
+	}
+	if( libbde_array_initialize(
+	     &( ( *volume_master_key )->entries_array ),
+	     0,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create entries array.",
+		 function );
 
-			return( -1 );
-		}
-		if( libbde_array_initialize(
-		     &( ( *volume_master_key )->entries_array ),
-		     0,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create entries array.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 
@@ -198,7 +206,7 @@ int libbde_volume_master_key_free(
 		}
 		if( libbde_array_free(
 		     &( ( *volume_master_key )->entries_array ),
-		     (int(*)(intptr_t *, liberror_error_t **)) &libbde_metadata_entry_free,
+		     (int(*)(intptr_t **, liberror_error_t **)) &libbde_metadata_entry_free,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -766,7 +774,7 @@ on_error:
 	if( property_metadata_entry != NULL )
 	{
 		libbde_metadata_entry_free(
-		 property_metadata_entry,
+		 &property_metadata_entry,
 		 NULL );
 	}
 	return( -1 );

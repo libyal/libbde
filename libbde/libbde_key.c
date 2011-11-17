@@ -54,36 +54,44 @@ int libbde_key_initialize(
 
 		return( -1 );
 	}
+	if( *key != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid key value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*key = memory_allocate_structure(
+	        libbde_key_t );
+
 	if( *key == NULL )
 	{
-		*key = memory_allocate_structure(
-		        libbde_key_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create key.",
+		 function );
 
-		if( *key == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create key.",
-			 function );
+		goto on_error;
+	}
+	if( memory_set(
+	     *key,
+	     0,
+	     sizeof( libbde_key_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear key.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     *key,
-		     0,
-		     sizeof( libbde_key_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear key.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 

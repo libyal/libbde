@@ -54,36 +54,44 @@ int libbde_metadata_entry_initialize(
 
 		return( -1 );
 	}
+	if( *metadata_entry != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid metadata entry value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*metadata_entry = memory_allocate_structure(
+	                   libbde_metadata_entry_t );
+
 	if( *metadata_entry == NULL )
 	{
-		*metadata_entry = memory_allocate_structure(
-		                   libbde_metadata_entry_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create metadata entry.",
+		 function );
 
-		if( *metadata_entry == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create metadata entry.",
-			 function );
+		goto on_error;
+	}
+	if( memory_set(
+	     *metadata_entry,
+	     0,
+	     sizeof( libbde_metadata_entry_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear metadata entry.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     *metadata_entry,
-		     0,
-		     sizeof( libbde_metadata_entry_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear metadata entry.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 
@@ -102,7 +110,7 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_metadata_entry_free(
-     libbde_metadata_entry_t *metadata_entry,
+     libbde_metadata_entry_t **metadata_entry,
      liberror_error_t **error )
 {
 	static char *function = "libbde_metadata_entry_free";
@@ -118,14 +126,18 @@ int libbde_metadata_entry_free(
 
 		return( -1 );
 	}
-	if( metadata_entry->value_data != NULL )
+	if( *metadata_entry != NULL )
 	{
+		if( ( *metadata_entry )->value_data != NULL )
+		{
+			memory_free(
+			 ( *metadata_entry )->value_data );
+		}
 		memory_free(
-		 metadata_entry->value_data );
-	}
-	memory_free(
-	 metadata_entry );
+		 *metadata_entry );
 
+		*metadata_entry = NULL;
+	}
 	return( 1 );
 }
 

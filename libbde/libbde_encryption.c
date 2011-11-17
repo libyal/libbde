@@ -51,95 +51,104 @@ int libbde_encryption_initialize(
 
 		return( -1 );
 	}
+	if( *context != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid context value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*context = memory_allocate_structure(
+	            libbde_encryption_context_t );
+
 	if( *context == NULL )
 	{
-		*context = memory_allocate_structure(
-		            libbde_encryption_context_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create context.",
+		 function );
 
-		if( *context == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create context.",
-			 function );
-
-			goto on_error;
-		}
-		if( memory_set(
-		     *context,
-		     0,
-		     sizeof( libbde_encryption_context_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear context.",
-			 function );
-
-			memory_free(
-			 *context );
-
-			*context = NULL;
-
-			return( -1 );
-		}
-		if( libcaes_context_initialize(
-		     &( ( *context )->fvek_decryption_context ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable initialize FVEK decryption context.",
-			 function );
-
-			goto on_error;
-		}
-		if( libcaes_context_initialize(
-		     &( ( *context )->fvek_encryption_context ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable initialize FVEK encryption context.",
-			 function );
-
-			goto on_error;
-		}
-		if( libcaes_context_initialize(
-		     &( ( *context )->tweak_decryption_context ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable initialize TWEAK decryption context.",
-			 function );
-
-			goto on_error;
-		}
-		if( libcaes_context_initialize(
-		     &( ( *context )->tweak_encryption_context ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable initialize TWEAK encryption context.",
-			 function );
-
-			goto on_error;
-		}
-		( *context )->method = method;
+		goto on_error;
 	}
+	if( memory_set(
+	     *context,
+	     0,
+	     sizeof( libbde_encryption_context_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear context.",
+		 function );
+
+		memory_free(
+		 *context );
+
+		*context = NULL;
+
+		return( -1 );
+	}
+	if( libcaes_context_initialize(
+	     &( ( *context )->fvek_decryption_context ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable initialize FVEK decryption context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcaes_context_initialize(
+	     &( ( *context )->fvek_encryption_context ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable initialize FVEK encryption context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcaes_context_initialize(
+	     &( ( *context )->tweak_decryption_context ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable initialize TWEAK decryption context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcaes_context_initialize(
+	     &( ( *context )->tweak_encryption_context ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable initialize TWEAK encryption context.",
+		 function );
+
+		goto on_error;
+	}
+	( *context )->method = method;
+
 	return( 1 );
 
 on_error:

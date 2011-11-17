@@ -85,21 +85,21 @@ int libbde_array_initialize(
 int libbde_array_free(
      libbde_array_t **array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error );
 
 int libbde_array_empty(
      libbde_array_t *array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error );
 
 int libbde_array_clear(
      libbde_array_t *array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error );
 
@@ -107,7 +107,7 @@ int libbde_array_clone(
      libbde_array_t **destination_array,
      libbde_array_t *source_array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      int (*entry_clone_function)(
             intptr_t **destination,
@@ -119,7 +119,7 @@ int libbde_array_resize(
      libbde_array_t *array,
      int number_of_entries,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error );
 
