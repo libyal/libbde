@@ -66,55 +66,58 @@ int libbde_metadata_initialize(
 
 		return( -1 );
 	}
+	if( *metadata != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid metadata value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*metadata = memory_allocate_structure(
+	             libbde_metadata_t );
+
 	if( *metadata == NULL )
 	{
-		*metadata = memory_allocate_structure(
-		             libbde_metadata_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create metadata.",
+		 function );
 
-		if( *metadata == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create metadata.",
-			 function );
+		goto on_error;
+	}
+	if( memory_set(
+	     *metadata,
+	     0,
+	     sizeof( libbde_metadata_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear metadata.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     *metadata,
-		     0,
-		     sizeof( libbde_metadata_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear metadata.",
-			 function );
+		goto on_error;
+	}
+	if( libbde_array_initialize(
+	     &( ( *metadata )->entries_array ),
+	     0,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create entries array.",
+		 function );
 
-			memory_free(
-			 *metadata );
-
-			*metadata = NULL;
-
-			return( -1 );
-		}
-		if( libbde_array_initialize(
-		     &( ( *metadata )->entries_array ),
-		     0,
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create entries array.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 
@@ -234,7 +237,7 @@ int libbde_metadata_free(
 		}
 		if( libbde_array_free(
 		     &( ( *metadata )->entries_array ),
-		     (int(*)(intptr_t *, liberror_error_t **)) &libbde_metadata_entry_free,
+		     (int(*)(intptr_t **, liberror_error_t **)) &libbde_metadata_entry_free,
 		     error ) != 1 )
 		{
 			liberror_error_set(
@@ -1468,7 +1471,7 @@ on_error:
 	if( metadata_entry != NULL )
 	{
 		libbde_metadata_entry_free(
-		 metadata_entry,
+		 &metadata_entry,
 		 NULL );
 	}
 	return( -1 );

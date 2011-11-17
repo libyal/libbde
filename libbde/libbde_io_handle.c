@@ -66,38 +66,47 @@ int libbde_io_handle_initialize(
 
 		return( -1 );
 	}
+	if( *io_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid IO handle value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*io_handle = memory_allocate_structure(
+	              libbde_io_handle_t );
+
 	if( *io_handle == NULL )
 	{
-		*io_handle = memory_allocate_structure(
-		              libbde_io_handle_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create IO handle.",
+		 function );
 
-		if( *io_handle == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create IO handle.",
-			 function );
-
-			goto on_error;
-		}
-		if( memory_set(
-		     *io_handle,
-		     0,
-		     sizeof( libbde_io_handle_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear IO handle.",
-			 function );
-
-			goto on_error;
-		}
-		( *io_handle )->bytes_per_sector = 512;
+		goto on_error;
 	}
+	if( memory_set(
+	     *io_handle,
+	     0,
+	     sizeof( libbde_io_handle_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	( *io_handle )->bytes_per_sector = 512;
+
 	return( 1 );
 
 on_error:
@@ -943,7 +952,7 @@ int libbde_io_handle_read_sector(
 	     cache,
 	     element_index,
 	     (intptr_t *) sector_data,
-	     (int (*)(intptr_t *, liberror_error_t **)) &libbde_sector_data_free,
+	     (int (*)(intptr_t **, liberror_error_t **)) &libbde_sector_data_free,
 	     LIBFDATA_LIST_ELEMENT_VALUE_FLAG_MANAGED,
 	     error ) != 1 )
 	{
@@ -962,7 +971,7 @@ on_error:
 	if( sector_data != NULL )
 	{
 		libbde_sector_data_free(
-		 sector_data,
+		 &sector_data,
 		 NULL );
 	}
 	return( -1 );
@@ -1092,7 +1101,7 @@ int libbde_io_handle_read_unencrypted_volume_header(
 		}
 	}
 	if( libbde_sector_data_free(
-	     sector_data,
+	     &sector_data,
 	     error ) != 1 )
 	{
 		liberror_error_set(
@@ -1112,7 +1121,7 @@ on_error:
 	if( sector_data != NULL )
 	{
 		libbde_sector_data_free(
-		 sector_data,
+		 &sector_data,
 		 NULL );
 	}
 	return( -1 );

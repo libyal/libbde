@@ -54,6 +54,17 @@ int libbde_sector_data_initialize(
 
 		return( -1 );
 	}
+	if( *sector_data != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid sector data value already set.",
+		 function );
+
+		return( -1 );
+	}
 	if( data_size > (size_t) SSIZE_MAX )
 	{
 		liberror_error_set(
@@ -65,73 +76,70 @@ int libbde_sector_data_initialize(
 
 		return( -1 );
 	}
+	*sector_data = memory_allocate_structure(
+	                libbde_sector_data_t );
+
 	if( *sector_data == NULL )
 	{
-		*sector_data = memory_allocate_structure(
-		                libbde_sector_data_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create IO handle.",
+		 function );
 
-		if( *sector_data == NULL )
+		goto on_error;
+	}
+	if( memory_set(
+	     *sector_data,
+	     0,
+	     sizeof( libbde_sector_data_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear IO handle.",
+		 function );
+
+		memory_free(
+		 *sector_data );
+
+		*sector_data = NULL;
+
+		return( -1 );
+	}
+	if( data_size > 0 )
+	{
+		( *sector_data )->encrypted_data = (uint8_t *) memory_allocate(
+		                                                sizeof( uint8_t ) * data_size );
+
+		if( ( *sector_data )->encrypted_data == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create IO handle.",
+			 "%s: unable to create encrypted data.",
 			 function );
 
 			goto on_error;
 		}
-		if( memory_set(
-		     *sector_data,
-		     0,
-		     sizeof( libbde_sector_data_t ) ) == NULL )
+		( *sector_data )->data = (uint8_t *) memory_allocate(
+		                                      sizeof( uint8_t ) * data_size );
+
+		if( ( *sector_data )->data == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear IO handle.",
+			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create data.",
 			 function );
 
-			memory_free(
-			 *sector_data );
-
-			*sector_data = NULL;
-
-			return( -1 );
+			goto on_error;
 		}
-		if( data_size > 0 )
-		{
-			( *sector_data )->encrypted_data = (uint8_t *) memory_allocate(
-			                                                sizeof( uint8_t ) * data_size );
-
-			if( ( *sector_data )->encrypted_data == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-				 "%s: unable to create encrypted data.",
-				 function );
-
-				goto on_error;
-			}
-			( *sector_data )->data = (uint8_t *) memory_allocate(
-			                                      sizeof( uint8_t ) * data_size );
-
-			if( ( *sector_data )->data == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-				 "%s: unable to create data.",
-				 function );
-
-				goto on_error;
-			}
-			( *sector_data )->data_size = data_size;
-		}
+		( *sector_data )->data_size = data_size;
 	}
 	return( 1 );
 
@@ -155,7 +163,7 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_sector_data_free(
-     libbde_sector_data_t *sector_data,
+     libbde_sector_data_t **sector_data,
      liberror_error_t **error )
 {
 	static char *function = "libbde_sector_data_free";
@@ -172,31 +180,35 @@ int libbde_sector_data_free(
 
 		return( -1 );
 	}
-	if( sector_data->data != NULL )
+	if( *sector_data != NULL )
 	{
-		if( memory_set(
-		     sector_data->data,
-		     0,
-		     sector_data->data_size ) == NULL )
+		if( ( *sector_data )->data != NULL )
 		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear data.",
-			 function );
+			if( memory_set(
+			     ( *sector_data )->data,
+			     0,
+			     ( *sector_data )->data_size ) == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 "%s: unable to clear data.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
+			memory_free(
+			 ( *sector_data )->data );
+
+			memory_free(
+			 ( *sector_data )->encrypted_data );
 		}
 		memory_free(
-		 sector_data->data );
+		 *sector_data );
 
-		memory_free(
-		 sector_data->encrypted_data );
+		*sector_data = NULL;
 	}
-	memory_free(
-	 sector_data );
-
 	return( result );
 }
 

@@ -27,6 +27,7 @@
 #include "libbde_array_type.h"
 
 /* Creates an array
+ * Make sure the value array is pointing to is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_array_initialize(
@@ -48,6 +49,17 @@ int libbde_array_initialize(
 
 		return( -1 );
 	}
+	if( *array != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid array value already set.",
+		 function );
+
+		return( -1 );
+	}
 	if( number_of_entries < 0 )
 	{
 		liberror_error_set(
@@ -59,87 +71,79 @@ int libbde_array_initialize(
 
 		return( -1 );
 	}
+	*array = memory_allocate_structure(
+	          libbde_array_t );
+
 	if( *array == NULL )
 	{
-		*array = memory_allocate_structure(
-		          libbde_array_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create array.",
+		 function );
 
-		if( *array == NULL )
+		goto on_error;
+	}
+	if( memory_set(
+	     *array,
+	     0,
+	     sizeof( libbde_array_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear array.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_entries > 0 )
+	{
+		entries_size = sizeof( intptr_t * ) * number_of_entries;
+
+		if( entries_size > (size_t) SSIZE_MAX )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid entries size value exceeds maximum.",
+			 function );
+
+			goto on_error;
+		}
+		( *array )->entries = (intptr_t **) memory_allocate(
+		                                     entries_size );
+
+		if( ( *array )->entries == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create array.",
+			 "%s: unable to create array entries.",
 			 function );
 
 			goto on_error;
 		}
 		if( memory_set(
-		     *array,
+		     ( *array )->entries,
 		     0,
-		     sizeof( libbde_array_t ) ) == NULL )
+		     entries_size ) == NULL )
 		{
 			liberror_error_set(
 			 error,
 			 LIBERROR_ERROR_DOMAIN_MEMORY,
 			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear array.",
+			 "%s: unable to clear array entries.",
 			 function );
 
-			memory_free(
-			 *array );
-
-			*array = NULL;
-
-			return( -1 );
+			goto on_error;
 		}
-		if( number_of_entries > 0 )
-		{
-			entries_size = sizeof( intptr_t * ) * number_of_entries;
-
-			if( entries_size > (size_t) SSIZE_MAX )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-				 "%s: invalid entries size value exceeds maximum.",
-				 function );
-
-				goto on_error;
-			}
-			( *array )->entries = (intptr_t **) memory_allocate(
-			                                     entries_size );
-
-			if( ( *array )->entries == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-				 "%s: unable to create array entries.",
-				 function );
-
-				goto on_error;
-			}
-			if( memory_set(
-			     ( *array )->entries,
-			     0,
-			     entries_size ) == NULL )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
-				 "%s: unable to clear array entries.",
-				 function );
-
-				goto on_error;
-			}
-			( *array )->number_of_allocated_entries = number_of_entries;
-			( *array )->number_of_entries           = number_of_entries;
-		}
+		( *array )->number_of_allocated_entries = number_of_entries;
+		( *array )->number_of_entries           = number_of_entries;
 	}
 	return( 1 );
 
@@ -166,7 +170,7 @@ on_error:
 int libbde_array_free(
      libbde_array_t **array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error )
 {
@@ -220,7 +224,7 @@ int libbde_array_free(
 int libbde_array_empty(
      libbde_array_t *array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error )
 {
@@ -263,7 +267,7 @@ int libbde_array_empty(
 int libbde_array_clear(
      libbde_array_t *array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error )
 {
@@ -293,7 +297,7 @@ int libbde_array_clear(
 				if( entry_free_function != NULL )
 				{
 					if( entry_free_function(
-					     array->entries[ entry_iterator ],
+					     &( array->entries[ entry_iterator ] ),
 					     error ) != 1 )
 					{
 						liberror_error_set(
@@ -325,7 +329,7 @@ int libbde_array_clone(
      libbde_array_t **destination_array,
      libbde_array_t *source_array,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      int (*entry_clone_function)(
             intptr_t **destination,
@@ -457,7 +461,7 @@ int libbde_array_resize(
      libbde_array_t *array,
      int number_of_entries,
      int (*entry_free_function)(
-            intptr_t *entry,
+            intptr_t **entry,
             liberror_error_t **error ),
      liberror_error_t **error )
 {
@@ -564,7 +568,7 @@ int libbde_array_resize(
 				if( entry_free_function != NULL )
 				{
 					if( entry_free_function(
-					     array->entries[ entry_iterator ],
+					     &( array->entries[ entry_iterator ] ),
 					     error ) != 1 )
 					{
 						liberror_error_set(
