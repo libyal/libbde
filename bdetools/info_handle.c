@@ -30,10 +30,18 @@
 #include <libsystem.h>
 
 #include "bdetools_libbde.h"
+#include "bdetools_libbfio.h"
 #include "bdetools_libfdatetime.h"
 #include "info_handle.h"
 
 #define INFO_HANDLE_NOTIFY_STREAM		stdout
+
+extern \
+int libbde_volume_open_file_io_handle(
+     libbde_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
+     int access_flags,
+     libbde_error_t **error );
 
 /* Initializes the info handle
  * Returns 1 if successful or -1 on error
@@ -55,56 +63,89 @@ int info_handle_initialize(
 
 		return( -1 );
 	}
+	if( *info_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid info handle value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*info_handle = memory_allocate_structure(
+	                info_handle_t );
+
 	if( *info_handle == NULL )
 	{
-		*info_handle = memory_allocate_structure(
-		                info_handle_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create info handle.",
+		 function );
 
-		if( *info_handle == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create info handle.",
-			 function );
-
-			goto on_error;
-		}
-		if( memory_set(
-		     *info_handle,
-		     0,
-		     sizeof( info_handle_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear info handle.",
-			 function );
-
-			goto on_error;
-		}
-		if( libbde_volume_initialize(
-		     &( ( *info_handle )->input_volume ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize input volume.",
-			 function );
-
-			goto on_error;
-		}
-		( *info_handle )->notify_stream = INFO_HANDLE_NOTIFY_STREAM;
+		goto on_error;
 	}
+	if( memory_set(
+	     *info_handle,
+	     0,
+	     sizeof( info_handle_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear info handle.",
+		 function );
+
+		memory_free(
+		 *info_handle );
+
+		*info_handle = NULL;
+
+		return( -1 );
+	}
+	if( libbfio_file_range_initialize(
+	     &( ( *info_handle )->input_file_io_handle ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize input file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_volume_initialize(
+	     &( ( *info_handle )->input_volume ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize input volume.",
+		 function );
+
+		goto on_error;
+	}
+	( *info_handle )->notify_stream = INFO_HANDLE_NOTIFY_STREAM;
+
 	return( 1 );
 
 on_error:
 	if( *info_handle != NULL )
 	{
+		if( ( *info_handle )->input_file_io_handle != NULL )
+		{
+			libbfio_handle_free(
+			 &( ( *info_handle )->input_file_io_handle ),
+			 NULL );
+		}
 		memory_free(
 		 *info_handle );
 
@@ -136,21 +177,31 @@ int info_handle_free(
 	}
 	if( *info_handle != NULL )
 	{
-		if( ( *info_handle )->input_volume != NULL )
+		if( libbde_volume_free(
+		     &( ( *info_handle )->input_volume ),
+		     error ) != 1 )
 		{
-			if( libbde_volume_free(
-			     &( ( *info_handle )->input_volume ),
-			     error ) != 1 )
-			{
-				liberror_error_set(
-				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free input volume.",
-				 function );
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free input volume.",
+			 function );
 
-				result = -1;
-			}
+			result = -1;
+		}
+		if( libbfio_handle_free(
+		     &( ( *info_handle )->input_file_io_handle ),
+		     error ) != 1 )
+		{
+			liberror_error_set(
+			 error,
+			 LIBERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free input file IO handle.",
+			 function );
+
+			result = -1;
 		}
 		memory_free(
 		 *info_handle );
@@ -354,8 +405,9 @@ int info_handle_open_input(
      const libcstring_system_character_t *filename,
      liberror_error_t **error )
 {
-	static char *function = "info_handle_open_input";
-	int result            = 0;
+	static char *function  = "info_handle_open_input";
+	size_t filename_length = 0;
+	int result             = 0;
 
 	if( info_handle == NULL )
 	{
@@ -368,19 +420,53 @@ int info_handle_open_input(
 
 		return( -1 );
 	}
+	filename_length = libcstring_system_string_length(
+	                   filename );
+
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libbde_volume_open_wide(
-	          info_handle->input_volume,
-	          filename,
-	          LIBBDE_OPEN_READ,
-	          error );
+	if( libbfio_file_range_set_name_wide(
+	     info_handle->input_file_io_handle,
+	     filename,
+	     filename_length,
+	     error ) != 1 )
 #else
-	result = libbde_volume_open(
+	if( libbfio_file_range_set_name(
+	     info_handle->input_file_io_handle,
+	     filename,
+	     filename_length,
+	     error ) != 1 )
+#endif
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open set file name.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbfio_file_range_set(
+	     info_handle->input_file_io_handle,
+	     info_handle->volume_offset,
+	     0,
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_IO,
+		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open set volume offset.",
+		 function );
+
+		return( -1 );
+	}
+	result = libbde_volume_open_file_io_handle(
 	          info_handle->input_volume,
-	          filename,
+	          info_handle->input_file_io_handle,
 	          LIBBDE_OPEN_READ,
 	          error );
-#endif
+
 	if( result == -1 )
 	{
 		liberror_error_set(
