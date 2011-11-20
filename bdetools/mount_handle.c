@@ -58,67 +58,75 @@ int mount_handle_initialize(
 
 		return( -1 );
 	}
+	if( *mount_handle != NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid mount handle value already set.",
+		 function );
+
+		return( -1 );
+	}
+	*mount_handle = memory_allocate_structure(
+	                 mount_handle_t );
+
 	if( *mount_handle == NULL )
 	{
-		*mount_handle = memory_allocate_structure(
-		                 mount_handle_t );
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create mount handle.",
+		 function );
 
-		if( *mount_handle == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create mount handle.",
-			 function );
+		goto on_error;
+	}
+	if( memory_set(
+	     *mount_handle,
+	     0,
+	     sizeof( mount_handle_t ) ) == NULL )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_MEMORY,
+		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear mount handle.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     *mount_handle,
-		     0,
-		     sizeof( mount_handle_t ) ) == NULL )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear mount handle.",
-			 function );
+		memory_free(
+		 *mount_handle );
 
-			memory_free(
-			 *mount_handle );
+		*mount_handle = NULL;
 
-			*mount_handle = NULL;
+		return( -1 );
+	}
+	if( libbfio_file_range_initialize(
+	     &( ( *mount_handle )->input_file_io_handle ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize input file IO handle.",
+		 function );
 
-			return( -1 );
-		}
-		if( libbfio_file_range_initialize(
-		     &( ( *mount_handle )->input_file_io_handle ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize input file IO handle.",
-			 function );
+		goto on_error;
+	}
+	if( libbde_volume_initialize(
+	     &( ( *mount_handle )->input_volume ),
+	     error ) != 1 )
+	{
+		liberror_error_set(
+		 error,
+		 LIBERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize input volume.",
+		 function );
 
-			goto on_error;
-		}
-		if( libbde_volume_initialize(
-		     &( ( *mount_handle )->input_volume ),
-		     error ) != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize input volume.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 
