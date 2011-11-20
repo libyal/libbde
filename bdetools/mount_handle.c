@@ -434,7 +434,7 @@ int mount_handle_open_input(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open set file name.",
+		 "%s: unable to set file name.",
 		 function );
 
 		return( -1 );
@@ -449,7 +449,7 @@ int mount_handle_open_input(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_IO,
 		 LIBERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open set volume offset.",
+		 "%s: unable to set volume offset.",
 		 function );
 
 		return( -1 );
