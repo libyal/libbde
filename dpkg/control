@@ -1,0 +1,29 @@
+Source: libbde
+Section: unknown
+Priority: extra
+Maintainer: Joachim Metz <joachim.metz@gmail.com>
+Build-Depends: debhelper (>= 7), autotools-dev
+Standards-Version: 3.8.3
+Homepage: http://code.google.com/p/libbde/
+
+Package: libbde
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library to support the BitLocker Drive Encryption (BDE) format
+ libbde is a library to support the BitLocker Drive Encryption (BDE) format
+
+Package: libbde-dev
+Section: libdevel
+Architecture: any
+Depends: libbde (= ${Source-Version})
+Description: Header files and libraries for developing applications for libbde
+ Header files and libraries for developing applications for libbde.
+
+Package: libbde-tools
+Section: utils
+Architecture: any
+Depends: libbde (= ${Source-Version}), ${shlibs:Depends}
+Description: Several tools for reading and writing BitLocker Drive Encrypted volumes
+ Several tools for reading BitLocker Drive Encrypted volumes.
+
