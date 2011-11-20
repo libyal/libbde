@@ -1,0 +1,68 @@
+#!/usr/bin/make -f
+# debian/rules that uses debhelper >= 7.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+
+%:
+	dh  $@
+
+install_libbde:
+	# Set up libbde package directories and files
+	mkdir -p debian/libbde/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so.*.*.* debian/libbde/usr/lib
+
+install_libbde_dev:
+	# Set up libbde-dev package directories and files
+	mkdir -p debian/libbde-dev/usr/include
+	mkdir -p debian/libbde-dev/usr/include/libbde
+	mkdir -p debian/libbde-dev/usr/lib
+	mkdir -p debian/libbde-dev/usr/lib/pkgconfig
+	mkdir -p debian/libbde-dev/usr/share/man/man3
+	install -p -m755 debian/tmp/usr/include/*.h debian/libbde-dev/usr/include
+	install -p -m755 debian/tmp/usr/include/libbde/*.h debian/libbde-dev/usr/include
+	install -p -m755 debian/tmp/usr/lib/*.la debian/libbde-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.a debian/libbde-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so debian/libbde-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/pkgconfig/* debian/libbde-dev/usr/lib
+	install -p -m755 debian/tmp/usr/share/man/man3/* debian/libbde-dev/usr/share/man/man3
+
+install_libbde_tools:
+	# Set up libbde-tools package directories and files
+	mkdir -p debian/libbde-tools/usr/bin
+	mkdir -p debian/libbde-tools/usr/share/man/man1
+	install -p -m755 debian/tmp/usr/bin/* debian/libbde-tools/usr/bin
+	install -p -m755 debian/tmp/usr/share/man/man1/* debian/libbde-tools/usr/share/man/man1
+
+override_dh_installinit: install_libbde install_libbde_dev install_libbde_tools
+
+override_dh_installmenu:
+
+override_dh_installmime:
+
+override_dh_installmodules:
+
+override_dh_installlogcheck:
+
+override_dh_installlogrotate:
+
+override_dh_installpam:
+
+override_dh_installppp:
+
+override_dh_installudev:
+
+override_dh_installwm:
+
+override_dh_installxfonts:
+
+override_dh_gconf:
+
+override_dh_icons:
+
+override_dh_perl:
+
