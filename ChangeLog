@@ -52,7 +52,11 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111118
+* code clean up
+
 20111117
+* code clean up
 * updated libcstring, libsystem, libfdatetime, libfvalue, libhmac, libfguid,
   libfdata
 

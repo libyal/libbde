@@ -29,6 +29,7 @@
 #include <liberror.h>
 
 #include "bdetools_libbde.h"
+#include "bdetools_libbfio.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -38,6 +39,14 @@ typedef struct info_handle info_handle_t;
 
 struct info_handle
 {
+	/* The volume offset
+	 */
+	off64_t volume_offset;
+
+	/* The libbfio input file IO handle
+	 */
+	libbfio_handle_t *input_file_io_handle;
+
 	/* The libbde input volume
 	 */
 	libbde_volume_t *input_volume;

@@ -1,0 +1,5 @@
+libbde (20111023.tar.gz-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Joachim Metz <jbmetz@google.com>  Mon, 24 Oct 2011 11:42:22 +0200

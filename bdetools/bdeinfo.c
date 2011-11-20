@@ -56,12 +56,13 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
 	                 " Drive Encrypted (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -p password ] [ -r password ] [ -s filename ]\n"
-	                 "               [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: bdeinfo [ -o offset ] [ -p password ] [ -r password ]\n"
+	                 "               [ -s filename ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
+	fprintf( stream, "\t-o:     specify the volume offset\n" );
 	fprintf( stream, "\t-p:     specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-s:     specify the file containing the startup key.\n"
@@ -121,7 +122,9 @@ int main( int argc, char * const argv[] )
 	libcstring_system_character_t *option_password             = NULL;
 	libcstring_system_character_t *option_recovery_password    = NULL;
 	libcstring_system_character_t *option_startup_key_filename = NULL;
+	libcstring_system_character_t *option_volume_offset        = NULL;
 	libcstring_system_character_t *source                      = NULL;
+	size_t string_length                                       = 0;
 	char *program                                              = "bdeinfo";
 	libcstring_system_integer_t option                         = 0;
 	int result                                                 = 0;
@@ -156,7 +159,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = libsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hp:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -177,6 +180,11 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (libcstring_system_integer_t) 'o':
+				option_volume_offset = optarg;
+
+				break;
 
 			case (libcstring_system_integer_t) 'p':
 				option_password = optarg;
@@ -276,6 +284,30 @@ int main( int argc, char * const argv[] )
 			 "Unable to read startup key.\n" );
 
 			goto on_error;
+		}
+	}
+	if( option_volume_offset != NULL )
+	{
+		string_length = libcstring_system_string_length(
+				 option_volume_offset );
+
+		if( libsystem_string_to_uint64(
+		     option_volume_offset,
+		     string_length + 1,
+		     (uint64_t *) &( bdeinfo_info_handle->volume_offset ),
+		     &error ) != 1 )
+		{
+			libsystem_notify_print_error_backtrace(
+			 error );
+			liberror_error_free(
+			 &error );
+
+			bdeinfo_info_handle->volume_offset = 0;
+
+			fprintf(
+			 stderr,
+			 "Unsupported volume offset defaulting to: %" PRIu64 ".\n",
+			 bdeinfo_info_handle->volume_offset );
 		}
 	}
 	result = info_handle_open_input(
