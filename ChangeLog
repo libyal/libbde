@@ -52,6 +52,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20111123
+* updated libfdata
+
 20111118
 * code clean up
 
