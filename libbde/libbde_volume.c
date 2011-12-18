@@ -30,6 +30,7 @@
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
 #include "libbde_password.h"
@@ -866,7 +867,7 @@ int libbde_volume_close(
 
 		result = -1;
 	}
-	if( libfdata_cache_free(
+	if( libfcache_cache_free(
 	     &( internal_volume->sectors_cache ),
 	     error ) != 1 )
 	{
@@ -1166,7 +1167,7 @@ int libbde_volume_open_read(
 
 			goto on_error;
 		}
-		if( libfdata_cache_initialize(
+		if( libfcache_cache_initialize(
 		     &( internal_volume->sectors_cache ),
 		     LIBBDE_MAXIMUM_CACHE_ENTRIES_SECTORS,
 		     error ) != 1 )
@@ -1186,7 +1187,7 @@ int libbde_volume_open_read(
 on_error:
 	if( internal_volume->sectors_cache != NULL )
 	{
-		libfdata_cache_free(
+		libfcache_cache_free(
 		 &( internal_volume->sectors_cache ),
 		 NULL );
 	}

@@ -31,6 +31,7 @@
 #include "libbde_encryption.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_libfguid.h"
 #include "libbde_sector_data.h"
@@ -890,7 +891,7 @@ int libbde_io_handle_read_sector(
      intptr_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,
-     libfdata_cache_t *cache,
+     libfcache_cache_t *cache,
      int element_index,
      off64_t element_data_offset,
      size64_t element_data_size LIBBDE_ATTRIBUTE_UNUSED,

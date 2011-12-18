@@ -52,7 +52,11 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
-20111123
+20111218
+* updated libcstring, libsystem, libfdata, libfvalue
+* added libfcache
+
+20111124
 * updated libfdata
 
 20111118

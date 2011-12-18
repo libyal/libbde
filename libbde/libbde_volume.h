@@ -29,6 +29,7 @@
 #include "libbde_extern.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
 #include "libbde_types.h"
@@ -67,7 +68,7 @@ struct libbde_internal_volume
 
 	/* The sectors cache
 	 */
-	libfdata_cache_t *sectors_cache;
+	libfcache_cache_t *sectors_cache;
 
 	/* The file IO handle
 	 */
