@@ -5,6 +5,7 @@ EXTRA_DIST = \
 	libcaes/libcaes.vcproj \
 	libcstring/libcstring.vcproj \
 	liberror/liberror.vcproj \
+	libfcache/libfcache.vcproj \
 	libfdata/libfdata.vcproj \
 	libfdatetime/libfdatetime.vcproj \
 	libfguid/libfguid.vcproj \
