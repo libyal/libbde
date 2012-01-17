@@ -3,7 +3,7 @@
  * This header should be included in header files that export or import
  * library functions
  *
- * Copyright (C) 2011, Google Inc.
+ * Copyright (C) 2011-2012, Google Inc.
  *
  * Refer to AUTHORS for acknowledgements.
  *

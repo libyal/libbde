@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20111218],
+ [20120116],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -149,7 +149,7 @@ AS_IF(
 dnl Set the date for dpkg files
 AC_SUBST(
  [DATE],
- [`date -R`])
+ [`date -R 2> /dev/null`])
 
 dnl Have configure make the Makefiles
 AC_CONFIG_FILES([Makefile])

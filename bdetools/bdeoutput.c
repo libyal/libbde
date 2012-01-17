@@ -1,7 +1,7 @@
 /*
  * Common output functions for the bdetools
  *
- * Copyright (C) 2011, Google Inc.
+ * Copyright (C) 2011-2012, Google Inc.
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -64,7 +64,7 @@ void bdeoutput_copyright_fprint(
 	}
 	fprintf(
 	 stream,
-	 "Copyright (C) 2011, Google Inc.\n"
+	 "Copyright (C) 2011-2012, Google Inc.\n"
 	 "This is free software; see the source for copying conditions. There is NO\n"
 	 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n" );
 }
