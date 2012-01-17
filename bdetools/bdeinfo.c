@@ -1,7 +1,7 @@
 /*
  * Shows information obtained from a BitLocker Drive Encryption (BDE) encrypted volume
  *
- * Copyright (C) 2011, Google Inc.
+ * Copyright (C) 2011-2012, Google Inc.
  *
  * Refer to AUTHORS for acknowledgements.
  *

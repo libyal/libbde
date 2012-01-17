@@ -1,7 +1,7 @@
 /*
  * Notification function
  *
- * Copyright (C) 2011, Google Inc.
+ * Copyright (C) 2011-2012, Google Inc.
  *
  * Refer to AUTHORS for acknowledgements.
  *
