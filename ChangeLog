@@ -52,6 +52,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20120208
+* fix in dpkg/rules for include files
+
 20120116
 * 2012 update
 
