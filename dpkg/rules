@@ -14,7 +14,7 @@ export DH_OPTIONS
 install_libbde:
 	# Set up libbde package directories and files
 	mkdir -p debian/libbde/usr/lib
-	install -p -m755 debian/tmp/usr/lib/lib*.so.*.*.* debian/libbde/usr/lib
+	install -p -m755 debian/tmp/usr/lib/lib*.so.* debian/libbde/usr/lib
 
 install_libbde_dev:
 	# Set up libbde-dev package directories and files
@@ -24,11 +24,11 @@ install_libbde_dev:
 	mkdir -p debian/libbde-dev/usr/lib/pkgconfig
 	mkdir -p debian/libbde-dev/usr/share/man/man3
 	install -p -m755 debian/tmp/usr/include/*.h debian/libbde-dev/usr/include
-	install -p -m755 debian/tmp/usr/include/libbde/*.h debian/libbde-dev/usr/include
+	install -p -m755 debian/tmp/usr/include/libbde/*.h debian/libbde-dev/usr/include/libbde
 	install -p -m755 debian/tmp/usr/lib/*.la debian/libbde-dev/usr/lib
 	install -p -m755 debian/tmp/usr/lib/lib*.a debian/libbde-dev/usr/lib
 	install -p -m755 debian/tmp/usr/lib/lib*.so debian/libbde-dev/usr/lib
-	install -p -m755 debian/tmp/usr/lib/pkgconfig/* debian/libbde-dev/usr/lib
+	install -p -m755 debian/tmp/usr/lib/pkgconfig/* debian/libbde-dev/usr/lib/pkgconfig
 	install -p -m755 debian/tmp/usr/share/man/man3/* debian/libbde-dev/usr/share/man/man3
 
 install_libbde_tools:
