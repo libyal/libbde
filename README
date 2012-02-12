@@ -9,7 +9,7 @@ bdemount requires:
 
 
 Solaris
-To build libbde on Solaris make sure that /usr/ccs/bin and /usr/swf/bin are defined in the PATH environment variable
+To build libbde on Solaris make sure that /usr/ccs/bin and /usr/sfw/bin are defined in the PATH environment variable
 
 
 Also see:

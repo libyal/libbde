@@ -10,7 +10,7 @@ Upstream Author(s):
 
 Copyright:
 
-    Copyright (C) 2011, Google Inc.
+    Copyright (C) 2011-2012, Google Inc.
 
 License:
 
@@ -31,7 +31,10 @@ can be found in `/usr/share/common-licenses/Apache-2.0'.
 
 The Debian packaging is:
 
-    Copyright (C) 2011, Google Inc.
+    Copyright (C) 2011-2012, Google Inc.
+
+and is licensed under the pache License, Version 2.0
+see `/usr/share/common-licenses/Apache-2.0'.
 
 The support libraries are released under the GNU Lesser General Public License, Version 3.
 
