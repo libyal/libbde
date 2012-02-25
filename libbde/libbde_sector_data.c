@@ -85,7 +85,7 @@ int libbde_sector_data_initialize(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
 		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create IO handle.",
+		 "%s: unable to create sector data.",
 		 function );
 
 		goto on_error;
@@ -99,7 +99,7 @@ int libbde_sector_data_initialize(
 		 error,
 		 LIBERROR_ERROR_DOMAIN_MEMORY,
 		 LIBERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear IO handle.",
+		 "%s: unable to clear sector data.",
 		 function );
 
 		memory_free(

@@ -52,6 +52,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20120225
+* fix for libfuse in spec file
+
 20120208
 * fix in dpkg/rules for include files
 

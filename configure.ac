@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20120208],
+ [20120225],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -109,7 +109,7 @@ AS_IF(
  ])
 
 AS_IF(
- [test "x$ac_cv_libfuse" = xyes],
+ [test "x$ac_cv_libfuse" != xno],
  [AC_SUBST(
   [libbde_spec_tools_build_requires],
   [BuildRequires:])
