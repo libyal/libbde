@@ -333,7 +333,8 @@ int libbde_aes_ccm_encrypted_key_read(
 		 function );
 		libnotify_print_data(
 		 value_data,
-		 value_data_size );
+		 value_data_size,
+		 0 );
 	}
 #endif
 	aes_ccm_encrypted_key->data = (uint8_t *) memory_allocate(

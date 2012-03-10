@@ -120,7 +120,8 @@ int libbde_utf8_password_calculate_hash(
 			 function );
 			libnotify_print_data(
 			 utf16_stream,
-			 utf16_stream_size );
+			 utf16_stream_size,
+			 0 );
 		}
 #endif
 	/* Ignore the byte-order mark in the UTF16 stream

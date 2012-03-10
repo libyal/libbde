@@ -372,7 +372,8 @@ int libbde_metadata_read_block(
 		 function );
 		libnotify_print_data(
 		 fve_metadata_block,
-		 sizeof( bde_metadata_block_header_v1_t ) );
+		 sizeof( bde_metadata_block_header_v1_t ),
+		 0 );
 	}
 #endif
 	if( memory_compare(
@@ -488,7 +489,8 @@ int libbde_metadata_read_block(
 			 function );
 			libnotify_print_data(
 			 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown3,
-			 16 );
+			 16,
+			 0 );
 		}
 		else if( metadata->version == 2 )
 		{
@@ -751,7 +753,8 @@ ssize_t libbde_metadata_read_header(
 		 function );
 		libnotify_print_data(
 		 header_data,
-		 sizeof( bde_metadata_header_v1_t ) );
+		 sizeof( bde_metadata_header_v1_t ),
+		 0 );
 	}
 #endif
 	byte_stream_copy_to_uint32_little_endian(
@@ -1600,7 +1603,8 @@ int libbde_metadata_get_volume_master_key(
 			 function );
 			libnotify_print_data(
 			 aes_ccm_key,
-			 32 );
+			 32,
+			 0 );
 		}
 #endif
 		if( metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
@@ -1701,7 +1705,8 @@ int libbde_metadata_get_volume_master_key(
 			 function );
 			libnotify_print_data(
 			 unencrypted_data,
-			 unencrypted_data_size );
+			 unencrypted_data_size,
+			 0 );
 		}
 #endif
 		/* TODO improve this check */
@@ -1827,7 +1832,8 @@ int libbde_metadata_get_volume_master_key(
 				 function );
 				libnotify_print_data(
 				 aes_ccm_key,
-				 32 );
+				 32,
+				 0 );
 			}
 #endif
 			if( metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
@@ -1928,7 +1934,8 @@ int libbde_metadata_get_volume_master_key(
 				 function );
 				libnotify_print_data(
 				 unencrypted_data,
-				 unencrypted_data_size );
+				 unencrypted_data_size,
+				 0 );
 			}
 #endif
 			/* TODO improve this check */
@@ -2069,7 +2076,8 @@ int libbde_metadata_get_volume_master_key(
 				 function );
 				libnotify_print_data(
 				 aes_ccm_key,
-				 32 );
+				 32,
+				 0 );
 			}
 #endif
 			if( metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
@@ -2170,7 +2178,8 @@ int libbde_metadata_get_volume_master_key(
 				 function );
 				libnotify_print_data(
 				 unencrypted_data,
-				 unencrypted_data_size );
+				 unencrypted_data_size,
+				 0 );
 			}
 #endif
 			/* TODO improve this check */
@@ -2311,7 +2320,8 @@ int libbde_metadata_get_volume_master_key(
 				 function );
 				libnotify_print_data(
 				 aes_ccm_key,
-				 32 );
+				 32,
+				 0 );
 			}
 #endif
 			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
@@ -2412,7 +2422,8 @@ int libbde_metadata_get_volume_master_key(
 				 function );
 				libnotify_print_data(
 				 unencrypted_data,
-				 unencrypted_data_size );
+				 unencrypted_data_size,
+				 0 );
 			}
 #endif
 			/* TODO improve this check */
@@ -2704,7 +2715,8 @@ int libbde_metadata_get_full_volume_encryption_key(
 		 function );
 		libnotify_print_data(
 		 unencrypted_data,
-		 unencrypted_data_size );
+		 unencrypted_data_size,
+		 0 );
 	}
 #endif
 	/* TODO improve this check */
