@@ -245,7 +245,8 @@ int libbde_stretch_key_read(
 		 function );
 		libnotify_print_data(
 		 ( (bde_metadata_entry_stretch_key_header_t *) value_data )->salt,
-		 16 );
+		 16,
+		 0 );
 	}
 #endif
 	value_data      += sizeof( bde_metadata_entry_stretch_key_header_t );
@@ -259,7 +260,8 @@ int libbde_stretch_key_read(
 		 function );
 		libnotify_print_data(
 		 value_data,
-		 value_data_size );
+		 value_data_size,
+		 0 );
 	}
 #endif
 	stretch_key->data = (uint8_t *) memory_allocate(

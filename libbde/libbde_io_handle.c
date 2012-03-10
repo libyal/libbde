@@ -297,7 +297,8 @@ int libbde_io_handle_read_volume_header(
 		 function );
 		libnotify_print_data(
 		 volume_header_data,
-		 read_size );
+		 read_size,
+		 0 );
 	}
 #endif
 	if( memory_compare(
@@ -432,7 +433,8 @@ int libbde_io_handle_read_volume_header(
 		 function );
 		libnotify_print_data(
 		 volume_header_data,
-		 3 );
+		 3,
+		 0 );
 
 		libnotify_printf(
 		 "%s: signature\t\t\t\t: %c%c%c%c%c%c%c%c\n",
@@ -461,7 +463,8 @@ int libbde_io_handle_read_volume_header(
 		 function );
 		libnotify_print_data(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown1,
-		 5 );
+		 5,
+		 0 );
 
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_16bit,
@@ -585,7 +588,8 @@ int libbde_io_handle_read_volume_header(
 			 function );
 			libnotify_print_data(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->bootcode,
-			 426 );
+			 426,
+			 0 );
 		}
 		else if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		      || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
@@ -595,7 +599,8 @@ int libbde_io_handle_read_volume_header(
 			 function );
 			libnotify_print_data(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown4,
-			 31 );
+			 31,
+			 0 );
 
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_serial_number,
@@ -639,7 +644,8 @@ int libbde_io_handle_read_volume_header(
 			 function );
 			libnotify_print_data(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->bootcode,
-			 47 );
+			 47,
+			 0 );
 
 			if( libfguid_identifier_initialize(
 			     &guid,
@@ -720,7 +726,8 @@ int libbde_io_handle_read_volume_header(
 			 function );
 			libnotify_print_data(
 			 ( (bde_volume_header_to_go_t *) volume_header_data )->bootcode,
-			 335 );
+			 335,
+			 0 );
 
 			if( libfguid_identifier_initialize(
 			     &guid,
@@ -819,7 +826,8 @@ int libbde_io_handle_read_volume_header(
 			 function );
 			libnotify_print_data(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown5,
-			 310 );
+			 310,
+			 0 );
 		}
 		else if( io_handle->version == LIBBDE_VERSION_TO_GO )
 		{
@@ -828,7 +836,8 @@ int libbde_io_handle_read_volume_header(
 			 function );
 			libnotify_print_data(
 			 ( (bde_volume_header_to_go_t *) volume_header_data )->unknown5,
-			 46 );
+			 46,
+			 0 );
 		}
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->sector_signature,

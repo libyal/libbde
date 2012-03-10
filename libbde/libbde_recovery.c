@@ -187,7 +187,8 @@ int libbde_utf8_recovery_password_calculate_hash(
 			 function );
 			libnotify_print_data(
 			 binary_recovery_password,
-			 16 );
+			 16,
+			 0 );
 		}
 #endif
 		if( libhmac_sha256_calculate(
@@ -395,7 +396,8 @@ int libbde_utf16_recovery_password_calculate_hash(
 			 function );
 			libnotify_print_data(
 			 binary_recovery_password,
-			 16 );
+			 16,
+			 0 );
 		}
 #endif
 		if( libhmac_sha256_calculate(

@@ -195,7 +195,8 @@ ssize_t libbde_metadata_entry_read(
 		 function );
 		libnotify_print_data(
 		 fve_metadata,
-		 sizeof( bde_metadata_entry_v1_t ) );
+		 sizeof( bde_metadata_entry_v1_t ),
+		 0 );
 	}
 #endif
 	byte_stream_copy_to_uint16_little_endian(
@@ -305,7 +306,8 @@ ssize_t libbde_metadata_entry_read(
 		 function );
 		libnotify_print_data(
 		 metadata_entry->value_data,
-		 (size_t) metadata_entry->value_data_size );
+		 (size_t) metadata_entry->value_data_size,
+		 0 );
 	}
 #endif
 	return( (ssize_t) entry_size );
@@ -388,59 +390,73 @@ int libbde_metadata_entry_read_string(
 
 			return( -1 );
 		}
-		value_string = libcstring_system_string_allocate(
-		                value_string_size );
-
-		if( value_string == NULL )
+		if( value_string_size > 0 )
 		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create name string.",
-			 function );
+			if( ( value_string_size > (size_t) SSIZE_MAX )
+			 || ( ( sizeof( libcstring_system_character_t ) * value_string_size )  > (size_t) SSIZE_MAX ) )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid value string size value exceeds maximum.",
+				 function );
 
-			return( -1 );
-		}
+				return( -1 );
+			}
+			value_string = libcstring_system_string_allocate(
+					value_string_size );
+
+			if( value_string == NULL )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_MEMORY,
+				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+				 "%s: unable to create name string.",
+				 function );
+
+				return( -1 );
+			}
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libuna_utf16_string_copy_from_utf16_stream(
-			  (libuna_utf16_character_t *) value_string,
-			  value_string_size,
-			  metadata_entry->value_data,
-			  (size_t) metadata_entry->value_data_size,
-			  LIBUNA_ENDIAN_LITTLE,
-			  error );
+			result = libuna_utf16_string_copy_from_utf16_stream(
+				  (libuna_utf16_character_t *) value_string,
+				  value_string_size,
+				  metadata_entry->value_data,
+				  (size_t) metadata_entry->value_data_size,
+				  LIBUNA_ENDIAN_LITTLE,
+				  error );
 #else
-		result = libuna_utf8_string_copy_from_utf16_stream(
-			  (libuna_utf8_character_t *) value_string,
-			  value_string_size,
-			  metadata_entry->value_data,
-			  (size_t) metadata_entry->value_data_size,
-			  LIBUNA_ENDIAN_LITTLE,
-			  error );
+			result = libuna_utf8_string_copy_from_utf16_stream(
+				  (libuna_utf8_character_t *) value_string,
+				  value_string_size,
+				  metadata_entry->value_data,
+				  (size_t) metadata_entry->value_data_size,
+				  LIBUNA_ENDIAN_LITTLE,
+				  error );
 #endif
-		if( result != 1 )
-		{
-			liberror_error_set(
-			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set name string.",
-			 function );
+			if( result != 1 )
+			{
+				liberror_error_set(
+				 error,
+				 LIBERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to set name string.",
+				 function );
+
+				memory_free(
+				 value_string );
+
+				return( -1 );
+			}
+			libnotify_printf(
+			 "%s: string\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 function,
+			 value_string );
 
 			memory_free(
 			 value_string );
-
-			return( -1 );
 		}
-		libnotify_printf(
-		 "%s: string\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
-		 function,
-		 value_string );
-
-		memory_free(
-		 value_string );
-
 		libnotify_printf(
 		 "\n" );
 	}
