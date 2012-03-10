@@ -392,7 +392,8 @@ int libbde_sector_data_read(
 		 function );
 		libnotify_print_data(
 		 sector_data->encrypted_data,
-		 sector_data->data_size );
+		 sector_data->data_size,
+		 0 );
 	}
 #endif
 	/* In Windows Vista the first 16 sectors are unencrypted
@@ -493,7 +494,8 @@ int libbde_sector_data_read(
 		 function );
 		libnotify_print_data(
 		 sector_data->data,
-		 sector_data->data_size );
+		 sector_data->data_size,
+		 0 );
 	}
 #endif
 	return( 1 );

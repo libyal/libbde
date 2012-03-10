@@ -1380,21 +1380,24 @@ int libbde_volume_open_read_keys_from_metadata(
 			 function );
 			libnotify_print_data(
 			 volume_master_key,
-			 32 );
+			 32,
+			 0 );
 
 			libnotify_printf(
 			 "%s: full volume encryption key:\n",
 			 function );
 			libnotify_print_data(
 			 full_volume_encryption_key,
-			 32 );
+			 32,
+			 0 );
 
 			libnotify_printf(
 			 "%s: tweak key:\n",
 			 function );
 			libnotify_print_data(
 			 tweak_key,
-			 32 );
+			 32,
+			 0 );
 		}
 #endif
 		if( libbde_encryption_set_keys(

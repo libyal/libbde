@@ -238,10 +238,10 @@ int libbde_key_read(
 		 function );
 		libnotify_print_data(
 		 value_data,
-		 value_data_size );
+		 value_data_size,
+		 0 );
 	}
 #endif
-
 	key->data = (uint8_t *) memory_allocate(
 	                         sizeof( uint8_t ) * value_data_size );
 
