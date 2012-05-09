@@ -24,7 +24,7 @@ BEGIN
       VALUE "FileDescription",		"Library to support the BitLocker Drive Encryption (BDE) format\0"
       VALUE "FileVersion",		"@VERSION@" "\0"
       VALUE "InternalName",		"libbde.dll\0"
-      VALUE "LegalCopyright",		"(c) 2011 Google Inc.\0"
+      VALUE "LegalCopyright",		"(c) 2011-2012 Joachim Metz <joachim.metz@gmail.com>\0"
       VALUE "OriginalFilename",		"libbde.dll\0"
       VALUE "ProductName",		"libbde\0"
       VALUE "ProductVersion",		"@VERSION@" "\0"

@@ -3,12 +3,12 @@ Version: @VERSION@
 Release: 1
 Summary: Library to support the BitLocker Drive Encryption (BDE) format
 Group: System Environment/Libraries
-License: Apache
+License: LGPL
 Source: %{name}-%{version}.tar.gz
 URL: http://code.google.com/p/libbde
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-@libbde_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_lifguid_spec_requires@ @ax_libfvalue_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@
-@libbde_spec_build_requires@ @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfvalue_spec_build_requires@ @ax_libuna_spec_build_requires@
+@libbde_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libcstring_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_lifguid_spec_requires@ @ax_libfvalue_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@
+@libbde_spec_build_requires@ @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@  @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libcstring_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfvalue_spec_build_requires@ @ax_libuna_spec_build_requires@
 
 %description
 libbde is a library to support the BitLocker Drive Encryption (BDE) format
@@ -24,8 +24,8 @@ Header files and libraries for developing applications for libbde.
 %package tools
 Summary: Several tools for accessing BitLocker encrypted volumes
 Group: Applications/System
-Requires: libbde = %{version}-%{release} @ax_libfuse_spec_requires@
-@libbde_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
+Requires: libbde = %{version}-%{release} @ax_libcsystem_spec_requires@ @ax_libfuse_spec_requires@
+@libbde_spec_tools_build_requires@ @ax_libcsystem_spec_build_requires@ @ax_libfuse_spec_build_requires@
 
 %description tools
 Several tools for accessing the BitLocker encrypted volumes
@@ -50,12 +50,12 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING LICENSE.lgpl NEWS README
+%doc AUTHORS COPYING NEWS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
 %files devel
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING LICENSE.lgpl NEWS README README.dll README.mingw README.static ChangeLog
+%doc AUTHORS COPYING NEWS README README.dll README.mingw README.static ChangeLog
 %{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so

@@ -1,21 +1,22 @@
 /*
  * Input/Output (IO) handle functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -23,14 +24,13 @@
 #include <memory.h>
 #include <types.h>
 
-#include <libcstring.h>
-#include <liberror.h>
-#include <libnotify.h>
-
 #include "libbde_definitions.h"
 #include "libbde_encryption.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcerror.h"
+#include "libbde_libcnotify.h"
+#include "libbde_libcstring.h"
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_libfguid.h"
@@ -52,16 +52,16 @@ const char *bde_ntfs_volume_file_system_signature = "NTFS    ";
  */
 int libbde_io_handle_initialize(
      libbde_io_handle_t **io_handle,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function = "libbde_io_handle_initialize";
 
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
@@ -69,10 +69,10 @@ int libbde_io_handle_initialize(
 	}
 	if( *io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid IO handle value already set.",
 		 function );
 
@@ -83,10 +83,10 @@ int libbde_io_handle_initialize(
 
 	if( *io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create IO handle.",
 		 function );
 
@@ -97,10 +97,10 @@ int libbde_io_handle_initialize(
 	     0,
 	     sizeof( libbde_io_handle_t ) ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear IO handle.",
 		 function );
 
@@ -126,17 +126,17 @@ on_error:
  */
 int libbde_io_handle_free(
      libbde_io_handle_t **io_handle,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function = "libbde_io_handle_free";
 	int result            = 1;
 
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
@@ -150,10 +150,10 @@ int libbde_io_handle_free(
 			     &( ( *io_handle )->encryption_context ),
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free encryption context.",
 				 function );
 
@@ -165,10 +165,10 @@ int libbde_io_handle_free(
 		     0,
 		     32 ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear password hash.",
 			 function );
 
@@ -179,10 +179,10 @@ int libbde_io_handle_free(
 		     0,
 		     32 ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear recovery password hash.",
 			 function );
 
@@ -203,7 +203,7 @@ int libbde_io_handle_read_volume_header(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t *volume_header_data      = NULL;
 	static char *function            = "libbde_io_handle_read_volume_header";
@@ -223,19 +223,19 @@ int libbde_io_handle_read_volume_header(
 
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: reading volume header at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
 		 file_offset,
@@ -248,10 +248,10 @@ int libbde_io_handle_read_volume_header(
 	     SEEK_SET,
 	     error ) == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
 		 "%s: unable to seek volume header offset: %" PRIi64 ".",
 		 function,
 		 file_offset );
@@ -263,16 +263,16 @@ int libbde_io_handle_read_volume_header(
 
 	if( volume_header_data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create volume header data.",
 		 function );
 
 		goto on_error;
 	}
-	read_count = libbfio_handle_read(
+	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
 	              volume_header_data,
 	              read_size,
@@ -280,22 +280,22 @@ int libbde_io_handle_read_volume_header(
 
 	if( read_count != (ssize_t) read_size )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read volume header data.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: volume header data:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 volume_header_data,
 		 read_size,
 		 0 );
@@ -329,10 +329,10 @@ int libbde_io_handle_read_volume_header(
 		}
 		else
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 			 "%s: unsupported identifier.",
 			 function );
 
@@ -341,10 +341,10 @@ int libbde_io_handle_read_volume_header(
 	}
 	else
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported volume boot entry point.",
 		 function );
 
@@ -358,10 +358,10 @@ int libbde_io_handle_read_volume_header(
 		     bde_signature,
 		     8 ) != 0 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 			 "%s: invalid volume signature.",
 			 function );
 
@@ -426,17 +426,17 @@ int libbde_io_handle_read_volume_header(
 		 io_handle->third_metadata_offset );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: boot entry point:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 volume_header_data,
 		 3,
 		 0 );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: signature\t\t\t\t: %c%c%c%c%c%c%c%c\n",
 		 function,
 		 volume_header_data[ 3 ],
@@ -448,20 +448,20 @@ int libbde_io_handle_read_volume_header(
 		 volume_header_data[ 9 ],
 		 volume_header_data[ 10 ] );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: bytes per sector\t\t\t: %" PRIu16 "\n",
 		 function,
 		 io_handle->bytes_per_sector );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: sectors per cluster block\t\t: %" PRIu8 "\n",
 		 function,
 		 io_handle->sectors_per_cluster_block );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: unknown1\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown1,
 		 5,
 		 0 );
@@ -469,12 +469,12 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_16bit,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: total number of sectors (16-bit)\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: media descriptor\t\t\t: 0x%02" PRIx8 "\n",
 		 function,
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->media_descriptor );
@@ -482,7 +482,7 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown2,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: unknown2\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
@@ -490,7 +490,7 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->sectors_per_track,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: sectors per track\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
@@ -498,7 +498,7 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->number_of_heads,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: number of heads\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
@@ -506,7 +506,7 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->number_of_hidden_sectors,
 		 value_32bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: number of hidden sectors\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
@@ -514,7 +514,7 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_32bit,
 		 value_32bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: total number of sectors (32-bit)\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
@@ -524,7 +524,7 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->unknown4,
 			 value_32bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unknown4\t\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
 			 function,
 			 value_32bit,
@@ -533,7 +533,7 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->total_number_of_sectors_64bit,
 			 value_64bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: total number of sectors (64-bit)\t: %" PRIu64 "\n",
 			 function,
 			 value_64bit );
@@ -541,12 +541,12 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint64_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->mft_cluster_block_number,
 			 value_64bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: MFT cluster block number\t\t: %" PRIu64 "\n",
 			 function,
 			 value_64bit );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: first metadata cluster block\t: 0x%08" PRIx64 "\n",
 			 function,
 			 io_handle->first_metadata_offset );
@@ -554,7 +554,7 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->mft_entry_size,
 			 value_32bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: MFT entry size\t\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
@@ -562,7 +562,7 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->index_entry_size,
 			 value_32bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: index entry size\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
@@ -570,7 +570,7 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint64_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->volume_serial_number,
 			 value_64bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: volume serial number\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 value_64bit );
@@ -578,15 +578,15 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->checksum,
 			 value_32bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: checksum\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: bootcode\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->bootcode,
 			 426,
 			 0 );
@@ -594,10 +594,10 @@ int libbde_io_handle_read_volume_header(
 		else if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		      || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unknown4:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown4,
 			 31,
 			 0 );
@@ -605,12 +605,12 @@ int libbde_io_handle_read_volume_header(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_serial_number,
 			 value_64bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: volume serial number\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: volume label\t\t\t: %c%c%c%c%c%c%c%c%c%c%c\n",
 			 function,
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 0 ],
@@ -625,7 +625,7 @@ int libbde_io_handle_read_volume_header(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 9 ],
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->volume_label[ 10 ] );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: file system signature\t\t: %c%c%c%c%c%c%c%c\n",
 			 function,
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->file_system_signature[ 0 ],
@@ -639,10 +639,10 @@ int libbde_io_handle_read_volume_header(
 		}
 		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: bootcode\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->bootcode,
 			 47,
 			 0 );
@@ -651,10 +651,10 @@ int libbde_io_handle_read_volume_header(
 			     &guid,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 				 "%s: unable to create GUID.",
 				 function );
 
@@ -667,10 +667,10 @@ int libbde_io_handle_read_volume_header(
 			     LIBFGUID_ENDIAN_LITTLE,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
 				 "%s: unable to copy byte stream to GUID.",
 				 function );
 
@@ -691,16 +691,16 @@ int libbde_io_handle_read_volume_header(
 #endif
 			if( result != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
 				 "%s: unable to copy GUID to string.",
 				 function );
 
 				goto on_error;
 			}
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 			 function,
 			 guid_string );
@@ -709,10 +709,10 @@ int libbde_io_handle_read_volume_header(
 			     &guid,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free GUID.",
 				 function );
 
@@ -721,10 +721,10 @@ int libbde_io_handle_read_volume_header(
 		}
 		else if( io_handle->version == LIBBDE_VERSION_TO_GO )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: bootcode\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_volume_header_to_go_t *) volume_header_data )->bootcode,
 			 335,
 			 0 );
@@ -733,10 +733,10 @@ int libbde_io_handle_read_volume_header(
 			     &guid,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 				 "%s: unable to create GUID.",
 				 function );
 
@@ -749,10 +749,10 @@ int libbde_io_handle_read_volume_header(
 			     LIBFGUID_ENDIAN_LITTLE,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
 				 "%s: unable to copy byte stream to GUID.",
 				 function );
 
@@ -773,16 +773,16 @@ int libbde_io_handle_read_volume_header(
 #endif
 			if( result != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
 				 "%s: unable to copy GUID to string.",
 				 function );
 
 				goto on_error;
 			}
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 			 function,
 			 guid_string );
@@ -791,10 +791,10 @@ int libbde_io_handle_read_volume_header(
 			     &guid,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free GUID.",
 				 function );
 
@@ -804,37 +804,37 @@ int libbde_io_handle_read_volume_header(
 		if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		 || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: first metadata offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 io_handle->first_metadata_offset );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: second metadata offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 io_handle->second_metadata_offset );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: third metadata offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 io_handle->third_metadata_offset );
 		}
 		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unknown5:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_volume_header_windows_7_t *) volume_header_data )->unknown5,
 			 310,
 			 0 );
 		}
 		else if( io_handle->version == LIBBDE_VERSION_TO_GO )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unknown5:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_volume_header_to_go_t *) volume_header_data )->unknown5,
 			 46,
 			 0 );
@@ -842,18 +842,18 @@ int libbde_io_handle_read_volume_header(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->sector_signature,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: sector signature\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 value_16bit );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "\n" );
 	}
 #endif
 	if( total_number_of_sectors != 0 )
 	{
-		io_handle->volume_size  = total_number_of_sectors + 1;
+		io_handle->volume_size  = total_number_of_sectors;
 		io_handle->volume_size *= io_handle->bytes_per_sector;
 	}
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
@@ -905,7 +905,7 @@ int libbde_io_handle_read_sector(
      off64_t element_data_offset,
      size64_t element_data_size LIBBDE_ATTRIBUTE_UNUSED,
      uint8_t read_flags LIBBDE_ATTRIBUTE_UNUSED,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_sector_data_t *sector_data = NULL;
 	static char *function             = "libbde_io_handle_read_sector";
@@ -915,10 +915,10 @@ int libbde_io_handle_read_sector(
 
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
@@ -930,10 +930,10 @@ int libbde_io_handle_read_sector(
 	     (size_t) ( (libbde_io_handle_t *) io_handle )->bytes_per_sector,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create sector data.",
 		 function );
 
@@ -948,10 +948,10 @@ int libbde_io_handle_read_sector(
 	     1,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read sector data.",
 		 function );
 
@@ -962,14 +962,14 @@ int libbde_io_handle_read_sector(
 	     cache,
 	     element_index,
 	     (intptr_t *) sector_data,
-	     (int (*)(intptr_t **, liberror_error_t **)) &libbde_sector_data_free,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libbde_sector_data_free,
 	     LIBFDATA_LIST_ELEMENT_VALUE_FLAG_MANAGED,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set sector data as element value.",
 		 function );
 
@@ -993,7 +993,7 @@ on_error:
 int libbde_io_handle_read_unencrypted_volume_header(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_sector_data_t *sector_data = NULL;
 	uint8_t *volume_header_data       = NULL;
@@ -1003,10 +1003,10 @@ int libbde_io_handle_read_unencrypted_volume_header(
 
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
@@ -1018,9 +1018,9 @@ int libbde_io_handle_read_unencrypted_volume_header(
 		volume_header_offset = io_handle->volume_header_offset;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: reading unencrypted volume header at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
 		 volume_header_offset,
@@ -1032,10 +1032,10 @@ int libbde_io_handle_read_unencrypted_volume_header(
 	     io_handle->bytes_per_sector,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create sector data.",
 		 function );
 
@@ -1050,10 +1050,10 @@ int libbde_io_handle_read_unencrypted_volume_header(
 	     0,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read volume header sector data.",
 		 function );
 
@@ -1086,24 +1086,24 @@ int libbde_io_handle_read_unencrypted_volume_header(
 			}
 			if( total_number_of_sectors == 0 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: missing total number of sectors.",
 				 function );
 
 				goto on_error;
 			}
-			io_handle->volume_size  = total_number_of_sectors + 1;
+			io_handle->volume_size  = total_number_of_sectors;
 			io_handle->volume_size *= io_handle->bytes_per_sector;
 		}
 		else
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 			 "%s: unsupported volume signature.",
 			 function );
 
@@ -1114,10 +1114,10 @@ int libbde_io_handle_read_unencrypted_volume_header(
 	     &sector_data,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free sector data.",
 		 function );
 

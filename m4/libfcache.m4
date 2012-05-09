@@ -1,6 +1,6 @@
 dnl Functions for libfcache
 dnl
-dnl Version: 20111124
+dnl Version: 20120501
 
 dnl Function to detect if libfcache is available
 dnl ac_libfcache_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -19,20 +19,39 @@ AC_DEFUN([AX_LIBFCACHE_CHECK_LIB],
  AS_IF(
   [test "x$ac_cv_with_libfcache" = xno],
   [ac_cv_libfcache=no],
-  [dnl Check for headers
-  AC_CHECK_HEADERS([libfcache.h])
- 
+  [dnl Check for a pkg-config file
   AS_IF(
-   [test "x$ac_cv_header_libfcache_h" = xno],
-   [ac_cv_libfcache=no],
-   [ac_cv_libfcache=yes
-   AC_CHECK_LIB(
-    fcache,
-    libfcache_get_version,
-    [ac_cv_libfcache_dummy=yes],
+   [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+   [PKG_CHECK_MODULES(
+    [libfcache],
+    [libfcache >= 20120405],
+    [ac_cv_libfcache=yes],
     [ac_cv_libfcache=no])
+   ])
+
+  AS_IF(
+   [test "x$ac_cv_libfcache" = xyes],
+   [ac_cv_libfcache_CPPFLAGS="$pkg_cv_libfcache_CFLAGS"
+   ac_cv_libfcache_LIBADD="$pkg_cv_libfcache_LIBS"],
+   [dnl Check for headers
+   AC_CHECK_HEADERS([libfcache.h])
   
-   dnl TODO add functions
+   AS_IF(
+    [test "x$ac_cv_header_libfcache_h" = xno],
+    [ac_cv_libfcache=no],
+    [dnl Check for the individual functions
+    ac_cv_libfcache=yes
+ 
+    AC_CHECK_LIB(
+     fcache,
+     libfcache_get_version,
+     [ac_cv_libfcache_dummy=yes],
+     [ac_cv_libfcache=no])
+   
+    dnl TODO add functions
+ 
+    ac_cv_libfcache_LIBADD="-lfcache"
+    ])
    ])
   ])
 
@@ -42,7 +61,6 @@ AC_DEFUN([AX_LIBFCACHE_CHECK_LIB],
    [HAVE_LIBFCACHE],
    [1],
    [Define to 1 if you have the `fcache' library (-lfcache).])
-  LIBS="-lfcache $LIBS"
   ])
 
  AS_IF(
@@ -72,6 +90,11 @@ AC_DEFUN([AX_LIBFCACHE_CHECK_LOCAL],
    [Missing function: time],
    [1])
   ])
+
+ ac_cv_libfcache_CPPFLAGS="-I../libfcache";
+ ac_cv_libfcache_LIBADD="../libfcache/libfcache.la";
+
+ ac_cv_libfcache=local
  ])
 
 dnl Function to detect how to enable libfcache
@@ -83,8 +106,10 @@ AC_DEFUN([AX_LIBFCACHE_CHECK_ENABLE],
   [auto-detect],
   [DIR])
 
+ dnl Check for a shared library version
  AX_LIBFCACHE_CHECK_LIB
 
+ dnl Check if the dependencies for the local library version
  AS_IF(
   [test "x$ac_cv_libfcache" != xyes],
   [AX_LIBFCACHE_CHECK_LOCAL
@@ -96,18 +121,23 @@ AC_DEFUN([AX_LIBFCACHE_CHECK_ENABLE],
   AC_SUBST(
    [HAVE_LOCAL_LIBFCACHE],
    [1])
-  AC_SUBST(
-   [LIBFCACHE_CPPFLAGS],
-   [-I../libfcache])
-  AC_SUBST(
-   [LIBFCACHE_LIBADD],
-   [../libfcache/libfcache.la])
-  ac_cv_libfcache=local
   ])
 
  AM_CONDITIONAL(
   [HAVE_LOCAL_LIBFCACHE],
   [test "x$ac_cv_libfcache" = xlocal])
+ AS_IF(
+  [test "x$ac_cv_libfcache_CPPFLAGS" != "x"],
+  [AC_SUBST(
+   [LIBFCACHE_CPPFLAGS],
+   [$ac_cv_libfcache_CPPFLAGS])
+  ])
+ AS_IF(
+  [test "x$ac_cv_libfcache_LIBADD" != "x"],
+  [AC_SUBST(
+   [LIBFCACHE_LIBADD],
+   [$ac_cv_libfcache_LIBADD])
+  ])
 
  AS_IF(
   [test "x$ac_cv_libfcache" = xyes],

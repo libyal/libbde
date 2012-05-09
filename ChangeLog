@@ -50,6 +50,12 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20120509
+* applied updates
+* added bdemount destroy function
+* remove + 1 from volume size calculation, does not add up for
+  volume-only storage media
+
 20120310
 * updated libnotify, libsystem
 

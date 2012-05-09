@@ -1,14 +1,18 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	-I$(top_srcdir)/libcstring \
-	-I$(top_srcdir)/liberror \
-	-I$(top_srcdir)/libsystem \
+	@LIBCSTRING_CPPFLAGS@ \
+	@LIBCERROR_CPPFLAGS@ \
+	@LIBCLOCALE_CPPFLAGS@ \
+	@LIBCNOTIFY_CPPFLAGS@ \
 	@LIBUNA_CPPFLAGS@ \
+	@LIBCFILE_CPPFLAGS@ \
+	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFCACHE_CPPFLAGS@ \
 	@LIBFDATA_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBCSYSTEM_CPPFLAGS@ \
 	@MEMWATCH_CPPFLAGS@ \
 	@LIBBDE_DLL_IMPORT@
 
@@ -21,14 +25,23 @@ bin_PROGRAMS = \
 bdeinfo_SOURCES = \
 	bdeinfo.c \
 	bdeoutput.c bdeoutput.h \
-	bdetools_libfdatetime.h \
 	bdetools_libbde.h \
+	bdetools_libcerror.h \
+	bdetools_libclocale.h \
+	bdetools_libcnotify.h \
+	bdetools_libcstring.h \
+	bdetools_libcsystem.h \
+	bdetools_libfdatetime.h \
 	info_handle.c info_handle.h
 
 bdeinfo_LDADD  = \
-	../liberror/liberror.la \
+	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
 	../libbde/libbde.la \
-	../libsystem/libsystem.la \
+	@LIBCSYSTEM_LIBADD@ \
+	@LIBINTL@ \
 	@MEMWATCH_LIBADD@
 
 bdemount_SOURCES = \
@@ -36,12 +49,21 @@ bdemount_SOURCES = \
 	bdeoutput.c bdeoutput.h \
 	bdetools_libbfio.h \
 	bdetools_libbde.h \
+	bdetools_libcerror.h \
+	bdetools_libclocale.h \
+	bdetools_libcnotify.h \
+	bdetools_libcstring.h \
+	bdetools_libcsystem.h \
 	mount_handle.c mount_handle.h
 
 bdemount_LDADD  = \
-	../liberror/liberror.la \
+	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
 	../libbde/libbde.la \
-	../libsystem/libsystem.la \
+	@LIBCSYSTEM_LIBADD@ \
+	@LIBINTL@ \
 	@LIBFUSE_LIBADD@ \
 	@MEMWATCH_LIBADD@
 
