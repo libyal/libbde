@@ -1,21 +1,22 @@
 /*
  * Recovery functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -23,9 +24,8 @@
 #include <memory.h>
 #include <types.h>
 
-#include <liberror.h>
-#include <libnotify.h>
-
+#include "libbde_libcerror.h"
+#include "libbde_libcnotify.h"
 #include "libbde_libfvalue.h"
 #include "libbde_libhmac.h"
 #include "libbde_recovery.h"
@@ -38,7 +38,7 @@ int libbde_utf8_recovery_password_calculate_hash(
      size_t utf8_string_length,
      uint8_t *recovery_password_hash,
      size_t recovery_password_hash_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t binary_recovery_password[ 16 ];
 
@@ -53,10 +53,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 
 	if( recovery_password_hash == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid recovery password hash.",
 		 function );
 
@@ -64,10 +64,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 	}
 	if( recovery_password_hash_size != 32 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: recovery password hash size value out of bounds.",
 		 function );
 
@@ -80,10 +80,10 @@ int libbde_utf8_recovery_password_calculate_hash(
  	     &split_string,
  	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to split string.",
 		 function );
 
@@ -94,10 +94,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 	     &number_of_segments,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve number of segments in split string.",
 		 function );
 
@@ -118,10 +118,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 			     &string_segment_size,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve segment: %d from split string.",
 				 function,
 				 segment_index );
@@ -134,10 +134,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 			     &value_32bit,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to determine binary value for segment: %d from split string.",
 				 function,
 				 segment_index );
@@ -168,10 +168,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 	     &split_string,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free split string.",
 		 function );
 
@@ -180,12 +180,12 @@ int libbde_utf8_recovery_password_calculate_hash(
 	if( result == 1 )
 	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: binary recovery password:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 binary_recovery_password,
 			 16,
 			 0 );
@@ -198,10 +198,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 		     recovery_password_hash_size,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to calculate recovery password hash.",
 			 function );
 
@@ -212,10 +212,10 @@ int libbde_utf8_recovery_password_calculate_hash(
 		     0,
 		     16 ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear binary recovery password.",
 			 function );
 
@@ -247,7 +247,7 @@ int libbde_utf16_recovery_password_calculate_hash(
      size_t utf16_string_length,
      uint8_t *recovery_password_hash,
      size_t recovery_password_hash_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t binary_recovery_password[ 16 ];
 
@@ -262,10 +262,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 
 	if( recovery_password_hash == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid recovery password hash.",
 		 function );
 
@@ -273,10 +273,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 	}
 	if( recovery_password_hash_size != 32 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: recovery password hash size value out of bounds.",
 		 function );
 
@@ -289,10 +289,10 @@ int libbde_utf16_recovery_password_calculate_hash(
  	     &split_string,
  	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to split string.",
 		 function );
 
@@ -303,10 +303,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 	     &number_of_segments,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve number of segments in split string.",
 		 function );
 
@@ -327,10 +327,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 			     &string_segment_size,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve segment: %d from split string.",
 				 function,
 				 segment_index );
@@ -343,10 +343,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 			     &value_32bit,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to determine binary value for segment: %d from split string.",
 				 function,
 				 segment_index );
@@ -377,10 +377,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 	     &split_string,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free split string.",
 		 function );
 
@@ -389,12 +389,12 @@ int libbde_utf16_recovery_password_calculate_hash(
 	if( result == 1 )
 	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: binary recovery password:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 binary_recovery_password,
 			 16,
 			 0 );
@@ -407,10 +407,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 		     recovery_password_hash_size,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to calculate recovery password hash.",
 			 function );
 
@@ -421,10 +421,10 @@ int libbde_utf16_recovery_password_calculate_hash(
 		     0,
 		     16 ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear binary recovery password.",
 			 function );
 

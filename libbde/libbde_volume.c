@@ -1,35 +1,35 @@
 /*
  * Volume functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
 #include <memory.h>
 #include <types.h>
 
-#include <libcstring.h>
-#include <liberror.h>
-#include <libnotify.h>
-
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcerror.h"
+#include "libbde_libcnotify.h"
+#include "libbde_libcstring.h"
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
@@ -46,17 +46,17 @@
  */
 int libbde_volume_initialize(
      libbde_volume_t **volume,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_initialize";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -64,10 +64,10 @@ int libbde_volume_initialize(
 	}
 	if( *volume != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume value already set.",
 		 function );
 
@@ -78,10 +78,10 @@ int libbde_volume_initialize(
 
 	if( internal_volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create volume.",
 		 function );
 
@@ -92,10 +92,10 @@ int libbde_volume_initialize(
 	     0,
 	     sizeof( libbde_internal_volume_t ) ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear volume.",
 		 function );
 
@@ -108,10 +108,10 @@ int libbde_volume_initialize(
 	     &( internal_volume->primary_metadata ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create primary metadata.",
 		 function );
 
@@ -121,10 +121,10 @@ int libbde_volume_initialize(
 	     &( internal_volume->secondary_metadata ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create secondary metadata.",
 		 function );
 
@@ -134,10 +134,10 @@ int libbde_volume_initialize(
 	     &( internal_volume->tertiary_metadata ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create tertiary metadata.",
 		 function );
 
@@ -147,10 +147,10 @@ int libbde_volume_initialize(
 	     &( internal_volume->io_handle ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create IO handle.",
 		 function );
 
@@ -192,7 +192,7 @@ on_error:
  */
 int libbde_volume_free(
      libbde_volume_t **volume,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_free";
@@ -200,10 +200,10 @@ int libbde_volume_free(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -219,10 +219,10 @@ int libbde_volume_free(
 			     *volume,
 			     error ) != 0 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_IO,
-				 LIBERROR_IO_ERROR_CLOSE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_CLOSE_FAILED,
 				 "%s: unable to close volume.",
 				 function );
 
@@ -235,10 +235,10 @@ int libbde_volume_free(
 		     &( internal_volume->primary_metadata ),
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free primary metadata.",
 			 function );
 
@@ -248,10 +248,10 @@ int libbde_volume_free(
 		     &( internal_volume->secondary_metadata ),
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free secondary metadata.",
 			 function );
 
@@ -261,10 +261,10 @@ int libbde_volume_free(
 		     &( internal_volume->tertiary_metadata ),
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free tertiary metadata.",
 			 function );
 
@@ -274,10 +274,10 @@ int libbde_volume_free(
 		     &( internal_volume->io_handle ),
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free IO handle.",
 			 function );
 
@@ -294,17 +294,17 @@ int libbde_volume_free(
  */
 int libbde_volume_signal_abort(
      libbde_volume_t *volume,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_signal_abort";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -314,10 +314,10 @@ int libbde_volume_signal_abort(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -335,7 +335,7 @@ int libbde_volume_open(
      libbde_volume_t *volume,
      const char *filename,
      int access_flags,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbfio_handle_t *file_io_handle          = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
@@ -345,10 +345,10 @@ int libbde_volume_open(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -358,10 +358,10 @@ int libbde_volume_open(
 
 	if( filename == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid filename.",
 		 function );
 
@@ -370,10 +370,10 @@ int libbde_volume_open(
 	if( ( ( access_flags & LIBBDE_ACCESS_FLAG_READ ) == 0 )
 	 && ( ( access_flags & LIBBDE_ACCESS_FLAG_WRITE ) == 0 ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported access flags.",
 		 function );
 
@@ -381,10 +381,10 @@ int libbde_volume_open(
 	}
 	if( ( access_flags & LIBBDE_ACCESS_FLAG_WRITE ) != 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: write access currently not supported.",
 		 function );
 
@@ -395,10 +395,10 @@ int libbde_volume_open(
 
 	if( filename_length == 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid filename.",
 		 function );
 
@@ -408,10 +408,10 @@ int libbde_volume_open(
 	     &file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create file IO handle.",
 		 function );
 
@@ -423,10 +423,10 @@ int libbde_volume_open(
 	     1,
 	     error ) != 1 )
 	{
-                liberror_error_set(
+                libcerror_error_set(
                  error,
-                 LIBERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
                  "%s: unable to set track offsets read in file IO handle.",
                  function );
 
@@ -439,10 +439,10 @@ int libbde_volume_open(
 	     filename_length,
 	     error ) != 1 )
 	{
-                liberror_error_set(
+                libcerror_error_set(
                  error,
-                 LIBERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
                  "%s: unable to set filename in file IO handle.",
                  function );
 
@@ -456,10 +456,10 @@ int libbde_volume_open(
 
 	if( result == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
 		 "%s: unable to open volume: %s.",
 		 function,
 		 filename );
@@ -489,7 +489,7 @@ int libbde_volume_open_wide(
      libbde_volume_t *volume,
      const wchar_t *filename,
      int access_flags,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbfio_handle_t *file_io_handle          = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
@@ -499,10 +499,10 @@ int libbde_volume_open_wide(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -512,10 +512,10 @@ int libbde_volume_open_wide(
 
 	if( filename == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid filename.",
 		 function );
 
@@ -524,10 +524,10 @@ int libbde_volume_open_wide(
 	if( ( ( access_flags & LIBBDE_ACCESS_FLAG_READ ) == 0 )
 	 && ( ( access_flags & LIBBDE_ACCESS_FLAG_WRITE ) == 0 ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported access flags.",
 		 function );
 
@@ -535,10 +535,10 @@ int libbde_volume_open_wide(
 	}
 	if( ( access_flags & LIBBDE_ACCESS_FLAG_WRITE ) != 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: write access currently not supported.",
 		 function );
 
@@ -549,10 +549,10 @@ int libbde_volume_open_wide(
 
 	if( filename_length == 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid filename.",
 		 function );
 
@@ -562,10 +562,10 @@ int libbde_volume_open_wide(
 	     &file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create file IO handle.",
 		 function );
 
@@ -577,10 +577,10 @@ int libbde_volume_open_wide(
 	     1,
 	     error ) != 1 )
 	{
-                liberror_error_set(
+                libcerror_error_set(
                  error,
-                 LIBERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
                  "%s: unable to set track offsets read in file IO handle.",
                  function );
 
@@ -593,10 +593,10 @@ int libbde_volume_open_wide(
 	     filename_length,
 	     error ) != 1 )
 	{
-                liberror_error_set(
+                libcerror_error_set(
                  error,
-                 LIBERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
                  "%s: unable to set filename in file IO handle.",
                  function );
 
@@ -610,10 +610,10 @@ int libbde_volume_open_wide(
 
 	if( result == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
 		 "%s: unable to open volume: %ls.",
 		 function,
 		 filename );
@@ -643,7 +643,7 @@ int libbde_volume_open_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
      int access_flags,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open_file_io_handle";
@@ -653,10 +653,10 @@ int libbde_volume_open_file_io_handle(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -666,10 +666,10 @@ int libbde_volume_open_file_io_handle(
 
 	if( internal_volume->file_io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - file IO handle already set.",
 		 function );
 
@@ -677,10 +677,10 @@ int libbde_volume_open_file_io_handle(
 	}
 	if( file_io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file IO handle.",
 		 function );
 
@@ -689,10 +689,10 @@ int libbde_volume_open_file_io_handle(
 	if( ( ( access_flags & LIBBDE_ACCESS_FLAG_READ ) == 0 )
 	 && ( ( access_flags & LIBBDE_ACCESS_FLAG_WRITE ) == 0 ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported access flags.",
 		 function );
 
@@ -700,10 +700,10 @@ int libbde_volume_open_file_io_handle(
 	}
 	if( ( access_flags & LIBBDE_ACCESS_FLAG_WRITE ) != 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: write access currently not supported.",
 		 function );
 
@@ -719,10 +719,10 @@ int libbde_volume_open_file_io_handle(
 
 	if( file_io_handle_is_open == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
 		 "%s: unable to open file.",
 		 function );
 
@@ -735,10 +735,10 @@ int libbde_volume_open_file_io_handle(
 		     bfio_access_flags,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_OPEN_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_OPEN_FAILED,
 			 "%s: unable to open file IO handle.",
 			 function );
 
@@ -753,10 +753,10 @@ int libbde_volume_open_file_io_handle(
 
 	if( result == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read from volume handle.",
 		 function );
 
@@ -776,7 +776,7 @@ int libbde_volume_open_file_io_handle(
  */
 int libbde_volume_close(
      libbde_volume_t *volume,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_close";
@@ -784,10 +784,10 @@ int libbde_volume_close(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -797,10 +797,10 @@ int libbde_volume_close(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -809,16 +809,16 @@ int libbde_volume_close(
 	if( internal_volume->file_io_handle_created_in_library != 0 )
 	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
 			if( libbde_debug_print_read_offsets(
 			     internal_volume->file_io_handle,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
 				 "%s: unable to print the read offsets.",
 				 function );
 			}
@@ -828,10 +828,10 @@ int libbde_volume_close(
 		     internal_volume->file_io_handle,
 		     error ) != 0 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_CLOSE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
 			 "%s: unable to close file IO handle.",
 			 function );
 
@@ -841,10 +841,10 @@ int libbde_volume_close(
 		     &( internal_volume->file_io_handle ),
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free file IO handle.",
 			 function );
 
@@ -858,10 +858,10 @@ int libbde_volume_close(
 	     &( internal_volume->sectors_vector ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free sectors vector.",
 		 function );
 
@@ -871,10 +871,10 @@ int libbde_volume_close(
 	     &( internal_volume->sectors_cache ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free sectors cache.",
 		 function );
 
@@ -888,7 +888,7 @@ int libbde_volume_close(
  */
 int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t *startup_key_identifier    = NULL;
 	static char *function              = "libbde_volume_open_read";
@@ -897,10 +897,10 @@ int libbde_volume_open_read(
 
 	if( internal_volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid internal volume.",
 		 function );
 
@@ -908,10 +908,10 @@ int libbde_volume_open_read(
 	}
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid internal volume - missing IO handle.",
 		 function );
 
@@ -919,10 +919,10 @@ int libbde_volume_open_read(
 	}
 	if( internal_volume->sectors_vector != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal file - sectors vector already set.",
 		 function );
 
@@ -930,10 +930,10 @@ int libbde_volume_open_read(
 	}
 	if( internal_volume->sectors_cache != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal file - sectors cache already set.",
 		 function );
 
@@ -946,9 +946,9 @@ int libbde_volume_open_read(
 		startup_key_identifier_size = 16;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "Reading BitLocker volume header:\n" );
 	}
 #endif
@@ -958,19 +958,19 @@ int libbde_volume_open_read(
 	     0,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read volume header.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "Reading BitLocker primary metadata block:\n" );
 	}
 #endif
@@ -983,19 +983,19 @@ int libbde_volume_open_read(
 	     startup_key_identifier_size,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read primary metadata block.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "Reading BitLocker secondary metadata block:\n" );
 	}
 #endif
@@ -1008,19 +1008,19 @@ int libbde_volume_open_read(
 	     startup_key_identifier_size,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read secondary metadata block.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "Reading BitLocker tertiary metadata block:\n" );
 	}
 #endif
@@ -1033,10 +1033,10 @@ int libbde_volume_open_read(
 	     startup_key_identifier_size,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read tertiary metadata block.",
 		 function );
 
@@ -1049,10 +1049,10 @@ int libbde_volume_open_read(
 
 	if( result == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read keys from primary metadata.",
 		 function );
 
@@ -1067,10 +1067,10 @@ int libbde_volume_open_read(
 
 		if( result == -1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_READ_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read keys from secondary metadata.",
 			 function );
 
@@ -1086,10 +1086,10 @@ int libbde_volume_open_read(
 
 		if( result == -1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_READ_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read keys from tertiary metadata.",
 			 function );
 
@@ -1099,9 +1099,9 @@ int libbde_volume_open_read(
 	if( result != 0 )
 	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "Reading unencrypted volume header:\n" );
 		}
 #endif
@@ -1110,24 +1110,24 @@ int libbde_volume_open_read(
 		     internal_volume->file_io_handle,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_READ_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read unencrypted volume header.",
 			 function );
 
 			goto on_error;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: volume size\t\t\t\t\t: %" PRIu64 "\n",
 			 function,
 			 internal_volume->io_handle->volume_size );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "\n" );
 		}
 #endif
@@ -1142,10 +1142,10 @@ int libbde_volume_open_read(
 		     LIBFDATA_FLAG_IO_HANDLE_NON_MANAGED,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create sectors vector.",
 			 function );
 
@@ -1158,10 +1158,10 @@ int libbde_volume_open_read(
 		     0,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
 			 "%s: unable to append segment to sectors vector.",
 			 function );
 
@@ -1172,10 +1172,10 @@ int libbde_volume_open_read(
 		     LIBBDE_MAXIMUM_CACHE_ENTRIES_SECTORS,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create sectors cache.",
 			 function );
 
@@ -1206,7 +1206,7 @@ on_error:
 int libbde_volume_open_read_keys_from_metadata(
      libbde_internal_volume_t *internal_volume,
      libbde_metadata_t *metadata,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t full_volume_encryption_key[ 32 ];
 	uint8_t tweak_key[ 32 ];
@@ -1223,10 +1223,10 @@ int libbde_volume_open_read_keys_from_metadata(
 
 	if( internal_volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid internal volume.",
 		 function );
 
@@ -1234,10 +1234,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	}
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid internal volume - missing IO handle.",
 		 function );
 
@@ -1245,10 +1245,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	}
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -1259,10 +1259,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	     0,
 	     32 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear full volume encryption key.",
 		 function );
 
@@ -1273,10 +1273,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	     0,
 	     32 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear tweak key.",
 		 function );
 
@@ -1287,10 +1287,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	     0,
 	     32 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to volume master key.",
 		 function );
 
@@ -1319,10 +1319,10 @@ int libbde_volume_open_read_keys_from_metadata(
 
 	if( result == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve volume master key from metadata.",
 		 function );
 
@@ -1342,10 +1342,10 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		if( result == -1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve full volume encryption key from metadata.",
 			 function );
 
@@ -1363,38 +1363,38 @@ int libbde_volume_open_read_keys_from_metadata(
 		     encryption_method,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create encryption context.",
 			 function );
 
 			goto on_error;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: volume master key:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 volume_master_key,
 			 32,
 			 0 );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: full volume encryption key:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 full_volume_encryption_key,
 			 32,
 			 0 );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: tweak key:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 tweak_key,
 			 32,
 			 0 );
@@ -1406,10 +1406,10 @@ int libbde_volume_open_read_keys_from_metadata(
 		     tweak_key,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to set keys in encryption context.",
 			 function );
 
@@ -1421,10 +1421,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	     0,
 	     32 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear full volume encryption key.",
 		 function );
 
@@ -1435,10 +1435,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	     0,
 	     32 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear tweak key.",
 		 function );
 
@@ -1449,10 +1449,10 @@ int libbde_volume_open_read_keys_from_metadata(
 	     0,
 	     32 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to volume master key.",
 		 function );
 
@@ -1488,7 +1488,7 @@ ssize_t libbde_volume_read_buffer(
          libbde_volume_t *volume,
          void *buffer,
          size_t buffer_size,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	libbde_sector_data_t *sector_data         = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
@@ -1500,10 +1500,10 @@ ssize_t libbde_volume_read_buffer(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1513,10 +1513,10 @@ ssize_t libbde_volume_read_buffer(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -1524,10 +1524,10 @@ ssize_t libbde_volume_read_buffer(
 	}
 	if( internal_volume->sectors_vector == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid internal file - missing sectors vector.",
 		 function );
 
@@ -1535,10 +1535,10 @@ ssize_t libbde_volume_read_buffer(
 	}
 	if( internal_volume->sectors_cache == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid internal file - missing sectors cache.",
 		 function );
 
@@ -1546,10 +1546,10 @@ ssize_t libbde_volume_read_buffer(
 	}
 	if( internal_volume->io_handle->current_offset < 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: invalid internal volume - invalid IO handle - current offset value out of bounds.",
 		 function );
 
@@ -1557,10 +1557,10 @@ ssize_t libbde_volume_read_buffer(
 	}
 	if( buffer == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid buffer.",
 		 function );
 
@@ -1568,10 +1568,10 @@ ssize_t libbde_volume_read_buffer(
 	}
 	if( buffer_size > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid buffer size value exceeds maximum.",
 		 function );
 
@@ -1598,10 +1598,10 @@ ssize_t libbde_volume_read_buffer(
 		     0,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve sector data at offset: %" PRIi64 ".",
 			 function,
 			 internal_volume->io_handle->current_offset );
@@ -1610,10 +1610,10 @@ ssize_t libbde_volume_read_buffer(
 		}
 		if( sector_data == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: missing sector data at offset: %" PRIi64 ".",
 			 function,
 			 internal_volume->io_handle->current_offset );
@@ -1635,10 +1635,10 @@ ssize_t libbde_volume_read_buffer(
 		     &( ( sector_data->data )[ sector_data_offset ] ),
 		     read_size ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 			 "%s: unable to copy sector data to buffer.",
 			 function );
 
@@ -1671,7 +1671,7 @@ ssize_t libbde_volume_read_random(
          void *buffer,
          size_t buffer_size,
          off64_t offset,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	static char *function = "libbde_volume_read_random";
 	ssize_t read_count    = 0;
@@ -1682,10 +1682,10 @@ ssize_t libbde_volume_read_random(
 	     SEEK_SET,
 	     error ) == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
 		 "%s: unable to seek offset.",
 		 function );
 
@@ -1699,10 +1699,10 @@ ssize_t libbde_volume_read_random(
 
 	if( read_count < 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read buffer.",
 		 function );
 
@@ -1720,7 +1720,7 @@ ssize_t libbde_volume_write_buffer(
          libbde_volume_t *volume,
          void *buffer,
          size_t buffer_size,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	return( -1 );
 }
@@ -1733,7 +1733,7 @@ ssize_t libbde_volume_write_random(
          const void *buffer,
          size_t buffer_size,
          off64_t offset,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	static char *function = "libbde_volume_write_random";
 	ssize_t write_count   = 0;
@@ -1744,10 +1744,10 @@ ssize_t libbde_volume_write_random(
 	     SEEK_SET,
 	     error ) == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
 		 "%s: unable to seek offset.",
 		 function );
 
@@ -1761,10 +1761,10 @@ ssize_t libbde_volume_write_random(
 
 	if( write_count < 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_WRITE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_WRITE_FAILED,
 		 "%s: unable to write buffer.",
 		 function );
 
@@ -1782,17 +1782,17 @@ off64_t libbde_volume_seek_offset(
          libbde_volume_t *volume,
          off64_t offset,
          int whence,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_seek_offset";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1802,10 +1802,10 @@ off64_t libbde_volume_seek_offset(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -1815,10 +1815,10 @@ off64_t libbde_volume_seek_offset(
 	 && ( whence != SEEK_END )
 	 && ( whence != SEEK_SET ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported whence.",
 		 function );
 
@@ -1833,9 +1833,9 @@ off64_t libbde_volume_seek_offset(
 		offset += (off64_t) internal_volume->io_handle->volume_size;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: seeking media data offset: %" PRIi64 ".\n",
 		 function,
 		 offset );
@@ -1843,10 +1843,10 @@ off64_t libbde_volume_seek_offset(
 #endif
 	if( offset < 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: invalid offset value out of bounds.",
 		 function );
 
@@ -1863,17 +1863,17 @@ off64_t libbde_volume_seek_offset(
 int libbde_volume_get_size(
      libbde_volume_t *volume,
      size64_t *size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_get_size";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1883,10 +1883,10 @@ int libbde_volume_get_size(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -1894,10 +1894,10 @@ int libbde_volume_get_size(
 	}
 	if( size == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid size.",
 		 function );
 
@@ -1914,17 +1914,17 @@ int libbde_volume_get_size(
 int libbde_volume_get_encryption_method(
      libbde_volume_t *volume,
      uint32_t *encryption_method,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_get_encryption_method";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1934,10 +1934,10 @@ int libbde_volume_get_encryption_method(
 
 	if( encryption_method == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid encryption method.",
 		 function );
 
@@ -1956,17 +1956,17 @@ int libbde_volume_set_utf8_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_set_utf8_password";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1976,10 +1976,10 @@ int libbde_volume_set_utf8_password(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -1987,10 +1987,10 @@ int libbde_volume_set_utf8_password(
 	}
 	if( internal_volume->file_io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - file IO handle already set.",
 		 function );
 
@@ -2003,10 +2003,10 @@ int libbde_volume_set_utf8_password(
 	     32,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set password hash.",
 		 function );
 
@@ -2025,17 +2025,17 @@ int libbde_volume_set_utf16_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_set_utf16_password";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -2045,10 +2045,10 @@ int libbde_volume_set_utf16_password(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -2056,10 +2056,10 @@ int libbde_volume_set_utf16_password(
 	}
 	if( internal_volume->file_io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - file IO handle already set.",
 		 function );
 
@@ -2072,10 +2072,10 @@ int libbde_volume_set_utf16_password(
 	     32,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set password hash.",
 		 function );
 
@@ -2094,17 +2094,17 @@ int libbde_volume_set_utf8_recovery_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_set_utf8_recovery_password";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -2114,10 +2114,10 @@ int libbde_volume_set_utf8_recovery_password(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -2125,10 +2125,10 @@ int libbde_volume_set_utf8_recovery_password(
 	}
 	if( internal_volume->file_io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - file IO handle already set.",
 		 function );
 
@@ -2141,10 +2141,10 @@ int libbde_volume_set_utf8_recovery_password(
 	     32,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set recovery password hash.",
 		 function );
 
@@ -2163,17 +2163,17 @@ int libbde_volume_set_utf16_recovery_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_set_utf16_recovery_password";
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -2183,10 +2183,10 @@ int libbde_volume_set_utf16_recovery_password(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -2194,10 +2194,10 @@ int libbde_volume_set_utf16_recovery_password(
 	}
 	if( internal_volume->file_io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - file IO handle already set.",
 		 function );
 
@@ -2210,10 +2210,10 @@ int libbde_volume_set_utf16_recovery_password(
 	     32,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set recovery password hash.",
 		 function );
 
@@ -2231,7 +2231,7 @@ int libbde_volume_set_utf16_recovery_password(
 int libbde_volume_read_startup_key(
      libbde_volume_t *volume,
      const char *filename,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbfio_handle_t *file_io_handle = NULL;
 	static char *function            = "libbde_volume_read_startup_key";
@@ -2239,10 +2239,10 @@ int libbde_volume_read_startup_key(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -2253,10 +2253,10 @@ int libbde_volume_read_startup_key(
 
 	if( filename_length == 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid filename.",
 		 function );
 
@@ -2266,10 +2266,10 @@ int libbde_volume_read_startup_key(
 	     &file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create file IO handle.",
 		 function );
 
@@ -2281,10 +2281,10 @@ int libbde_volume_read_startup_key(
 	     filename_length,
 	     error ) != 1 )
 	{
-                liberror_error_set(
+                libcerror_error_set(
                  error,
-                 LIBERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
                  "%s: unable to set filename in file IO handle.",
                  function );
 
@@ -2295,10 +2295,10 @@ int libbde_volume_read_startup_key(
 	     file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
 		 "%s: unable to open startup key file: %s.",
 		 function,
 		 filename );
@@ -2309,10 +2309,10 @@ int libbde_volume_read_startup_key(
 	     &file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free file IO handle.",
 		 function );
 
@@ -2339,7 +2339,7 @@ on_error:
 int libbde_volume_read_startup_key_wide(
      libbde_volume_t *volume,
      const wchar_t *filename,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	libbfio_handle_t *file_io_handle = NULL;
 	static char *function            = "libbde_volume_read_startup_key_wide";
@@ -2347,10 +2347,10 @@ int libbde_volume_read_startup_key_wide(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -2361,10 +2361,10 @@ int libbde_volume_read_startup_key_wide(
 
 	if( filename_length == 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid filename.",
 		 function );
 
@@ -2374,10 +2374,10 @@ int libbde_volume_read_startup_key_wide(
 	     &file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create file IO handle.",
 		 function );
 
@@ -2389,10 +2389,10 @@ int libbde_volume_read_startup_key_wide(
 	     filename_length,
 	     error ) != 1 )
 	{
-                liberror_error_set(
+                libcerror_error_set(
                  error,
-                 LIBERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
                  "%s: unable to set filename in file IO handle.",
                  function );
 
@@ -2403,10 +2403,10 @@ int libbde_volume_read_startup_key_wide(
 	     file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
 		 "%s: unable to open startup key file: %ls.",
 		 function,
 		 filename );
@@ -2417,10 +2417,10 @@ int libbde_volume_read_startup_key_wide(
 	     &file_io_handle,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to free file IO handle.",
 		 function );
 
@@ -2447,7 +2447,7 @@ on_error:
 int libbde_volume_read_startup_key_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	bde_metadata_header_v1_t file_header;
 
@@ -2460,10 +2460,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( volume == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume.",
 		 function );
 
@@ -2473,10 +2473,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( internal_volume->io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing IO handle.",
 		 function );
 
@@ -2484,10 +2484,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 	}
 	if( internal_volume->file_io_handle != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - file IO handle already set.",
 		 function );
 
@@ -2495,10 +2495,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 	}
 	if( internal_volume->external_key_metadata != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - external key metadata already set.",
 		 function );
 
@@ -2506,10 +2506,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 	}
 	if( file_io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file IO handle.",
 		 function );
 
@@ -2521,10 +2521,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( file_io_handle_is_open == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_OPEN_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
 		 "%s: unable to open file.",
 		 function );
 
@@ -2537,10 +2537,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 		     LIBBFIO_OPEN_READ,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_OPEN_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_OPEN_FAILED,
 			 "%s: unable to open file.",
 			 function );
 
@@ -2553,10 +2553,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 	     SEEK_SET,
 	     error ) == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
 		 "%s: unable to seek file header offset: 0.",
 		 function );
 
@@ -2566,23 +2566,23 @@ int libbde_volume_read_startup_key_file_io_handle(
 	     &( internal_volume->external_key_metadata ),
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create external key metadata.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "Reading BitLocker External Key (BEK) metadata:\n" );
 	}
 #endif
-	read_count = libbfio_handle_read(
+	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
 	              (uint8_t *) &file_header,
 	              sizeof( bde_metadata_header_v1_t ),
@@ -2590,10 +2590,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( read_count != sizeof( bde_metadata_header_v1_t ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read file header.",
 		 function );
 
@@ -2608,10 +2608,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( read_count == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read external key metadata header.",
 		 function );
 
@@ -2619,10 +2619,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 	}
 	if( metadata_size < sizeof( bde_metadata_header_v1_t ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: metadata size value out of bounds.",
 		 function );
 
@@ -2635,16 +2635,16 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( metadata_entries_data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to metadata entries data.",
 		 function );
 
 		goto on_error;
 	}
-	read_count = libbfio_handle_read(
+	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
 	              metadata_entries_data,
 	              (size_t) metadata_size,
@@ -2652,10 +2652,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( read_count != (ssize_t) metadata_size )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read metadata entries data.",
 		 function );
 
@@ -2671,10 +2671,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	if( read_count == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read external key metadata entries.",
 		 function );
 
@@ -2691,10 +2691,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 		     file_io_handle,
 		     error ) != 0 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_CLOSE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
 			 "%s: unable to close file.",
 			 function );
 

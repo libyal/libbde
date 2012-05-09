@@ -1,31 +1,30 @@
 /*
  * Error functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
+#include <file_stream.h>
 #include <types.h>
 
-#include <liberror.h>
-
-#include <stdio.h>
-
 #include "libbde_error.h"
+#include "libbde_libcerror.h"
 
 #if !defined( HAVE_LOCAL_LIBBDE )
 
@@ -34,8 +33,8 @@
 void libbde_error_free(
       libbde_error_t **error )
 {
-	liberror_error_free(
-	 (liberror_error_t **) error );
+	libcerror_error_free(
+	 (libcerror_error_t **) error );
 }
 
 /* Prints a descriptive string of the error to the stream
@@ -45,8 +44,8 @@ int libbde_error_fprint(
      libbde_error_t *error,
      FILE *stream )
 {
-	return( liberror_error_fprint(
-	         (liberror_error_t *) error,
+	return( libcerror_error_fprint(
+	         (libcerror_error_t *) error,
 	         stream ) );
 }
 
@@ -59,8 +58,8 @@ int libbde_error_sprint(
      char *string,
      size_t size )
 {
-	return( liberror_error_sprint(
-	         (liberror_error_t *) error,
+	return( libcerror_error_sprint(
+	         (libcerror_error_t *) error,
 	         string,
 	         size ) );
 }
@@ -72,8 +71,8 @@ int libbde_error_backtrace_fprint(
      libbde_error_t *error,
       FILE *stream )
 {
-	return( liberror_error_backtrace_fprint(
-	         (liberror_error_t *) error,
+	return( libcerror_error_backtrace_fprint(
+	         (libcerror_error_t *) error,
 	         stream ) );
 }
 
@@ -86,8 +85,8 @@ int libbde_error_backtrace_sprint(
      char *string,
      size_t size )
 {
-	return( liberror_error_backtrace_sprint(
-	         (liberror_error_t *) error,
+	return( libcerror_error_backtrace_sprint(
+	         (libcerror_error_t *) error,
 	         string,
 	         size ) );
 }

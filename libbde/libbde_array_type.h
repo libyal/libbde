@@ -1,21 +1,22 @@
 /* 
  * Array type functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #if !defined( _LIBBDE_ARRAY_TYPE_H )
@@ -24,7 +25,7 @@
 #include <common.h>
 #include <types.h>
 
-#include <liberror.h>
+#include "libbde_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -80,71 +81,71 @@ struct libbde_array
 int libbde_array_initialize(
      libbde_array_t **array,
      int number_of_entries,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_array_free(
      libbde_array_t **array,
      int (*entry_free_function)(
             intptr_t **entry,
-            liberror_error_t **error ),
-     liberror_error_t **error );
+            libcerror_error_t **error ),
+     libcerror_error_t **error );
 
 int libbde_array_empty(
      libbde_array_t *array,
      int (*entry_free_function)(
             intptr_t **entry,
-            liberror_error_t **error ),
-     liberror_error_t **error );
+            libcerror_error_t **error ),
+     libcerror_error_t **error );
 
 int libbde_array_clear(
      libbde_array_t *array,
      int (*entry_free_function)(
             intptr_t **entry,
-            liberror_error_t **error ),
-     liberror_error_t **error );
+            libcerror_error_t **error ),
+     libcerror_error_t **error );
 
 int libbde_array_clone(
      libbde_array_t **destination_array,
      libbde_array_t *source_array,
      int (*entry_free_function)(
             intptr_t **entry,
-            liberror_error_t **error ),
+            libcerror_error_t **error ),
      int (*entry_clone_function)(
             intptr_t **destination,
             intptr_t *source,
-            liberror_error_t **error ),
-     liberror_error_t **error );
+            libcerror_error_t **error ),
+     libcerror_error_t **error );
 
 int libbde_array_resize(
      libbde_array_t *array,
      int number_of_entries,
      int (*entry_free_function)(
             intptr_t **entry,
-            liberror_error_t **error ),
-     liberror_error_t **error );
+            libcerror_error_t **error ),
+     libcerror_error_t **error );
 
 int libbde_array_get_number_of_entries(
      libbde_array_t *array,
      int *number_of_entries,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_array_get_entry_by_index(
      libbde_array_t *array,
      int entry_index,
      intptr_t **entry,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_array_set_entry_by_index(
      libbde_array_t *array,
      int entry_index,
      intptr_t *entry,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_array_append_entry(
      libbde_array_t *array,
      int *entry_index,
      intptr_t *entry,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_array_insert_entry(
      libbde_array_t *array,
@@ -153,9 +154,9 @@ int libbde_array_insert_entry(
      int (*entry_compare_function)(
             intptr_t *first_entry,
             intptr_t *second_entry,
-            liberror_error_t **error ),
+            libcerror_error_t **error ),
      uint8_t insert_flags,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }

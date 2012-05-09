@@ -1,21 +1,22 @@
 /*
  * Volume functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #if !defined( _LIBBDE_INTERNAL_VOLUME_H )
@@ -24,11 +25,10 @@
 #include <common.h>
 #include <types.h>
 
-#include <liberror.h>
-
 #include "libbde_extern.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcerror.h"
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
@@ -86,24 +86,24 @@ struct libbde_internal_volume
 LIBBDE_EXTERN \
 int libbde_volume_initialize(
      libbde_volume_t **volume,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_free(
      libbde_volume_t **volume,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_signal_abort(
      libbde_volume_t *volume,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_open(
      libbde_volume_t *volume,
      const char *filename,
      int access_flags,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 LIBBDE_EXTERN \
@@ -111,7 +111,7 @@ int libbde_volume_open_wide(
      libbde_volume_t *volume,
      const wchar_t *filename,
      int access_flags,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 #endif
 
 LIBBDE_EXTERN \
@@ -119,28 +119,28 @@ int libbde_volume_open_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
      int access_flags,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_close(
      libbde_volume_t *volume,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_volume_open_read_keys_from_metadata(
      libbde_internal_volume_t *internal_volume,
      libbde_metadata_t *metadata,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 ssize_t libbde_volume_read_buffer(
          libbde_volume_t *volume,
          void *buffer,
          size_t buffer_size,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 ssize_t libbde_volume_read_random(
@@ -148,7 +148,7 @@ ssize_t libbde_volume_read_random(
          void *buffer,
          size_t buffer_size,
          off64_t offset,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 #ifdef TODO
 LIBBDE_EXTERN \
@@ -156,7 +156,7 @@ ssize_t libbde_volume_write_buffer(
          libbde_volume_t *volume,
          void *buffer,
          size_t buffer_size,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 ssize_t libbde_volume_write_random(
@@ -164,7 +164,7 @@ ssize_t libbde_volume_write_random(
          const void *buffer,
          size_t buffer_size,
          off64_t offset,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 #endif
 
 LIBBDE_EXTERN \
@@ -172,67 +172,67 @@ off64_t libbde_volume_seek_offset(
          libbde_volume_t *volume,
          off64_t offset,
          int whence,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_get_size(
      libbde_volume_t *volume,
      size64_t *size,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_get_encryption_method(
      libbde_volume_t *volume,
      uint32_t *encryption_method,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_set_utf8_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_set_utf16_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_set_utf8_recovery_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_set_utf16_recovery_password(
      libbde_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_read_startup_key(
      libbde_volume_t *volume,
      const char *filename,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 LIBBDE_EXTERN \
 int libbde_volume_read_startup_key_wide(
      libbde_volume_t *volume,
      const wchar_t *filename,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 #endif
 
 LIBBDE_EXTERN \
 int libbde_volume_read_startup_key_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }

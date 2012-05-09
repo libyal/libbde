@@ -1,21 +1,22 @@
 /*
  * Elephant diffuser encryption functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -23,9 +24,8 @@
 #include <memory.h>
 #include <types.h>
 
-#include <liberror.h>
-
 #include "libbde_diffuser.h"
+#include "libbde_libcerror.h"
 
 /* Decrypts the data using Diffuser-A and B
  * Returns 1 if successful or -1 on error
@@ -33,7 +33,7 @@
 int libbde_diffuser_decrypt(
      uint8_t *data,
      size_t data_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint32_t *values_32bit   = NULL;
 	static char *function    = "libbde_diffuser_decrypt";
@@ -43,10 +43,10 @@ int libbde_diffuser_decrypt(
 
 	if( data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid data.",
 		 function );
 
@@ -54,10 +54,10 @@ int libbde_diffuser_decrypt(
 	}
 	if( data_size > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid data size value exceeds maximum.",
 		 function );
 
@@ -65,10 +65,10 @@ int libbde_diffuser_decrypt(
 	}
 	if( ( data_size % 4 ) != 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported data size - not a multitude of 4.",
 		 function );
 
@@ -81,10 +81,10 @@ int libbde_diffuser_decrypt(
 
 	if( values_32bit == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create values 32-bit.",
 		 function );
 
@@ -107,10 +107,10 @@ int libbde_diffuser_decrypt(
 	     number_of_values,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
 		 "%s: unable to decrypt data using Diffuser-B.",
 		 function );
 
@@ -121,10 +121,10 @@ int libbde_diffuser_decrypt(
 	     number_of_values,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
 		 "%s: unable to decrypt data using Diffuser-A.",
 		 function );
 
@@ -147,10 +147,10 @@ int libbde_diffuser_decrypt(
 	     0,
 	     data_size ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear values 32-bit.",
 		 function );
 
@@ -181,7 +181,7 @@ on_error:
 int libbde_diffuser_a_decrypt(
      uint32_t *values_32bit,
      size_t number_of_values,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function       = "libbde_diffuser_a_decrypt";
 	size_t number_of_iterations = 0;
@@ -191,10 +191,10 @@ int libbde_diffuser_a_decrypt(
 
 	if( values_32bit == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid values 32-bit.",
 		 function );
 
@@ -202,10 +202,10 @@ int libbde_diffuser_a_decrypt(
 	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid number of values exceeds maximum.",
 		 function );
 
@@ -271,7 +271,7 @@ int libbde_diffuser_a_decrypt(
 int libbde_diffuser_b_decrypt(
      uint32_t *values_32bit,
      size_t number_of_values,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function       = "libbde_diffuser_b_decrypt";
 	size_t number_of_iterations = 0;
@@ -281,10 +281,10 @@ int libbde_diffuser_b_decrypt(
 
 	if( values_32bit == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid values 32-bit.",
 		 function );
 
@@ -292,10 +292,10 @@ int libbde_diffuser_b_decrypt(
 	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid number of values exceeds maximum.",
 		 function );
 
@@ -361,7 +361,7 @@ int libbde_diffuser_b_decrypt(
 int libbde_diffuser_encrypt(
      uint8_t *data,
      size_t data_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint32_t *values_32bit   = NULL;
 	static char *function    = "libbde_diffuser_encrypt";
@@ -371,10 +371,10 @@ int libbde_diffuser_encrypt(
 
 	if( data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid data.",
 		 function );
 
@@ -382,10 +382,10 @@ int libbde_diffuser_encrypt(
 	}
 	if( data_size > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid data size value exceeds maximum.",
 		 function );
 
@@ -393,10 +393,10 @@ int libbde_diffuser_encrypt(
 	}
 	if( ( data_size % 4 ) != 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported data size - not a multitude of 4.",
 		 function );
 
@@ -409,10 +409,10 @@ int libbde_diffuser_encrypt(
 
 	if( values_32bit == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create values 32-bit.",
 		 function );
 
@@ -435,10 +435,10 @@ int libbde_diffuser_encrypt(
 	     number_of_values,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 		 "%s: unable to encrypt data using Diffuser-A.",
 		 function );
 
@@ -449,10 +449,10 @@ int libbde_diffuser_encrypt(
 	     number_of_values,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 		 "%s: unable to encrypt data using Diffuser-B.",
 		 function );
 
@@ -475,10 +475,10 @@ int libbde_diffuser_encrypt(
 	     0,
 	     data_size ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear values 32-bit.",
 		 function );
 
@@ -509,7 +509,7 @@ on_error:
 int libbde_diffuser_a_encrypt(
      uint32_t *values_32bit,
      size_t number_of_values,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function       = "libbde_diffuser_a_encrypt";
 	size_t number_of_iterations = 0;
@@ -519,10 +519,10 @@ int libbde_diffuser_a_encrypt(
 
 	if( values_32bit == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid values 32-bit.",
 		 function );
 
@@ -530,10 +530,10 @@ int libbde_diffuser_a_encrypt(
 	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid number of values exceeds maximum.",
 		 function );
 
@@ -606,7 +606,7 @@ int libbde_diffuser_a_encrypt(
 int libbde_diffuser_b_encrypt(
      uint32_t *values_32bit,
      size_t number_of_values,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function       = "libbde_diffuser_b_encrypt";
 	size_t number_of_iterations = 0;
@@ -616,10 +616,10 @@ int libbde_diffuser_b_encrypt(
 
 	if( values_32bit == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid values 32-bit.",
 		 function );
 
@@ -627,10 +627,10 @@ int libbde_diffuser_b_encrypt(
 	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid number of values exceeds maximum.",
 		 function );
 
