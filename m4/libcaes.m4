@@ -117,8 +117,10 @@ AC_DEFUN([AX_LIBCAES_CHECK_ENABLE],
   [auto-detect],
   [DIR])
 
+ dnl Check for a shared library version
  AX_LIBCAES_CHECK_LIB
 
+ dnl Check if the dependencies for the local library version
  AS_IF(
   [test "x$ac_cv_libcaes" != xyes],
   [AX_LIBCAES_CHECK_LOCAL

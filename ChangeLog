@@ -1,11 +1,11 @@
 TODO
+* update msvscpp files
 * libcaes
   - WinXP no AES support ?
   - WINAPI initialize provider only once - where to stick the init functions ?
   - wincrypt and EVP - make sure to pass block sized blocks ?
 * check metadata number_of_volume_header_sectors ?
 * debug print more volume header info
-* remove libfvalue ?
 
 Optimizations
 * pass values 32-bit to aes

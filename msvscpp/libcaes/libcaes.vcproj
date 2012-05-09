@@ -163,10 +163,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcaes\libcaes_error_string.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libcaes\libcaes_key.c"
 				>
 			</File>
@@ -194,10 +190,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libcaes\libcaes_error.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcaes\libcaes_error_string.h"
 				>
 			</File>
 			<File

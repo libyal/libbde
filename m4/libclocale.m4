@@ -1,6 +1,6 @@
 dnl Functions for libclocale
 dnl
-dnl Version: 20120501
+dnl Version: 20120509
 
 dnl Function to detect if libclocale is available
 dnl ac_libclocale_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments

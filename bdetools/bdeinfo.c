@@ -23,9 +23,6 @@
 #include <memory.h>
 #include <types.h>
 
-#include <libcstring.h>
-#include <libcerror.h>
-
 #include <stdio.h>
 
 #if defined( HAVE_UNISTD_H )
@@ -36,10 +33,13 @@
 #include <stdlib.h>
 #endif
 
-#include <libsystem.h>
-
 #include "bdeoutput.h"
 #include "bdetools_libbde.h"
+#include "bdetools_libcerror.h"
+#include "bdetools_libclocale.h"
+#include "bdetools_libcnotify.h"
+#include "bdetools_libcstring.h"
+#include "bdetools_libcsystem.h"
 #include "info_handle.h"
 
 info_handle_t *bdeinfo_info_handle = NULL;
@@ -75,12 +75,12 @@ void usage_fprint(
 /* Signal handler for bdeinfo
  */
 void bdeinfo_signal_handler(
-      libsystem_signal_t signal LIBSYSTEM_ATTRIBUTE_UNUSED )
+      libcsystem_signal_t signal LIBCSYSTEM_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function   = "bdeinfo_signal_handler";
 
-	LIBSYSTEM_UNREFERENCED_PARAMETER( signal )
+	LIBCSYSTEM_UNREFERENCED_PARAMETER( signal )
 
 	bdeinfo_abort = 1;
 
@@ -90,11 +90,11 @@ void bdeinfo_signal_handler(
 		     bdeinfo_info_handle,
 		     &error ) != 1 )
 		{
-			libsystem_notify_printf(
+			libcnotify_printf(
 			 "%s: unable to signal info handle to abort.\n",
 			 function );
 
-			libsystem_notify_print_error_backtrace(
+			libcnotify_print_error_backtrace(
 			 error );
 			libcerror_error_free(
 			 &error );
@@ -102,10 +102,10 @@ void bdeinfo_signal_handler(
 	}
 	/* Force stdin to close otherwise any function reading it will remain blocked
 	 */
-	if( libsystem_file_io_close(
+	if( libcsystem_file_io_close(
 	     0 ) != 0 )
 	{
-		libsystem_notify_printf(
+		libcnotify_printf(
 		 "%s: unable to close stdin.\n",
 		 function );
 	}
@@ -131,14 +131,23 @@ int main( int argc, char * const argv[] )
 	int result                                                 = 0;
 	int verbose                                                = 0;
 
-	libsystem_notify_set_stream(
+	libcnotify_stream_set(
 	 stderr,
 	 NULL );
-	libsystem_notify_set_verbose(
+	libcnotify_verbose_set(
 	 1 );
 
-        if( libsystem_initialize(
+	if( libclocale_initialize(
              "bdetools",
+	     &error ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to initialize locale values.\n" );
+
+		goto on_error;
+	}
+	if( libcsystem_initialize(
              _IONBF,
              &error ) != 1 )
 	{
@@ -146,18 +155,13 @@ int main( int argc, char * const argv[] )
 		 stderr,
 		 "Unable to initialize system values.\n" );
 
-		libsystem_notify_print_error_backtrace(
-		 error );
-		libcerror_error_free(
-		 &error );
-
-		return( EXIT_FAILURE );
+		goto on_error;
 	}
 	bdeoutput_version_fprint(
 	 stdout,
 	 program );
 
-	while( ( option = libsystem_getopt(
+	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
 	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
@@ -227,7 +231,7 @@ int main( int argc, char * const argv[] )
 	}
 	source = argv[ optind ];
 
-	libsystem_notify_set_verbose(
+	libcnotify_verbose_set(
 	 verbose );
 	libbde_notify_set_stream(
 	 stderr,
@@ -292,13 +296,13 @@ int main( int argc, char * const argv[] )
 		string_length = libcstring_system_string_length(
 				 option_volume_offset );
 
-		if( libsystem_string_decimal_copy_to_64_bit(
+		if( libcsystem_string_decimal_copy_to_64_bit(
 		     option_volume_offset,
 		     string_length + 1,
 		     (uint64_t *) &( bdeinfo_info_handle->volume_offset ),
 		     &error ) != 1 )
 		{
-			libsystem_notify_print_error_backtrace(
+			libcnotify_print_error_backtrace(
 			 error );
 			libcerror_error_free(
 			 &error );
@@ -368,7 +372,7 @@ int main( int argc, char * const argv[] )
 on_error:
 	if( error != NULL )
 	{
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );

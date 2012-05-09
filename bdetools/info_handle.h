@@ -26,11 +26,10 @@
 #include <file_stream.h>
 #include <types.h>
 
-#include <libcstring.h>
-#include <libcerror.h>
-
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
+#include "bdetools_libcerror.h"
+#include "bdetools_libcstring.h"
 
 #if defined( __cplusplus )
 extern "C" {
