@@ -3,16 +3,19 @@ EXTRA_DIST = \
 	libbde_dll/libbde_dll.vcproj \
 	libbfio/libbfio.vcproj \
 	libcaes/libcaes.vcproj \
+	libcerror/libcerror.vcproj \
+	libcfile/libcfile.vcproj \
+	libclocale/libclocale.vcproj \
+	libcnotify/libcnotify.vcproj \
+	libcpath/libcpath.vcproj \
 	libcstring/libcstring.vcproj \
-	liberror/liberror.vcproj \
+	libcsystem/libcsystem.vcproj \
 	libfcache/libfcache.vcproj \
 	libfdata/libfdata.vcproj \
 	libfdatetime/libfdatetime.vcproj \
 	libfguid/libfguid.vcproj \
 	libfvalue/libfvalue.vcproj \
 	libhmac/libhmac.vcproj \
-	libnotify/libnotify.vcproj \
-	libsystem/libsystem.vcproj \
 	libuna/libuna.vcproj \
 	libbde.sln
 

@@ -29,30 +29,15 @@
 #include <libuna.h>
 #endif
 
-#if defined( HAVE_LOCAL_LIBBFIO )
-#include <libbfio_definitions.h>
-#elif defined( HAVE_LIBBFIO_H )
-#include <libbfio.h>
-#endif
-
-#if defined( HAVE_LOCAL_LIBFDATETIME )
-#include <libfdatetime_definitions.h>
-#elif defined( HAVE_LIBFDATETIME_H )
-#include <libfdatetime.h>
-#endif
-
-/* If libtool DLL support is enabled set LIBBDE_DLL_IMPORT
- * before including libbde.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define LIBBDE_DLL_IMPORT
-#endif
-
-#include <libbde.h>
-
-#include <libsystem.h>
-
 #include "bdeoutput.h"
+#include "bdetools_libbde.h"
+#include "bdetools_libbfio.h"
+#include "bdetools_libcerror.h"
+#include "bdetools_libcnotify.h"
+#include "bdetools_libclocale.h"
+#include "bdetools_libcstring.h"
+#include "bdetools_libcsystem.h"
+#include "bdetools_libfdatetime.h"
 
 /* Prints the copyright information
  */

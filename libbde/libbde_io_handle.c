@@ -212,7 +212,7 @@ int libbde_io_handle_read_volume_header(
 	uint64_t total_number_of_sectors = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
+	libcstring_system_character_t guid_string[ 48 ];
 
 	libfguid_identifier_t *guid      = NULL;
 	uint64_t value_64bit             = 0;
@@ -680,13 +680,15 @@ int libbde_io_handle_read_volume_header(
 			result = libfguid_identifier_copy_to_utf16_string(
 				  guid,
 				  (uint16_t *) guid_string,
-				  LIBFGUID_IDENTIFIER_STRING_SIZE,
+				  48,
+				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
 				  error );
 #else
 			result = libfguid_identifier_copy_to_utf8_string(
 				  guid,
 				  (uint8_t *) guid_string,
-				  LIBFGUID_IDENTIFIER_STRING_SIZE,
+				  48,
+				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
 				  error );
 #endif
 			if( result != 1 )
@@ -762,13 +764,15 @@ int libbde_io_handle_read_volume_header(
 			result = libfguid_identifier_copy_to_utf16_string(
 				  guid,
 				  (uint16_t *) guid_string,
-				  LIBFGUID_IDENTIFIER_STRING_SIZE,
+				  48,
+				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
 				  error );
 #else
 			result = libfguid_identifier_copy_to_utf8_string(
 				  guid,
 				  (uint8_t *) guid_string,
-				  LIBFGUID_IDENTIFIER_STRING_SIZE,
+				  48,
+				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
 				  error );
 #endif
 			if( result != 1 )

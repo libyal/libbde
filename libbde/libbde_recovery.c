@@ -45,8 +45,9 @@ int libbde_utf8_recovery_password_calculate_hash(
 	libfvalue_split_utf8_string_t *split_string = NULL;
 	uint8_t *string_segment                     = NULL;
 	static char *function                       = "libbde_utf8_recovery_password_calculate_hash";
+	size_t string_segment_index                 = 0;
 	size_t string_segment_size                  = 0;
-	uint32_t value_32bit                        = 0;
+	uint64_t value_64bit                        = 0;
 	int number_of_segments                      = 0;
 	int result                                  = 0;
 	int segment_index                           = 0;
@@ -128,10 +129,15 @@ int libbde_utf8_recovery_password_calculate_hash(
 
 				goto on_error;
 			}
-			if( libfvalue_utf8_string_decimal_copy_to_32bit(
+			string_segment_index = 0;
+
+			if( libfvalue_utf8_string_with_index_copy_to_integer(
 			     string_segment,
 			     string_segment_size,
-			     &value_32bit,
+			     &string_segment_index,
+			     &value_64bit,
+			     16,
+			     LIBFVALUE_INTEGER_FORMAT_TYPE_DECIMAL_UNSIGNED,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -146,21 +152,21 @@ int libbde_utf8_recovery_password_calculate_hash(
 			}
 			/* A recovery password segment should be dividable by 11
 			 */
-			if( ( value_32bit % 11 ) != 0 )
+			if( ( value_64bit % 11 ) != 0 )
 			{
 				break;
 			}
-			value_32bit /= 11;
+			value_64bit /= 11;
 
 			/* A recovery password segment / 11 should be <= 65535 (0xffff)
 			 */
-			if( value_32bit > (uint32_t) UINT16_MAX )
+			if( value_64bit > (uint64_t) UINT16_MAX )
 			{
 				break;
 			}
 			byte_stream_copy_from_uint16_little_endian(
 			 &( binary_recovery_password[ segment_index * 2 ] ),
-			 value_32bit );
+			 value_64bit );
 		}
 		result = 1;
 	}
@@ -254,8 +260,9 @@ int libbde_utf16_recovery_password_calculate_hash(
 	libfvalue_split_utf16_string_t *split_string = NULL;
 	uint16_t *string_segment                     = NULL;
 	static char *function                        = "libbde_utf16_recovery_password_calculate_hash";
+	size_t string_segment_index                  = 0;
 	size_t string_segment_size                   = 0;
-	uint32_t value_32bit                         = 0;
+	uint64_t value_64bit                         = 0;
 	int number_of_segments                       = 0;
 	int result                                   = 0;
 	int segment_index                            = 0;
@@ -337,10 +344,15 @@ int libbde_utf16_recovery_password_calculate_hash(
 
 				goto on_error;
 			}
-			if( libfvalue_utf16_string_decimal_copy_to_32bit(
+			string_segment_index = 0;
+
+			if( libfvalue_utf16_string_with_index_copy_to_integer(
 			     string_segment,
 			     string_segment_size,
-			     &value_32bit,
+			     &string_segment_index,
+			     &value_64bit,
+			     16,
+			     LIBFVALUE_INTEGER_FORMAT_TYPE_DECIMAL_UNSIGNED,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -355,21 +367,21 @@ int libbde_utf16_recovery_password_calculate_hash(
 			}
 			/* A recovery password segment should be dividable by 11
 			 */
-			if( ( value_32bit % 11 ) != 0 )
+			if( ( value_64bit % 11 ) != 0 )
 			{
 				break;
 			}
-			value_32bit /= 11;
+			value_64bit /= 11;
 
 			/* A recovery password segment / 11 should be <= 65535 (0xffff)
 			 */
-			if( value_32bit > (uint32_t) UINT16_MAX )
+			if( value_64bit > (uint64_t) UINT16_MAX )
 			{
 				break;
 			}
 			byte_stream_copy_from_uint16_little_endian(
 			 &( binary_recovery_password[ segment_index * 2 ] ),
-			 value_32bit );
+			 value_64bit );
 		}
 		result = 1;
 	}
