@@ -1,6 +1,6 @@
 dnl Functions for libcaes
 dnl
-dnl Version: 20111007
+dnl Version: 20120509
 
 dnl Function to detect if libcaes is available
 dnl ac_libcaes_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -17,21 +17,41 @@ AC_DEFUN([AX_LIBCAES_CHECK_LIB],
   ])
 
  AS_IF(
-  [test "x$ac_cv_with_libcaes" != xno],
-  [dnl Check for headers
-  AC_CHECK_HEADERS([libcaes.h])
+  [test "x$ac_cv_with_libcaes" = xno],
+  [ac_cv_libcaes=no],
+  [dnl Check for a pkg-config file
+  AS_IF(
+   [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+   [PKG_CHECK_MODULES(
+    [libcaes],
+    [libcaes >= 20120425],
+    [ac_cv_libcaes=yes],
+    [ac_cv_libcaes=no])
+   ])
 
   AS_IF(
-   [test "x$ac_cv_header_libcaes_h" = xno],
-   [ac_cv_libcaes=no],
-   [ac_cv_libcaes=yes
-   AC_CHECK_LIB(
-    caes,
-    libcaes_get_version,
-    [ac_cv_libcaes_dummy=yes],
-    [ac_cv_libcaes=no])
+   [test "x$ac_cv_libcaes" = xyes],
+   [ac_cv_libcaes_CPPFLAGS="$pkg_cv_libcaes_CFLAGS"
+   ac_cv_libcaes_LIBADD="$pkg_cv_libcaes_LIBS"],
+   [dnl Check for headers
+   AC_CHECK_HEADERS([libcaes.h])
+
+   AS_IF(
+    [test "x$ac_cv_header_libcaes_h" = xno],
+    [ac_cv_libcaes=no],
+    [dnl Check for the individual functions
+    ac_cv_libcaes=yes
+
+    AC_CHECK_LIB(
+     caes,
+     libcaes_get_version,
+     [ac_cv_libcaes_dummy=yes],
+     [ac_cv_libcaes=no])
 
     dnl TODO check if all LIBCAES functions are available
+
+    ac_cv_libcaes_LIBADD="-lcaes"
+    ])
    ])
   ])
 
@@ -41,7 +61,6 @@ AC_DEFUN([AX_LIBCAES_CHECK_LIB],
    [HAVE_LIBCAES],
    [1],
    [Define to 1 if you have the `caes' library (-lcaes).])
-  LIBS="-lcaes $LIBS"
   ])
 
  AS_IF(
@@ -111,12 +130,9 @@ AC_DEFUN([AX_LIBCAES_CHECK_ENABLE],
   AC_SUBST(
    [HAVE_LOCAL_LIBCAES],
    [1])
-  AC_SUBST(
-   [LIBCAES_CPPFLAGS],
-   [-I../libcaes])
-  AC_SUBST(
-   [LIBCAES_LIBADD],
-   [../libcaes/libcaes.la])
+
+  ac_cv_libcaes_CPPFLAGS="-I../libcaes";
+  ac_cv_libcaes_LIBADD="../libcaes/libcaes.la";
 
   ac_cv_libcaes=local
   ])
@@ -124,6 +140,18 @@ AC_DEFUN([AX_LIBCAES_CHECK_ENABLE],
  AM_CONDITIONAL(
   [HAVE_LOCAL_LIBCAES],
   [test "x$ac_cv_libcaes" = xlocal])
+ AS_IF(
+  [test "x$ac_cv_libcaes_CPPFLAGS" != "x"],
+  [AC_SUBST(
+   [LIBCAES_CPPFLAGS],
+   [$ac_cv_libcaes_CPPFLAGS])
+  ])
+ AS_IF(
+  [test "x$ac_cv_libcaes_LIBADD" != "x"],
+  [AC_SUBST(
+   [LIBCAES_LIBADD],
+   [$ac_cv_libcaes_LIBADD])
+  ])
 
  AS_IF(
   [test "x$ac_cv_libcaes" = xyes],

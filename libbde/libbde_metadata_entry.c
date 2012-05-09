@@ -1,21 +1,22 @@
 /*
  * Metadata entry functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -23,11 +24,10 @@
 #include <memory.h>
 #include <types.h>
 
-#include <liberror.h>
-#include <libnotify.h>
-
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
+#include "libbde_libcerror.h"
+#include "libbde_libcnotify.h"
 #include "libbde_libuna.h"
 #include "libbde_metadata_entry.h"
 
@@ -39,16 +39,16 @@
  */
 int libbde_metadata_entry_initialize(
      libbde_metadata_entry_t **metadata_entry,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function = "libbde_metadata_entry_initialize";
 
 	if( metadata_entry == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata entry.",
 		 function );
 
@@ -56,10 +56,10 @@ int libbde_metadata_entry_initialize(
 	}
 	if( *metadata_entry != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid metadata entry value already set.",
 		 function );
 
@@ -70,10 +70,10 @@ int libbde_metadata_entry_initialize(
 
 	if( *metadata_entry == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create metadata entry.",
 		 function );
 
@@ -84,10 +84,10 @@ int libbde_metadata_entry_initialize(
 	     0,
 	     sizeof( libbde_metadata_entry_t ) ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear metadata entry.",
 		 function );
 
@@ -111,16 +111,16 @@ on_error:
  */
 int libbde_metadata_entry_free(
      libbde_metadata_entry_t **metadata_entry,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function = "libbde_metadata_entry_free";
 
 	if( metadata_entry == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata entry.",
 		 function );
 
@@ -148,7 +148,7 @@ ssize_t libbde_metadata_entry_read(
          libbde_metadata_entry_t *metadata_entry,
          const uint8_t *fve_metadata,
          size_t fve_metadata_size,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	static char *function = "libbde_metadata_entry_read";
 	uint16_t entry_size   = 0;
@@ -156,10 +156,10 @@ ssize_t libbde_metadata_entry_read(
 
 	if( metadata_entry == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata entry.",
 		 function );
 
@@ -167,10 +167,10 @@ ssize_t libbde_metadata_entry_read(
 	}
 	if( fve_metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid FVE metadata.",
 		 function );
 
@@ -178,22 +178,22 @@ ssize_t libbde_metadata_entry_read(
 	}
 	if( fve_metadata_size < sizeof( bde_metadata_entry_v1_t ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 		 "%s: invalid FVE metadata size value too small.",
 		 function );
 
 		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: FVE metadata entry:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 fve_metadata,
 		 sizeof( bde_metadata_entry_v1_t ),
 		 0 );
@@ -216,28 +216,28 @@ ssize_t libbde_metadata_entry_read(
 	 version );
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: entry size\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 entry_size );\
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: entry type\t\t\t\t\t: 0x%04" PRIx16 " (%s)\n",
 		 function,
 		 metadata_entry->type,
 		 libbde_debug_print_entry_type(
 		  metadata_entry->type ) );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: value type\t\t\t\t\t: 0x%04" PRIx16 " (%s)\n",
 		 function,
 		 metadata_entry->value_type,
 		 libbde_debug_print_value_type(
 		  metadata_entry->value_type ) );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 version );
@@ -245,10 +245,10 @@ ssize_t libbde_metadata_entry_read(
 #endif
 	if( version != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported FVE metadata entry version.",
 		 function );
 
@@ -257,10 +257,10 @@ ssize_t libbde_metadata_entry_read(
 	if( ( entry_size < sizeof( bde_metadata_entry_v1_t ) )
 	 || ( entry_size > fve_metadata_size ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: FVE metadata entry size value out of bounds.",
 		 function );
 
@@ -275,10 +275,10 @@ ssize_t libbde_metadata_entry_read(
 
 	if( metadata_entry->value_data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create value data.",
 		 function );
 
@@ -289,22 +289,22 @@ ssize_t libbde_metadata_entry_read(
 	     fve_metadata,
 	     metadata_entry->value_data_size ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 		 "%s: unable to copy value data.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: FVE metadata entry data:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 metadata_entry->value_data,
 		 (size_t) metadata_entry->value_data_size,
 		 0 );
@@ -328,7 +328,7 @@ on_error:
  */
 int libbde_metadata_entry_read_string(
      libbde_metadata_entry_t *metadata_entry,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function                       = "libbde_metadata_entry_read_string";
 
@@ -340,10 +340,10 @@ int libbde_metadata_entry_read_string(
 
 	if( metadata_entry == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata entry.",
 		 function );
 
@@ -351,10 +351,10 @@ int libbde_metadata_entry_read_string(
 	}
 	if( metadata_entry->value_type != LIBBDE_VALUE_TYPE_UNICODE_STRING )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid metadata entry - unsupported value type: 0x%04" PRIx16 ".",
 		 function,
 		 metadata_entry->value_type );
@@ -362,7 +362,7 @@ int libbde_metadata_entry_read_string(
 		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libuna_utf16_string_size_from_utf16_stream(
@@ -381,10 +381,10 @@ int libbde_metadata_entry_read_string(
 #endif
 		if( result != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to determine size of name string.",
 			 function );
 
@@ -395,10 +395,10 @@ int libbde_metadata_entry_read_string(
 			if( ( value_string_size > (size_t) SSIZE_MAX )
 			 || ( ( sizeof( libcstring_system_character_t ) * value_string_size )  > (size_t) SSIZE_MAX ) )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
 				 "%s: invalid value string size value exceeds maximum.",
 				 function );
 
@@ -409,10 +409,10 @@ int libbde_metadata_entry_read_string(
 
 			if( value_string == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 				 "%s: unable to create name string.",
 				 function );
 
@@ -437,10 +437,10 @@ int libbde_metadata_entry_read_string(
 #endif
 			if( result != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 				 "%s: unable to set name string.",
 				 function );
 
@@ -449,7 +449,7 @@ int libbde_metadata_entry_read_string(
 
 				return( -1 );
 			}
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: string\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 			 function,
 			 value_string );
@@ -457,7 +457,7 @@ int libbde_metadata_entry_read_string(
 			memory_free(
 			 value_string );
 		}
-		libnotify_printf(
+		libcnotify_printf(
 		 "\n" );
 	}
 #endif

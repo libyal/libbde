@@ -1,31 +1,28 @@
 /*
  * Metadata functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
 #include <types.h>
-
-#include <libcstring.h>
-#include <liberror.h>
-#include <libnotify.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_array_type.h"
@@ -36,6 +33,9 @@
 #include "libbde_key.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcaes.h"
+#include "libbde_libcerror.h"
+#include "libbde_libcnotify.h"
+#include "libbde_libcstring.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_metadata.h"
@@ -51,16 +51,16 @@
  */
 int libbde_metadata_initialize(
      libbde_metadata_t **metadata,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function = "libbde_metadata_initialize";
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -68,10 +68,10 @@ int libbde_metadata_initialize(
 	}
 	if( *metadata != NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid metadata value already set.",
 		 function );
 
@@ -82,10 +82,10 @@ int libbde_metadata_initialize(
 
 	if( *metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create metadata.",
 		 function );
 
@@ -96,10 +96,10 @@ int libbde_metadata_initialize(
 	     0,
 	     sizeof( libbde_metadata_t ) ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear metadata.",
 		 function );
 
@@ -110,10 +110,10 @@ int libbde_metadata_initialize(
 	     0,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create entries array.",
 		 function );
 
@@ -137,17 +137,17 @@ on_error:
  */
 int libbde_metadata_free(
      libbde_metadata_t **metadata,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	static char *function = "libbde_metadata_free";
 	int result            = 1;
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -161,10 +161,10 @@ int libbde_metadata_free(
 			     &( ( *metadata )->clear_key_volume_master_key ),
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free clear key volume master key.",
 				 function );
 
@@ -177,10 +177,10 @@ int libbde_metadata_free(
 			     &( ( *metadata )->startup_key_volume_master_key ),
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free startup key volume master key.",
 				 function );
 
@@ -193,10 +193,10 @@ int libbde_metadata_free(
 			     &( ( *metadata )->recovery_password_volume_master_key ),
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free recovery password volume master key.",
 				 function );
 
@@ -209,10 +209,10 @@ int libbde_metadata_free(
 			     &( ( *metadata )->password_volume_master_key ),
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free password volume master key.",
 				 function );
 
@@ -225,10 +225,10 @@ int libbde_metadata_free(
 			     &( ( *metadata )->full_volume_encryption_key ),
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable to free full volume encryption key.",
 				 function );
 
@@ -237,13 +237,13 @@ int libbde_metadata_free(
 		}
 		if( libbde_array_free(
 		     &( ( *metadata )->entries_array ),
-		     (int(*)(intptr_t **, liberror_error_t **)) &libbde_metadata_entry_free,
+		     (int(*)(intptr_t **, libcerror_error_t **)) &libbde_metadata_entry_free,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free entries array.",
 			 function );
 
@@ -267,7 +267,7 @@ int libbde_metadata_read_block(
      off64_t file_offset,
      const uint8_t *startup_key_identifier,
      size_t startup_key_identifier_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t *fve_metadata_block              = NULL;
 	static char *function                    = "libbde_metadata_read_block";
@@ -287,10 +287,10 @@ int libbde_metadata_read_block(
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -298,19 +298,19 @@ int libbde_metadata_read_block(
 	}
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
 		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: reading metadata at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
 		 file_offset,
@@ -323,10 +323,10 @@ int libbde_metadata_read_block(
 	     SEEK_SET,
 	     error ) == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
 		 "%s: unable to seek metadata offset: %" PRIi64 ".",
 		 function,
 		 file_offset );
@@ -338,16 +338,16 @@ int libbde_metadata_read_block(
 
 	if( fve_metadata_block == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create FVE metadata block.",
 		 function );
 
 		goto on_error;
 	}
-	read_count = libbfio_handle_read(
+	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
 	              fve_metadata_block,
 	              read_size,
@@ -355,22 +355,22 @@ int libbde_metadata_read_block(
 
 	if( read_count != (ssize_t) read_size )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read FVE metadata block.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: FVE metadata block header:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 fve_metadata_block,
 		 sizeof( bde_metadata_block_header_v1_t ),
 		 0 );
@@ -381,10 +381,10 @@ int libbde_metadata_read_block(
 	     bde_signature,
 	     8 ) != 0 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid metadata block signature.",
 		 function );
 
@@ -397,10 +397,10 @@ int libbde_metadata_read_block(
 	if( ( metadata->version != 1 )
 	 && ( metadata->version != 2 ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported metadata block version.",
 		 function );
 
@@ -439,9 +439,9 @@ int libbde_metadata_read_block(
 	 third_metadata_offset );
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: signature\t\t\t\t\t: %c%c%c%c%c%c%c%c\n",
 		 function,
 		 fve_metadata_block[ 0 ],
@@ -456,12 +456,12 @@ int libbde_metadata_read_block(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->size,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: size\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 metadata->version );
@@ -469,7 +469,7 @@ int libbde_metadata_read_block(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown1,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: unknown1\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
@@ -477,24 +477,24 @@ int libbde_metadata_read_block(
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown2,
 		 value_16bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: unknown2\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
 		if( metadata->version == 1 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unknown3:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown3,
 			 16,
 			 0 );
 		}
 		else if( metadata->version == 2 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: encrypted volume size\t\t\t: %" PRIu64 "\n",
 			 function,
 			 metadata->encrypted_volume_size );
@@ -502,46 +502,46 @@ int libbde_metadata_read_block(
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->unknown3,
 			 value_32bit );
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unknown3\t\t\t\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
 
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: number of volume header sectors\t\t: %" PRIu32 "\n",
 			 function,
 			 number_of_volume_header_sectors );
 		}
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: first metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 first_metadata_offset );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: second metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 second_metadata_offset );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: third metadata offset\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 third_metadata_offset );
 
 		if( metadata->version == 1 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: MFT mirror cluster block\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 metadata->mft_mirror_cluster_block_number );
 		}
 		else if( metadata->version == 2 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: volume header offset\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 metadata->volume_header_offset );
 		}
-		libnotify_printf(
+		libcnotify_printf(
 		 "\n" );
 	}
 #endif
@@ -558,10 +558,10 @@ int libbde_metadata_read_block(
 	}
 	if( (uint64_t) io_handle->first_metadata_offset != first_metadata_offset )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
 		 "%s: value mismatch for first metadata offset.",
 		 function );
 
@@ -569,10 +569,10 @@ int libbde_metadata_read_block(
 	}
 	if( (uint64_t) io_handle->second_metadata_offset != second_metadata_offset )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
 		 "%s: value mismatch for second metadata offset.",
 		 function );
 
@@ -580,10 +580,10 @@ int libbde_metadata_read_block(
 	}
 	if( (uint64_t) io_handle->third_metadata_offset != third_metadata_offset )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
 		 "%s: value mismatch for third metadata offset.",
 		 function );
 
@@ -603,10 +603,10 @@ int libbde_metadata_read_block(
 
 	if( read_count == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read metadata header.",
 		 function );
 
@@ -618,10 +618,10 @@ int libbde_metadata_read_block(
 	if( ( metadata_size < sizeof( bde_metadata_header_v1_t ) )
 	 || ( metadata_size > read_size ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: metadata size value out of bounds.",
 		 function );
 
@@ -637,10 +637,10 @@ int libbde_metadata_read_block(
 
 	if( read_count == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read metadata header.",
 		 function );
 
@@ -673,7 +673,7 @@ ssize_t libbde_metadata_read_header(
          uint8_t *header_data,
          size_t header_data_size,
          uint32_t *metadata_size,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	static char *function             = "libbde_metadata_read_header";
 	uint32_t metadata_header_size     = 0;
@@ -692,10 +692,10 @@ ssize_t libbde_metadata_read_header(
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -703,10 +703,10 @@ ssize_t libbde_metadata_read_header(
 	}
 	if( header_data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid header data.",
 		 function );
 
@@ -714,10 +714,10 @@ ssize_t libbde_metadata_read_header(
 	}
 	if( header_data_size > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid header data size value exceeds maximum.",
 		 function );
 
@@ -725,10 +725,10 @@ ssize_t libbde_metadata_read_header(
 	}
 	if( header_data_size < sizeof( bde_metadata_header_v1_t ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: header data size value out of bounds.",
 		 function );
 
@@ -736,22 +736,22 @@ ssize_t libbde_metadata_read_header(
 	}
 	if( metadata_size == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata size.",
 		 function );
 
 		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: FVE metadata header:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 header_data,
 		 sizeof( bde_metadata_header_v1_t ),
 		 0 );
@@ -778,10 +778,10 @@ ssize_t libbde_metadata_read_header(
 	     ( (bde_metadata_header_v1_t *) header_data )->volume_identifier,
 	     16 ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 		 "%s: unable to copy volume identifier.",
 		 function );
 
@@ -797,34 +797,34 @@ ssize_t libbde_metadata_read_header(
 
 	if( version != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported metadata header version.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: metadata size\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 *metadata_size );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: version\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 version );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: metadata header size\t\t\t: %" PRIu32 "\n",
 		 function,
 		 metadata_header_size );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: metadata size copy\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 metadata_size_copy );
@@ -833,10 +833,10 @@ ssize_t libbde_metadata_read_header(
 		     &guid,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create GUID.",
 			 function );
 
@@ -849,10 +849,10 @@ ssize_t libbde_metadata_read_header(
 		     LIBFGUID_ENDIAN_LITTLE,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
 			 "%s: unable to copy byte stream to GUID.",
 			 function );
 
@@ -873,16 +873,16 @@ ssize_t libbde_metadata_read_header(
 #endif
 		if( result != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_COPY_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
 			 "%s: unable to copy GUID to string.",
 			 function );
 
 			goto on_error;
 		}
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: volume identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 		 function,
 		 guid_string );
@@ -891,10 +891,10 @@ ssize_t libbde_metadata_read_header(
 		     &guid,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free GUID.",
 			 function );
 
@@ -903,12 +903,12 @@ ssize_t libbde_metadata_read_header(
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (bde_metadata_header_v1_t *) header_data )->next_nonce_counter,
 		 value_32bit );
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: next nonce counter\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: encryption method\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
 		 function,
 		 metadata->encryption_method,
@@ -919,10 +919,10 @@ ssize_t libbde_metadata_read_header(
 		     &filetime,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create filetime.",
 			 function );
 
@@ -935,10 +935,10 @@ ssize_t libbde_metadata_read_header(
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to copy filetime from byte stream.",
 			 function );
 
@@ -963,16 +963,16 @@ ssize_t libbde_metadata_read_header(
 #endif
 		if( result != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to copy filetime to string.",
 			 function );
 
 			goto on_error;
 		}
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: creation time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
 		 function,
 		 filetime_string );
@@ -981,25 +981,25 @@ ssize_t libbde_metadata_read_header(
 		     &filetime,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free filetime.",
 			 function );
 
 			goto on_error;
 		}
-		libnotify_printf(
+		libcnotify_printf(
 		 "\n" );
 	}
 #endif
 	if( metadata_header_size != sizeof( bde_metadata_header_v1_t ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
 		 "%s: value mismatch for metadata header size.",
 		 function );
 
@@ -1007,10 +1007,10 @@ ssize_t libbde_metadata_read_header(
 	}
 	if( *metadata_size != metadata_size_copy )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_INPUT,
-		 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
 		 "%s: value mismatch for metadata size and copy.",
 		 function );
 
@@ -1018,10 +1018,10 @@ ssize_t libbde_metadata_read_header(
 	}
 	if( *metadata_size < sizeof( bde_metadata_header_v1_t ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: metadata size value out of bounds.",
 		 function );
 
@@ -1057,7 +1057,7 @@ ssize_t libbde_metadata_read_entries(
          size_t entries_data_size,
          const uint8_t *startup_key_identifier,
          size_t startup_key_identifier_size,
-         liberror_error_t **error )
+         libcerror_error_t **error )
 {
 	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
 	libbde_external_key_t *external_key                   = NULL;
@@ -1072,10 +1072,10 @@ ssize_t libbde_metadata_read_entries(
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -1083,10 +1083,10 @@ ssize_t libbde_metadata_read_entries(
 	}
 	if( entries_data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid entries data.",
 		 function );
 
@@ -1094,10 +1094,10 @@ ssize_t libbde_metadata_read_entries(
 	}
 	if( entries_data_size > (size_t) SSIZE_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid entries data size value exceeds maximum.",
 		 function );
 
@@ -1107,10 +1107,10 @@ ssize_t libbde_metadata_read_entries(
 	{
 		if( startup_key_identifier_size < 16 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 			 "%s: invalid startup key identifier value too small.",
 			 function );
 
@@ -1123,10 +1123,10 @@ ssize_t libbde_metadata_read_entries(
 		     &metadata_entry,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create metadata entry.",
 			 function );
 
@@ -1140,10 +1140,10 @@ ssize_t libbde_metadata_read_entries(
 
 		if( read_count == -1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_IO,
-			 LIBERROR_IO_ERROR_READ_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read metadata entry.",
 			 function );
 
@@ -1159,10 +1159,10 @@ ssize_t libbde_metadata_read_entries(
 				     &volume_master_key,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 					 "%s: unable to create volume master key.",
 					 function );
 
@@ -1173,10 +1173,10 @@ ssize_t libbde_metadata_read_entries(
 				     metadata_entry,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_IO,
-					 LIBERROR_IO_ERROR_READ_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
 					 "%s: unable to read volume master key.",
 					 function );
 
@@ -1234,10 +1234,10 @@ ssize_t libbde_metadata_read_entries(
 					     &volume_master_key,
 					     error ) != 1 )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 						 "%s: unable to free volume master key.",
 						 function );
 
@@ -1253,10 +1253,10 @@ ssize_t libbde_metadata_read_entries(
 				     &aes_ccm_encrypted_key,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 					 "%s: unable to create AES-CCM encrypted key.",
 					 function );
 
@@ -1267,10 +1267,10 @@ ssize_t libbde_metadata_read_entries(
 				     metadata_entry,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_IO,
-					 LIBERROR_IO_ERROR_READ_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
 					 "%s: unable to read AES-CCM encrypted key from property metadata entry.",
 					 function );
 
@@ -1293,10 +1293,10 @@ ssize_t libbde_metadata_read_entries(
 					     &aes_ccm_encrypted_key,
 					     error ) != 1 )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 						 "%s: unable to free AES-CCM encrypted key.",
 						 function );
 
@@ -1310,10 +1310,10 @@ ssize_t libbde_metadata_read_entries(
 				     &external_key,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 					 "%s: unable to create external key.",
 					 function );
 
@@ -1324,10 +1324,10 @@ ssize_t libbde_metadata_read_entries(
 				     metadata_entry,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_IO,
-					 LIBERROR_IO_ERROR_READ_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
 					 "%s: unable to read external key from property metadata entry.",
 					 function );
 
@@ -1345,10 +1345,10 @@ ssize_t libbde_metadata_read_entries(
 					     &external_key,
 					     error ) != 1 )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 						 "%s: unable to free external key.",
 						 function );
 
@@ -1363,10 +1363,10 @@ ssize_t libbde_metadata_read_entries(
 				     metadata_entry,
 				     error ) != 1 )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_IO,
-					 LIBERROR_IO_ERROR_READ_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
 					 "%s: unable to read string metadata entry.",
 					 function );
 
@@ -1381,10 +1381,10 @@ ssize_t libbde_metadata_read_entries(
 /* TODO move to separate function and check for the size */
 					if( metadata_entry->value_data_size < 16 )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 						 "%s: value data size value out of bounds.",
 						 function );
 
@@ -1399,28 +1399,28 @@ ssize_t libbde_metadata_read_entries(
 					 volume_header_size );
 
 #if defined( HAVE_DEBUG_OUTPUT )
-					if( libnotify_verbose != 0 )
+					if( libcnotify_verbose != 0 )
 					{
-						libnotify_printf(
+						libcnotify_printf(
 						 "%s: offset\t\t\t\t\t: 0x%" PRIx64 "\n",
 						 function,
 						 volume_header_offset );
 
-						libnotify_printf(
+						libcnotify_printf(
 						 "%s: size\t\t\t\t\t: %" PRIu64 "\n",
 						 function,
 						 volume_header_size );
 
-						libnotify_printf(
+						libcnotify_printf(
 						 "\n" );
 					}
 #endif
 					if( (off64_t) volume_header_offset != metadata->volume_header_offset )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_INPUT,
-						 LIBERROR_INPUT_ERROR_VALUE_MISMATCH,
+						 LIBCERROR_ERROR_DOMAIN_INPUT,
+						 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
 						 "%s: value mismatch for metadata volume header offset.",
 						 function );
 
@@ -1439,10 +1439,10 @@ ssize_t libbde_metadata_read_entries(
 		     (intptr_t *) metadata_entry,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to append metadata entry to entries array.",
 			 function );
 
@@ -1490,7 +1490,7 @@ int libbde_metadata_get_volume_master_key(
      size_t external_key_size,
      uint8_t *volume_master_key,
      size_t volume_master_key_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t aes_ccm_key[ 32 ];
 
@@ -1504,10 +1504,10 @@ int libbde_metadata_get_volume_master_key(
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -1515,10 +1515,10 @@ int libbde_metadata_get_volume_master_key(
 	}
 	if( io_handle == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
 		 function );
 
@@ -1526,10 +1526,10 @@ int libbde_metadata_get_volume_master_key(
 	}
 	if( volume_master_key == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume master key.",
 		 function );
 
@@ -1537,10 +1537,10 @@ int libbde_metadata_get_volume_master_key(
 	}
 	if( volume_master_key_size < 32 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 		 "%s: invalid volume master key value too small.",
 		 function );
 
@@ -1550,10 +1550,10 @@ int libbde_metadata_get_volume_master_key(
 	{
 		if( metadata->clear_key_volume_master_key->key == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid metadata - invalid clear key volume master key - missing key.",
 			 function );
 
@@ -1561,10 +1561,10 @@ int libbde_metadata_get_volume_master_key(
 		}
 		if( metadata->clear_key_volume_master_key->aes_ccm_encrypted_key == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid metadata - invalid clear key volume master key - missing AES-CCM encrypted key.",
 			 function );
 
@@ -1572,10 +1572,10 @@ int libbde_metadata_get_volume_master_key(
 		}
 		if( metadata->clear_key_volume_master_key->key->data_size != 32 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 			 "%s: clear key volume master key - key data size value out of bounds.",
 			 function );
 
@@ -1586,22 +1586,22 @@ int libbde_metadata_get_volume_master_key(
 		     metadata->clear_key_volume_master_key->key->data,
 		     32 ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 			 "%s: unable to copy AES-CCM key.",
 			 function );
 
 			goto on_error;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: AES-CCM key:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 aes_ccm_key,
 			 32,
 			 0 );
@@ -1609,10 +1609,10 @@ int libbde_metadata_get_volume_master_key(
 #endif
 		if( metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 			 "%s: clear key volume master key - AES-CCM encrypted key data size value out of bounds.",
 			 function );
 
@@ -1625,10 +1625,10 @@ int libbde_metadata_get_volume_master_key(
 
 		if( unencrypted_data == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 			 "%s: unable to create unencrypted data.",
 			 function );
 
@@ -1639,10 +1639,10 @@ int libbde_metadata_get_volume_master_key(
 		     0,
 		     unencrypted_data_size ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear unencrypted data.",
 			 function );
 
@@ -1652,10 +1652,10 @@ int libbde_metadata_get_volume_master_key(
 		     &aes_context,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable initialize AES context.",
 			 function );
 
@@ -1668,10 +1668,10 @@ int libbde_metadata_get_volume_master_key(
 		     256,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to set encryption key in AES context.",
 			 function );
 
@@ -1688,22 +1688,22 @@ int libbde_metadata_get_volume_master_key(
 		     unencrypted_data_size,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 			 "%s: unable to decrypt data.",
 			 function );
 
 			goto on_error;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libnotify_verbose != 0 )
+		if( libcnotify_verbose != 0 )
 		{
-			libnotify_printf(
+			libcnotify_printf(
 			 "%s: unencrypted data:\n",
 			 function );
-			libnotify_print_data(
+			libcnotify_print_data(
 			 unencrypted_data,
 			 unencrypted_data_size,
 			 0 );
@@ -1727,10 +1727,10 @@ int libbde_metadata_get_volume_master_key(
 				     &( unencrypted_data[ 28 ] ),
 				     32 ) == NULL )
 				{
-					liberror_error_set(
+					libcerror_error_set(
 					 error,
-					 LIBERROR_ERROR_DOMAIN_MEMORY,
-					 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 					 "%s: unable to copy unencrypted volume master key.",
 					 function );
 
@@ -1743,10 +1743,10 @@ int libbde_metadata_get_volume_master_key(
 		     &aes_context,
 		     error ) != 1 )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable free context.",
 			 function );
 
@@ -1757,10 +1757,10 @@ int libbde_metadata_get_volume_master_key(
 		     0,
 		     unencrypted_data_size ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear unencrypted data.",
 			 function );
 
@@ -1776,10 +1776,10 @@ int libbde_metadata_get_volume_master_key(
 		{
 			if( metadata->startup_key_volume_master_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - missing startup key volume master key.",
 				 function );
 
@@ -1787,10 +1787,10 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( metadata->startup_key_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - invalid startup key volume master key - missing AES-CCM encrypted key.",
 				 function );
 
@@ -1801,10 +1801,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear AES-CCM key.",
 				 function );
 
@@ -1815,22 +1815,22 @@ int libbde_metadata_get_volume_master_key(
 			     external_key,
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy AES-CCM key.",
 				 function );
 
 				goto on_error;
 			}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libnotify_verbose != 0 )
+			if( libcnotify_verbose != 0 )
 			{
-				libnotify_printf(
+				libcnotify_printf(
 				 "%s: AES-CCM key:\n",
 				 function );
-				libnotify_print_data(
+				libcnotify_print_data(
 				 aes_ccm_key,
 				 32,
 				 0 );
@@ -1838,10 +1838,10 @@ int libbde_metadata_get_volume_master_key(
 #endif
 			if( metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 				 "%s: startup key volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
@@ -1854,10 +1854,10 @@ int libbde_metadata_get_volume_master_key(
 
 			if( unencrypted_data == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 				 "%s: unable to create unencrypted data.",
 				 function );
 
@@ -1868,10 +1868,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     unencrypted_data_size ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear unencrypted data.",
 				 function );
 
@@ -1881,10 +1881,10 @@ int libbde_metadata_get_volume_master_key(
 			     &aes_context,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 				 "%s: unable initialize AES context.",
 				 function );
 
@@ -1897,10 +1897,10 @@ int libbde_metadata_get_volume_master_key(
 			     256,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 				 "%s: unable to set encryption key in AES context.",
 				 function );
 
@@ -1917,22 +1917,22 @@ int libbde_metadata_get_volume_master_key(
 			     unencrypted_data_size,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 				 "%s: unable to decrypt data.",
 				 function );
 
 				goto on_error;
 			}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libnotify_verbose != 0 )
+			if( libcnotify_verbose != 0 )
 			{
-				libnotify_printf(
+				libcnotify_printf(
 				 "%s: unencrypted data:\n",
 				 function );
-				libnotify_print_data(
+				libcnotify_print_data(
 				 unencrypted_data,
 				 unencrypted_data_size,
 				 0 );
@@ -1956,10 +1956,10 @@ int libbde_metadata_get_volume_master_key(
 					     &( unencrypted_data[ 28 ] ),
 					     32 ) == NULL )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_MEMORY,
-						 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 						 "%s: unable to copy unencrypted volume master key.",
 						 function );
 
@@ -1972,10 +1972,10 @@ int libbde_metadata_get_volume_master_key(
 			     &aes_context,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable free context.",
 				 function );
 
@@ -1986,10 +1986,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     unencrypted_data_size ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear unencrypted data.",
 				 function );
 
@@ -2005,10 +2005,10 @@ int libbde_metadata_get_volume_master_key(
 		{
 			if( metadata->password_volume_master_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - missing password volume master key.",
 				 function );
 
@@ -2016,10 +2016,10 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( metadata->password_volume_master_key->stretch_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - invalid password volume master key - missing stretch key.",
 				 function );
 
@@ -2027,10 +2027,10 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( metadata->password_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - invalid password volume master key - missing AES-CCM encrypted key.",
 				 function );
 
@@ -2041,10 +2041,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear AES-CCM key.",
 				 function );
 
@@ -2059,22 +2059,22 @@ int libbde_metadata_get_volume_master_key(
 			     32,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to determine AES-CCM key.",
 				 function );
 
 				goto on_error;
 			}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libnotify_verbose != 0 )
+			if( libcnotify_verbose != 0 )
 			{
-				libnotify_printf(
+				libcnotify_printf(
 				 "%s: AES-CCM key:\n",
 				 function );
-				libnotify_print_data(
+				libcnotify_print_data(
 				 aes_ccm_key,
 				 32,
 				 0 );
@@ -2082,10 +2082,10 @@ int libbde_metadata_get_volume_master_key(
 #endif
 			if( metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 				 "%s: password volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
@@ -2098,10 +2098,10 @@ int libbde_metadata_get_volume_master_key(
 
 			if( unencrypted_data == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 				 "%s: unable to create unencrypted data.",
 				 function );
 
@@ -2112,10 +2112,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     unencrypted_data_size ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear unencrypted data.",
 				 function );
 
@@ -2125,10 +2125,10 @@ int libbde_metadata_get_volume_master_key(
 			     &aes_context,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 				 "%s: unable initialize AES context.",
 				 function );
 
@@ -2141,10 +2141,10 @@ int libbde_metadata_get_volume_master_key(
 			     256,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 				 "%s: unable to set encryption key in AES context.",
 				 function );
 
@@ -2161,22 +2161,22 @@ int libbde_metadata_get_volume_master_key(
 			     unencrypted_data_size,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 				 "%s: unable to decrypt data.",
 				 function );
 
 				goto on_error;
 			}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libnotify_verbose != 0 )
+			if( libcnotify_verbose != 0 )
 			{
-				libnotify_printf(
+				libcnotify_printf(
 				 "%s: unencrypted data:\n",
 				 function );
-				libnotify_print_data(
+				libcnotify_print_data(
 				 unencrypted_data,
 				 unencrypted_data_size,
 				 0 );
@@ -2200,10 +2200,10 @@ int libbde_metadata_get_volume_master_key(
 					     &( unencrypted_data[ 28 ] ),
 					     32 ) == NULL )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_MEMORY,
-						 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 						 "%s: unable to copy unencrypted volume master key.",
 						 function );
 
@@ -2216,10 +2216,10 @@ int libbde_metadata_get_volume_master_key(
 			     &aes_context,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable free context.",
 				 function );
 
@@ -2230,10 +2230,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     unencrypted_data_size ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear unencrypted data.",
 				 function );
 
@@ -2249,10 +2249,10 @@ int libbde_metadata_get_volume_master_key(
 		{
 			if( metadata->recovery_password_volume_master_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - missing recovery password volume master key.",
 				 function );
 
@@ -2260,10 +2260,10 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( metadata->recovery_password_volume_master_key->stretch_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - invalid recovery password volume master key - missing stretch key.",
 				 function );
 
@@ -2271,10 +2271,10 @@ int libbde_metadata_get_volume_master_key(
 			}
 			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 				 "%s: invalid metadata - invalid recovery password volume master key - missing AES-CCM encrypted key.",
 				 function );
 
@@ -2285,10 +2285,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear AES-CCM key.",
 				 function );
 
@@ -2303,22 +2303,22 @@ int libbde_metadata_get_volume_master_key(
 			     32,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to determine AES-CCM key.",
 				 function );
 
 				goto on_error;
 			}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libnotify_verbose != 0 )
+			if( libcnotify_verbose != 0 )
 			{
-				libnotify_printf(
+				libcnotify_printf(
 				 "%s: AES-CCM key:\n",
 				 function );
-				libnotify_print_data(
+				libcnotify_print_data(
 				 aes_ccm_key,
 				 32,
 				 0 );
@@ -2326,10 +2326,10 @@ int libbde_metadata_get_volume_master_key(
 #endif
 			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 				 "%s: recovery password volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
@@ -2342,10 +2342,10 @@ int libbde_metadata_get_volume_master_key(
 
 			if( unencrypted_data == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 				 "%s: unable to create unencrypted data.",
 				 function );
 
@@ -2356,10 +2356,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     unencrypted_data_size ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear unencrypted data.",
 				 function );
 
@@ -2369,10 +2369,10 @@ int libbde_metadata_get_volume_master_key(
 			     &aes_context,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 				 "%s: unable initialize AES context.",
 				 function );
 
@@ -2385,10 +2385,10 @@ int libbde_metadata_get_volume_master_key(
 			     256,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 				 "%s: unable to set encryption key in AES context.",
 				 function );
 
@@ -2405,22 +2405,22 @@ int libbde_metadata_get_volume_master_key(
 			     unencrypted_data_size,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 				 "%s: unable to decrypt data.",
 				 function );
 
 				goto on_error;
 			}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libnotify_verbose != 0 )
+			if( libcnotify_verbose != 0 )
 			{
-				libnotify_printf(
+				libcnotify_printf(
 				 "%s: unencrypted data:\n",
 				 function );
-				libnotify_print_data(
+				libcnotify_print_data(
 				 unencrypted_data,
 				 unencrypted_data_size,
 				 0 );
@@ -2444,10 +2444,10 @@ int libbde_metadata_get_volume_master_key(
 					     &( unencrypted_data[ 28 ] ),
 					     32 ) == NULL )
 					{
-						liberror_error_set(
+						libcerror_error_set(
 						 error,
-						 LIBERROR_ERROR_DOMAIN_MEMORY,
-						 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 						 "%s: unable to copy unencrypted volume master key.",
 						 function );
 
@@ -2460,10 +2460,10 @@ int libbde_metadata_get_volume_master_key(
 			     &aes_context,
 			     error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 				 "%s: unable free context.",
 				 function );
 
@@ -2474,10 +2474,10 @@ int libbde_metadata_get_volume_master_key(
 			     0,
 			     unencrypted_data_size ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_SET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 				 "%s: unable to clear unencrypted data.",
 				 function );
 
@@ -2519,7 +2519,7 @@ int libbde_metadata_get_full_volume_encryption_key(
      size_t full_volume_encryption_key_size,
      uint8_t *tweak_key,
      size_t tweak_key_size,
-     liberror_error_t **error )
+     libcerror_error_t **error )
 {
 	uint8_t *unencrypted_data      = NULL;
 	libcaes_context_t *aes_context = NULL;
@@ -2531,10 +2531,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 	if( metadata == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid metadata.",
 		 function );
 
@@ -2542,10 +2542,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( metadata->full_volume_encryption_key == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid metadata - missing full volume encryption key.",
 		 function );
 
@@ -2553,10 +2553,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( metadata->full_volume_encryption_key->data_size < 28 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 		 "%s: full volume encryption key data size value out of bounds.",
 		 function );
 
@@ -2564,10 +2564,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( volume_master_key == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume master key.",
 		 function );
 
@@ -2575,10 +2575,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( volume_master_key_size < 32 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 		 "%s: invalid volume master key value too small.",
 		 function );
 
@@ -2586,10 +2586,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( full_volume_encryption_key == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid full volume encryption key.",
 		 function );
 
@@ -2597,10 +2597,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( full_volume_encryption_key_size < 32 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 		 "%s: invalid full volume encryption key value too small.",
 		 function );
 
@@ -2608,10 +2608,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( tweak_key == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid TWEAK key.",
 		 function );
 
@@ -2619,10 +2619,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	}
 	if( tweak_key_size < 32 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 		 "%s: invalid TWEAK key value too small.",
 		 function );
 
@@ -2635,10 +2635,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 
 	if( unencrypted_data == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_INSUFFICIENT,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create unencrypted data.",
 		 function );
 
@@ -2649,10 +2649,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	     0,
 	     unencrypted_data_size ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear unencrypted data.",
 		 function );
 
@@ -2662,10 +2662,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	     &aes_context,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable initialize AES context.",
 		 function );
 
@@ -2678,10 +2678,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	     256,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set encryption key in AES context.",
 		 function );
 
@@ -2698,22 +2698,22 @@ int libbde_metadata_get_full_volume_encryption_key(
 	     unencrypted_data_size,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
 		 "%s: unable to decrypt data.",
 		 function );
 
 		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
 	{
-		libnotify_printf(
+		libcnotify_printf(
 		 "%s: unencrypted data:\n",
 		 function );
-		libnotify_print_data(
+		libcnotify_print_data(
 		 unencrypted_data,
 		 unencrypted_data_size,
 		 0 );
@@ -2737,10 +2737,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 			     &( unencrypted_data[ 28 ] ),
 			     16 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy unencrypted full volume encryption key.",
 				 function );
 
@@ -2755,10 +2755,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 			     &( unencrypted_data[ 28 ] ),
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy unencrypted full volume encryption key.",
 				 function );
 
@@ -2773,10 +2773,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 			     &( unencrypted_data[ 28 ] ),
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy unencrypted full volume encryption key.",
 				 function );
 
@@ -2787,10 +2787,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 			     &( unencrypted_data[ 60 ] ),
 			     32 ) == NULL )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 error,
-				 LIBERROR_ERROR_DOMAIN_MEMORY,
-				 LIBERROR_MEMORY_ERROR_COPY_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy unencrypted TWEAK key.",
 				 function );
 
@@ -2803,10 +2803,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 	     &aes_context,
 	     error ) != 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable free context.",
 		 function );
 
@@ -2819,10 +2819,10 @@ int libbde_metadata_get_full_volume_encryption_key(
 		     0,
 		     unencrypted_data_size ) == NULL )
 		{
-			liberror_error_set(
+			libcerror_error_set(
 			 error,
-			 LIBERROR_ERROR_DOMAIN_MEMORY,
-			 LIBERROR_MEMORY_ERROR_SET_FAILED,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 			 "%s: unable to clear unencrypted data.",
 			 function );
 

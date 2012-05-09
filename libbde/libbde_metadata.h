@@ -1,21 +1,22 @@
 /*
  * Metadata functions
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #if !defined( _LIBBDE_METADATA_H )
@@ -24,12 +25,11 @@
 #include <common.h>
 #include <types.h>
 
-#include <liberror.h>
-
 #include "libbde_array_type.h"
 #include "libbde_external_key.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcerror.h"
 #include "libbde_volume_master_key.h"
 
 #if defined( __cplusplus )
@@ -110,11 +110,11 @@ struct libbde_metadata
 
 int libbde_metadata_initialize(
      libbde_metadata_t **metadata,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_metadata_free(
      libbde_metadata_t **metadata,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_metadata_read_block(
      libbde_metadata_t *metadata,
@@ -123,14 +123,14 @@ int libbde_metadata_read_block(
      off64_t file_offset,
      const uint8_t *startup_key_identifier,
      size_t startup_key_identifier_size,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 ssize_t libbde_metadata_read_header(
          libbde_metadata_t *metadata,
          uint8_t *header_data,
          size_t header_data_size,
          uint32_t *metadata_size,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 ssize_t libbde_metadata_read_entries(
          libbde_metadata_t *metadata,
@@ -138,7 +138,7 @@ ssize_t libbde_metadata_read_entries(
          size_t entries_data_size,
          const uint8_t *startup_key_identifier,
          size_t startup_key_identifier_size,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
@@ -147,7 +147,7 @@ int libbde_metadata_get_volume_master_key(
      size_t external_key_size,
      uint8_t *volume_master_key,
      size_t volume_master_key_size,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int libbde_metadata_get_full_volume_encryption_key(
      libbde_metadata_t *metadata,
@@ -157,7 +157,7 @@ int libbde_metadata_get_full_volume_encryption_key(
      size_t full_volume_encryption_key_size,
      uint8_t *tweak_key,
      size_t tweak_key_size,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }

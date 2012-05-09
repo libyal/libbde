@@ -1,21 +1,22 @@
 /* 
  * Mount handle
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #if !defined( _MOUNT_HANDLE_H )
@@ -26,7 +27,7 @@
 #include <types.h>
 
 #include <libcstring.h>
-#include <liberror.h>
+#include <libcerror.h>
 
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
@@ -58,56 +59,56 @@ struct mount_handle
 
 int mount_handle_initialize(
      mount_handle_t **mount_handle,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_free(
      mount_handle_t **mount_handle,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_signal_abort(
      mount_handle_t *mount_handle,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_set_password(
      mount_handle_t *mount_handle,
      const libcstring_system_character_t *string,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_set_recovery_password(
      mount_handle_t *mount_handle,
      const libcstring_system_character_t *string,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_read_startup_key(
      mount_handle_t *mount_handle,
      const libcstring_system_character_t *filename,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_open_input(
      mount_handle_t *mount_handle,
      const libcstring_system_character_t *filename,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 int mount_handle_close(
      mount_handle_t *mount_handle,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 ssize_t mount_handle_read_buffer(
          mount_handle_t *mount_handle,
          uint8_t *buffer,
          size_t size,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 off64_t mount_handle_seek_offset(
          mount_handle_t *mount_handle,
          off64_t offset,
          int whence,
-         liberror_error_t **error );
+         libcerror_error_t **error );
 
 int mount_handle_get_size(
      mount_handle_t *mount_handle,
      size64_t *size,
-     liberror_error_t **error );
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }

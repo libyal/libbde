@@ -1,21 +1,22 @@
 /*
  * Mounts a Windows NT BitLocker Drive Encryption (BDE) encrypted volume
  *
- * Copyright (C) 2011-2012, Google Inc.
+ * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -23,7 +24,7 @@
 #include <types.h>
 
 #include <libcstring.h>
-#include <liberror.h>
+#include <libcerror.h>
 
 #include <stdio.h>
 
@@ -94,7 +95,7 @@ void usage_fprint(
 void bdemount_signal_handler(
       libsystem_signal_t signal LIBSYSTEM_ATTRIBUTE_UNUSED )
 {
-	liberror_error_t *error = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_signal_handler";
 
 	LIBSYSTEM_UNREFERENCED_PARAMETER( signal )
@@ -113,7 +114,7 @@ void bdemount_signal_handler(
 
 			libsystem_notify_print_error_backtrace(
 			 error );
-			liberror_error_free(
+			libcerror_error_free(
 			 &error );
 		}
 	}
@@ -144,17 +145,17 @@ int bdemount_fuse_open(
      const char *path,
      struct fuse_file_info *file_info )
 {
-	liberror_error_t *error = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_fuse_open";
 	size_t path_length      = 0;
 	int result              = 0;
 
 	if( path == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid path.",
 		 function );
 
@@ -164,10 +165,10 @@ int bdemount_fuse_open(
 	}
 	if( file_info == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file info.",
 		 function );
 
@@ -184,10 +185,10 @@ int bdemount_fuse_open(
 	       bdemount_fuse_path,
 	       bdemount_fuse_path_length ) != 0 ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported path.",
 		 function );
 
@@ -197,10 +198,10 @@ int bdemount_fuse_open(
 	}
 	if( ( file_info->flags & 0x03 ) != O_RDONLY )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: write access currently not supported.",
 		 function );
 
@@ -215,7 +216,7 @@ on_error:
 	{
 		libsystem_notify_print_error_backtrace(
 		 error );
-		liberror_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
@@ -231,7 +232,7 @@ int bdemount_fuse_read(
      off_t offset,
      struct fuse_file_info *file_info )
 {
-	liberror_error_t *error = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_fuse_read";
 	size_t path_length      = 0;
 	ssize_t read_count      = 0;
@@ -239,10 +240,10 @@ int bdemount_fuse_read(
 
 	if( path == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid path.",
 		 function );
 
@@ -252,10 +253,10 @@ int bdemount_fuse_read(
 	}
 	if( size > (size_t) INT_MAX )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
 		 "%s: invalid size value exceeds maximum.",
 		 function );
 
@@ -265,10 +266,10 @@ int bdemount_fuse_read(
 	}
 	if( file_info == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file info.",
 		 function );
 
@@ -285,10 +286,10 @@ int bdemount_fuse_read(
 	       bdemount_fuse_path,
 	       bdemount_fuse_path_length ) != 0 ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported path.",
 		 function );
 
@@ -302,10 +303,10 @@ int bdemount_fuse_read(
 	     SEEK_SET,
 	     &error ) == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
 		 "%s: unable to seek offset in mount handle.",
 		 function );
 
@@ -321,10 +322,10 @@ int bdemount_fuse_read(
 
 	if( read_count == -1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_IO,
-		 LIBERROR_IO_ERROR_READ_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read from mount handle.",
 		 function );
 
@@ -339,7 +340,7 @@ on_error:
 	{
 		libsystem_notify_print_error_backtrace(
 		 error );
-		liberror_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
@@ -355,7 +356,7 @@ int bdemount_fuse_readdir(
      off_t offset LIBSYSTEM_ATTRIBUTE_UNUSED,
      struct fuse_file_info *file_info LIBSYSTEM_ATTRIBUTE_UNUSED )
 {
-	liberror_error_t *error = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_fuse_readdir";
 	size_t path_length      = 0;
 	int result              = 0;
@@ -365,10 +366,10 @@ int bdemount_fuse_readdir(
 
 	if( path == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid path.",
 		 function );
 
@@ -382,10 +383,10 @@ int bdemount_fuse_readdir(
 	if( ( path_length != 1 )
 	 || ( path[ 0 ] != '/' ) )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported path.",
 		 function );
 
@@ -399,10 +400,10 @@ int bdemount_fuse_readdir(
 	     NULL,
 	     0 ) == 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set directory entry.",
 		 function );
 
@@ -416,10 +417,10 @@ int bdemount_fuse_readdir(
 	     NULL,
 	     0 ) == 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set directory entry.",
 		 function );
 
@@ -433,10 +434,10 @@ int bdemount_fuse_readdir(
 	     NULL,
 	     0 ) == 1 )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBERROR_RUNTIME_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set directory entry.",
 		 function );
 
@@ -451,7 +452,7 @@ on_error:
 	{
 		libsystem_notify_print_error_backtrace(
 		 error );
-		liberror_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
@@ -464,7 +465,7 @@ int bdemount_fuse_getattr(
      const char *path,
      struct stat *stat_info )
 {
-	liberror_error_t *error = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_fuse_getattr";
 	size64_t volume_size    = 0;
 	size_t path_length      = 0;
@@ -472,10 +473,10 @@ int bdemount_fuse_getattr(
 
 	if( path == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid path.",
 		 function );
 
@@ -485,10 +486,10 @@ int bdemount_fuse_getattr(
 	}
 	if( stat_info == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid stat info.",
 		 function );
 
@@ -501,10 +502,10 @@ int bdemount_fuse_getattr(
 	     0,
 	     sizeof( struct stat ) ) == NULL )
 	{
-		liberror_error_set(
+		libcerror_error_set(
 		 &error,
-		 LIBERROR_ERROR_DOMAIN_MEMORY,
-		 LIBERROR_MEMORY_ERROR_SET_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
 		 "%s: unable to clear stat info.",
 		 function );
 
@@ -540,10 +541,10 @@ int bdemount_fuse_getattr(
 			     &volume_size,
 			     &error ) != 1 )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 &error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_GET_FAILED,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve volume size.",
 				 function );
 
@@ -554,10 +555,10 @@ int bdemount_fuse_getattr(
 #if SIZEOF_OFF_T == 4
 			if( volume_size > (size64_t) UINT32_MAX )
 			{
-				liberror_error_set(
+				libcerror_error_set(
 				 &error,
-				 LIBERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
 				 "%s: invalid volume size value out of bounds.",
 				 function );
 
@@ -600,10 +601,49 @@ on_error:
 	{
 		libsystem_notify_print_error_backtrace(
 		 error );
-		liberror_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
+}
+
+/* Cleans up when fuse is done
+ */
+void bdemount_fuse_destroy(
+      void *private_data LIBCSYSTEM_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "bdemount_fuse_destroy";
+
+	LIBCSYSTEM_UNREFERENCED_PARAMETER( private_data )
+
+	if( bdemount_mount_handle != NULL )
+	{
+		if( mount_handle_free(
+		     &bdemount_mount_handle,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free mount handle.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	return;
+
+on_error:
+	if( error != NULL )
+	{
+		libcnotify_print_error_backtrace(
+		 error );
+		libcerror_error_free(
+		 &error );
+	}
+	return;
 }
 
 #endif /* defined( HAVE_LIBFUSE ) */
@@ -652,7 +692,7 @@ int main( int argc, char * const argv[] )
 
 		libsystem_notify_print_error_backtrace(
 		 error );
-		liberror_error_free(
+		libcerror_error_free(
 		 &error );
 
 		return( EXIT_FAILURE );
@@ -817,7 +857,7 @@ int main( int argc, char * const argv[] )
 		{
 			libsystem_notify_print_error_backtrace(
 			 error );
-			liberror_error_free(
+			libcerror_error_free(
 			 &error );
 
 			bdemount_mount_handle->volume_offset = 0;
@@ -866,6 +906,7 @@ int main( int argc, char * const argv[] )
 	bdemount_fuse_operations.read    = &bdemount_fuse_read;
 	bdemount_fuse_operations.readdir = &bdemount_fuse_readdir;
 	bdemount_fuse_operations.getattr = &bdemount_fuse_getattr;
+	bdemount_fuse_operations.destroy = &bdemount_fuse_destroy;
 
 	bdemount_fuse_channel = fuse_mount(
 	                         mount_point,
@@ -934,7 +975,7 @@ on_error:
 	{
 		libsystem_notify_print_error_backtrace(
 		 error );
-		liberror_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 #if defined( HAVE_LIBFUSE )
