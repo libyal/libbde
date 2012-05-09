@@ -25,8 +25,6 @@
 #include <common.h>
 #include <types.h>
 
-#include <libsystem.h>
-
 #if defined( __cplusplus )
 extern "C" {
 #endif

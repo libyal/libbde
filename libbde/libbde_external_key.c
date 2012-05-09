@@ -204,7 +204,7 @@ int libbde_external_key_read(
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 32 ];
-	libcstring_system_character_t guid_string[ LIBFGUID_IDENTIFIER_STRING_SIZE ];
+	libcstring_system_character_t guid_string[ 48 ];
 
 	libfdatetime_filetime_t *filetime                = NULL;
 	libfguid_identifier_t *guid                      = NULL;
@@ -309,13 +309,15 @@ int libbde_external_key_read(
 		result = libfguid_identifier_copy_to_utf16_string(
 			  guid,
 			  (uint16_t *) guid_string,
-			  LIBFGUID_IDENTIFIER_STRING_SIZE,
+			  48,
+			  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
 			  error );
 #else
 		result = libfguid_identifier_copy_to_utf8_string(
 			  guid,
 			  (uint8_t *) guid_string,
-			  LIBFGUID_IDENTIFIER_STRING_SIZE,
+			  48,
+			  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
 			  error );
 #endif
 		if( result != 1 )
@@ -382,16 +384,14 @@ int libbde_external_key_read(
 			  filetime,
 			  (uint16_t *) filetime_string,
 			  32,
-			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_MICRO_SECONDS,
-			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
 			  error );
 #else
 		result = libfdatetime_filetime_copy_to_utf8_string(
 			  filetime,
 			  (uint8_t *) filetime_string,
 			  32,
-			  LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_MICRO_SECONDS,
-			  LIBFDATETIME_DATE_TIME_FORMAT_CTIME,
+			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
 			  error );
 #endif
 		if( result != 1 )

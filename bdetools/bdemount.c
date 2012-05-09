@@ -23,9 +23,6 @@
 #include <memory.h>
 #include <types.h>
 
-#include <libcstring.h>
-#include <libcerror.h>
-
 #include <stdio.h>
 
 #if defined( HAVE_ERRNO_H )
@@ -40,22 +37,25 @@
 #include <stdlib.h>
 #endif
 
-#include <libsystem.h>
-
-#if defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 #define FUSE_USE_VERSION	26
 
-#if defined( HAVE_FUSE_H )
+#if defined( HAVE_LIBFUSE )
 #include <fuse.h>
 
-#elif defined( HAVE_OSXFUSE_FUSE_H )
+#elif defined( HAVE_LIBOSXFUSE )
 #include <osxfuse/fuse.h>
 #endif
 
-#endif /* defined( HAVE_FUSE_H ) || defined( HAVE_OSXFUSE_FUSE_H ) */
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
 
 #include "bdeoutput.h"
 #include "bdetools_libbde.h"
+#include "bdetools_libcerror.h"
+#include "bdetools_libclocale.h"
+#include "bdetools_libcnotify.h"
+#include "bdetools_libcstring.h"
+#include "bdetools_libcsystem.h"
 #include "mount_handle.h"
 
 mount_handle_t *bdemount_mount_handle = NULL;
@@ -93,12 +93,12 @@ void usage_fprint(
 /* Signal handler for bdemount
  */
 void bdemount_signal_handler(
-      libsystem_signal_t signal LIBSYSTEM_ATTRIBUTE_UNUSED )
+      libcsystem_signal_t signal LIBCSYSTEM_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_signal_handler";
 
-	LIBSYSTEM_UNREFERENCED_PARAMETER( signal )
+	LIBCSYSTEM_UNREFERENCED_PARAMETER( signal )
 
 	bdemount_abort = 1;
 
@@ -108,11 +108,11 @@ void bdemount_signal_handler(
 		     bdemount_mount_handle,
 		     &error ) != 1 )
 		{
-			libsystem_notify_printf(
+			libcnotify_printf(
 			 "%s: unable to signal mount handle to abort.\n",
 			 function );
 
-			libsystem_notify_print_error_backtrace(
+			libcnotify_print_error_backtrace(
 			 error );
 			libcerror_error_free(
 			 &error );
@@ -120,16 +120,16 @@ void bdemount_signal_handler(
 	}
 	/* Force stdin to close otherwise any function reading it will remain blocked
 	 */
-	if( libsystem_file_io_close(
+	if( libcsystem_file_io_close(
 	     0 ) != 0 )
 	{
-		libsystem_notify_printf(
+		libcnotify_printf(
 		 "%s: unable to close stdin.\n",
 		 function );
 	}
 }
 
-#if defined( HAVE_LIBFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 
 #if ( SIZEOF_OFF_T != 8 ) && ( SIZEOF_OFF_T != 4 )
 #error Size of off_t not supported
@@ -214,7 +214,7 @@ int bdemount_fuse_open(
 on_error:
 	if( error != NULL )
 	{
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );
@@ -338,7 +338,7 @@ int bdemount_fuse_read(
 on_error:
 	if( error != NULL )
 	{
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );
@@ -353,16 +353,16 @@ int bdemount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
-     off_t offset LIBSYSTEM_ATTRIBUTE_UNUSED,
-     struct fuse_file_info *file_info LIBSYSTEM_ATTRIBUTE_UNUSED )
+     off_t offset LIBCSYSTEM_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function   = "bdemount_fuse_readdir";
 	size_t path_length      = 0;
 	int result              = 0;
 
-	LIBSYSTEM_UNREFERENCED_PARAMETER( offset )
-	LIBSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	LIBCSYSTEM_UNREFERENCED_PARAMETER( offset )
+	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
 
 	if( path == NULL )
 	{
@@ -450,7 +450,7 @@ int bdemount_fuse_readdir(
 on_error:
 	if( error != NULL )
 	{
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );
@@ -574,13 +574,13 @@ int bdemount_fuse_getattr(
 	}
 	if( result == 0 )
 	{
-		stat_info->st_atime = libsystem_date_time_time(
+		stat_info->st_atime = libcsystem_date_time_time(
 		                       NULL );
 
-		stat_info->st_mtime = libsystem_date_time_time(
+		stat_info->st_mtime = libcsystem_date_time_time(
 		                       NULL );
 
-		stat_info->st_ctime = libsystem_date_time_time(
+		stat_info->st_ctime = libcsystem_date_time_time(
 		                       NULL );
 
 #if defined( HAVE_GETEUID )
@@ -599,7 +599,7 @@ int bdemount_fuse_getattr(
 on_error:
 	if( error != NULL )
 	{
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );
@@ -646,7 +646,7 @@ on_error:
 	return;
 }
 
-#endif /* defined( HAVE_LIBFUSE ) */
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
 
 /* The main program
  */
@@ -669,20 +669,29 @@ int main( int argc, char * const argv[] )
 	int result                                                 = 0;
 	int verbose                                                = 0;
 
-#if defined( HAVE_LIBFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations bdemount_fuse_operations;
 	struct fuse_chan *bdemount_fuse_channel                    = NULL;
 	struct fuse *bdemount_fuse_handle                          = NULL;
 #endif
 
-	libsystem_notify_set_stream(
+	libcnotify_stream_set(
 	 stderr,
 	 NULL );
-	libsystem_notify_set_verbose(
+	libcnotify_verbose_set(
 	 1 );
 
-        if( libsystem_initialize(
+	if( libclocale_initialize(
              "bdetools",
+	     &error ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to initialize locale values.\n" );
+
+		goto on_error;
+	}
+	if( libcsystem_initialize(
              _IONBF,
              &error ) != 1 )
 	{
@@ -690,7 +699,7 @@ int main( int argc, char * const argv[] )
 		 stderr,
 		 "Unable to initialize system values.\n" );
 
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );
@@ -701,7 +710,7 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-	while( ( option = libsystem_getopt(
+	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
 	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
@@ -784,7 +793,7 @@ int main( int argc, char * const argv[] )
 	}
 	mount_point = argv[ optind ];
 
-	libsystem_notify_set_verbose(
+	libcnotify_verbose_set(
 	 verbose );
 	libbde_notify_set_stream(
 	 stderr,
@@ -849,13 +858,13 @@ int main( int argc, char * const argv[] )
 		string_length = libcstring_system_string_length(
 				 option_volume_offset );
 
-		if( libsystem_string_decimal_copy_to_64_bit(
+		if( libcsystem_string_decimal_copy_to_64_bit(
 		     option_volume_offset,
 		     string_length + 1,
 		     (uint64_t *) &( bdemount_mount_handle->volume_offset ),
 		     &error ) != 1 )
 		{
-			libsystem_notify_print_error_backtrace(
+			libcnotify_print_error_backtrace(
 			 error );
 			libcerror_error_free(
 			 &error );
@@ -890,7 +899,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-#if defined( HAVE_LIBFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	if( memory_set(
 	     &bdemount_fuse_operations,
 	     0,
@@ -973,12 +982,12 @@ int main( int argc, char * const argv[] )
 on_error:
 	if( error != NULL )
 	{
-		libsystem_notify_print_error_backtrace(
+		libcnotify_print_error_backtrace(
 		 error );
 		libcerror_error_free(
 		 &error );
 	}
-#if defined( HAVE_LIBFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	if( bdemount_fuse_handle != NULL )
 	{
 		fuse_destroy(
