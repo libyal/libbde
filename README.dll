@@ -15,8 +15,6 @@ To create a DLL using Cygwin you'll need:
 Cygwin with the following packages:
 * binutils
 * gcc-core
-* bison (for libodraw)
-* flex (for libodraw)
 * autoconf
 * automake
 * make
@@ -24,7 +22,6 @@ Cygwin with the following packages:
 * gettext
 * libiconv
 * openssl-devel (optional but recommended)
-* libuuid-devel (optional but recommended)
 
 Building the library:
 ./configure

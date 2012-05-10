@@ -50,6 +50,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20120510
+* small changes
+* worked on msvscpp files
+
 20120509
 * applied updates
 * added bdemount destroy function
