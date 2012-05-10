@@ -1,5 +1,5 @@
 TODO
-* update msvscpp files
+* update manuals
 * libcaes
   - WinXP no AES support ?
   - WINAPI initialize provider only once - where to stick the init functions ?
