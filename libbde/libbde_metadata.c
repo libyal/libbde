@@ -270,9 +270,10 @@ int libbde_metadata_read_block(
      libcerror_error_t **error )
 {
 	uint8_t *fve_metadata_block              = NULL;
+	void *reallocation                       = NULL;
 	static char *function                    = "libbde_metadata_read_block";
 	size_t fve_metadata_block_offset         = 0;
-	size_t read_size                         = 4096;
+	size_t read_size                         = 8192;
 	ssize_t read_count                       = 0;
 	uint64_t first_metadata_offset           = 0;
 	uint64_t second_metadata_offset          = 0;
@@ -589,8 +590,6 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-/* TODO validate size value ? */
-
 	fve_metadata_block_offset += sizeof( bde_metadata_block_header_v1_t );
 	read_size                 -= sizeof( bde_metadata_block_header_v1_t );
 
@@ -615,8 +614,7 @@ int libbde_metadata_read_block(
 	fve_metadata_block_offset += read_count;
 	read_size                 -= read_count;
 
-	if( ( metadata_size < sizeof( bde_metadata_header_v1_t ) )
-	 || ( metadata_size > read_size ) )
+	if( metadata_size < ( sizeof( bde_metadata_header_v1_t ) + read_count ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -626,6 +624,25 @@ int libbde_metadata_read_block(
 		 function );
 
 		goto on_error;
+	}
+	if( metadata_size > read_size )
+	{
+		reallocation = memory_reallocate(
+		                fve_metadata_block,
+		                metadata_size );
+
+		if( reallocation == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to resize metadata.",
+			 function );
+
+			return( -1 );
+		}
+		fve_metadata_block = (uint8_t *) reallocation;
 	}
 	read_count = libbde_metadata_read_entries(
 	              metadata,
@@ -1411,8 +1428,21 @@ ssize_t libbde_metadata_read_entries(
 						 function,
 						 volume_header_size );
 
-						libcnotify_printf(
-						 "\n" );
+						if( metadata_entry->value_data_size > 16 )
+						{
+							libcnotify_printf(
+							 "%s: unknown1:\n",
+							 function );
+							libcnotify_print_data(
+							 &( metadata_entry->value_data[ 16 ] ),
+							 metadata_entry->value_data_size - 16,
+							 0 );
+						}
+						else
+						{
+							libcnotify_printf(
+							 "\n" );
+						}
 					}
 #endif
 					if( (off64_t) volume_header_offset != metadata->volume_header_offset )

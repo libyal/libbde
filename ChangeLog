@@ -1,5 +1,6 @@
 TODO
 * update manuals
+* move free metadata to volume_close()
 * libcaes
   - WinXP no AES support ?
   - WINAPI initialize provider only once - where to stick the init functions ?
@@ -49,6 +50,9 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20120518
+* updates for Windows 8 BDE volume
 
 20120511
 * fixes for dpkg files
