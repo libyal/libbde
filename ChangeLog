@@ -1,4 +1,6 @@
 TODO
+* add handling of BDE volumes with corrupt metadata, e.g. file header
+
 * update manuals
 * move free metadata to volume_close()
 * libcaes
@@ -50,6 +52,9 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20120807
+* applied updates
 
 20120721
 * added libcsplit
