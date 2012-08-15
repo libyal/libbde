@@ -51,6 +51,13 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20120721
+* added libcsplit
+* applied updates
+* updated msvscpp files
+* switched library order in tools
+* fixed issue in spec file
+
 20120520
 * libfdata update
 * code clean up in bdetools

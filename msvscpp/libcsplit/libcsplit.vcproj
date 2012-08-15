@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="libbfio"
-	ProjectGUID="{41CFAFBF-A1C8-4704-AFEF-31979E6452B9}"
-	RootNamespace="libbfio"
+	Name="libcsplit"
+	ProjectGUID="{B86FB73A-4ACC-42DE-9545-586D93955B06}"
+	RootNamespace="libcsplit"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -39,10 +39,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror;..\..\libclocale;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror;..\..\libclocale;..\..\libuna"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCSPLIT"
+				SmallerTypeCheck="true"
 				RuntimeLibrary="2"
 				WarningLevel="4"
+				WarnAsError="false"
 				CompileAs="1"
 			/>
 			<Tool
@@ -56,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\libbfio.lib"
+				OutputFile="$(OutDir)\libcsplit.lib"
 				ModuleDefinitionFile=""
 				IgnoreAllDefaultLibraries="false"
 			/>
@@ -101,12 +103,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror;..\..\libclocale;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror;..\..\libclocale;..\..\libuna"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCSPLIT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				WarningLevel="4"
+				WarnAsError="false"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -121,7 +124,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\libbfio.lib"
+				OutputFile="$(OutDir)\libcsplit.lib"
 				ModuleDefinitionFile=""
 				IgnoreAllDefaultLibraries="false"
 			/>
@@ -151,47 +154,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\libbfio\libbfio_error.c"
+				RelativePath="..\..\libcsplit\libcsplit_error.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_file.c"
+				RelativePath="..\..\libcsplit\libcsplit_narrow_split_string.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_file_pool.c"
+				RelativePath="..\..\libcsplit\libcsplit_narrow_string.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_file_range.c"
+				RelativePath="..\..\libcsplit\libcsplit_support.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_handle.c"
+				RelativePath="..\..\libcsplit\libcsplit_wide_split_string.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_legacy.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_list_type.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_memory_range.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_offset_list.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_pool.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_support.c"
+				RelativePath="..\..\libcsplit\libcsplit_wide_string.c"
 				>
 			</File>
 		</Filter>
@@ -201,91 +184,51 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\libbfio\libbfio_codepage.h"
+				RelativePath="..\..\libcsplit\libcsplit_definitions.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_definitions.h"
+				RelativePath="..\..\libcsplit\libcsplit_error.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_error.h"
+				RelativePath="..\..\libcsplit\libcsplit_extern.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_extern.h"
+				RelativePath="..\..\libcsplit\libcsplit_libcerror.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_file.h"
+				RelativePath="..\..\libcsplit\libcsplit_libcstring.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_file_pool.h"
+				RelativePath="..\..\libcsplit\libcsplit_narrow_split_string.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_file_range.h"
+				RelativePath="..\..\libcsplit\libcsplit_narrow_string.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_handle.h"
+				RelativePath="..\..\libcsplit\libcsplit_support.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_legacy.h"
+				RelativePath="..\..\libcsplit\libcsplit_types.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_libcerror.h"
+				RelativePath="..\..\libcsplit\libcsplit_unused.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_libcfile.h"
+				RelativePath="..\..\libcsplit\libcsplit_wide_split_string.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_libclocale.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_libcpath.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_libcstring.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_libuna.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_list_type.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_memory_range.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_offset_list.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_pool.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_support.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_unused.h"
+				RelativePath="..\..\libcsplit\libcsplit_wide_string.h"
 				>
 			</File>
 		</Filter>
