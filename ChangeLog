@@ -39,7 +39,7 @@ Format:
 * why does Windows hide the last 4096 bytes of the volume?
 
 Test images:
-* for Windows Vista, Windows 7, To Go
+* for Windows Vista, Windows 7, To Go, Windows 8
 
 Validate test cases:
 * AES 128
@@ -50,6 +50,10 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20120520
+* libfdata update
+* code clean up in bdetools
 
 20120518
 * updates for Windows 8 BDE volume

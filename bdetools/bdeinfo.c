@@ -125,7 +125,6 @@ int main( int argc, char * const argv[] )
 	libcstring_system_character_t *option_startup_key_filename = NULL;
 	libcstring_system_character_t *option_volume_offset        = NULL;
 	libcstring_system_character_t *source                      = NULL;
-	size_t string_length                                       = 0;
 	char *program                                              = "bdeinfo";
 	libcstring_system_integer_t option                         = 0;
 	int result                                                 = 0;
@@ -293,13 +292,9 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_volume_offset != NULL )
 	{
-		string_length = libcstring_system_string_length(
-				 option_volume_offset );
-
-		if( libcsystem_string_decimal_copy_to_64_bit(
+		if( info_handle_set_volume_offset(
+		     bdeinfo_info_handle,
 		     option_volume_offset,
-		     string_length + 1,
-		     (uint64_t *) &( bdeinfo_info_handle->volume_offset ),
 		     &error ) != 1 )
 		{
 			libcnotify_print_error_backtrace(
@@ -307,11 +302,9 @@ int main( int argc, char * const argv[] )
 			libcerror_error_free(
 			 &error );
 
-			bdeinfo_info_handle->volume_offset = 0;
-
 			fprintf(
 			 stderr,
-			 "Unsupported volume offset defaulting to: %" PRIu64 ".\n",
+			 "Unsupported volume offset defaulting to: %" PRIi64 ".\n",
 			 bdeinfo_info_handle->volume_offset );
 		}
 	}
@@ -347,7 +340,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( info_handle_close(
+	if( info_handle_close_input(
 	     bdeinfo_info_handle,
 	     &error ) != 0 )
 	{

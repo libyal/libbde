@@ -24,6 +24,6 @@ Package: libbde-tools
 Section: utils
 Architecture: any
 Depends: libbde (= ${Source-Version}), ${shlibs:Depends}
-Description: Several tools for reading and writing BitLocker Drive Encrypted volumes
+Description: Several tools for reading BitLocker Drive Encrypted volumes
  Several tools for reading BitLocker Drive Encrypted volumes.
 
