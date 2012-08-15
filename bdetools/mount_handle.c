@@ -27,14 +27,17 @@
 #include "bdetools_libbfio.h"
 #include "bdetools_libcerror.h"
 #include "bdetools_libcstring.h"
+#include "bdetools_libcsystem.h"
 #include "mount_handle.h"
 
+#if !defined( LIBBDE_HAVE_BFIO )
 extern \
 int libbde_volume_open_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
      int access_flags,
      libbde_error_t **error );
+#endif
 
 /* Initializes the mount handle
  * Returns 1 if successful or -1 on error
@@ -388,6 +391,52 @@ int mount_handle_read_startup_key(
 	return( 1 );
 }
 
+/* Sets the volume offset
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_set_volume_offset(
+     mount_handle_t *mount_handle,
+     const libcstring_system_character_t *string,
+     libcerror_error_t **error )
+{
+	static char *function = "mount_handle_set_volume_offset";
+	size_t string_length  = 0;
+	uint64_t value_64bit  = 0;
+
+	if( mount_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = libcstring_system_string_length(
+	                 string );
+
+	if( libcsystem_string_decimal_copy_to_64_bit(
+	     string,
+	     string_length + 1,
+	     &value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy string to 64-bit decimal.",
+		 function );
+
+		return( -1 );
+	}
+	mount_handle->volume_offset = (off64_t) value_64bit;
+
+	return( 1 );
+}
+
 /* Opens the mount handle
  * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
@@ -396,7 +445,7 @@ int mount_handle_open_input(
      const libcstring_system_character_t *filename,
      libcerror_error_t **error )
 {
-	static char *function  = "mount_handle_open";
+	static char *function  = "mount_handle_open_input";
 	size_t filename_length = 0;
 	int result             = 0;
 
@@ -475,11 +524,11 @@ int mount_handle_open_input(
 /* Closes the mount handle
  * Returns the 0 if succesful or -1 on error
  */
-int mount_handle_close(
+int mount_handle_close_input(
      mount_handle_t *mount_handle,
      libcerror_error_t **error )
 {
-	static char *function = "mount_handle_close";
+	static char *function = "mount_handle_close_input";
 
 	if( mount_handle == NULL )
 	{

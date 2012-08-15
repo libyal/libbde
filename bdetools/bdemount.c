@@ -665,7 +665,6 @@ int main( int argc, char * const argv[] )
 	libcstring_system_character_t *source                      = NULL;
 	char *program                                              = "bdemount";
 	libcstring_system_integer_t option                         = 0;
-	size_t string_length                                       = 0;
 	int result                                                 = 0;
 	int verbose                                                = 0;
 
@@ -850,13 +849,9 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_volume_offset != NULL )
 	{
-		string_length = libcstring_system_string_length(
-				 option_volume_offset );
-
-		if( libcsystem_string_decimal_copy_to_64_bit(
+		if( mount_handle_set_volume_offset(
+		     bdemount_mount_handle,
 		     option_volume_offset,
-		     string_length + 1,
-		     (uint64_t *) &( bdemount_mount_handle->volume_offset ),
 		     &error ) != 1 )
 		{
 			libcnotify_print_error_backtrace(
@@ -864,11 +859,9 @@ int main( int argc, char * const argv[] )
 			libcerror_error_free(
 			 &error );
 
-			bdemount_mount_handle->volume_offset = 0;
-
 			fprintf(
 			 stderr,
-			 "Unsupported volume offset defaulting to: %" PRIu64 ".\n",
+			 "Unsupported volume offset defaulting to: %" PRIi64 ".\n",
 			 bdemount_mount_handle->volume_offset );
 		}
 	}
