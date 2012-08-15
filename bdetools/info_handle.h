@@ -54,6 +54,10 @@ struct info_handle
 	/* The nofication output stream
 	 */
 	FILE *notify_stream;
+
+	/* Value to indicate if abort was signalled
+	 */
+	int abort;
 };
 
 int info_handle_initialize(
@@ -83,12 +87,17 @@ int info_handle_read_startup_key(
      const libcstring_system_character_t *filename,
      libcerror_error_t **error );
 
+int info_handle_set_volume_offset(
+     info_handle_t *info_handle,
+     const libcstring_system_character_t *string,
+     libcerror_error_t **error );
+
 int info_handle_open_input(
      info_handle_t *info_handle,
      const libcstring_system_character_t *filename,
      libcerror_error_t **error );
 
-int info_handle_close(
+int info_handle_close_input(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 

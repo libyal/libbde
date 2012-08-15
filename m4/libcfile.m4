@@ -1,6 +1,6 @@
 dnl Functions for libcfile
 dnl
-dnl Version: 20120501
+dnl Version: 20120519
 
 dnl Function to detect if libcfile is available
 dnl ac_libcfile_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -130,7 +130,7 @@ AC_DEFUN([AX_LIBCFILE_CHECK_LIB],
       [ac_cv_libcfile=no])
      ])
 
-     ac_cv_libcfile_LIBADD="-lcfile"
+    ac_cv_libcfile_LIBADD="-lcfile"
     ])
    ])
   ])
