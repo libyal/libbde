@@ -24,11 +24,11 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libbde_array_type.h"
 #include "libbde_definitions.h"
 #include "libbde_external_key.h"
 #include "libbde_io_handle.h"
 #include "libbde_key.h"
+#include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
 #include "libbde_libcstring.h"
@@ -98,7 +98,7 @@ int libbde_external_key_initialize(
 
 		goto on_error;
 	}
-	if( libbde_array_initialize(
+	if( libcdata_array_initialize(
 	     &( ( *external_key )->entries_array ),
 	     0,
 	     error ) != 1 )
@@ -164,7 +164,7 @@ int libbde_external_key_free(
 				result = -1;
 			}
 		}
-		if( libbde_array_free(
+		if( libcdata_array_free(
 		     &( ( *external_key )->entries_array ),
 		     (int(*)(intptr_t **, libcerror_error_t **)) &libbde_metadata_entry_free,
 		     error ) != 1 )
@@ -539,7 +539,7 @@ int libbde_external_key_read(
 				external_key->string_entry = property_metadata_entry;
 			}
 		}
-		if( libbde_array_append_entry(
+		if( libcdata_array_append_entry(
 		     external_key->entries_array,
 		     &property_metadata_entry_index,
 		     (intptr_t *) property_metadata_entry,

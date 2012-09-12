@@ -25,10 +25,10 @@
 #include <common.h>
 #include <types.h>
 
-#include "libbde_array_type.h"
 #include "libbde_external_key.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_volume_master_key.h"
 
@@ -105,7 +105,7 @@ struct libbde_metadata
 
 	/* The metadata entries array
 	 */
-	libbde_array_t *entries_array;
+	libcdata_array_t *entries_array;
 };
 
 int libbde_metadata_initialize(

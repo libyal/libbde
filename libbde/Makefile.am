@@ -3,6 +3,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/common \
 	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
+	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBCNOTIFY_CPPFLAGS@ \
 	@LIBCSPLIT_CPPFLAGS@ \
@@ -16,15 +17,13 @@ AM_CPPFLAGS = \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFVALUE_CPPFLAGS@ \
 	@LIBHMAC_CPPFLAGS@ \
-	@LIBCAES_CPPFLAGS@ \
-	@MEMWATCH_CPPFLAGS@
+	@LIBCAES_CPPFLAGS@
 
 lib_LTLIBRARIES = libbde.la
 
 libbde_la_SOURCES = \
 	libbde.c \
 	libbde_aes_ccm_encrypted_key.c libbde_aes_ccm_encrypted_key.h \
-	libbde_array_type.c libbde_array_type.h \
 	libbde_codepage.h \
 	libbde_debug.c libbde_debug.h \
 	libbde_definitions.h \
@@ -37,6 +36,7 @@ libbde_la_SOURCES = \
 	libbde_key.c libbde_key.h \
 	libbde_libbfio.h \
 	libbde_libcaes.h \
+	libbde_libcdata.h \
 	libbde_libcerror.h \
 	libbde_libclocale.h \
 	libbde_libcnotify.h \
@@ -66,6 +66,7 @@ libbde_la_SOURCES = \
 libbde_la_LIBADD = \
 	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCSPLIT_LIBADD@ \
