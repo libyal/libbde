@@ -25,7 +25,6 @@
 #include <common.h>
 #include <types.h>
 
-#include "libbde_array_type.h"
 #include "libbde_encryption.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"

@@ -25,8 +25,8 @@
 #include <common.h>
 #include <types.h>
 
-#include "libbde_array_type.h"
 #include "libbde_key.h"
+#include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_metadata_entry.h"
 
@@ -53,7 +53,7 @@ struct libbde_external_key
 
 	/* The metadata entries array
 	 */
-	libbde_array_t *entries_array;
+	libcdata_array_t *entries_array;
 };
 
 int libbde_external_key_initialize(
