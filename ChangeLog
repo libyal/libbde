@@ -1,4 +1,5 @@
 TODO
+* update msvscpp files
 * add handling of BDE volumes with corrupt metadata, e.g. file header
 
 * update manuals
@@ -52,6 +53,10 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20120912
+* applied updates
+* changes for libcdata update
 
 20120807
 * applied updates

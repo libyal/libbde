@@ -25,7 +25,6 @@
 #include <types.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
-#include "libbde_array_type.h"
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_external_key.h"
@@ -33,6 +32,7 @@
 #include "libbde_key.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcaes.h"
+#include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
 #include "libbde_libcstring.h"
@@ -105,7 +105,7 @@ int libbde_metadata_initialize(
 
 		goto on_error;
 	}
-	if( libbde_array_initialize(
+	if( libcdata_array_initialize(
 	     &( ( *metadata )->entries_array ),
 	     0,
 	     error ) != 1 )
@@ -235,7 +235,7 @@ int libbde_metadata_free(
 				result = -1;
 			}
 		}
-		if( libbde_array_free(
+		if( libcdata_array_free(
 		     &( ( *metadata )->entries_array ),
 		     (int(*)(intptr_t **, libcerror_error_t **)) &libbde_metadata_entry_free,
 		     error ) != 1 )
@@ -1463,7 +1463,7 @@ ssize_t libbde_metadata_read_entries(
 			default:
 				break;
 		}
-		if( libbde_array_append_entry(
+		if( libcdata_array_append_entry(
 		     metadata->entries_array,
 		     &metadata_entry_index,
 		     (intptr_t *) metadata_entry,

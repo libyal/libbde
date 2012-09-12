@@ -26,8 +26,8 @@
 #include <types.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
-#include "libbde_array_type.h"
 #include "libbde_key.h"
+#include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_stretch_key.h"
@@ -67,7 +67,7 @@ struct libbde_volume_master_key
 
 	/* The metadata entries array
 	 */
-	libbde_array_t *entries_array;
+	libcdata_array_t *entries_array;
 };
 
 int libbde_volume_master_key_initialize(
