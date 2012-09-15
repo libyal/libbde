@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="libfdatetime"
-	ProjectGUID="{25C60507-39C6-4564-912D-DA2E7482A00F}"
-	RootNamespace="libfdatetime"
+	Name="libcdata"
+	ProjectGUID="{B9332DC8-7594-47DF-80C1-38922E0F4DFB}"
+	RootNamespace="libcdata"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -40,9 +40,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBFDATETIME"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA"
+				SmallerTypeCheck="true"
 				RuntimeLibrary="2"
 				WarningLevel="4"
+				WarnAsError="false"
 				CompileAs="1"
 			/>
 			<Tool
@@ -56,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\libfdatetime.lib"
+				OutputFile="$(OutDir)\libcdata.lib"
 				ModuleDefinitionFile=""
 				IgnoreAllDefaultLibraries="false"
 			/>
@@ -102,11 +104,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBFDATETIME"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				WarningLevel="4"
+				WarnAsError="false"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -121,7 +124,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\libfdatetime.lib"
+				OutputFile="$(OutDir)\libcdata.lib"
 				ModuleDefinitionFile=""
 				IgnoreAllDefaultLibraries="false"
 			/>
@@ -151,39 +154,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_date_time_values.c"
+				RelativePath="..\..\libcdata\libcdata_array.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_error.c"
+				RelativePath="..\..\libcdata\libcdata_btree.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_fat_date_time.c"
+				RelativePath="..\..\libcdata\libcdata_list.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_filetime.c"
+				RelativePath="..\..\libcdata\libcdata_list_element.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_floatingtime.c"
+				RelativePath="..\..\libcdata\libcdata_support.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_nsf_timedate.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_posix_time.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_systemtime.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_support.c"
+				RelativePath="..\..\libcdata\libcdata_tree_node.c"
 				>
 			</File>
 		</Filter>
@@ -193,63 +184,51 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_date_time_values.h"
+				RelativePath="..\..\libcdata\libcdata_array.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_definitions.h"
+				RelativePath="..\..\libcdata\libcdata_btree.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_error.h"
+				RelativePath="..\..\libcdata\libcdata_definitions.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_extern.h"
+				RelativePath="..\..\libcdata\libcdata_extern.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_fat_date_time.h"
+				RelativePath="..\..\libcdata\libcdata_libcerror.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_filetime.h"
+				RelativePath="..\..\libcdata\libcdata_libcstring.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_floatingtime.h"
+				RelativePath="..\..\libcdata\libcdata_list.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_libcerror.h"
+				RelativePath="..\..\libcdata\libcdata_list_element.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_libcstring.h"
+				RelativePath="..\..\libcdata\libcdata_support.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_nsf_timedate.h"
+				RelativePath="..\..\libcdata\libcdata_tree_node.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_posix_time.h"
+				RelativePath="..\..\libcdata\libcdata_types.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_systemtime.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_support.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_unused.h"
+				RelativePath="..\..\libcdata\libcdata_unused.h"
 				>
 			</File>
 		</Filter>

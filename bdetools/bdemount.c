@@ -74,7 +74,8 @@ void usage_fprint(
 	                 " volume\n\n" );
 
 	fprintf( stream, "Usage: bdemount [ - o offset ] [ -p password ] [ -r password ]\n"
-	                 "                [ -s filename ] [ -hvV ] source mount_point\n\n" );
+	                 "                [ -s filename ] [ -X extended_options ] [ -hvV ]\n"
+	                 "                source mount_point\n\n" );
 
 	fprintf( stream, "\tsource:      the source file or device\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
@@ -88,6 +89,7 @@ void usage_fprint(
 	fprintf( stream, "\t-v:          verbose output to stderr\n"
 	                 "\t             bdemount will remain running in the foregroud\n" );
 	fprintf( stream, "\t-V:          print version\n" );
+	fprintf( stream, "\t-X:          extended options to pass to sub system\n" );
 }
 
 /* Signal handler for bdemount
@@ -658,6 +660,7 @@ int main( int argc, char * const argv[] )
 {
 	libbde_error_t *error                                      = NULL;
 	libcstring_system_character_t *mount_point                 = NULL;
+	libcstring_system_character_t *option_extended_options     = NULL;
 	libcstring_system_character_t *option_password             = NULL;
 	libcstring_system_character_t *option_recovery_password    = NULL;
 	libcstring_system_character_t *option_startup_key_filename = NULL;
@@ -670,6 +673,8 @@ int main( int argc, char * const argv[] )
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations bdemount_fuse_operations;
+
+	struct fuse_args bdemount_fuse_arguments                   = FUSE_ARGS_INIT(0, NULL);
 	struct fuse_chan *bdemount_fuse_channel                    = NULL;
 	struct fuse *bdemount_fuse_handle                          = NULL;
 #endif
@@ -707,7 +712,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vV" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vVX:" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -759,6 +764,11 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (libcstring_system_integer_t) 'X':
+				option_extended_options = optarg;
+
+				break;
 		}
 	}
 	if( optind == argc )
@@ -899,6 +909,41 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+	if( option_extended_options != NULL )
+	{
+		/* This argument is required but ignored
+		 */
+		if( fuse_opt_add_arg(
+		     &bdemount_fuse_arguments,
+		     "" ) != 0 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable add fuse arguments.\n" );
+
+			goto on_error;
+		}
+		if( fuse_opt_add_arg(
+		     &bdemount_fuse_arguments,
+		     "-o" ) != 0 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable add fuse arguments.\n" );
+
+			goto on_error;
+		}
+		if( fuse_opt_add_arg(
+		     &bdemount_fuse_arguments,
+		     option_extended_options ) != 0 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable add fuse arguments.\n" );
+
+			goto on_error;
+		}
+	}
 	bdemount_fuse_operations.open    = &bdemount_fuse_open;
 	bdemount_fuse_operations.read    = &bdemount_fuse_read;
 	bdemount_fuse_operations.readdir = &bdemount_fuse_readdir;
@@ -907,7 +952,7 @@ int main( int argc, char * const argv[] )
 
 	bdemount_fuse_channel = fuse_mount(
 	                         mount_point,
-	                         NULL );
+	                         &bdemount_fuse_arguments );
 
 	if( bdemount_fuse_channel == NULL )
 	{
@@ -919,7 +964,7 @@ int main( int argc, char * const argv[] )
 	}
 	bdemount_fuse_handle = fuse_new(
 	                        bdemount_fuse_channel,
-	                        NULL,
+	                        &bdemount_fuse_arguments,
 	                        &bdemount_fuse_operations,
 	                        sizeof( struct fuse_operations ),
 	                        bdemount_mount_handle );
@@ -958,6 +1003,9 @@ int main( int argc, char * const argv[] )
 	fuse_destroy(
 	 bdemount_fuse_handle );
 
+	fuse_opt_free_args(
+	 &bdemount_fuse_arguments );
+
 	return( EXIT_SUCCESS );
 #else
 	fprintf(
@@ -981,6 +1029,8 @@ on_error:
 		fuse_destroy(
 		 bdemount_fuse_handle );
 	}
+	fuse_opt_free_args(
+	 &bdemount_fuse_arguments );
 #endif
 	if( bdemount_mount_handle != NULL )
 	{

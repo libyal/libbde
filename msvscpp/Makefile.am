@@ -3,6 +3,7 @@ EXTRA_DIST = \
 	libbde_dll/libbde_dll.vcproj \
 	libbfio/libbfio.vcproj \
 	libcaes/libcaes.vcproj \
+	libcdata/libcdata.vcproj \
 	libcerror/libcerror.vcproj \
 	libcfile/libcfile.vcproj \
 	libclocale/libclocale.vcproj \

@@ -1,22 +1,23 @@
-.Dd September 12, 2012
-.Dt bdeinfo
+.Dd September 15, 2012
+.Dt bdemount
 .Os libbde
 .Sh NAME
-.Nm bdeinfo
+.Nm bdemount
 .Nd mounts a BitLocker Drive Encryption (BDE) encrypted volume
 .Sh SYNOPSIS
-.Nm bdeinfo
+.Nm bdemount
 .Op Fl o Ar offset
 .Op Fl p Ar password
 .Op Fl r Ar password
 .Op Fl s Ar filename
+.Op Fl X Ar extended_options
 .Op Fl hvV
 .Va Ar source
 .Sh DESCRIPTION
-.Nm bdeinfo
+.Nm bdemount
 is a utility to mount a BitLocker Drive Encryption (BDE) encrypted volume
 .Pp
-.Nm bdeinfo
+.Nm bdemount
 is part of the
 .Nm libbde
 package.
@@ -43,6 +44,8 @@ typically this file has the extension .BEK
 verbose output to stderr
 .It Fl V
 print version
+.It Fl X Ar extended_options
+extended options to pass to sub system
 .El
 .Sh ENVIRONMENT
 None
@@ -50,11 +53,8 @@ None
 None
 .Sh EXAMPLES
 .Bd -literal
-# bdeinfo /dev/sda1
-bdeinfo 20110821
-
-BitLocker Drive Encryption information:
-	Encryption method:		AES 128-bit
+# bdemount /dev/sda1
+bdemount 20110821
 
 .Ed
 .Sh DIAGNOSTICS
