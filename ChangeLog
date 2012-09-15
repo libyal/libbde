@@ -54,6 +54,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20120915
+* added -X option to bdemount to pass sub system options
+* update ewfmount man page
+
 20120912
 * applied updates
 * changes for libcdata update
