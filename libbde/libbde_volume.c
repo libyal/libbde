@@ -1131,7 +1131,7 @@ int libbde_volume_open_read(
 			 "\n" );
 		}
 #endif
-		/* TODO clone function ? */
+/* TODO clone function ? */
 		if( libfdata_vector_initialize(
 		     &( internal_volume->sectors_vector ),
 		     (size64_t) internal_volume->io_handle->bytes_per_sector,
@@ -1254,106 +1254,92 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		return( -1 );
 	}
-	if( internal_volume->io_handle->keys_are_set != 0 )
+	if( memory_set(
+	     full_volume_encryption_key,
+	     0,
+	     32 ) == NULL )
 	{
-		if( memory_copy(
-		     full_volume_encryption_key,
-		     internal_volume->io_handle->full_volume_encryption_key,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy full volume encryption key.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear full volume encryption key.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_copy(
-		     tweak_key,
-		     internal_volume->io_handle->tweak_key,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy tweak key.",
-			 function );
-
-			goto on_error;
-		}
-/* TODO test external provided keys */
-		result = 1;
+		goto on_error;
 	}
-	if( internal_volume->io_handle->keys_are_set == 0 )
+	if( memory_set(
+	     tweak_key,
+	     0,
+	     32 ) == NULL )
 	{
-		if( memory_set(
-		     full_volume_encryption_key,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear full volume encryption key.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear tweak key.",
+		 function );
 
-			goto on_error;
-		}
-		if( memory_set(
-		     tweak_key,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear tweak key.",
-			 function );
-
-			goto on_error;
-		}
-		if( memory_set(
-		     volume_master_key,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to volume master key.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
-	if( internal_volume->io_handle->keys_are_set == 0 )
+	if( memory_set(
+	     volume_master_key,
+	     0,
+	     32 ) == NULL )
 	{
-		if( ( internal_volume->external_key_metadata != NULL )
-		 && ( internal_volume->external_key_metadata->startup_key_external_key != NULL )
-		 && ( internal_volume->external_key_metadata->startup_key_external_key->key != NULL ) )
-		{
-			external_key      = internal_volume->external_key_metadata->startup_key_external_key->key->data;
-			external_key_size = internal_volume->external_key_metadata->startup_key_external_key->key->data_size;
-		}
-		encrypted_volume_size = metadata->encrypted_volume_size;
-		volume_header_offset  = metadata->volume_header_offset;
-		volume_header_size    = metadata->volume_header_size;
-		encryption_method     = metadata->encryption_method;
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to volume master key.",
+		 function );
 
-		result = libbde_metadata_get_volume_master_key(
-			  metadata,
-			  internal_volume->io_handle,
-			  external_key,
-			  external_key_size,
-			  volume_master_key,
-			  32,
-			  error );
+		goto on_error;
+	}
+	if( ( internal_volume->external_key_metadata != NULL )
+	 && ( internal_volume->external_key_metadata->startup_key_external_key != NULL )
+	 && ( internal_volume->external_key_metadata->startup_key_external_key->key != NULL ) )
+	{
+		external_key      = internal_volume->external_key_metadata->startup_key_external_key->key->data;
+		external_key_size = internal_volume->external_key_metadata->startup_key_external_key->key->data_size;
+	}
+	encrypted_volume_size = metadata->encrypted_volume_size;
+	volume_header_offset  = metadata->volume_header_offset;
+	volume_header_size    = metadata->volume_header_size;
+	encryption_method     = metadata->encryption_method;
+
+	result = libbde_metadata_get_volume_master_key(
+	          metadata,
+	          internal_volume->io_handle,
+	          external_key,
+	          external_key_size,
+	          volume_master_key,
+	          32,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume master key from metadata.",
+		 function );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		result = libbde_metadata_get_full_volume_encryption_key(
+		          metadata,
+		          internal_volume->io_handle,
+		          volume_master_key,
+		          32,
+		          full_volume_encryption_key,
+		          32,
+		          tweak_key,
+		          32,
+		          error );
 
 		if( result == -1 )
 		{
@@ -1361,34 +1347,10 @@ int libbde_volume_open_read_keys_from_metadata(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume master key from metadata.",
+			 "%s: unable to retrieve full volume encryption key from metadata.",
 			 function );
 
 			goto on_error;
-		}
-		else if( result != 0 )
-		{
-			result = libbde_metadata_get_full_volume_encryption_key(
-				  metadata,
-				  volume_master_key,
-				  32,
-				  full_volume_encryption_key,
-				  32,
-				  tweak_key,
-				  32,
-				  error );
-
-			if( result == -1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve full volume encryption key from metadata.",
-				 function );
-
-				goto on_error;
-			}
 		}
 	}
 	if( result != 0 )
@@ -1414,16 +1376,14 @@ int libbde_volume_open_read_keys_from_metadata(
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			if( internal_volume->io_handle->keys_are_set == 0 )
-			{
-				libcnotify_printf(
-				 "%s: volume master key:\n",
-				 function );
-				libcnotify_print_data(
-				 volume_master_key,
-				 32,
-				 0 );
-			}
+			libcnotify_printf(
+			 "%s: volume master key:\n",
+			 function );
+			libcnotify_print_data(
+			 volume_master_key,
+			 32,
+			 0 );
+
 			libcnotify_printf(
 			 "%s: full volume encryption key:\n",
 			 function );
@@ -1487,22 +1447,19 @@ int libbde_volume_open_read_keys_from_metadata(
 
 		goto on_error;
 	}
-	if( internal_volume->io_handle->keys_are_set == 0 )
+	if( memory_set(
+	     volume_master_key,
+	     0,
+	     32 ) == NULL )
 	{
-		if( memory_set(
-		     volume_master_key,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to volume master key.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to volume master key.",
+		 function );
 
-			goto on_error;
-		}
+		goto on_error;
 	}
 	internal_volume->encryption_method = encryption_method;
 
@@ -2103,6 +2060,23 @@ int libbde_volume_set_keys(
 
 		return( -1 );
 	}
+	if( full_volume_encryption_key_size < 32 )
+	{
+		if( memory_set(
+		     internal_volume->io_handle->full_volume_encryption_key,
+		     0,
+		     32  ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear full volume encryption key.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	if( memory_copy(
 	     internal_volume->io_handle->full_volume_encryption_key,
 	     full_volume_encryption_key,
@@ -2119,19 +2093,39 @@ int libbde_volume_set_keys(
 	}
 	internal_volume->io_handle->full_volume_encryption_key_size = full_volume_encryption_key_size;
 
-	if( memory_copy(
-	     internal_volume->io_handle->tweak_key,
-	     tweak_key,
-	     tweak_key_size ) == NULL )
+	if( tweak_key_size < 32 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy tweak key.",
-		 function );
+		if( memory_set(
+		     internal_volume->io_handle->tweak_key,
+		     0,
+		     32  ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear tweak key.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+	}
+	if( tweak_key_size != 0 )
+	{
+		if( memory_copy(
+		     internal_volume->io_handle->tweak_key,
+		     tweak_key,
+		     tweak_key_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy tweak key.",
+			 function );
+
+			goto on_error;
+		}
 	}
 	internal_volume->io_handle->tweak_key_size = tweak_key_size;
 
