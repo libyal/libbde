@@ -9,12 +9,12 @@
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -1300,7 +1300,7 @@ ssize_t libbde_metadata_read_entries(
 
 					aes_ccm_encrypted_key = NULL;
 				}
-				if( ( metadata_entry->type == 0x000b ) )
+				if( metadata_entry->type == 0x000b )
 				{
 /* TODO store key somewhere */
 				}
@@ -1739,7 +1739,7 @@ int libbde_metadata_get_volume_master_key(
 			 0 );
 		}
 #endif
-		/* TODO improve this check */
+/* TODO improve this check */
 		byte_stream_copy_to_uint16_little_endian(
 		 &( unencrypted_data[ 16 ] ),
 		 data_size );
@@ -2919,7 +2919,6 @@ int libbde_metadata_get_full_volume_encryption_key(
 					goto on_error;
 				}
 			}
-/* TODO test external provided keys */
 			result = 1;
 		}
 	}

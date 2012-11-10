@@ -38,7 +38,7 @@ bdeinfo_SOURCES = \
 	bdetools_libuna.h \
 	info_handle.c info_handle.h
 
-bdeinfo_LDADD  = \
+bdeinfo_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
@@ -66,7 +66,7 @@ bdemount_SOURCES = \
 	bdetools_libcsystem.h \
 	mount_handle.c mount_handle.h
 
-bdemount_LDADD  = \
+bdemount_LDADD = \
 	@LIBFUSE_LIBADD@ \
 	@LIBCSYSTEM_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
@@ -89,8 +89,8 @@ distclean: clean
 	/bin/rm -f Makefile
 
 splint:
-	@echo "Running splint on bdeinfo ..." 
-	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(bdeinfo_SOURCES) 
-	@echo "Running splint on bdemount ..." 
-	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(bdemount_SOURCES) 
+	@echo "Running splint on bdeinfo ..."
+	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(bdeinfo_SOURCES)
+	@echo "Running splint on bdemount ..."
+	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(bdemount_SOURCES)
 

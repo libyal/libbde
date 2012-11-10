@@ -1,4 +1,4 @@
-.Dd November 9, 2012
+.Dd November 10, 2012
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -68,6 +68,8 @@ Volume functions
 .Fn libbde_volume_read_random "libbde_volume_t *volume, void *buffer, size_t buffer_size, off64_t offset, libbde_error_t **error"
 .Ft off64_t
 .Fn libbde_volume_seek_offset "libbde_volume_t *volume, off64_t offset, int whence, libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_get_offset "libbde_volume_t *volume, off64_t *offset, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_get_size "libbde_volume_t *volume, size64_t *size, libbde_error_t **error"
 .Ft int

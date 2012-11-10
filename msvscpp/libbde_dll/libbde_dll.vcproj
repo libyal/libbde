@@ -310,6 +310,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_libcdata.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_libcerror.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_libclocale.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_libcnotify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_libcstring.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_libfcache.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_libfdata.h"
 				>
 			</File>

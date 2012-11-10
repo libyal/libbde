@@ -9,12 +9,12 @@
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -58,7 +58,7 @@ struct libbde_internal_volume
 	 */
 	libbde_metadata_t *tertiary_metadata;
 
-	/* The metadata stored in a startup key file
+	/* The metadata volumed in a startup key file
 	 */
 	libbde_metadata_t *external_key_metadata;
 
@@ -173,6 +173,12 @@ off64_t libbde_volume_seek_offset(
          off64_t offset,
          int whence,
          libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_get_offset(
+     libbde_volume_t *volume,
+     off64_t *offset,
+     libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_get_size(
