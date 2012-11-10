@@ -1,20 +1,23 @@
 TODO
+* add support for passing key directly to library
 * update msvscpp files
 * add handling of BDE volumes with corrupt metadata, e.g. file header
 
 * update manuals
 * move free metadata to volume_close()
+* check metadata number_of_volume_header_sectors ?
+* debug print more volume header info
+
 * libcaes
   - WinXP no AES support ?
   - WINAPI initialize provider only once - where to stick the init functions ?
   - wincrypt and EVP - make sure to pass block sized blocks ?
-* check metadata number_of_volume_header_sectors ?
-* debug print more volume header info
 
 Optimizations
 * pass values 32-bit to aes
 
 Library
+* add support for passing key directly to library
 * add support for smart card + pin?
 * add support for TPM ?
 
@@ -54,20 +57,23 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20121108
+* updated dependecies
+
 20120915
 * added -X option to bdemount to pass sub system options
-* update ewfmount man page
+* updated bdemount man page
 
 20120912
-* applied updates
+* updated dependecies
 * changes for libcdata update
 
 20120807
-* applied updates
+* updated dependecies
 
 20120721
 * added libcsplit
-* applied updates
+* updated dependecies
 * updated msvscpp files
 * switched library order in tools
 * fixed issue in spec file
@@ -87,7 +93,7 @@ Validate test cases:
 * worked on msvscpp files
 
 20120509
-* applied updates
+* updated dependecies
 * added bdemount destroy function
 * remove + 1 from volume size calculation, does not add up for
   volume-only storage media
