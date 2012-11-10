@@ -119,6 +119,26 @@ struct libbde_io_handle
 	 */
 	uint8_t recovery_password_is_set;
 
+	/* External provided full volume encryption key
+	 */
+	uint8_t full_volume_encryption_key[ 32 ];
+
+	/* Size of the external provided full volume encryption key
+	 */
+	size_t full_volume_encryption_key_size;
+
+	/* External provided tweak key
+	 */
+	uint8_t tweak_key[ 32 ];
+
+	/* Size of the tweak key
+	 */
+	size_t tweak_key_size;
+
+	/* Value to indicate the keys are set
+	 */
+	uint8_t keys_are_set;
+
 	/* Value to indicate if abort was signalled
 	 */
 	int abort;

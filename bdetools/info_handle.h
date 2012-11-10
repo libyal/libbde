@@ -72,6 +72,11 @@ int info_handle_signal_abort(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
+int info_handle_set_keys(
+     info_handle_t *info_handle,
+     const libcstring_system_character_t *string,
+     libcerror_error_t **error );
+
 int info_handle_set_password(
      info_handle_t *info_handle,
      const libcstring_system_character_t *string,

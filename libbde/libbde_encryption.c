@@ -268,8 +268,10 @@ int libbde_encryption_free(
  */
 int libbde_encryption_set_keys(
      libbde_encryption_context_t *context,
-     uint8_t full_volume_encryption_key[ 32 ],
-     uint8_t tweak_key[ 32 ],
+     const uint8_t *full_volume_encryption_key,
+     size_t full_volume_encryption_key_size,
+     const uint8_t *tweak_key,
+     size_t tweak_key_size,
      libcerror_error_t **error )
 {
 	static char *function = "libbde_encryption_set_keys";
@@ -286,16 +288,84 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
+	if( full_volume_encryption_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid full volume encryption key.",
+		 function );
+
+		return( -1 );
+	}
+	if( full_volume_encryption_key_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid full volume encryption key size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid tweak key.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid tweak key size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
 	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER ) )
 	{
-		key_bit_size = 128;
+		key_bit_size = 16;
 	}
 	else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		key_bit_size = 256;
+		key_bit_size = 32;
 	}
+	if( full_volume_encryption_key_size < key_bit_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid full volume encryption key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key_size < key_bit_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid tweak key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	key_bit_size *= 8;
+
 	/* The volume master key is always 256-bit in size
 	 */
 	if( libcaes_crypt_set_key(

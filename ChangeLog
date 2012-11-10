@@ -1,5 +1,8 @@
 TODO
 * add support for passing key directly to library
+  - test if keys are valid ?
+  - what about issue with key bit size
+* bdetools: add support for passing the keys as base16 ?
 * update msvscpp files
 * add handling of BDE volumes with corrupt metadata, e.g. file header
 

@@ -31,9 +31,11 @@ bdeinfo_SOURCES = \
 	bdetools_libcerror.h \
 	bdetools_libclocale.h \
 	bdetools_libcnotify.h \
+	bdetools_libcsplit.h \
 	bdetools_libcstring.h \
 	bdetools_libcsystem.h \
 	bdetools_libfdatetime.h \
+	bdetools_libuna.h \
 	info_handle.c info_handle.h
 
 bdeinfo_LDADD  = \
@@ -59,6 +61,7 @@ bdemount_SOURCES = \
 	bdetools_libcerror.h \
 	bdetools_libclocale.h \
 	bdetools_libcnotify.h \
+	bdetools_libcsplit.h \
 	bdetools_libcstring.h \
 	bdetools_libcsystem.h \
 	mount_handle.c mount_handle.h

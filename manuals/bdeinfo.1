@@ -1,4 +1,4 @@
-.Dd September 12, 2012
+.Dd November 8, 2012
 .Dt bdeinfo
 .Os libbde
 .Sh NAME
@@ -6,6 +6,8 @@
 .Nd determines information about a Windows NT BitLocker Drive Encrypted (BDE) volume
 .Sh SYNOPSIS
 .Nm bdeinfo
+.Op Fl k Ar keys
+.Op Fl o Ar offset
 .Op Fl p Ar password
 .Op Fl r Ar password
 .Op Fl s Ar filename
@@ -29,7 +31,11 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl h
 shows this help
-.It Fl p Ar password
+.It Fl k Ar keys
+the full volume encryption key and tweak key formatted in base16 and separated by a : character e.g. FKEV:TWEAK
+.It Fl o Ar offset
+specify the volume offset
+.It fl p Ar password
 specify the password
 .It Fl r Ar password
 specify the recovery password
@@ -47,7 +53,7 @@ None
 None
 .Sh EXAMPLES
 .Bd -literal
-# bdeinfo /dev/sda1
+# bdeinfo -p Password /dev/sda1
 bdeinfo 20110821
 
 BitLocker Drive Encryption information:

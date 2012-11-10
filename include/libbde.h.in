@@ -324,6 +324,19 @@ int libbde_volume_get_encryption_method(
      uint32_t *encryption_method,
      libbde_error_t **error );
 
+/* Sets the keys
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_set_keys(
+     libbde_volume_t *volume,
+     const uint8_t *full_volume_encryption_key,
+     size_t full_volume_encryption_key_size,
+     const uint8_t *tweak_key,
+     size_t tweak_key_size,
+     libbde_error_t **error );
+
 /* Sets an UTF-8 formatted password
  * This function needs to be used before one of the open functions
  * Returns 1 if successful, 0 if password is invalid or -1 on error
