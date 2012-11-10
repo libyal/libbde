@@ -151,10 +151,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\libfdata\libfdata_array_type.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_block.c"
 				>
 			</File>
@@ -217,10 +213,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\libfdata\libfdata_array_type.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_block.h"
 				>
 			</File>
@@ -258,6 +250,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_libbfio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfdata\libfdata_libcdata.h"
 				>
 			</File>
 			<File

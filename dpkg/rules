@@ -38,6 +38,14 @@ install_libbde_tools:
 	install -p -m755 debian/tmp/usr/bin/* debian/libbde-tools/usr/bin
 	install -p -m755 debian/tmp/usr/share/man/man1/* debian/libbde-tools/usr/share/man/man1
 
+install_libbde_python:
+	# Set up libbde-python package directories and files
+	mkdir -p debian/libbde-python/$(shell cd debian/tmp && ls -d usr/lib/python?.?/dist-packages/)
+	install -p -m775 debian/tmp/usr/lib/python?.?/dist-packages/pybde.* debian/libbde-python/usr/lib/python?.?/dist-packages/
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-python
+
 override_dh_auto_test:
 
 override_dh_installinit: install_libbde install_libbde_dev install_libbde_tools

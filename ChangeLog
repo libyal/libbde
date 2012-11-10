@@ -61,8 +61,15 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20121110
+* worked on Python-bindings (pybde)
+
+20121109
+* worked on set keys
+
 20121108
-* updated dependecies
+* updated dependencies
+* worked on set keys
 
 20120915
 * added -X option to bdemount to pass sub system options

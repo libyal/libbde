@@ -23,6 +23,7 @@ SUBDIRS = \
 	libbde \
 	libcsystem \
 	bdetools \
+	pybde \
 	po \
 	manuals \
 	msvscpp
@@ -128,5 +129,6 @@ splint:
 	(cd $(srcdir)/libbde && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libcsystem && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/bdetools && $(MAKE) splint $(AM_MAKEFLAGS))
+	(cd $(srcdir)/pybde && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) splint $(AM_MAKEFLAGS))
 

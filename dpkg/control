@@ -27,3 +27,10 @@ Depends: libbde (= ${Source-Version}), ${shlibs:Depends}
 Description: Several tools for reading BitLocker Drive Encrypted volumes
  Several tools for reading BitLocker Drive Encrypted volumes.
 
+Package: libbde-python
+Section: python
+Architecture: any
+Depends: libbde (= ${Source-Version}), ${shlibs:Depends}, ${python:Depends}
+Description: Python bindings for libbde
+ Python bindings for libbde.
+

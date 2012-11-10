@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20121108],
+ [20121110],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -128,6 +128,9 @@ AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT
 dnl Check if libbde should be build with debug output
 AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT
 
+dnl Check if libevt python bindings (pybde) should be build
+AX_PYTHON_CHECK_ENABLE
+
 dnl Check if DLL support is needed in bdetools
 AS_IF(
  [test "x$enable_shared" = xyes && test "x$ac_cv_enable_static_executables" = xno],
@@ -190,6 +193,7 @@ AC_CONFIG_FILES([libcaes/Makefile])
 AC_CONFIG_FILES([libbde/Makefile])
 AC_CONFIG_FILES([libcsystem/Makefile])
 AC_CONFIG_FILES([bdetools/Makefile])
+AC_CONFIG_FILES([pybde/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([po/Makevars])
 AC_CONFIG_FILES([manuals/Makefile])
@@ -240,6 +244,7 @@ Building:
 Features:
    Wide character type support:              $ac_cv_enable_wide_character_type
    bdetools are build as static executables: $ac_cv_enable_static_executables
+   Python (pybde) support:                   $ac_cv_enable_python
    Verbose output:                           $ac_cv_enable_verbose_output
    Debug output:                             $ac_cv_enable_debug_output
 ]);

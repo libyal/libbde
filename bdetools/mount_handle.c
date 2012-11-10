@@ -1,4 +1,4 @@
-/* 
+/*
  * Mount handle
  *
  * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
@@ -9,12 +9,12 @@
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -537,7 +537,7 @@ int mount_handle_set_keys(
 		if( libuna_base16_stream_copy_to_byte_stream(
 		     (uint8_t *) string_segment,
 		     string_segment_size - 1,
-		     &( key_data[ 31 ] ),
+		     &( key_data[ 32 ] ),
 		     32,
 		     base16_variant,
 		     0,
@@ -565,7 +565,7 @@ int mount_handle_set_keys(
 	     mount_handle->input_volume,
 	     key_data,
 	     full_volume_encryption_key_size,
-	     &( key_data[ 31 ] ),
+	     &( key_data[ 32 ] ),
 	     tweak_key_size,
 	     error ) != 1 )
 	{
