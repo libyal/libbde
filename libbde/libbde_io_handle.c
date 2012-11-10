@@ -188,6 +188,34 @@ int libbde_io_handle_free(
 
 			result = -1;
 		}
+		if( memory_set(
+		     ( *io_handle )->full_volume_encryption_key,
+		     0,
+		     32 ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear full volume encryption key.",
+			 function );
+
+			result = -1;
+		}
+		if( memory_set(
+		     ( *io_handle )->tweak_key,
+		     0,
+		     32 ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear tweak key.",
+			 function );
+
+			result = -1;
+		}
 		memory_free(
 		 *io_handle );
 
@@ -681,14 +709,14 @@ int libbde_io_handle_read_volume_header(
 				  guid,
 				  (uint16_t *) guid_string,
 				  48,
-				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
+				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 				  error );
 #else
 			result = libfguid_identifier_copy_to_utf8_string(
 				  guid,
 				  (uint8_t *) guid_string,
 				  48,
-				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
+				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 				  error );
 #endif
 			if( result != 1 )
@@ -765,14 +793,14 @@ int libbde_io_handle_read_volume_header(
 				  guid,
 				  (uint16_t *) guid_string,
 				  48,
-				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
+				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 				  error );
 #else
 			result = libfguid_identifier_copy_to_utf8_string(
 				  guid,
 				  (uint8_t *) guid_string,
 				  48,
-				  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
+				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 				  error );
 #endif
 			if( result != 1 )

@@ -72,6 +72,11 @@ int mount_handle_signal_abort(
      mount_handle_t *mount_handle,
      libcerror_error_t **error );
 
+int mount_handle_set_keys(
+     mount_handle_t *mount_handle,
+     const libcstring_system_character_t *string,
+     libcerror_error_t **error );
+
 int mount_handle_set_password(
      mount_handle_t *mount_handle,
      const libcstring_system_character_t *string,

@@ -187,6 +187,15 @@ int libbde_volume_get_encryption_method(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_set_keys(
+     libbde_volume_t *volume,
+     const uint8_t *full_volume_encryption_key,
+     size_t full_volume_encryption_key_size,
+     const uint8_t *tweak_key,
+     size_t tweak_key_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_set_utf8_password(
      libbde_volume_t *volume,
      const uint8_t *utf8_string,

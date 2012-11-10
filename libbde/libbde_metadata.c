@@ -880,14 +880,14 @@ ssize_t libbde_metadata_read_header(
 			  guid,
 			  (uint16_t *) guid_string,
 			  48,
-			  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
+			  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 			  error );
 #else
 		result = libfguid_identifier_copy_to_utf8_string(
 			  guid,
 			  (uint8_t *) guid_string,
 			  48,
-			  LIBFGUID_STRING_FORMAT_USE_LOWER_CASE,
+			  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 			  error );
 #endif
 		if( result != 1 )
