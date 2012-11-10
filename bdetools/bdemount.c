@@ -73,14 +73,17 @@ void usage_fprint(
 	fprintf( stream, "Use bdemount to mount a Windows NT BitLocker Drive Encryption (BDE)\n"
 	                 " volume\n\n" );
 
-	fprintf( stream, "Usage: bdemount [ - o offset ] [ -p password ] [ -r password ]\n"
-	                 "                [ -s filename ] [ -X extended_options ] [ -hvV ]\n"
-	                 "                source mount_point\n\n" );
+	fprintf( stream, "Usage: bdemount [ -k keys ] [ -o offset ] [ -p password ]\n"
+	                 "                [ -r password ] [ -s filename ] [ -X extended_options ]\n"
+	                 "                [ -hvV ] source mount_point\n\n" );
 
 	fprintf( stream, "\tsource:      the source file or device\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
 	fprintf( stream, "\t-h:          shows this help\n" );
+	fprintf( stream, "\t-k:          the full volume encryption key and tweak key\n"
+	                 "\t             formatted in base16 and separated by a : character\n"
+	                 "\t             e.g. FKEV:TWEAK\n" );
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
@@ -661,6 +664,7 @@ int main( int argc, char * const argv[] )
 	libbde_error_t *error                                      = NULL;
 	libcstring_system_character_t *mount_point                 = NULL;
 	libcstring_system_character_t *option_extended_options     = NULL;
+	libcstring_system_character_t *option_keys                 = NULL;
 	libcstring_system_character_t *option_password             = NULL;
 	libcstring_system_character_t *option_recovery_password    = NULL;
 	libcstring_system_character_t *option_startup_key_filename = NULL;
@@ -712,7 +716,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "ho:p:r:s:vVX:" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _LIBCSTRING_SYSTEM_STRING( "hk:o:p:r:s:vVX:" ) ) ) != (libcstring_system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -733,6 +737,11 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (libcstring_system_integer_t) 'k':
+				option_keys = optarg;
+
+				break;
 
 			case (libcstring_system_integer_t) 'o':
 				option_volume_offset = optarg;
@@ -814,6 +823,20 @@ int main( int argc, char * const argv[] )
 		 "Unable to initialize mount handle.\n" );
 
 		goto on_error;
+	}
+	if( option_keys != NULL )
+	{
+		if( mount_handle_set_keys(
+		     bdemount_mount_handle,
+		     option_keys,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set keys.\n" );
+
+			goto on_error;
+		}
 	}
 	if( option_password != NULL )
 	{

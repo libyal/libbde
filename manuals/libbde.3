@@ -1,4 +1,4 @@
-.Dd September 12, 2012
+.Dd November 8, 2012
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -72,6 +72,8 @@ Volume functions
 .Fn libbde_volume_get_size "libbde_volume_t *volume, size64_t *size, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_get_encryption_method "libbde_volume_t *volume, uint32_t *encryption_method, libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_set_keys "libbde_volume_t *volume, const uint8_t *full_volume_encryption_key, size_t full_volume_encryption_key_size, const uint8_t *tweak_key, size_t tweak_key_size, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_set_utf8_password "libbde_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libbde_error_t **error"
 .Ft int

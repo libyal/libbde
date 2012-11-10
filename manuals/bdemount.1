@@ -1,4 +1,4 @@
-.Dd September 15, 2012
+.Dd November 8, 2012
 .Dt bdemount
 .Os libbde
 .Sh NAME
@@ -6,6 +6,7 @@
 .Nd mounts a BitLocker Drive Encryption (BDE) encrypted volume
 .Sh SYNOPSIS
 .Nm bdemount
+.Op Fl k Ar keys
 .Op Fl o Ar offset
 .Op Fl p Ar password
 .Op Fl r Ar password
@@ -31,6 +32,8 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl h
 shows this help
+.It Fl k Ar keys
+the full volume encryption key and tweak key formatted in base16 and separated by a : character e.g. FKEV:TWEAK
 .It Fl o Ar offset
 specify the volume offset
 .It Fl p Ar password
@@ -53,7 +56,7 @@ None
 None
 .Sh EXAMPLES
 .Bd -literal
-# bdemount /dev/sda1
+# bdemount -p Password /dev/sda1
 bdemount 20110821
 
 .Ed
