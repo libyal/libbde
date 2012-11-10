@@ -151,6 +151,7 @@ int libbde_metadata_get_volume_master_key(
 
 int libbde_metadata_get_full_volume_encryption_key(
      libbde_metadata_t *metadata,
+     libbde_io_handle_t *io_handle,
      const uint8_t *volume_master_key,
      size_t volume_master_key_size,
      uint8_t *full_volume_encryption_key,
