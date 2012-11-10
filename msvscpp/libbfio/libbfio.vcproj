@@ -179,10 +179,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libbfio\libbfio_offset_list.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libbfio\libbfio_pool.c"
 				>
 			</File>
@@ -262,10 +258,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libbfio\libbfio_memory_range.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libbfio\libbfio_offset_list.h"
 				>
 			</File>
 			<File

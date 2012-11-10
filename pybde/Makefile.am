@@ -1,0 +1,50 @@
+if HAVE_PYTHON
+AM_CFLAGS = \
+	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/common \
+	@LIBCSTRING_CPPFLAGS@ \
+	@LIBCERROR_CPPFLAGS@ \
+	@LIBCDATA_CPPFLAGS@ \
+	@LIBCLOCALE_CPPFLAGS@ \
+	@LIBCSPLIT_CPPFLAGS@ \
+	@LIBUNA_CPPFLAGS@ \
+	@LIBCFILE_CPPFLAGS@ \
+	@LIBCPATH_CPPFLAGS@ \
+	@LIBBFIO_CPPFLAGS@
+
+pyexec_LTLIBRARIES = pybde.la
+
+pybde_la_SOURCES = \
+	pybde.c pybde.h \
+	pybde_file_object_io_handle.c pybde_file_object_io_handle.h \
+	pybde_libbfio.h \
+	pybde_libcerror.h \
+	pybde_libclocale.h \
+	pybde_libcstring.h \
+	pybde_libbde.h \
+	pybde_python.h \
+	pybde_volume.c pybde_volume.h
+
+pybde_la_LIBADD = \
+	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCDATA_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBBFIO_LIBADD@
+
+pybde_la_CPPFLAGS = $(PYTHON_CPPFLAGS)
+pybde_la_LDFLAGS  = -module -avoid-version $(PYTHON_LDFLAGS)
+
+endif
+
+MAINTAINERCLEANFILES = \
+	Makefile.in
+
+distclean: clean
+	/bin/rm -f Makefile
+

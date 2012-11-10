@@ -19,6 +19,7 @@ EXTRA_DIST = \
 	libfvalue/libfvalue.vcproj \
 	libhmac/libhmac.vcproj \
 	libuna/libuna.vcproj \
+	pybde/pybde.vcproj \
 	libbde.sln
 
 MAINTAINERCLEANFILES = \
