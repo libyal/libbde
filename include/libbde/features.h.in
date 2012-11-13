@@ -25,7 +25,7 @@
 /* The libbde type support features
  */
 #if @HAVE_WIDE_CHARACTER_TYPE@ || defined( HAVE_WIDE_CHARACTER_TYPE )
-#define LIBBDE_HAVE_WIDE_CHARACTER_TYPE	1
+#define LIBBDE_HAVE_WIDE_CHARACTER_TYPE		1
 
 #endif
 

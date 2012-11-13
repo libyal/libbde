@@ -1,5 +1,5 @@
 /*
- * Mounts a Windows NT BitLocker Drive Encryption (BDE) encrypted volume
+ * Mounts a BitLocker Drive Encrypted (BDE) volume
  *
  * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -70,8 +70,7 @@ void usage_fprint(
 	{
 		return;
 	}
-	fprintf( stream, "Use bdemount to mount a Windows NT BitLocker Drive Encryption (BDE)\n"
-	                 " volume\n\n" );
+	fprintf( stream, "Use bdemount to mount a BitLocker Drive Encrypted (BDE) volume\n\n" );
 
 	fprintf( stream, "Usage: bdemount [ -k keys ] [ -o offset ] [ -p password ]\n"
 	                 "                [ -r password ] [ -s filename ] [ -X extended_options ]\n"

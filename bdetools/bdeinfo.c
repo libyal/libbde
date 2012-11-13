@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from a BitLocker Drive Encryption (BDE) encrypted volume
+ * Shows information obtained from a BitLocker Drive Encrypted (BDE) volume
  *
  * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -54,8 +54,8 @@ void usage_fprint(
 	{
 		return;
 	}
-	fprintf( stream, "Use bdeinfo to determine information about a Windows NT BitLocker\n"
-	                 " Drive Encrypted (BDE) volume\n\n" );
+	fprintf( stream, "Use bdeinfo to determine information about a BitLocker Drive\n"
+	                 " Encrypted (BDE) volume\n\n" );
 
 	fprintf( stream, "Usage: bdeinfo [ -k keys ] [ -o offset ] [ -p password ]\n"
 	                 "               [ -r password ] [ -s filename ] [ -hvV ] source\n\n" );
