@@ -20,7 +20,6 @@
  */
 
 #include <common.h>
-#include <memory.h>
 #include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( HAVE_WINAPI )
@@ -833,7 +832,7 @@ PyObject *pybde_volume_read_buffer(
 
 		return( NULL );
 	}
-	/* Make sure the data fits into a memory buffer
+	/* Make sure the data fits into the memory buffer
 	 */
 	if( read_size > INT_MAX )
 	{
@@ -933,7 +932,7 @@ PyObject *pybde_volume_read_random(
 
 		return( NULL );
 	}
-	/* Make sure the data fits into a memory buffer
+	/* Make sure the data fits into the memory buffer
 	 */
 	if( read_size > INT_MAX )
 	{
@@ -953,7 +952,7 @@ PyObject *pybde_volume_read_random(
 
 		return( NULL );
 	}
-	/* Make sure the data fits into a memory buffer
+	/* Make sure the data fits into the memory buffer
 	 */
 	result_data = PyString_FromStringAndSize(
 	               NULL,
