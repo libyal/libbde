@@ -320,15 +320,11 @@ int main( int argc, char * const argv[] )
 		     option_volume_offset,
 		     &error ) != 1 )
 		{
-			libcnotify_print_error_backtrace(
-			 error );
-			libcerror_error_free(
-			 &error );
-
 			fprintf(
 			 stderr,
-			 "Unsupported volume offset defaulting to: %" PRIi64 ".\n",
-			 bdeinfo_info_handle->volume_offset );
+			 "Unable to set volume offset.\n" );
+
+			goto on_error;
 		}
 	}
 	result = info_handle_open_input(
