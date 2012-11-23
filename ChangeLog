@@ -61,6 +61,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20121123
+* pybde: code clean up
+
 20121110
 * worked on Python-bindings (pybde)
 

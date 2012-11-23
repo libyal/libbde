@@ -72,8 +72,8 @@ int pybde_file_object_io_handle_initialize(
 
 		return( -1 );
 	}
-	*file_object_io_handle = memory_allocate_structure(
-	                          pybde_file_object_io_handle_t );
+	*file_object_io_handle = (pybde_file_object_io_handle_t *) PyMem_Malloc(
+	                                                            sizeof( pybde_file_object_io_handle_t ) );
 
 	if( *file_object_io_handle == NULL )
 	{
@@ -110,7 +110,7 @@ int pybde_file_object_io_handle_initialize(
 on_error:
 	if( *file_object_io_handle != NULL )
 	{
-		memory_free(
+		PyMem_Free(
 		 *file_object_io_handle );
 
 		*file_object_io_handle = NULL;
@@ -227,7 +227,7 @@ int pybde_file_object_io_handle_free(
 		Py_DecRef(
 		 ( *file_object_io_handle )->file_object );
 
-		memory_free(
+		PyMem_Free(
 		 *file_object_io_handle );
 
 		*file_object_io_handle = NULL;
