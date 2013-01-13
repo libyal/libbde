@@ -1,7 +1,7 @@
 /*
  * The libfvalue header wrapper
  *
- * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
