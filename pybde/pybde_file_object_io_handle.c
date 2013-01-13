@@ -1,7 +1,7 @@
 /*
  * Python file object IO handle functions
  *
- * Copyright (c) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -127,7 +127,7 @@ int pybde_file_object_initialize(
      libcerror_error_t **error )
 {
 	pybde_file_object_io_handle_t *file_object_io_handle = NULL;
-	static char *function                                    = "pybde_file_object_initialize";
+	static char *function                                = "pybde_file_object_initialize";
 
 	if( handle == NULL )
 	{

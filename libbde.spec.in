@@ -87,12 +87,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/python*/site-packages/*.so
 
 %changelog
-* Sat Nov 10 2012 Joachim Metz <joachim.metz@gmail.com> 20121110-1
-- Added Python bindings support
-
-* Sun Oct  9 2011 Joachim Metz <joachim.metz@gmail.com> 20111009-1
-- Changes for configure update and README files
-
-* Sun Sep 18 2011 Joachim Metz <joachim.metz@gmail.com> 20110918-1
-- Initial version
+* @SPEC_DATE@ Joachim Metz <joachim.metz@gmail.com> @VERSION@-1
+- Auto-generated
 

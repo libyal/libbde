@@ -4,13 +4,13 @@ TODO
   - what about issue with key bit size
   - info handle (check if tweak_key is not 0 ) when diffuser is specified
 * bdetools: add support for passing the keys as base16 ?
-* update msvscpp files
 * add handling of BDE volumes with corrupt metadata, e.g. file header
 
 * update manuals
 * move free metadata to volume_close()
 * check metadata number_of_volume_header_sectors ?
 * debug print more volume header info
+* add examples
 
 * libcaes
   - WinXP no AES support ?
@@ -38,7 +38,7 @@ Tools:
 * bdeinfo
 * bdeexport
 * bdemount
-  - implement ImDisk version for WINAPI
+  - implement ImDisk/Dokan version for WINAPI
   - implement native MacOS-X version
 
 Format:
@@ -60,6 +60,12 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20130113
+* 2013 update
+* updated depencies
+* updated msvscpp files
+* updated pybde
 
 20121123
 * pybde: code clean up

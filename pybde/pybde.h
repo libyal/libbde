@@ -1,7 +1,7 @@
 /*
  * Python bindings for libbde (pybde)
  *
- * Copyright (c) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -36,15 +36,12 @@ extern "C" {
 PyObject *pybde_get_version(
            PyObject *self );
 
-PyObject *pybde_get_access_flags_read(
-           PyObject *self );
-
 PyObject *pybde_check_volume_signature(
            PyObject *self,
            PyObject *arguments,
            PyObject *keywords );
 
-PyObject *pybde_set_notify_values(
+PyObject *pybde_check_volume_signature_file_object(
            PyObject *self,
            PyObject *arguments,
            PyObject *keywords );

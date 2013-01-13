@@ -1,4 +1,4 @@
-EXTRA_DIST = \
+MSVSCPP_FILES = \
 	bdeinfo/bdeinfo.vcproj \
 	libbde_dll/libbde_dll.vcproj \
 	libbfio/libbfio.vcproj \
@@ -21,6 +21,18 @@ EXTRA_DIST = \
 	libuna/libuna.vcproj \
 	pybde/pybde.vcproj \
 	libbde.sln
+
+SCRIPT_FILES = \
+	scripts/vs2008_x64.sh \
+	scripts/vs2008_x64_sln.sed \
+	scripts/vs2008_x64_vcproj.sed \
+	scripts/vs2010_x64.sh \
+	scripts/vs2010_x64_sln.sed \
+	scripts/vs2010_x64_vcxproj.sed
+
+EXTRA_DIST = \
+	$(MSVSCPP_FILES) \
+	$(SCRIPT_FILES)
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
