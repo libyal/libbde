@@ -1,7 +1,7 @@
 /*
  * The python header wrapper
  *
- * Copyright (c) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *

@@ -1,7 +1,7 @@
 /*
  * Common output functions for the bdetools
  *
- * Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -50,7 +50,7 @@ void bdeoutput_copyright_fprint(
 	}
 	fprintf(
 	 stream,
-	 "Copyright (C) 2011-2012, Joachim Metz <joachim.metz@gmail.com>\n"
+	 "Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>\n"
 	 "This is free software; see the source for copying conditions. There is NO\n"
 	 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n" );
 }

@@ -1,7 +1,7 @@
 /*
  * Python object definition of the libbde volume
  *
- * Copyright (c) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -49,9 +49,14 @@ extern PyMethodDef pybde_volume_object_methods[];
 extern PyTypeObject pybde_volume_type_object;
 
 PyObject *pybde_volume_new(
-           PyObject *self );
+           void );
 
 PyObject *pybde_volume_new_open(
+           PyObject *self,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pybde_volume_new_open_file_object(
            PyObject *self,
            PyObject *arguments,
            PyObject *keywords );

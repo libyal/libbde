@@ -1,7 +1,7 @@
 /*
  * Python object definition of the libbde volume
  *
- * Copyright (c) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -59,14 +59,14 @@ PyMethodDef pybde_volume_object_methods[] = {
 	{ "open",
 	  (PyCFunction) pybde_volume_open,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "open(filename, access_flags) -> None\n"
+	  "open(filename, mode='r') -> None\n"
 	  "\n"
 	  "Opens a volume" },
 
 	{ "open_file_object",
 	  (PyCFunction) pybde_volume_open_file_object,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "open(file_object, access_flags) -> None\n"
+	  "open(file_object, mode='r') -> None\n"
 	  "\n"
 	  "Opens a volume using a file-like object" },
 
@@ -268,14 +268,14 @@ PyTypeObject pybde_volume_type_object = {
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_new(
-           PyObject *self )
+           void )
 {
 	pybde_volume_t *pybde_volume = NULL;
-	static char *function                = "pybde_volume_new";
+	static char *function        = "pybde_volume_new";
 
 	pybde_volume = PyObject_New(
-	                    struct pybde_volume,
-	                    &pybde_volume_type_object );
+	                struct pybde_volume,
+	                &pybde_volume_type_object );
 
 	if( pybde_volume == NULL )
 	{
@@ -284,7 +284,7 @@ PyObject *pybde_volume_new(
 		 "%s: unable to initialize volume.",
 		 function );
 
-		return( NULL );
+		goto on_error;
 	}
 	if( pybde_volume_init(
 	     pybde_volume ) != 0 )
@@ -317,10 +317,29 @@ PyObject *pybde_volume_new_open(
 {
 	PyObject *pybde_volume = NULL;
 
-	pybde_volume = pybde_volume_new(
-	                    self );
+	pybde_volume = pybde_volume_new();
 
 	pybde_volume_open(
+	 (pybde_volume_t *) pybde_volume,
+	 arguments,
+	 keywords );
+
+	return( pybde_volume );
+}
+
+/* Creates a new volume object and opens it
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_new_open_file_object(
+           PyObject *self,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *pybde_volume = NULL;
+
+	pybde_volume = pybde_volume_new();
+
+	pybde_volume_open_file_object(
 	 (pybde_volume_t *) pybde_volume,
 	 arguments,
 	 keywords );
@@ -536,9 +555,9 @@ PyObject *pybde_volume_open(
 
 	libcerror_error_t *error    = NULL;
 	char *filename              = NULL;
-	static char *keyword_list[] = { "filename", "access_flags", NULL };
+	char *mode                  = NULL;
+	static char *keyword_list[] = { "filename", "mode", NULL };
 	static char *function       = "pybde_volume_open";
-	int access_flags            = 0;
 	int result                  = 0;
 
 	if( pybde_volume == NULL )
@@ -553,25 +572,30 @@ PyObject *pybde_volume_open(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "s|i",
+	     "s|s",
 	     keyword_list,
 	     &filename,
-	     &access_flags ) == 0 )
+	     &mode ) == 0 )
         {
                 return( NULL );
         }
-	/* Default to read-only if no access flags were provided
-	 */
-	if( access_flags == 0 )
+	if( ( mode != NULL )
+	 && ( mode[ 0 ] != 'r' ) )
 	{
-		access_flags = libbde_get_access_flags_read();
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: unsupported mode: %s.",
+		 function,
+		 mode );
+
+		return( NULL );
 	}
 	Py_BEGIN_ALLOW_THREADS
 
 	result = libbde_volume_open(
 	          pybde_volume->volume,
                   filename,
-                  access_flags,
+                  LIBBDE_OPEN_READ,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -620,9 +644,9 @@ PyObject *pybde_volume_open_file_object(
 	PyObject *file_object            = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
 	libcerror_error_t *error         = NULL;
-	static char *keyword_list[]      = { "file_object", "access_flags", NULL };
+	char *mode                       = NULL;
+	static char *keyword_list[]      = { "file_object", "mode", NULL };
 	static char *function            = "pybde_volume_open_file_object";
-	int access_flags                 = 0;
 	int result                       = 0;
 
 	if( pybde_volume == NULL )
@@ -637,18 +661,23 @@ PyObject *pybde_volume_open_file_object(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "O|i",
+	     "O|s",
 	     keyword_list,
 	     &file_object,
-	     &access_flags ) == 0 )
+	     &mode ) == 0 )
         {
                 return( NULL );
         }
-	/* Default to read-only if no access flags were provided
-	 */
-	if( access_flags == 0 )
+	if( ( mode != NULL )
+	 && ( mode[ 0 ] != 'r' ) )
 	{
-		access_flags = libbde_get_access_flags_read();
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: unsupported mode: %s.",
+		 function,
+		 mode );
+
+		return( NULL );
 	}
 	if( pybde_file_object_initialize(
 	     &file_io_handle,
@@ -683,7 +712,7 @@ PyObject *pybde_volume_open_file_object(
 	result = libbde_volume_open_file_io_handle(
 	          pybde_volume->volume,
                   file_io_handle,
-                  access_flags,
+                  LIBBDE_OPEN_READ,
 	          &error );
 
 	Py_END_ALLOW_THREADS

@@ -1,7 +1,7 @@
 /*
  * Python bindings module for libbde (pybde)
  *
- * Copyright (c) 2011-2012, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -30,8 +30,16 @@
 #include "pybde_libcerror.h"
 #include "pybde_libcstring.h"
 #include "pybde_libbde.h"
+#include "pybde_file_object_io_handle.h"
 #include "pybde_python.h"
 #include "pybde_volume.h"
+
+#if !defined( LIBBDE_HAVE_BFIO )
+LIBBDE_EXTERN \
+int libbde_check_volume_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libbde_error_t **error );
+#endif
 
 /* The pybde module methods
  */
@@ -39,22 +47,37 @@ PyMethodDef pybde_module_methods[] = {
 	{ "get_version",
 	  (PyCFunction) pybde_get_version,
 	  METH_NOARGS,
+	  "get_version() -> String\n"
+	  "\n"
 	  "Retrieves the version" },
-
-	{ "get_access_flags_read",
-	  (PyCFunction) pybde_get_access_flags_read,
-	  METH_NOARGS,
-	  "Retrieves the read access flags" },
 
 	{ "check_volume_signature",
 	  (PyCFunction) pybde_check_volume_signature,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "Checks if a volume has a VSS volume signature" },
+	  "check_volume_signature(filename) -> Boolean\n"
+	  "\n"
+	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature" },
+
+	{ "check_volume_signature_file_object",
+	  (PyCFunction) pybde_check_volume_signature_file_object,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "check_volume_signature(file_object) -> Boolean\n"
+	  "\n"
+	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object" },
 
 	{ "open",
 	  (PyCFunction) pybde_volume_new_open,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "Creates a new volume and opens it" },
+	  "open(filename, mode='r') -> Object\n"
+	  "\n"
+	  "Opens a volume" },
+
+	{ "open_file_object",
+	  (PyCFunction) pybde_volume_new_open_file_object,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "open(file_object, mode='r') -> Object\n"
+	  "\n"
+	  "Opens a volume using a file-like object" },
 
 	/* Sentinel */
 	{ NULL, NULL, 0, NULL }
@@ -70,7 +93,11 @@ PyObject *pybde_get_version(
 	const char *version_string   = NULL;
 	size_t version_string_length = 0;
 
+	Py_BEGIN_ALLOW_THREADS
+
 	version_string = libbde_get_version();
+
+	Py_END_ALLOW_THREADS
 
 	version_string_length = libcstring_narrow_string_length(
 	                         version_string );
@@ -85,17 +112,7 @@ PyObject *pybde_get_version(
 	         errors ) );
 }
 
-/* Retrieves the pybde/libbde read access flags
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_get_access_flags_read(
-           PyObject *self )
-{
-	return( PyInt_FromLong(
-	         (long) libbde_get_access_flags_read() ) );
-}
-
-/* Checks if the volume has a a VSS volume signature
+/* Checks if the volume has a BitLocker Drive Encryption (BDE) volume signature
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_check_volume_signature(
@@ -120,9 +137,13 @@ PyObject *pybde_check_volume_signature(
 	{
 		return( NULL );
 	}
+	Py_BEGIN_ALLOW_THREADS
+
 	result = libbde_check_volume_signature(
 	          filename,
 	          &error );
+
+	Py_END_ALLOW_THREADS
 
 	if( result == -1 )
 	{
@@ -154,6 +175,136 @@ PyObject *pybde_check_volume_signature(
 		return( Py_True );
 	}
 	return( Py_False );
+}
+
+/* Checks if the volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_check_volume_signature_file_object(
+           PyObject *self,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	char error_string[ PYBDE_ERROR_STRING_SIZE ];
+
+	libcerror_error_t *error         = NULL;
+	libbfio_handle_t *file_io_handle = NULL;
+	PyObject *file_object            = NULL;
+	static char *function            = "pybde_check_volume_signature_file_object";
+	static char *keyword_list[]      = { "file_object", NULL };
+	int result                       = 0;
+
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "|O",
+	     keyword_list,
+	     &file_object ) == 0 )
+	{
+		return( NULL );
+	}
+	if( pybde_file_object_initialize(
+	     &file_io_handle,
+	     file_object,
+	     &error ) != 1 )
+	{
+		if( libcerror_error_backtrace_sprint(
+		     error,
+		     error_string,
+		     PYBDE_ERROR_STRING_SIZE ) == -1 )
+                {
+			PyErr_Format(
+			 PyExc_MemoryError,
+			 "%s: unable to initialize file IO handle.",
+			 function );
+		}
+		else
+		{
+			PyErr_Format(
+			 PyExc_MemoryError,
+			 "%s: unable to initialize file IO handle.\n%s",
+			 function,
+			 error_string );
+		}
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_check_volume_signature_file_io_handle(
+	          file_io_handle,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		if( libcerror_error_backtrace_sprint(
+		     error,
+		     error_string,
+		     PYBDE_ERROR_STRING_SIZE ) == -1 )
+                {
+			PyErr_Format(
+			 PyExc_IOError,
+			 "%s: unable to check volume signature.",
+			 function );
+		}
+		else
+		{
+			PyErr_Format(
+			 PyExc_IOError,
+			 "%s: unable to check volume signature.\n%s",
+			 function,
+			 error_string );
+		}
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	if( libbfio_handle_free(
+	     &file_io_handle,
+	     &error ) != 1 )
+	{
+		if( libcerror_error_backtrace_sprint(
+		     error,
+		     error_string,
+		     PYBDE_ERROR_STRING_SIZE ) == -1 )
+                {
+			PyErr_Format(
+			 PyExc_MemoryError,
+			 "%s: unable to free file IO handle.",
+			 function );
+		}
+		else
+		{
+			PyErr_Format(
+			 PyExc_MemoryError,
+			 "%s: unable to free file IO handle.\n%s",
+			 function,
+			 error_string );
+		}
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	if( result != 0 )
+	{
+		return( Py_True );
+	}
+	return( Py_False );
+
+on_error:
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
+		 NULL );
+	}
+	return( NULL );
 }
 
 /* Declarations for DLL import/export
