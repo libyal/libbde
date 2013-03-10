@@ -100,7 +100,7 @@ void usage_fprint(
 	fprintf( stream, "\t-s:          specify the file containing the startup key.\n"
 	                 "\t             typically this file has the extension .BEK\n" );
 	fprintf( stream, "\t-v:          verbose output to stderr\n"
-	                 "\t             bdemount will remain running in the foregroud\n" );
+	                 "\t             bdemount will remain running in the foreground\n" );
 	fprintf( stream, "\t-V:          print version\n" );
 	fprintf( stream, "\t-X:          extended options to pass to sub system\n" );
 }
