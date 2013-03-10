@@ -1,4 +1,6 @@
 TODO
+* osx device and size issue
+* bdeinfo: print hostname
 * add support for passing key directly to library
   - test if keys are valid ?
   - what about issue with key bit size
@@ -61,9 +63,13 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20130310
+* updated dependencies
+* added Package Maker files
+
 20130113
 * 2013 update
-* updated depencies
+* update dependencies
 * updated msvscpp files
 * updated pybde
 

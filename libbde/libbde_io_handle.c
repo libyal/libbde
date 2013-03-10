@@ -929,20 +929,24 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_io_handle_read_sector(
-     intptr_t *io_handle,
+     libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,
      libfcache_cache_t *cache,
      int element_index,
+     int element_data_file_index LIBBDE_ATTRIBUTE_UNUSED,
      off64_t element_data_offset,
      size64_t element_data_size LIBBDE_ATTRIBUTE_UNUSED,
+     uint32_t element_data_flags LIBBDE_ATTRIBUTE_UNUSED,
      uint8_t read_flags LIBBDE_ATTRIBUTE_UNUSED,
      libcerror_error_t **error )
 {
 	libbde_sector_data_t *sector_data = NULL;
 	static char *function             = "libbde_io_handle_read_sector";
 
+	LIBBDE_UNREFERENCED_PARAMETER( element_data_file_index );
 	LIBBDE_UNREFERENCED_PARAMETER( element_data_size );
+	LIBBDE_UNREFERENCED_PARAMETER( element_data_flags );
 	LIBBDE_UNREFERENCED_PARAMETER( read_flags );
 
 	if( io_handle == NULL )
@@ -959,7 +963,7 @@ int libbde_io_handle_read_sector(
 /* TODO handle virtual sectors, what about different sector sizes? */
 	if( libbde_sector_data_initialize(
 	     &sector_data,
-	     (size_t) ( (libbde_io_handle_t *) io_handle )->bytes_per_sector,
+	     (size_t) io_handle->bytes_per_sector,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -973,10 +977,10 @@ int libbde_io_handle_read_sector(
 	}
 	if( libbde_sector_data_read(
 	     sector_data,
-	     (libbde_io_handle_t *) io_handle,
+	     io_handle,
 	     file_io_handle,
 	     element_data_offset,
-	     ( (libbde_io_handle_t *) io_handle )->encryption_context,
+	     io_handle->encryption_context,
 	     1,
 	     error ) != 1 )
 	{

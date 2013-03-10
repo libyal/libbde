@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20130113],
+ [20130310],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -130,7 +130,7 @@ AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT
 dnl Check if libbde should be build with debug output
 AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT
 
-dnl Check if libevt python bindings (pybde) should be build
+dnl Check if libbde python bindings (pybde) should be build
 AX_PYTHON_CHECK_ENABLE
 
 dnl Check if DLL support is needed in bdetools
@@ -176,6 +176,11 @@ AC_SUBST(
  [SPEC_DATE],
  [`date +"%a %b %e %Y" 2> /dev/null`])
 
+dnl Set the current working directory for PackageMaker files
+AC_SUBST(
+ [PWD],
+ [`pwd`])
+
 dnl Have configure make the Makefiles
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([include/Makefile])
@@ -204,6 +209,7 @@ AC_CONFIG_FILES([pybde/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([po/Makevars])
 AC_CONFIG_FILES([manuals/Makefile])
+AC_CONFIG_FILES([macosx/Makefile])
 AC_CONFIG_FILES([msvscpp/Makefile])
 dnl Have configure make the include files
 AC_CONFIG_FILES([include/libbde.h])
@@ -216,6 +222,13 @@ AC_CONFIG_FILES([common/types.h])
 AC_CONFIG_FILES([dpkg/changelog])
 AC_CONFIG_FILES([dpkg/copyright])
 AC_CONFIG_FILES([libbde/libbde.rc])
+AC_CONFIG_FILES([macosx/libbde.pmdoc/01bin.xml])
+AC_CONFIG_FILES([macosx/libbde.pmdoc/02include.xml])
+AC_CONFIG_FILES([macosx/libbde.pmdoc/03lib.xml])
+AC_CONFIG_FILES([macosx/libbde.pmdoc/04share.xml])
+AC_CONFIG_FILES([macosx/libbde.pmdoc/05python.xml])
+AC_CONFIG_FILES([macosx/libbde.pmdoc/index.xml])
+AC_CONFIG_FILES([macosx/Introduction.rtf])
 AC_CONFIG_FILES([libbde.pc])
 AC_CONFIG_FILES([libbde.spec])
 dnl Have configure write its configuration

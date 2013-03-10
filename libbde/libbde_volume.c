@@ -893,6 +893,7 @@ int libbde_volume_open_read(
 	uint8_t *startup_key_identifier    = NULL;
 	static char *function              = "libbde_volume_open_read";
 	size_t startup_key_identifier_size = 0;
+	int element_index                  = 0;
 	int result                         = 0;
 
 	if( internal_volume == NULL )
@@ -1138,8 +1139,9 @@ int libbde_volume_open_read(
 		     (intptr_t *) internal_volume->io_handle,
 		     NULL,
 		     NULL,
-		     &libbde_io_handle_read_sector,
-		     LIBFDATA_FLAG_IO_HANDLE_NON_MANAGED,
+		     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libbde_io_handle_read_sector,
+		     NULL,
+		     LIBFDATA_FLAG_DATA_HANDLE_NON_MANAGED,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1153,6 +1155,8 @@ int libbde_volume_open_read(
 		}
 		if( libfdata_vector_append_segment(
 		     internal_volume->sectors_vector,
+		     &element_index,
+		     0,
 		     0,
 		     internal_volume->io_handle->volume_size,
 		     0,
@@ -1594,7 +1598,7 @@ ssize_t libbde_volume_read_buffer(
 	{
 		if( libfdata_vector_get_element_value_at_offset(
 		     internal_volume->sectors_vector,
-		     internal_volume->file_io_handle,
+		     (intptr_t *) internal_volume->file_io_handle,
 		     internal_volume->sectors_cache,
 		     internal_volume->io_handle->current_offset,
 		     (intptr_t **) &sector_data,

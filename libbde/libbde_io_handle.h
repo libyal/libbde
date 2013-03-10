@@ -159,13 +159,15 @@ int libbde_io_handle_read_volume_header(
      libcerror_error_t **error );
 
 int libbde_io_handle_read_sector(
-     intptr_t *io_handle,
+     libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,
      libfcache_cache_t *cache,
      int element_index,
+     int element_data_file_index,
      off64_t element_data_offset,
      size64_t element_data_size,
+     uint32_t element_data_flags,
      uint8_t read_flags,
      libcerror_error_t **error );
 
