@@ -33,7 +33,6 @@
 
 /* The following type definitions hide internal data structures
  */
-typedef intptr_t libbde_store_t;
 typedef intptr_t libbde_volume_t;
 
 #endif

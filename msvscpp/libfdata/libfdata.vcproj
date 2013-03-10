@@ -151,14 +151,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\libfdata\libfdata_block.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_block_reference.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_buffer.c"
 				>
 			</File>
@@ -191,6 +183,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfdata\libfdata_stream.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfdata\libfdata_stream_reference.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfdata\libfdata_support.c"
 				>
 			</File>
@@ -212,14 +212,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\libfdata\libfdata_block.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_block_reference.h"
-				>
-			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_buffer.h"
 				>
@@ -286,6 +278,14 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_reference.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfdata\libfdata_stream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfdata\libfdata_stream_reference.h"
 				>
 			</File>
 			<File

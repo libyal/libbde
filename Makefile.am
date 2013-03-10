@@ -26,6 +26,7 @@ SUBDIRS = \
 	pybde \
 	po \
 	manuals \
+	macosx \
 	msvscpp
 
 DPKG_FILES = \
