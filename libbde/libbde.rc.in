@@ -21,7 +21,7 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
-      VALUE "FileDescription",		"Library to support the BitLocker Drive Encryption (BDE) format\0"
+      VALUE "FileDescription",		"Library to access the BitLocker Drive Encryption (BDE) format\0"
       VALUE "FileVersion",		"@VERSION@" "\0"
       VALUE "InternalName",		"libbde.dll\0"
       VALUE "LegalCopyright",		"(c) 2011-2013 Joachim Metz <joachim.metz@gmail.com>\0"
