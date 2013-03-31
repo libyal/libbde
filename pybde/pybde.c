@@ -49,35 +49,35 @@ PyMethodDef pybde_module_methods[] = {
 	  METH_NOARGS,
 	  "get_version() -> String\n"
 	  "\n"
-	  "Retrieves the version" },
+	  "Retrieves the version." },
 
 	{ "check_volume_signature",
 	  (PyCFunction) pybde_check_volume_signature,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "check_volume_signature(filename) -> Boolean\n"
 	  "\n"
-	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature" },
+	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature." },
 
 	{ "check_volume_signature_file_object",
 	  (PyCFunction) pybde_check_volume_signature_file_object,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "check_volume_signature(file_object) -> Boolean\n"
 	  "\n"
-	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object" },
+	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object." },
 
 	{ "open",
 	  (PyCFunction) pybde_volume_new_open,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open(filename, mode='r') -> Object\n"
 	  "\n"
-	  "Opens a volume" },
+	  "Opens a volume." },
 
 	{ "open_file_object",
 	  (PyCFunction) pybde_volume_new_open_file_object,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open(file_object, mode='r') -> Object\n"
 	  "\n"
-	  "Opens a volume using a file-like object" },
+	  "Opens a volume using a file-like object." },
 
 	/* Sentinel */
 	{ NULL, NULL, 0, NULL }

@@ -52,7 +52,7 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_NOARGS,
 	  "signal_abort() -> None\n"
 	  "\n"
-	  "Signals the volume to abort the current activity" },
+	  "Signals the volume to abort the current activity." },
 
 	/* Functions to access the volume */
 
@@ -61,49 +61,49 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open(filename, mode='r') -> None\n"
 	  "\n"
-	  "Opens a volume" },
+	  "Opens a volume." },
 
 	{ "open_file_object",
 	  (PyCFunction) pybde_volume_open_file_object,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open(file_object, mode='r') -> None\n"
 	  "\n"
-	  "Opens a volume using a file-like object" },
+	  "Opens a volume using a file-like object." },
 
 	{ "close",
 	  (PyCFunction) pybde_volume_close,
 	  METH_NOARGS,
 	  "close() -> None\n"
 	  "\n"
-	  "Closes a volume" },
+	  "Closes a volume." },
 
 	{ "read_buffer",
 	  (PyCFunction) pybde_volume_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "read_buffer(size) -> String\n"
 	  "\n"
-	  "Reads a buffer of volume data from the file(s)" },
+	  "Reads a buffer of volume data." },
 
 	{ "read_random",
 	  (PyCFunction) pybde_volume_read_random,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "read_random(size, offset) -> String\n"
 	  "\n"
-	  "Reads a buffer of volume data at a specific offset from the file(s)" },
+	  "Reads a buffer of volume data at a specific offset." },
 
 	{ "seek_offset",
 	  (PyCFunction) pybde_volume_seek_offset,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "seek_offset(offset, whence) -> None\n"
 	  "\n"
-	  "Seeks an offset within the volume data" },
+	  "Seeks an offset within the volume data." },
 
 	{ "get_offset",
 	  (PyCFunction) pybde_volume_get_offset,
 	  METH_NOARGS,
 	  "get_offset() -> Long\n"
 	  "\n"
-	  "Retrieved the current offset within the volume data" },
+	  "Retrieved the current offset within the volume data." },
 
 	/* Some Pythonesque aliases */
 
@@ -112,21 +112,21 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_VARARGS | METH_KEYWORDS,
 	  "read(size) -> String\n"
 	  "\n"
-	  "Reads a buffer of volume data from the file(s)" },
+	  "Reads a buffer of volume data." },
 
 	{ "seek",
 	  (PyCFunction) pybde_volume_seek_offset,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "seek(offset, whence) -> None\n"
 	  "\n"
-	  "Seeks an offset within the volume data" },
+	  "Seeks an offset within the volume data." },
 
 	{ "tell",
 	  (PyCFunction) pybde_volume_get_offset,
 	  METH_NOARGS,
 	  "tell() -> Long\n"
 	  "\n"
-	  "Retrieves the current offset within the volume data" },
+	  "Retrieves the current offset within the volume data." },
 
 	/* Functions to access the volume values */
 
@@ -135,21 +135,21 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_NOARGS,
 	  "get_size() -> Long\n"
 	  "\n"
-	  "Retrieves the size of the volume data" },
+	  "Retrieves the size of the volume data." },
 
 	{ "set_password",
 	  (PyCFunction) pybde_volume_set_password,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "set_password(password) -> None\n"
 	  "\n"
-	  "Sets the password" },
+	  "Sets the password." },
 
 	{ "set_recovery_password",
 	  (PyCFunction) pybde_volume_set_recovery_password,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "set_recovery_password(recovery_password) -> None\n"
 	  "\n"
-	  "Sets the recovery password" },
+	  "Sets the recovery password." },
 
 	/* Sentinel */
 	{ NULL, NULL, 0, NULL }
@@ -160,7 +160,7 @@ PyGetSetDef pybde_volume_object_get_set_definitions[] = {
 	{ "size",
 	  (getter) pybde_volume_get_size,
 	  (setter) 0,
-	  "The size",
+	  "The size.",
 	  NULL },
 
 	/* Sentinel */
