@@ -1,7 +1,7 @@
 Name: libbde
 Version: @VERSION@
 Release: 1
-Summary: Library to support the BitLocker Drive Encryption (BDE) format
+Summary: Library to access the BitLocker Drive Encryption (BDE) format
 Group: System Environment/Libraries
 License: LGPL
 Source: %{name}-%{version}.tar.gz
@@ -11,7 +11,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 @libbde_spec_build_requires@ @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcstring_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfvalue_spec_build_requires@ @ax_libhmac_spec_build_requires@ @ax_libuna_spec_build_requires@
 
 %description
-libbde is a library to support the BitLocker Drive Encryption (BDE) format
+libbde is a library to access the BitLocker Drive Encryption (BDE) format
 
 %package devel
 Summary: Header files and libraries for developing applications for libbde

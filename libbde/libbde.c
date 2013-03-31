@@ -1,5 +1,5 @@
 /*
- * Library to support the BitLocker Drive Encryption (BDE) format
+ * Library to access the BitLocker Drive Encryption (BDE) format
  *
  * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
