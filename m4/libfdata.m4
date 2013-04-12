@@ -1,6 +1,6 @@
 dnl Functions for libfdata
 dnl
-dnl Version: 20120501
+dnl Version: 20130409
 
 dnl Function to detect if libfdata is available
 dnl ac_libfdata_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -24,7 +24,7 @@ AC_DEFUN([AX_LIBFDATA_CHECK_LIB],
    [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
    [PKG_CHECK_MODULES(
     [libfdata],
-    [libfdata >= 20120405],
+    [libfdata >= 20130408],
     [ac_cv_libfdata=yes],
     [ac_cv_libfdata=no])
    ])
@@ -35,21 +35,21 @@ AC_DEFUN([AX_LIBFDATA_CHECK_LIB],
    ac_cv_libfdata_LIBADD="$pkg_cv_libfdata_LIBS"],
    [dnl Check for headers
    AC_CHECK_HEADERS([libfdata.h])
- 
+
    AS_IF(
     [test "x$ac_cv_header_libfdata_h" = xno],
     [ac_cv_libfdata=no],
     [dnl Check for the individual functions
     ac_cv_libfdata=yes
- 
+
     AC_CHECK_LIB(
      fdata,
      libfdata_get_version,
      [ac_cv_libfdata_dummy=yes],
      [ac_cv_libfdata=no])
-   
+
     dnl TODO add functions
- 
+
     ac_cv_libfdata_LIBADD="-lfdata"
     ])
    ])
