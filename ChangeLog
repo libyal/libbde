@@ -63,6 +63,11 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20130412
+* updated README files
+* updated dependencies
+* added tests directory
+
 20130331
 * updated dependencies
 * code clean up

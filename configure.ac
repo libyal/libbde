@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20130331],
+ [20130412],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -209,6 +209,7 @@ AC_CONFIG_FILES([pybde/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([po/Makevars])
 AC_CONFIG_FILES([manuals/Makefile])
+AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([macosx/Makefile])
 AC_CONFIG_FILES([msvscpp/Makefile])
 dnl Have configure make the include files
