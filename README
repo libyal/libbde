@@ -1,35 +1,4 @@
-Dependencies
-libbde requires:
-* libcrypto (OpenSSL) or Windows Crypto API from the Windows Platform SDK
-  (optional but recommended)
-
-bdemount requires:
-* libfuse
-  (optional but recommended)
-
-
-Building .deb files
-To build .deb files make sure you've have installed debhelper, dpkg-buildpackage and fakeroot
-* copy the dpkg directory to debian
-* run "dpkg-buildpackage -rfakeroot"
-  this will create the .deb files in the parent directory
-
-
-Building .rpm files
-To build .rpm files make sure you've have installed rpmbuild
-* rename the distrubted tar.gz file if necessary; applies to experimental, alpha and beta versions
-  "mv libbde-alpha-<version>.tar.gz libbde-<version>.tar.gz"
-* run "rpmbuild -ta libbde-<version>.tar.gz"
-  this will create the .rpm files in the rpmbuild tree, commonly ~/rpmbuild/RPMS/...
-
-
-Solaris
-To build libbde on Solaris make sure that /usr/ccs/bin and /usr/sfw/bin are defined in the PATH environment variable
-
-
-Also see:
-* README.dll
+See:
+* http://code.google.com/p/libbde/wiki/Building
 * README.macosx
-* README.mingw
-* README.static
 
