@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_FILE_H )
-#define _PYBDE_FILE_H
+#if !defined( _PYBDE_VOLUME_H )
+#define _PYBDE_VOLUME_H
 
 #include <common.h>
 #include <types.h>
@@ -68,7 +68,8 @@ void pybde_volume_free(
       pybde_volume_t *pybde_volume );
 
 PyObject *pybde_volume_signal_abort(
-           pybde_volume_t *pybde_volume );
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
 
 PyObject *pybde_volume_open(
            pybde_volume_t *pybde_volume,
@@ -81,7 +82,8 @@ PyObject *pybde_volume_open_file_object(
            PyObject *keywords );
 
 PyObject *pybde_volume_close(
-           pybde_volume_t *pybde_volume );
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
 
 PyObject *pybde_volume_read_buffer(
            pybde_volume_t *pybde_volume,
@@ -99,10 +101,12 @@ PyObject *pybde_volume_seek_offset(
            PyObject *keywords );
 
 PyObject *pybde_volume_get_offset(
-           pybde_volume_t *pybde_volume );
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
 
 PyObject *pybde_volume_get_size(
-           pybde_volume_t *pybde_volume );
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
 
 PyObject *pybde_volume_set_password(
            pybde_volume_t *pybde_volume,

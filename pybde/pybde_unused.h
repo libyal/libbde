@@ -1,5 +1,5 @@
 /*
- * The python header wrapper
+ * The internal unused definition
  *
  * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,26 +19,26 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_PYTHON_H )
-#define _PYBDE_PYTHON_H
+#if !defined( _PYBDE_INTERNAL_UNUSED_H )
+#define _PYBDE_INTERNAL_UNUSED_H
 
 #include <common.h>
 
-/* Fix defines in pyconfig.h
- */
-#undef _POSIX_C_SOURCE
+#if !defined( PYBDE_ATTRIBUTE_UNUSED )
+#if defined( __GNUC__ ) && __GNUC__ >= 3
+#define PYBDE_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
+#else
+#define PYBDE_ATTRIBUTE_UNUSED
+#endif
+#endif
 
-/* Fix defines in pyport.h
- */
-#undef HAVE_FSTAT
-#undef HAVE_STAT
-#undef HAVE_SSIZE_T
-#undef HAVE_INT32_T
-#undef HAVE_UINT32_T
-#undef HAVE_INT64_T
-#undef HAVE_UINT64_T
-
-#include <Python.h>
+#if defined( _MSC_VER )
+#define PYBDE_UNREFERENCED_PARAMETER( parameter ) \
+	UNREFERENCED_PARAMETER( parameter );
+#else
+#define PYBDE_UNREFERENCED_PARAMETER( parameter ) \
+	/* parameter */
+#endif
 
 #endif
 

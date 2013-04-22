@@ -17,12 +17,13 @@ pyexec_LTLIBRARIES = pybde.la
 pybde_la_SOURCES = \
 	pybde.c pybde.h \
 	pybde_file_object_io_handle.c pybde_file_object_io_handle.h \
+	pybde_libbde.h \
 	pybde_libbfio.h \
 	pybde_libcerror.h \
 	pybde_libclocale.h \
 	pybde_libcstring.h \
-	pybde_libbde.h \
 	pybde_python.h \
+	pybde_unused.h \
 	pybde_volume.c pybde_volume.h
 
 pybde_la_LIBADD = \

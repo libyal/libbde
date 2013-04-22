@@ -32,6 +32,7 @@
 #include "pybde_libbde.h"
 #include "pybde_file_object_io_handle.h"
 #include "pybde_python.h"
+#include "pybde_unused.h"
 #include "pybde_volume.h"
 
 #if !defined( LIBBDE_HAVE_BFIO )
@@ -87,11 +88,15 @@ PyMethodDef pybde_module_methods[] = {
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_get_version(
-           PyObject *self )
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
 	const char *errors           = NULL;
 	const char *version_string   = NULL;
 	size_t version_string_length = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
 
 	Py_BEGIN_ALLOW_THREADS
 
@@ -116,7 +121,7 @@ PyObject *pybde_get_version(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_check_volume_signature(
-           PyObject *self,
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
@@ -127,6 +132,8 @@ PyObject *pybde_check_volume_signature(
 	static char *keyword_list[] = { "filename", NULL };
 	const char *filename        = NULL;
 	int result                  = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
 
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
@@ -181,7 +188,7 @@ PyObject *pybde_check_volume_signature(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_check_volume_signature_file_object(
-           PyObject *self,
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
@@ -193,6 +200,8 @@ PyObject *pybde_check_volume_signature_file_object(
 	static char *function            = "pybde_check_volume_signature_file_object";
 	static char *keyword_list[]      = { "file_object", NULL };
 	int result                       = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
 
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,

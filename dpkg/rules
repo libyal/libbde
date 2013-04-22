@@ -50,7 +50,7 @@ override_dh_auto_configure:
 
 override_dh_auto_test:
 
-override_dh_installinit: install_libbde install_libbde_dev install_libbde_tools
+override_dh_installinit: install_libbde install_libbde_dev install_libbde_tools install_libbde_python
 
 override_dh_installmenu:
 
