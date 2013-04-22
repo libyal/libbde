@@ -235,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\pybde\pybde_unused.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\pybde\pybde_volume.h"
 				>
 			</File>

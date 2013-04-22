@@ -34,7 +34,8 @@ extern "C" {
 #define PYBDE_ERROR_STRING_SIZE		512
 
 PyObject *pybde_get_version(
-           PyObject *self );
+           PyObject *self,
+           PyObject *arguments );
 
 PyObject *pybde_check_volume_signature(
            PyObject *self,

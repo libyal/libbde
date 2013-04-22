@@ -34,6 +34,7 @@
 #include "pybde_libcstring.h"
 #include "pybde_libbde.h"
 #include "pybde_python.h"
+#include "pybde_unused.h"
 #include "pybde_volume.h"
 
 #if !defined( LIBBDE_HAVE_BFIO )
@@ -311,11 +312,13 @@ on_error:
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_new_open(
-           PyObject *self,
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
 	PyObject *pybde_volume = NULL;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
 
 	pybde_volume = pybde_volume_new();
 
@@ -331,11 +334,13 @@ PyObject *pybde_volume_new_open(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_new_open_file_object(
-           PyObject *self,
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
            PyObject *arguments,
            PyObject *keywords )
 {
 	PyObject *pybde_volume = NULL;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
 
 	pybde_volume = pybde_volume_new();
 
@@ -487,13 +492,16 @@ void pybde_volume_free(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_signal_abort(
-           pybde_volume_t *pybde_volume )
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
 	char error_string[ PYBDE_ERROR_STRING_SIZE ];
 
 	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_signal_abort";
 	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
 
 	if( pybde_volume == NULL )
 	{
@@ -761,13 +769,16 @@ on_error:
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_close(
-           pybde_volume_t *pybde_volume )
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
 	char error_string[ PYBDE_ERROR_STRING_SIZE ];
 
 	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_close";
 	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
 
 	if( pybde_volume == NULL )
 	{
@@ -1107,7 +1118,8 @@ PyObject *pybde_volume_seek_offset(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_get_offset(
-           pybde_volume_t *pybde_volume )
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
 	char error_string[ PYBDE_ERROR_STRING_SIZE ];
 
@@ -1115,6 +1127,8 @@ PyObject *pybde_volume_get_offset(
 	static char *function    = "pybde_volume_get_offset";
 	off64_t current_offset   = 0;
 	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
 
 	if( pybde_volume == NULL )
 	{
@@ -1190,7 +1204,8 @@ PyObject *pybde_volume_get_offset(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_get_size(
-           pybde_volume_t *pybde_volume )
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
 	char error_string[ PYBDE_ERROR_STRING_SIZE ];
 
@@ -1199,6 +1214,17 @@ PyObject *pybde_volume_get_size(
 	size64_t size            = 0;
 	int result               = 0;
 
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
 	Py_BEGIN_ALLOW_THREADS
 
 	result = libbde_volume_get_size(
