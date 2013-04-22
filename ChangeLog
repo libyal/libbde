@@ -1,18 +1,15 @@
 TODO
-* osx device and size issue
-* bdeinfo: print hostname
+* osx device and size issue (check should be fixed now with libcfile update)
 * add support for passing key directly to library
   - test if keys are valid ?
   - what about issue with key bit size
   - info handle (check if tweak_key is not 0 ) when diffuser is specified
-* bdetools: add support for passing the keys as base16 ?
 * add handling of BDE volumes with corrupt metadata, e.g. file header
 
 * update manuals
 * move free metadata to volume_close()
 * check metadata number_of_volume_header_sectors ?
 * debug print more volume header info
-* add examples
 
 * libcaes
   - WinXP no AES support ?
@@ -20,7 +17,7 @@ TODO
   - wincrypt and EVP - make sure to pass block sized blocks ?
 
 Optimizations
-* pass values 32-bit to aes
+* pass values 32-bit to libcaes
 
 Library
 * add support for passing key directly to library
@@ -38,7 +35,10 @@ Release:
 
 Tools:
 * bdeinfo
+  - print hostname
+  - print more metadata
 * bdeexport
+  - create tool to export decrypted BDE volume to RAW file?
 * bdemount
   - implement ImDisk/Dokan version for WINAPI
   - implement native MacOS-X version
@@ -62,6 +62,11 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20130422
+* updated dependencies
+* updated pybde
+* fix in dpkg files for python binding
 
 20130412
 * updated README files
