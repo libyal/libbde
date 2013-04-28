@@ -880,6 +880,19 @@ int libbde_volume_close(
 
 		result = -1;
 	}
+	if( libbde_encryption_free(
+	     &( internal_volume->io_handle->encryption_context ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free encryption context.",
+		 function );
+
+		result = -1;
+	}
 	return( result );
 }
 

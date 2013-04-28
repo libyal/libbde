@@ -997,35 +997,43 @@ int info_handle_volume_fprint(
 	 info_handle->notify_stream,
 	 "\tEncryption method:\t\t" );
 
-	if( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	switch( encryption_method )
 	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "AES 128-bit with Diffuser" );
-	}
-	else if( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER )
-	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "AES 256-bit with Diffuser" );
-	}
-	else if( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
-	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "AES 128-bit" );
-	}
-	else if( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
-	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "AES 256-bit" );
-	}
-	else
-	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "Unknown" );
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
+			fprintf(
+			 info_handle->notify_stream,
+			 "AES 128-bit with Diffuser" );
+
+			break;
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER:
+			fprintf(
+			 info_handle->notify_stream,
+			 "AES 256-bit with Diffuser" );
+
+			break;
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC:
+			fprintf(
+			 info_handle->notify_stream,
+			 "AES 128-bit" );
+
+			break;
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC:
+			fprintf(
+			 info_handle->notify_stream,
+			 "AES 256-bit" );
+
+			break;
+
+		default:
+			fprintf(
+			 info_handle->notify_stream,
+			 "Unknown (0x%08" PRIx32 ")",
+			 encryption_method );
+
+			break;
 	}
 	fprintf(
 	 info_handle->notify_stream,
