@@ -1,5 +1,6 @@
 MSVSCPP_FILES = \
 	bdeinfo/bdeinfo.vcproj \
+	bdemount/bdemount.vcproj \
 	libbde_dll/libbde_dll.vcproj \
 	libbfio/libbfio.vcproj \
 	libcaes/libcaes.vcproj \
