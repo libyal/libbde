@@ -67,6 +67,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20130624
+* fix for dealing with padding in FVE metadata block
+
 20130422
 * updated dependencies
 * updated pybde
