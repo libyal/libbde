@@ -33,6 +33,8 @@
 
 #include "bde_metadata.h"
 
+const uint8_t libbde_metadata_entry_empty[ 8 ] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
 /* Initialize a metadata entry
  * Make sure the value metadata entry is pointing to is set to NULL
  * Returns 1 if successful or -1 on error

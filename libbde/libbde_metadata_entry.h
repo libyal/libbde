@@ -31,6 +31,8 @@
 extern "C" {
 #endif
 
+extern const uint8_t libbde_metadata_entry_empty[ 8 ];
+
 typedef struct libbde_metadata_entry libbde_metadata_entry_t;
 
 struct libbde_metadata_entry

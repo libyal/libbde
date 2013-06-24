@@ -494,6 +494,13 @@ int libbde_volume_master_key_read(
 
 	while( value_data_size >= sizeof( bde_metadata_entry_v1_t ) )
 	{
+		if( memory_compare(
+		     value_data,
+		     libbde_metadata_entry_empty,
+		     sizeof( bde_metadata_entry_v1_t ) ) == 0 )
+		{
+			break;
+		}
 		if( libbde_metadata_entry_initialize(
 		     &property_metadata_entry,
 		     error ) != 1 )
@@ -733,7 +740,7 @@ int libbde_volume_master_key_read(
 			libcnotify_print_data(
 			 value_data,
 			 value_data_size,
-			 0 );
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
 	}
 #endif
