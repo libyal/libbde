@@ -1,7 +1,7 @@
 <pkgref spec="1.12" uuid="9ECFB3D2-9E23-4F80-8F98-D0DD1897F1C8">
 <config>
 	<identifier>com.google.code.p.libbde.site-packages.pkg</identifier>
-	<version>20130502</version>
+	<version>20130624</version>
 	<description/>
 	<post-install type="none"/>
 	<requireAuthorization/>

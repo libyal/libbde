@@ -1136,6 +1136,13 @@ ssize_t libbde_metadata_read_entries(
 	}
 	while( entries_data_size >= sizeof( bde_metadata_entry_v1_t ) )
 	{
+		if( memory_compare(
+		     &( entries_data[ entries_data_offset ] ),
+		     libbde_metadata_entry_empty,
+		     sizeof( bde_metadata_entry_v1_t ) ) == 0 )
+		{
+			break;
+		}
 		if( libbde_metadata_entry_initialize(
 		     &metadata_entry,
 		     error ) != 1 )
@@ -1480,6 +1487,21 @@ ssize_t libbde_metadata_read_entries(
 		}
 		metadata_entry = NULL;
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		if( entries_data_size > 0 )
+		{
+			libcnotify_printf(
+			 "%s: trailing data:\n",
+			 function );
+			libcnotify_print_data(
+			 &( entries_data[ entries_data_offset ] ),
+			 entries_data_size,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		}
+	}
+#endif
 	return( (ssize_t) entries_data_offset );
 
 on_error:
