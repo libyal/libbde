@@ -1,12 +1,12 @@
 <pkgref spec="1.12" uuid="9ECFB3D2-9E23-4F80-8F98-D0DD1897F1C8">
 <config>
 	<identifier>com.google.code.p.libbde.site-packages.pkg</identifier>
-	<version>20130625</version>
+	<version>20130703</version>
 	<description/>
 	<post-install type="none"/>
 	<requireAuthorization/>
-	<installFrom>/usr/local/google/home/jbmetz/Projects/libbde/macosx/tmp/lib/python2.7/dist-packages</installFrom>
-	<installTo mod="true">/usr/lib/python2.7/dist-packages</installTo>
+	<installFrom>/home/lordyesta/Projects/libbde/macosx/tmp/lib64/python2.7/site-packages</installFrom>
+	<installTo mod="true">/usr/lib64/python2.7/site-packages</installTo>
 	<flags>
 		<followSymbolicLinks/>
 	</flags>
