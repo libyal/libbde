@@ -128,6 +128,7 @@ int libbde_volume_close(
 
 int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
 int libbde_volume_open_read_keys_from_metadata(

@@ -1044,9 +1044,6 @@ ssize_t libbde_metadata_read_header(
 
 		goto on_error;
 	}
-	/* Ignore the MSB for now */
-	metadata->encryption_method &= 0x7fffffffUL;
-
 	return( sizeof( bde_metadata_header_v1_t ) );
 
 on_error:
@@ -1532,6 +1529,11 @@ on_error:
 		 &metadata_entry,
 		 NULL );
 	}
+	libcdata_array_empty(
+	 metadata->entries_array,
+	 (int(*)(intptr_t **, libcerror_error_t **)) &libbde_metadata_entry_free,
+	 NULL );
+
 	return( -1 );
 }
 

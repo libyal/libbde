@@ -468,7 +468,7 @@ int libbde_sector_data_read(
 	{
 		if( libbde_encryption_crypt(
 		     encryption_context,
-		     LIBBDE_ENCYPTION_CRYPT_MODE_DECRYPT,
+		     LIBBDE_ENCRYPTION_CRYPT_MODE_DECRYPT,
 		     sector_data->encrypted_data,
 		     sector_data->data_size,
 		     sector_data->data,

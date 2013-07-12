@@ -77,7 +77,7 @@ struct libbde_io_handle
 	 */
 	size64_t volume_size;
 
-	/* The encrtypted volume size
+	/* The encrypted volume size
 	 */
 	size64_t encrypted_volume_size;
 

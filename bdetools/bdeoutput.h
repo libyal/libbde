@@ -23,7 +23,6 @@
 #define _BDEOUTPUT_H
 
 #include <common.h>
-#include <file_stream.h>
 #include <types.h>
 
 #if defined( __cplusplus )
