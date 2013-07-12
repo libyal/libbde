@@ -25,9 +25,6 @@
 #include <common.h>
 #include <byte_stream.h>
 
-#define LIBBDE_ENDIAN_BIG				_BYTE_STREAM_ENDIAN_BIG
-#define LIBBDE_ENDIAN_LITTLE				_BYTE_STREAM_ENDIAN_LITTLE
-
 /* Define HAVE_LOCAL_LIBBDE for local use of libbde
  */
 #if !defined( HAVE_LOCAL_LIBBDE )

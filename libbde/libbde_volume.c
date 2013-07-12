@@ -745,10 +745,9 @@ int libbde_volume_open_file_io_handle(
 			return( -1 );
 		}
 	}
-	internal_volume->file_io_handle = file_io_handle;
-
 	result = libbde_volume_open_read(
 	          internal_volume,
+	          file_io_handle,
 	          error );
 
 	if( result == -1 )
@@ -768,6 +767,8 @@ int libbde_volume_open_file_io_handle(
 		}
 		return( -1 );
 	}
+	internal_volume->file_io_handle = file_io_handle;
+
 	return( result );
 }
 
@@ -901,6 +902,7 @@ int libbde_volume_close(
  */
 int libbde_volume_open_read(
      libbde_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
 	uint8_t *startup_key_identifier    = NULL;
@@ -968,7 +970,7 @@ int libbde_volume_open_read(
 #endif
 	if( libbde_io_handle_read_volume_header(
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     0,
 	     error ) != 1 )
 	{
@@ -991,7 +993,7 @@ int libbde_volume_open_read(
 	if( libbde_metadata_read_block(
 	     internal_volume->primary_metadata,
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     internal_volume->io_handle->first_metadata_offset,
 	     startup_key_identifier,
 	     startup_key_identifier_size,
@@ -1016,7 +1018,7 @@ int libbde_volume_open_read(
 	if( libbde_metadata_read_block(
 	     internal_volume->secondary_metadata,
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     internal_volume->io_handle->second_metadata_offset,
 	     startup_key_identifier,
 	     startup_key_identifier_size,
@@ -1041,7 +1043,7 @@ int libbde_volume_open_read(
 	if( libbde_metadata_read_block(
 	     internal_volume->tertiary_metadata,
 	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
+	     file_io_handle,
 	     internal_volume->io_handle->third_metadata_offset,
 	     startup_key_identifier,
 	     startup_key_identifier_size,
@@ -1121,7 +1123,7 @@ int libbde_volume_open_read(
 #endif
 		if( libbde_io_handle_read_unencrypted_volume_header(
 		     internal_volume->io_handle,
-		     internal_volume->file_io_handle,
+		     file_io_handle,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

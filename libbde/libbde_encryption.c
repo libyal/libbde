@@ -104,7 +104,7 @@ int libbde_encryption_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable initialize FVEK decryption context.",
+		 "%s: unable to initialize FVEK decryption context.",
 		 function );
 
 		goto on_error;
@@ -117,7 +117,7 @@ int libbde_encryption_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable initialize FVEK encryption context.",
+		 "%s: unable to initialize FVEK encryption context.",
 		 function );
 
 		goto on_error;
@@ -130,7 +130,7 @@ int libbde_encryption_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable initialize TWEAK decryption context.",
+		 "%s: unable to initialize TWEAK decryption context.",
 		 function );
 
 		goto on_error;
@@ -143,7 +143,7 @@ int libbde_encryption_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable initialize TWEAK encryption context.",
+		 "%s: unable to initialize TWEAK encryption context.",
 		 function );
 
 		goto on_error;
@@ -474,8 +474,8 @@ int libbde_encryption_crypt(
 
 		return( -1 );
 	}
-	if( ( mode != LIBBDE_ENCYPTION_CRYPT_MODE_DECRYPT )
-	 && ( mode != LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT ) )
+	if( ( mode != LIBBDE_ENCRYPTION_CRYPT_MODE_DECRYPT )
+	 && ( mode != LIBBDE_ENCRYPTION_CRYPT_MODE_ENCRYPT ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -600,7 +600,7 @@ int libbde_encryption_crypt(
 			return( -1 );
 		}
 	}
-	if( mode == LIBBDE_ENCYPTION_CRYPT_MODE_ENCRYPT )
+	if( mode == LIBBDE_ENCRYPTION_CRYPT_MODE_ENCRYPT )
 	{
 /* TODO safe guard input data ? */
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
