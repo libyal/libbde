@@ -170,6 +170,10 @@
 				RelativePath="..\..\libcaes\libcaes_support.c"
 				>
 			</File>
+			<File
+				RelativePath="..\..\libcaes\libcaes_tweaked_context.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -202,6 +206,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libcaes\libcaes_support.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcaes\libcaes_tweaked_context.h"
 				>
 			</File>
 			<File

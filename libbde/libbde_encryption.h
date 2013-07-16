@@ -32,12 +32,6 @@
 extern "C" {
 #endif
 
-enum LIBBDE_ENCRYPTION_CRYPT_MODES
-{
-	LIBBDE_ENCRYPTION_CRYPT_MODE_DECRYPT   = 0,
-	LIBBDE_ENCRYPTION_CRYPT_MODE_ENCRYPT   = 1
-};
-
 typedef struct libbde_encryption_context libbde_encryption_context_t;
 
 struct libbde_encryption_context

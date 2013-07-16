@@ -1,24 +1,22 @@
 TODO
+* git version
+  - make sure dependent local libs are in git
+  - fix synclibs.sh for libfvalue Makefile.am
 * check multiple open close
-* osx device and size issue (check should be fixed now with libcfile update)
 * add support for passing key directly to library
   - test if keys are valid ?
   - what about issue with key bit size
-  - info handle (check if tweak_key is not 0 ) when diffuser is specified
+  - info handle (check if tweak_key is not 0) when diffuser is specified
 * add handling of BDE volumes with corrupt metadata, e.g. file header
-
 * update manuals
 * move free metadata to volume_close()
 * check metadata number_of_volume_header_sectors ?
 * debug print more volume header info
+* check debug output alignment
+* check TODOs
 
 * pybde
   - add function to set the keys
-
-* libcaes
-  - WinXP no AES support ?
-  - WINAPI initialize provider only once - where to stick the init functions ?
-  - wincrypt and EVP - make sure to pass block sized blocks ?
 
 Optimizations
 * pass values 32-bit to libcaes
@@ -30,12 +28,6 @@ Library
 
 Test suite:
 * add test scripts
-
-Release:
-* check debug output alignment
-* automated tests - test suite
-* msvscpp build
-* check TODOs
 
 Tools:
 * bdeinfo
@@ -66,6 +58,10 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20130716
+* worked on git support
+* updated dependencies
 
 20130703
 * fixed some typos

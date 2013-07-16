@@ -1,40 +1,31 @@
 # Files to ignore by git
 #
-# Version: 20150725
+# Version: 20130507
 
 # Generic auto-generated build files
 *~
 *.a
 *.la
 *.lai
-*.lib
-*.lineno
 *.lo
-*.log
 *.Plo
 *.Po
 *.o
-*.obj
 *.so
 *.so.[0-9][0-9]*
 *.so.[0-9][0-9]*.[0-9][0-9]*.[0-9][0-9]*
-*.swp
-*.trs
 *.Tpo
 .deps
 .libs
 INSTALL
 Makefile
-Makefile.bcc
 Makefile.in
-stamp-h[1-9]
+stamp-h1
 
 # Specific auto-generated build files
 /ABOUT-NLS
 /aclocal.m4
 /autom4te.cache/
-/build
-/compile
 /config.guess
 /config.log
 /config.rpath
@@ -42,13 +33,10 @@ stamp-h[1-9]
 /config.sub
 /configure
 /depcomp
-/dist
 /install-sh
 /libtool
 /ltmain.sh
 /missing
-/test-driver
-/ylwrap
 /m4/codeset.m4
 /m4/fcntl-o.m4
 /m4/gettext.m4
@@ -111,14 +99,7 @@ stamp-h[1-9]
 /include/libbde/features.h
 /include/libbde/types.h
 /libbde/libbde.rc
-/libbde/libbde_definitions.h
-/bdetools/bdeinfo
-/bdetools/bdemount
-/tests/bde_test_open_close
-/tests/bde_test_read
-/tests/bde_test_seek
-/tests/input
-/tests/tmp*
+/libbde/libbde.h
 
 # Local library dependencies specific files
 /libbfio
@@ -130,9 +111,6 @@ stamp-h[1-9]
 /libcnotify
 /libcpath
 /libcsplit
-/libcstring
-/libcsystem
-/libcthreads
 /libfcache
 /libfdata
 /libfdatetime
