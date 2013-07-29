@@ -34,8 +34,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a AES-CCM encrypted key
- * Make sure the value AES-CCM encrypted key is pointing to is set to NULL
+/* Creates an AES-CCM encrypted key
+ * Make sure the value AES-CCM encrypted key is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_ccm_encrypted_key_initialize(
@@ -107,7 +107,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees a AES-CCM encrypted key
+/* Frees an AES-CCM encrypted key
  * Returns 1 if successful or -1 on error
  */
 int libbde_aes_ccm_encrypted_key_free(

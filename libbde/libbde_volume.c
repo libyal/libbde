@@ -40,8 +40,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a volume
- * Make sure the value volume is pointing to is set to NULL
+/* Creates a volume
+ * Make sure the value volume is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_volume_initialize(

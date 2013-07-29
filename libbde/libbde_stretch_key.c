@@ -33,8 +33,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a stretch key
- * Make sure the value stretch key is pointing to is set to NULL
+/* Creates a stretch key
+ * Make sure the value stretch key is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_stretch_key_initialize(

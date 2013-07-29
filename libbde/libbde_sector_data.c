@@ -32,8 +32,8 @@
 #include "libbde_libcnotify.h"
 #include "libbde_sector_data.h"
 
-/* Initialize sector data
- * Make sure the value sector_data is pointing to is set to NULL
+/* Creates sector data
+ * Make sure the value sector_data is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_sector_data_initialize(
@@ -159,7 +159,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees the sector data
+/* Frees sector data
  * Returns 1 if successful or -1 on error
  */
 int libbde_sector_data_free(

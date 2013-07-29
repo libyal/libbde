@@ -28,12 +28,9 @@
  */
 #if defined( HAVE_LOCAL_LIBFDATA )
 
-#include <libfdata_buffer.h>
-#include <libfdata_buffer_reference.h>
 #include <libfdata_definitions.h>
 #include <libfdata_list.h>
 #include <libfdata_list_element.h>
-#include <libfdata_reference.h>
 #include <libfdata_stream.h>
 #include <libfdata_tree.h>
 #include <libfdata_tree_node.h>
