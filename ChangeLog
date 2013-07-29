@@ -59,6 +59,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20130729
+* updated dependencies
+* pybde fixes for >2G file objects in BFIO glue code
+
 20130716
 * worked on git support
 * updated dependencies

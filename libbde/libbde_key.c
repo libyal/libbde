@@ -33,8 +33,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a key
- * Make sure the value key is pointing to is set to NULL
+/* Creates a key
+ * Make sure the value key is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_key_initialize(

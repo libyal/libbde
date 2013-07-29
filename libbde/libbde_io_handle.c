@@ -46,8 +46,8 @@ const uint8_t bde_identifier[ 16 ]            = { 0x3b, 0xd6, 0x67, 0x49, 0x29, 
 const char *bde_signature                         = "-FVE-FS-";
 const char *bde_ntfs_volume_file_system_signature = "NTFS    ";
 
-/* Initialize an IO handle
- * Make sure the value io_handle is pointing to is set to NULL
+/* Creates an IO handle
+ * Make sure the value io_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_io_handle_initialize(

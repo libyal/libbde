@@ -38,8 +38,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a external key
- * Make sure the value external key is pointing to is set to NULL
+/* Creates an external key
+ * Make sure the value external key is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_external_key_initialize(
@@ -125,7 +125,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees a external key
+/* Frees an external key
  * Returns 1 if successful or -1 on error
  */
 int libbde_external_key_free(

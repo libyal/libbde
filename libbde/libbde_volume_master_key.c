@@ -41,8 +41,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a volume master key
- * Make sure the value volume master key is pointing to is set to NULL
+/* Creates a volume master key
+ * Make sure the value volume master key is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_volume_master_key_initialize(
