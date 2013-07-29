@@ -45,8 +45,8 @@
 
 #include "bde_metadata.h"
 
-/* Initialize a metadata
- * Make sure the value metadata is pointing to is set to NULL
+/* Creates metadata
+ * Make sure the value metadata is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_metadata_initialize(

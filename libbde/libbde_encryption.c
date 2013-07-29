@@ -30,8 +30,8 @@
 #include "libbde_libcaes.h"
 #include "libbde_libcerror.h"
 
-/* Initialize an encryption context
- * Make sure the value encryption context is pointing to is set to NULL
+/* Creates an encryption context
+ * Make sure the value encryption context is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libbde_encryption_initialize(

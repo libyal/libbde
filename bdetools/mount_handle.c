@@ -41,7 +41,8 @@ int libbde_volume_open_file_io_handle(
      libbde_error_t **error );
 #endif
 
-/* Initializes the mount handle
+/* Creates a mount handle
+ * Make sure the value mount_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int mount_handle_initialize(
@@ -150,7 +151,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees the mount handle and its elements
+/* Frees a mount handle
  * Returns 1 if successful or -1 on error
  */
 int mount_handle_free(
