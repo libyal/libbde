@@ -640,7 +640,7 @@ int libbde_metadata_read_block(
 			 "%s: unable to resize metadata.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		fve_metadata_block = (uint8_t *) reallocation;
 	}
@@ -663,9 +663,6 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	fve_metadata_block_offset += read_count;
-	read_size                 -= read_count;
-
 	memory_free(
 	 fve_metadata_block );
 
@@ -1825,6 +1822,8 @@ int libbde_metadata_get_volume_master_key(
 		}
 		memory_free(
 		 unencrypted_data );
+
+		unencrypted_data = NULL;
 	}
 	if( result == 0 )
 	{
@@ -2054,6 +2053,8 @@ int libbde_metadata_get_volume_master_key(
 			}
 			memory_free(
 			 unencrypted_data );
+
+			unencrypted_data = NULL;
 		}
 	}
 	if( result == 0 )
@@ -2298,6 +2299,8 @@ int libbde_metadata_get_volume_master_key(
 			}
 			memory_free(
 			 unencrypted_data );
+
+			unencrypted_data = NULL;
 		}
 	}
 	if( result == 0 )
@@ -2542,6 +2545,8 @@ int libbde_metadata_get_volume_master_key(
 			}
 			memory_free(
 			 unencrypted_data );
+
+			unencrypted_data = NULL;
 		}
 	}
 	if( result == 0 )

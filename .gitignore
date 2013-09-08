@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20130507
+# Version: 20130831
 
 # Generic auto-generated build files
 *~
@@ -37,6 +37,7 @@ stamp-h1
 /libtool
 /ltmain.sh
 /missing
+/ylwrap
 /m4/codeset.m4
 /m4/fcntl-o.m4
 /m4/gettext.m4

@@ -200,6 +200,17 @@ int libbde_diffuser_a_decrypt(
 
 		return( -1 );
 	}
+	if( number_of_values < 8 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid number of values value too small.",
+		 function );
+
+		return( -1 );
+	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
@@ -286,6 +297,17 @@ int libbde_diffuser_b_decrypt(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid values 32-bit.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_values < 8 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid number of values value too small.",
 		 function );
 
 		return( -1 );
@@ -528,6 +550,17 @@ int libbde_diffuser_a_encrypt(
 
 		return( -1 );
 	}
+	if( number_of_values < 8 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid number of values value too small.",
+		 function );
+
+		return( -1 );
+	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
@@ -539,13 +572,14 @@ int libbde_diffuser_a_encrypt(
 
 		return( -1 );
 	}
+/* TODO reverse loop
 	number_of_iterations = number_of_values * 5;
 
 	value_32bit_index1 = 0;
 	value_32bit_index2 = number_of_values - 2;
 	value_32bit_index3 = number_of_values - 5;
+*/
 
-/* TODO reverse loop */
 	for( number_of_iterations = 5;
 	     number_of_iterations > 0;
 	     number_of_iterations-- )
@@ -625,6 +659,17 @@ int libbde_diffuser_b_encrypt(
 
 		return( -1 );
 	}
+	if( number_of_values < 8 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid number of values value too small.",
+		 function );
+
+		return( -1 );
+	}
 	if( number_of_values > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
@@ -636,13 +681,14 @@ int libbde_diffuser_b_encrypt(
 
 		return( -1 );
 	}
+/* TODO reverse loop
 	number_of_iterations = number_of_values * 3;
 
 	value_32bit_index1 = 0;
 	value_32bit_index2 = 2;
 	value_32bit_index3 = 5;
+*/
 
-/* TODO reverse loop */
 	for( number_of_iterations = 3;
 	     number_of_iterations > 0;
 	     number_of_iterations-- )
