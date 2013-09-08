@@ -59,6 +59,13 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20130908
+* updated dependencies
+* added libcthreads build support
+* updated msvscpp files
+* bug fixes
+* code clean up
+
 20130729
 * updated dependencies
 * pybde fixes for >2G file objects in BFIO glue code
