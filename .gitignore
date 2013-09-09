@@ -112,6 +112,7 @@ stamp-h1
 /libcnotify
 /libcpath
 /libcsplit
+/libcsthreads
 /libfcache
 /libfdata
 /libfdatetime

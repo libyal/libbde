@@ -4,7 +4,7 @@
 # Version: 20130330
 
 GIT_URL_PREFIX="https://code.google.com/p"
-LOCAL_LIBS="libbfio libcaes libcdata libcerror libcfile libclocale libcnotify libcpath libcsplit libfcache libfdata libfdatetime libfguid libfvalue libhmac libuna";
+LOCAL_LIBS="libbfio libcaes libcdata libcerror libcfile libclocale libcnotify libcpath libcsplit libcthreads libfcache libfdata libfdatetime libfguid libfvalue libhmac libuna";
 
 OLDIFS=$IFS;
 IFS=" ";
