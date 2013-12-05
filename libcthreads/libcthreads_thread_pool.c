@@ -118,7 +118,7 @@ DWORD WINAPI libcthreads_thread_pool_callback_function_helper(
 
 #elif defined( HAVE_PTHREAD_H )
 /* Start function helper function for pthread
- * Returns a pointer to a newly allocate int containing 1 if successful or -1 on error
+ * Returns a pointer to a newly allocated int containing 1 if successful or -1 on error
  * NULL is return if the helper function was unable to run the callback
  */
 void *libcthreads_thread_pool_callback_function_helper(

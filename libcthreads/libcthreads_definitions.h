@@ -35,11 +35,11 @@
  */
 #else
 
-#define LIBCTHREADS_VERSION			20130723
+#define LIBCTHREADS_VERSION			20131003
 
 /* The libcthreads version string
  */
-#define LIBCTHREADS_VERSION_STRING		"20130723"
+#define LIBCTHREADS_VERSION_STRING		"20131003"
 
 #endif /* !defined( HAVE_LOCAL_LIBCTHREADS ) */
 

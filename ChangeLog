@@ -59,6 +59,9 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20131205
+* updated dependencies
+
 20130908
 * updated dependencies
 * added libcthreads build support
