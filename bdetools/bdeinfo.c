@@ -341,14 +341,6 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	else if( result == 0 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to unlock keys.\n" );
-
-		goto on_error;
-	}
 	if( info_handle_volume_fprint(
 	     bdeinfo_info_handle,
 	     &error ) != 1 )
@@ -356,6 +348,14 @@ int main( int argc, char * const argv[] )
 		fprintf(
 		 stderr,
 		 "Unable to print volume information.\n" );
+
+		goto on_error;
+	}
+	if( result == 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to unlock keys.\n" );
 
 		goto on_error;
 	}

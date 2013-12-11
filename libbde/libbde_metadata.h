@@ -160,6 +160,17 @@ int libbde_metadata_get_full_volume_encryption_key(
      size_t tweak_key_size,
      libcerror_error_t **error );
 
+int libbde_metadata_get_volume_identifier(
+     libbde_metadata_t *metadata,
+     uint8_t *volume_identifier,
+     size_t size,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_creation_time(
+     libbde_metadata_t *metadata,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

@@ -2021,6 +2021,95 @@ int libbde_volume_get_encryption_method(
 	return( 1 );
 }
 
+/* Retrieves the volume identifier
+ * The identifier is a GUID and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_get_volume_identifier(
+     libbde_volume_t *volume,
+     uint8_t *volume_identifier,
+     size_t size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_volume_identifier";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_volume_identifier(
+	     internal_volume->primary_metadata,
+	     volume_identifier,
+	     size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume identifier from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the creation date and time
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_get_creation_time(
+     libbde_volume_t *volume,
+     uint64_t *filetime,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_creation_time";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_creation_time(
+	     internal_volume->primary_metadata,
+	     filetime,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve creation time from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Sets the keys
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error

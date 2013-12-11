@@ -14,6 +14,7 @@ AM_CPPFLAGS = \
 	@LIBFCACHE_CPPFLAGS@ \
 	@LIBFDATA_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBFGUID_CPPFLAGS@ \
 	@LIBCSYSTEM_CPPFLAGS@ \
 	@LIBFUSE_CPPFLAGS@ \
 	@LIBBDE_DLL_IMPORT@
@@ -35,10 +36,13 @@ bdeinfo_SOURCES = \
 	bdetools_libcstring.h \
 	bdetools_libcsystem.h \
 	bdetools_libfdatetime.h \
+	bdetools_libfguid.h \
 	bdetools_libuna.h \
 	info_handle.c info_handle.h
 
 bdeinfo_LDADD = \
+	@LIBFGUID_LIBADD@ \
+	@LIBFDATETIME_LIBADD@ \
 	@LIBCSYSTEM_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
