@@ -1,7 +1,7 @@
 /*
- * The libfguid header wrapper
+ * Error functions
  *
- * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,30 +19,29 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_LIBFGUID_H )
-#define _LIBBDE_LIBFGUID_H
+#if !defined( _PYBDE_ERROR_H )
+#define _PYBDE_ERROR_H
 
 #include <common.h>
+#include <types.h>
 
-/* Define HAVE_LOCAL_LIBFGUID for local use of libfguid
- */
-#if defined( HAVE_LOCAL_LIBFGUID )
+#include "pybde_libcerror.h"
+#include "pybde_python.h"
 
-#include <libfguid_definitions.h>
-#include <libfguid_identifier.h>
-#include <libfguid_types.h>
+#define PYBDE_ERROR_STRING_SIZE		768
 
-#else
-
-/* If libtool DLL support is enabled set LIBFGUID_DLL_IMPORT
- * before including libfguid.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
-#define LIBFGUID_DLL_IMPORT
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
-#include <libfguid.h>
+void pybde_error_raise(
+      libcerror_error_t *error,
+      PyObject *exception_object,
+      const char *format_string,
+      ... );
 
+#if defined( __cplusplus )
+}
 #endif
 
 #endif

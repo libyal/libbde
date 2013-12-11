@@ -31,8 +31,6 @@
 extern "C" {
 #endif
 
-#define PYBDE_ERROR_STRING_SIZE		512
-
 PyObject *pybde_get_version(
            PyObject *self,
            PyObject *arguments );

@@ -1,7 +1,7 @@
 /*
- * The libfguid header wrapper
+ * Integer functions
  *
- * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,30 +19,37 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_LIBFGUID_H )
-#define _LIBBDE_LIBFGUID_H
+#if !defined( _PYBDE_INTEGER_H )
+#define _PYBDE_INTEGER_H
 
 #include <common.h>
+#include <types.h>
 
-/* Define HAVE_LOCAL_LIBFGUID for local use of libfguid
- */
-#if defined( HAVE_LOCAL_LIBFGUID )
+#include "pybde_libcerror.h"
+#include "pybde_python.h"
 
-#include <libfguid_definitions.h>
-#include <libfguid_identifier.h>
-#include <libfguid_types.h>
-
-#else
-
-/* If libtool DLL support is enabled set LIBFGUID_DLL_IMPORT
- * before including libfguid.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
-#define LIBFGUID_DLL_IMPORT
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
-#include <libfguid.h>
+PyObject *pybde_integer_signed_new_from_64bit(
+           int64_t value_64bit );
 
+PyObject *pybde_integer_unsigned_new_from_64bit(
+           uint64_t value_64bit );
+
+int pybde_integer_signed_copy_to_64bit(
+     PyObject *integer_object,
+     int64_t *value_64bit,
+     libcerror_error_t **error );
+
+int pybde_integer_unsigned_copy_to_64bit(
+     PyObject *integer_object,
+     uint64_t *value_64bit,
+     libcerror_error_t **error );
+
+#if defined( __cplusplus )
+}
 #endif
 
 #endif

@@ -2975,3 +2975,102 @@ on_error:
 	return( -1 );
 }
 
+/* Retrieves the volume identifier
+ * The identifier is a GUID and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_metadata_get_volume_identifier(
+     libbde_metadata_t *metadata,
+     uint8_t *volume_identifier,
+     size_t size,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_volume_identifier";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume identifier.",
+		 function );
+
+		return( -1 );
+	}
+	if( size < 16 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: volume identifier too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_copy(
+	     volume_identifier,
+	     metadata->volume_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to set volume identifier.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the creation date and time
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_metadata_get_creation_time(
+     libbde_metadata_t *metadata,
+     uint64_t *filetime,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_creation_time";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( filetime == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filetime.",
+		 function );
+
+		return( -1 );
+	}
+	*filetime = metadata->creation_time;
+
+	return( 1 );
+}
+

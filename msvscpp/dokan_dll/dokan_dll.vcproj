@@ -2,11 +2,11 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="pybde"
-	ProjectGUID="{E221DB4C-B254-47CB-993D-DC7FED580DA1}"
-	RootNamespace="pybde"
+	Name="dokan_dll"
+	ProjectGUID="{91153D94-E20C-4739-A5D5-9A33A5670B81}"
+	RootNamespace="dokan_dll"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -41,14 +41,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;C:\Python27\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;LIBBDE_DLL_IMPORT"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="..\..\..\dokan\sys\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;DOKAN_DLL"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				CompileAs="1"
+				WarningLevel="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -61,16 +62,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).pyd"
+				OutputFile="$(OutDir)\dokan.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;;C:\Python27\libs"
+				ModuleDefinitionFile="..\..\..\dokan\dokan\dokan.def"
 				GenerateDebugInformation="false"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
+				SubSystem="0"
+				OptimizeReferences="0"
+				EnableCOMDATFolding="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				TargetMachine="1"
+				ImportLibrary="$(TargetDir)dokan.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -98,7 +99,7 @@
 			Name="VSDebug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -120,16 +121,16 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;C:\Python27\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;LIBBDE_DLL_IMPORT"
+				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="..\..\..\dokan\sys\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;DOKAN_DLL"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="false"
+				WarningLevel="3"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -142,16 +143,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).pyd"
+				OutputFile="$(OutDir)\dokan.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;;C:\Python27\libs"
 				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
+				SubSystem="0"
+				OptimizeReferences="0"
+				EnableCOMDATFolding="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				TargetMachine="1"
+				ImportLibrary="$(TargetDir)dokan.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -185,23 +185,75 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\pybde\pybde.c"
+				RelativePath="..\..\..\dokan\dokan\access.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_error.c"
+				RelativePath="..\..\..\dokan\dokan\cleanup.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_file_object_io_handle.c"
+				RelativePath="..\..\..\dokan\dokan\close.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_integer.c"
+				RelativePath="..\..\..\dokan\dokan\create.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_volume.c"
+				RelativePath="..\..\..\dokan\dokan\directory.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\dokan.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\fileinfo.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\flush.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\lock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\mount.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\read.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\security.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\setfile.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\status.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\timeout.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\version.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\volume.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\write.c"
 				>
 			</File>
 		</Filter>
@@ -211,51 +263,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\pybde\pybde.h"
+				RelativePath="..\..\..\dokan\dokan\dokan.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_error.h"
+				RelativePath="..\..\..\dokan\dokan\dokanc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_file_object_io_handle.h"
+				RelativePath="..\..\..\dokan\dokan\dokani.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_integer.h"
+				RelativePath="..\..\..\dokan\dokan\fileinfo.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_libbde.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libbfio.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libcerror.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libclocale.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libcstring.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_python.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_unused.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_volume.h"
+				RelativePath="..\..\..\dokan\dokan\list.h"
 				>
 			</File>
 		</Filter>

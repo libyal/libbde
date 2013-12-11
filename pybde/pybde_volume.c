@@ -27,7 +27,9 @@
 #endif
 
 #include "pybde.h"
+#include "pybde_error.h"
 #include "pybde_file_object_io_handle.h"
+#include "pybde_integer.h"
 #include "pybde_libbfio.h"
 #include "pybde_libcerror.h"
 #include "pybde_libclocale.h"
@@ -102,7 +104,7 @@ PyMethodDef pybde_volume_object_methods[] = {
 	{ "get_offset",
 	  (PyCFunction) pybde_volume_get_offset,
 	  METH_NOARGS,
-	  "get_offset() -> Long\n"
+	  "get_offset() -> Integer\n"
 	  "\n"
 	  "Retrieved the current offset within the volume data." },
 
@@ -125,7 +127,7 @@ PyMethodDef pybde_volume_object_methods[] = {
 	{ "tell",
 	  (PyCFunction) pybde_volume_get_offset,
 	  METH_NOARGS,
-	  "tell() -> Long\n"
+	  "tell() -> Integer\n"
 	  "\n"
 	  "Retrieves the current offset within the volume data." },
 
@@ -134,7 +136,7 @@ PyMethodDef pybde_volume_object_methods[] = {
 	{ "get_size",
 	  (PyCFunction) pybde_volume_get_size,
 	  METH_NOARGS,
-	  "get_size() -> Long\n"
+	  "get_size() -> Integer\n"
 	  "\n"
 	  "Retrieves the size of the volume data." },
 
@@ -358,8 +360,6 @@ PyObject *pybde_volume_new_open_file_object(
 int pybde_volume_init(
      pybde_volume_t *pybde_volume )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	static char *function    = "pybde_volume_init";
 	libcerror_error_t *error = NULL;
 
@@ -380,24 +380,12 @@ int pybde_volume_init(
 	     &( pybde_volume->volume ),
 	     &error ) != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_MemoryError,
-			 "%s: unable to initialize volume.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_MemoryError,
-			 "%s: unable to initialize volume.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to initialize volume.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -411,8 +399,6 @@ int pybde_volume_init(
 void pybde_volume_free(
       pybde_volume_t *pybde_volume )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_free";
 	int result               = 0;
@@ -463,24 +449,12 @@ void pybde_volume_free(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_MemoryError,
-			 "%s: unable to free libbde volume.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_MemoryError,
-			 "%s: unable to free libbde volume.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to free libbde volume.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 	}
@@ -495,8 +469,6 @@ PyObject *pybde_volume_signal_abort(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_signal_abort";
 	int result               = 0;
@@ -522,24 +494,12 @@ PyObject *pybde_volume_signal_abort(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to signal abort.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to signal abort.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to signal abort.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -559,8 +519,6 @@ PyObject *pybde_volume_open(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error    = NULL;
 	char *filename              = NULL;
 	char *mode                  = NULL;
@@ -610,24 +568,12 @@ PyObject *pybde_volume_open(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to open volume.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to open volume.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to open volume.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -647,8 +593,6 @@ PyObject *pybde_volume_open_file_object(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	PyObject *file_object            = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
 	libcerror_error_t *error         = NULL;
@@ -692,24 +636,12 @@ PyObject *pybde_volume_open_file_object(
 	     file_object,
 	     &error ) != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_MemoryError,
-			 "%s: unable to initialize file IO handle.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_MemoryError,
-			 "%s: unable to initialize file IO handle.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to initialize file IO handle.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -727,24 +659,12 @@ PyObject *pybde_volume_open_file_object(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to open volume.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to open volume.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to open volume.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -772,8 +692,6 @@ PyObject *pybde_volume_close(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_close";
 	int result               = 0;
@@ -799,24 +717,12 @@ PyObject *pybde_volume_close(
 
 	if( result != 0 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-                {
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to close volume.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to close volume.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to close volume.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -836,10 +742,8 @@ PyObject *pybde_volume_read_buffer(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error    = NULL;
-	PyObject *result_data       = NULL;
+	PyObject *string_object     = NULL;
 	static char *function       = "pybde_volume_read_buffer";
 	static char *keyword_list[] = { "size", NULL };
 	ssize_t read_count          = 0;
@@ -883,47 +787,49 @@ PyObject *pybde_volume_read_buffer(
 
 		return( NULL );
 	}
-	result_data = PyString_FromStringAndSize(
-	               NULL,
-	               read_size );
+	string_object = PyString_FromStringAndSize(
+	                 NULL,
+	                 read_size );
 
 	Py_BEGIN_ALLOW_THREADS
 
 	read_count = libbde_volume_read_buffer(
 	              pybde_volume->volume,
 	              PyString_AsString(
-	               result_data ),
+	               string_object ),
 	              (size_t) read_size,
 	              &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( read_count != (ssize_t) read_size )
+	if( read_count <= -1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to read data.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to read data.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to read data.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
+		Py_DecRef(
+		 (PyObject *) string_object );
+
 		return( NULL );
 	}
-	return( result_data );
+	/* Need to resize the string here in case read_size was not fully read.
+	 */
+	if( _PyString_Resize(
+	     &string_object,
+	     (Py_ssize_t) read_count ) != 0 )
+	{
+		Py_DecRef(
+		 (PyObject *) string_object );
+
+		return( NULL );
+	}
+	return( string_object );
 }
 
 /* Reads (volume) data at a specific offset
@@ -934,10 +840,8 @@ PyObject *pybde_volume_read_random(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error    = NULL;
-	PyObject *result_data       = NULL;
+	PyObject *string_object     = NULL;
 	static char *function       = "pybde_volume_read_random";
 	static char *keyword_list[] = { "size", "offset", NULL };
 	off64_t read_offset         = 0;
@@ -994,48 +898,50 @@ PyObject *pybde_volume_read_random(
 	}
 	/* Make sure the data fits into the memory buffer
 	 */
-	result_data = PyString_FromStringAndSize(
-	               NULL,
-	               read_size );
+	string_object = PyString_FromStringAndSize(
+	                 NULL,
+	                 read_size );
 
 	Py_BEGIN_ALLOW_THREADS
 
 	read_count = libbde_volume_read_random(
 	              pybde_volume->volume,
 	              PyString_AsString(
-	               result_data ),
+	               string_object ),
 	              (size_t) read_size,
 	              (off64_t) read_offset,
 	              &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( read_count != (ssize_t) read_size )
+	if( read_count <= -1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to read data.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to read data.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to read data.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
+		Py_DecRef(
+		 (PyObject *) string_object );
+
 		return( NULL );
 	}
-	return( result_data );
+	/* Need to resize the string here in case read_size was not fully read.
+	 */
+	if( _PyString_Resize(
+	     &string_object,
+	     (Py_ssize_t) read_count ) != 0 )
+	{
+		Py_DecRef(
+		 (PyObject *) string_object );
+
+		return( NULL );
+	}
+	return( string_object );
 }
 
 /* Seeks a certain offset in the (volume) data
@@ -1046,8 +952,6 @@ PyObject *pybde_volume_seek_offset(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error    = NULL;
 	static char *function       = "pybde_volume_seek_offset";
 	static char *keyword_list[] = { "offset", "whence", NULL };
@@ -1085,24 +989,12 @@ PyObject *pybde_volume_seek_offset(
 
  	if( offset == -1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to seek offset.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to seek offset.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to seek offset.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -1121,9 +1013,8 @@ PyObject *pybde_volume_get_offset(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error = NULL;
+	PyObject *integer_object = NULL;
 	static char *function    = "pybde_volume_get_offset";
 	off64_t current_offset   = 0;
 	int result               = 0;
@@ -1150,54 +1041,21 @@ PyObject *pybde_volume_get_offset(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to retrieve offset.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to retrieve offset.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve offset.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
 		return( NULL );
 	}
-#if defined( HAVE_LONG_LONG )
-	if( current_offset > (off64_t) LLONG_MAX )
-	{
-		PyErr_Format(
-		 PyExc_OverflowError,
-		 "%s: offset value exceeds maximum.",
-		 function );
+	integer_object = pybde_integer_signed_new_from_64bit(
+	                  (int64_t) current_offset );
 
-		return( NULL );
-	}
-	return( PyLong_FromLongLong(
-	         (long long) current_offset ) );
-#else
-	if( current_offset > (off64_t) LONG_MAX )
-	{
-		PyErr_Format(
-		 PyExc_OverflowError,
-		 "%s: offset value exceeds maximum.",
-		 function );
-
-		return( NULL );
-	}
-	return( PyLong_FromLong(
-	         (long) current_offset ) );
-#endif
+	return( integer_object );
 }
 
 /* Retrieves the size
@@ -1207,9 +1065,8 @@ PyObject *pybde_volume_get_size(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error = NULL;
+	PyObject *integer_object = NULL;
 	static char *function    = "pybde_volume_get_size";
 	size64_t size            = 0;
 	int result               = 0;
@@ -1236,54 +1093,21 @@ PyObject *pybde_volume_get_size(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: failed to retrieve size.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: failed to retrieve size.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: failed to retrieve size.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
 		return( NULL );
 	}
-#if defined( HAVE_LONG_LONG )
-	if( size > (size64_t) LLONG_MAX )
-	{
-		PyErr_Format(
-		 PyExc_OverflowError,
-		 "%s: size value exceeds maximum.",
-		 function );
+	integer_object = pybde_integer_unsigned_new_from_64bit(
+	                  (uint64_t) size );
 
-		return( NULL );
-	}
-	return( PyLong_FromLongLong(
-	         (long long) size ) );
-#else
-	if( size > (size64_t) LONG_MAX )
-	{
-		PyErr_Format(
-		 PyExc_OverflowError,
-		 "%s: size value exceeds maximum.",
-		 function );
-
-		return( NULL );
-	}
-	return( PyLong_FromLong(
-	         (long) size ) );
-#endif
+	return( integer_object );
 }
 
 /* Sets the password
@@ -1294,8 +1118,6 @@ PyObject *pybde_volume_set_password(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error      = NULL;
 	char *password_string         = NULL;
 	static char *keyword_list[]   = { "password", NULL };
@@ -1345,24 +1167,12 @@ PyObject *pybde_volume_set_password(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to set password.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to set password.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to set password.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 
@@ -1382,8 +1192,6 @@ PyObject *pybde_volume_set_recovery_password(
            PyObject *arguments,
            PyObject *keywords )
 {
-	char error_string[ PYBDE_ERROR_STRING_SIZE ];
-
 	libcerror_error_t *error               = NULL;
 	char *recovery_password_string         = NULL;
 	static char *keyword_list[]            = { "recovery_password", NULL };
@@ -1433,24 +1241,12 @@ PyObject *pybde_volume_set_recovery_password(
 
 	if( result != 1 )
 	{
-		if( libcerror_error_backtrace_sprint(
-		     error,
-		     error_string,
-		     PYBDE_ERROR_STRING_SIZE ) == -1 )
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to set recovery password.",
-			 function );
-		}
-		else
-		{
-			PyErr_Format(
-			 PyExc_IOError,
-			 "%s: unable to set recovery password.\n%s",
-			 function,
-			 error_string );
-		}
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to set recovery password.",
+		 function );
+
 		libcerror_error_free(
 		 &error );
 

@@ -7,16 +7,22 @@ TODO
   - test if keys are valid ?
   - what about issue with key bit size
   - info handle (check if tweak_key is not 0) when diffuser is specified
-* add handling of BDE volumes with corrupt metadata, e.g. file header
 * update manuals
-* move free metadata to volume_close()
-* check metadata number_of_volume_header_sectors ?
+* metadata
+  - compare the metadata values ?
+  - move free metadata to volume_close()
+  - check metadata number_of_volume_header_sectors ?
+* error tolerance
+  - add handling of BDE volumes with corrupt metadata, e.g. file header
 * debug print more volume header info
 * check debug output alignment
 * check TODOs
 
 * pybde
   - add function to set the keys
+  - add function to get volume identifier
+  - add function to get creation time
+  - setup.py add libfguid see: libvshadow
 
 Optimizations
 * pass values 32-bit to libcaes
@@ -32,11 +38,11 @@ Test suite:
 Tools:
 * bdeinfo
   - print hostname
-  - print more metadata
+  - print more metadata ?
 * bdeexport
   - create tool to export decrypted BDE volume to RAW file?
 * bdemount
-  - implement ImDisk/Dokan version for WINAPI
+  - implement Dokan version for WINAPI
   - implement native MacOS-X version
 
 Format:
@@ -58,6 +64,11 @@ Validate test cases:
 * clear key
 * partial encrypted volume
 * startup key
+
+20131211
+* worked on Python bindings
+* worked on exposing metadata via bdeinfo
+* updated msvscpp files
 
 20131205
 * updated dependencies
