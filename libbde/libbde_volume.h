@@ -194,6 +194,19 @@ int libbde_volume_get_encryption_method(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_get_volume_identifier(
+     libbde_volume_t *volume,
+     uint8_t *volume_identifier,
+     size_t size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_get_creation_time(
+     libbde_volume_t *volume,
+     uint64_t *filetime,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_set_keys(
      libbde_volume_t *volume,
      const uint8_t *full_volume_encryption_key,

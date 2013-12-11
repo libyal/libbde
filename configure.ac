@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20131205],
+ [20131211],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -234,6 +234,7 @@ AC_CONFIG_FILES([macosx/libbde.pmdoc/04share.xml])
 AC_CONFIG_FILES([macosx/libbde.pmdoc/05python.xml])
 AC_CONFIG_FILES([macosx/libbde.pmdoc/index.xml])
 AC_CONFIG_FILES([macosx/Introduction.rtf])
+AC_CONFIG_FILES([pybde/setup.py])
 AC_CONFIG_FILES([libbde.pc])
 AC_CONFIG_FILES([libbde.spec])
 dnl Have configure write its configuration

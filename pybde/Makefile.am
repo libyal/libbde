@@ -16,7 +16,9 @@ pyexec_LTLIBRARIES = pybde.la
 
 pybde_la_SOURCES = \
 	pybde.c pybde.h \
+	pybde_error.c pybde_error.h \
 	pybde_file_object_io_handle.c pybde_file_object_io_handle.h \
+	pybde_integer.c pybde_integer.h \
 	pybde_libbde.h \
 	pybde_libbfio.h \
 	pybde_libcerror.h \
@@ -43,9 +45,14 @@ pybde_la_LDFLAGS  = -module -avoid-version $(PYTHON_LDFLAGS)
 
 endif
 
+EXTRA_DIST = \
+	setup.py \
+	setup.py.in
+
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
+	/bin/rm -f setup.py
 	/bin/rm -f Makefile
 

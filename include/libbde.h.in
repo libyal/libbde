@@ -333,6 +333,26 @@ int libbde_volume_get_encryption_method(
      uint32_t *encryption_method,
      libbde_error_t **error );
 
+/* Retrieves the volume identifier
+ * The identifier is a GUID and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_volume_identifier(
+     libbde_volume_t *volume,
+     uint8_t *volume_identifier,
+     size_t size,
+     libbde_error_t **error );
+
+/* Retrieves the creation date and time
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_creation_time(
+     libbde_volume_t *volume,
+     uint64_t *filetime,
+     libbde_error_t **error );
+
 /* Sets the keys
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error
