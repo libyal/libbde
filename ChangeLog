@@ -65,6 +65,10 @@ Validate test cases:
 * partial encrypted volume
 * startup key
 
+20140112
+* 2014 update
+* updated dependencies
+
 20131211
 * worked on Python bindings
 * worked on exposing metadata via bdeinfo

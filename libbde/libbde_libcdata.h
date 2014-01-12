@@ -1,7 +1,7 @@
 /*
  * The internal libcdata header
  *
- * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -34,6 +34,7 @@
 #include <libcdata_list.h>
 #include <libcdata_list_element.h>
 #include <libcdata_tree_node.h>
+#include <libcdata_range_list.h>
 #include <libcdata_types.h>
 
 #else
