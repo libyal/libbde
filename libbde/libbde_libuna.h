@@ -1,7 +1,7 @@
 /*
  * The libuna header wrapper
  *
- * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * This software is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -30,7 +30,6 @@
 #include <libuna_base32_stream.h>
 #include <libuna_base64_stream.h>
 #include <libuna_byte_stream.h>
-#include <libuna_error.h>
 #include <libuna_unicode_character.h>
 #include <libuna_url_stream.h>
 #include <libuna_utf16_stream.h>

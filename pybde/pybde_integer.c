@@ -1,7 +1,7 @@
 /*
  * Integer functions
  *
- * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -22,7 +22,6 @@
 #include <common.h>
 #include <types.h>
 
-#include "pybde.h"
 #include "pybde_libcerror.h"
 #include "pybde_integer.h"
 #include "pybde_python.h"

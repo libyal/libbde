@@ -1,7 +1,7 @@
 /*
  * Mutex functions
  *
- * Copyright (C) 2012-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2012-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *

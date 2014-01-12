@@ -11,7 +11,7 @@ from distutils.command.sdist import sdist
 from distutils.core import setup, Extension
 
 
-# Custom handler for the setup.py sdist command.
+# Custom handler for the setup.py bdist_rpm command.
 class custom_bdist_rpm(bdist):
 	def run(self):
 		print "'setup.py bdist_rpm' command not supported use 'rpmbuild' instead."
@@ -91,7 +91,7 @@ if platform.system() == "Windows":
 	library_dll_file = os.path.join(library_directory, "%s.dll" % (LIBRARY_NAME))
 
 	# Add the library DLL file to the distribution.
-	LIBRARY_DATA_FILES.append((sysconfig.get_python_lib(True), [library_dll_file])) 
+	LIBRARY_DATA_FILES.append((sysconfig.get_python_lib(True), [library_dll_file]))
 
 else:
 	DEFINE_MACROS = [

@@ -1,7 +1,7 @@
 /*
  * The internal definitions
  *
- * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -34,11 +34,11 @@
  * for local use of libbde
  */
 #else
-#define LIBBDE_VERSION					20131211
+#define LIBBDE_VERSION					20140112
 
 /* The version string
  */
-#define LIBBDE_VERSION_STRING				"20131211"
+#define LIBBDE_VERSION_STRING				"20140112"
 
 /* The file access
  * bit 1        set to 1 for read access
