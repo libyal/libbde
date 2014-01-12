@@ -1,7 +1,7 @@
 /*
  * The internal libfdatetime header
  *
- * Copyright (C) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -30,9 +30,9 @@
 
 #include <libfdatetime_date_time_values.h>
 #include <libfdatetime_definitions.h>
-#include <libfdatetime_error.h>
 #include <libfdatetime_fat_date_time.h>
 #include <libfdatetime_filetime.h>
+#include <libfdatetime_floatingtime.h>
 #include <libfdatetime_nsf_timedate.h>
 #include <libfdatetime_posix_time.h>
 #include <libfdatetime_systemtime.h>

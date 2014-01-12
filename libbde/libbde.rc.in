@@ -24,7 +24,7 @@ BEGIN
       VALUE "FileDescription",		"Library to access the BitLocker Drive Encryption (BDE) format\0"
       VALUE "FileVersion",		"@VERSION@" "\0"
       VALUE "InternalName",		"libbde.dll\0"
-      VALUE "LegalCopyright",		"(c) 2011-2013 Joachim Metz <joachim.metz@gmail.com>\0"
+      VALUE "LegalCopyright",		"(c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>\0"
       VALUE "OriginalFilename",		"libbde.dll\0"
       VALUE "ProductName",		"libbde\0"
       VALUE "ProductVersion",		"@VERSION@" "\0"

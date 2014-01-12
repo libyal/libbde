@@ -1,7 +1,7 @@
 /*
  * Python object definition of the libbde volume
  *
- * Copyright (c) 2011-2013, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #endif
 
-#include "pybde.h"
 #include "pybde_error.h"
 #include "pybde_file_object_io_handle.h"
 #include "pybde_integer.h"
