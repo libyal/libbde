@@ -1,5 +1,5 @@
 /*
- * Error functions
+ * The internal libcerror header
  *
  * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,29 +19,31 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_ERROR_H )
-#define _PYBDE_ERROR_H
+#if !defined( _BDE_TEST_LIBCERROR_H )
+#define _BDE_TEST_LIBCERROR_H
 
 #include <common.h>
-#include <types.h>
 
-#include "pybde_libcerror.h"
-#include "pybde_python.h"
+/* Define HAVE_LOCAL_LIBCERROR for local use of libcerror
+ */
+#if defined( HAVE_LOCAL_LIBCERROR )
 
-#define PYBDE_ERROR_STRING_SIZE		768
+#include <libcerror_definitions.h>
+#include <libcerror_error.h>
+#include <libcerror_system.h>
+#include <libcerror_types.h>
 
-#if defined( __cplusplus )
-extern "C" {
+#else
+
+/* If libtool DLL support is enabled set LIBCERROR_DLL_IMPORT
+ * before including libcerror.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBCERROR_DLL_IMPORT
 #endif
 
-void pybde_error_raise(
-      libcerror_error_t *error,
-      PyObject *exception_object,
-      const char *format_string,
-      ... );
+#include <libcerror.h>
 
-#if defined( __cplusplus )
-}
 #endif
 
 #endif

@@ -102,6 +102,7 @@ stamp-h1
 /libbde/libbde.rc
 /libbde/libbde_definitions.h
 /pybde/setup.py
+/tests/bde_test_open_close
 /tests/input
 /tests/tmp
 

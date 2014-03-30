@@ -144,74 +144,15 @@ int libbde_io_handle_free(
 	}
 	if( *io_handle != NULL )
 	{
-		if( ( *io_handle )->encryption_context != NULL )
-		{
-			if( libbde_encryption_free(
-			     &( ( *io_handle )->encryption_context ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free encryption context.",
-				 function );
-
-				result = -1;
-			}
-		}
-		if( memory_set(
-		     ( *io_handle )->password_hash,
-		     0,
-		     32 ) == NULL )
+		if( libbde_io_handle_clear(
+		     *io_handle,
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear password hash.",
-			 function );
-
-			result = -1;
-		}
-		if( memory_set(
-		     ( *io_handle )->recovery_password_hash,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear recovery password hash.",
-			 function );
-
-			result = -1;
-		}
-		if( memory_set(
-		     ( *io_handle )->full_volume_encryption_key,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear full volume encryption key.",
-			 function );
-
-			result = -1;
-		}
-		if( memory_set(
-		     ( *io_handle )->tweak_key,
-		     0,
-		     32 ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear tweak key.",
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to clear IO handle.",
 			 function );
 
 			result = -1;
@@ -221,6 +162,76 @@ int libbde_io_handle_free(
 
 		*io_handle = NULL;
 	}
+	return( result );
+}
+
+/* Clears the IO handle
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_io_handle_clear(
+     libbde_io_handle_t *io_handle,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_io_handle_clear";
+	int result            = 1;
+
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle->encryption_context != NULL )
+	{
+		if( libbde_encryption_free(
+		     &( io_handle->encryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free encryption context.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( memory_set(
+	     io_handle->full_volume_encryption_key,
+	     0,
+	     32 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear full volume encryption key.",
+		 function );
+
+		result = -1;
+	}
+	if( memory_set(
+	     io_handle->tweak_key,
+	     0,
+	     32 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear tweak key.",
+		 function );
+
+		result = -1;
+	}
+	io_handle->bytes_per_sector = 512;
+
 	return( result );
 }
 

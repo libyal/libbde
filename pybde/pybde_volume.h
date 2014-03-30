@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "pybde_libbde.h"
+#include "pybde_libbfio.h"
 #include "pybde_python.h"
 
 #if defined( __cplusplus )
@@ -43,6 +44,10 @@ struct pybde_volume
 	/* The libbde volume
 	 */
 	libbde_volume_t *volume;
+
+	/* The libbfio file IO handle
+	 */
+	libbfio_handle_t *file_io_handle;
 };
 
 extern PyMethodDef pybde_volume_object_methods[];

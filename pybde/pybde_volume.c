@@ -371,9 +371,8 @@ int pybde_volume_init(
 
 		return( -1 );
 	}
-	/* Make sure libbde volume is set to NULL
-	 */
-	pybde_volume->volume = NULL;
+	pybde_volume->volume         = NULL;
+	pybde_volume->file_io_handle = NULL;
 
 	if( libbde_volume_initialize(
 	     &( pybde_volume->volume ),
@@ -592,13 +591,12 @@ PyObject *pybde_volume_open_file_object(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *file_object            = NULL;
-	libbfio_handle_t *file_io_handle = NULL;
-	libcerror_error_t *error         = NULL;
-	char *mode                       = NULL;
-	static char *keyword_list[]      = { "file_object", "mode", NULL };
-	static char *function            = "pybde_volume_open_file_object";
-	int result                       = 0;
+	PyObject *file_object       = NULL;
+	libcerror_error_t *error    = NULL;
+	char *mode                  = NULL;
+	static char *keyword_list[] = { "file_object", "mode", NULL };
+	static char *function       = "pybde_volume_open_file_object";
+	int result                  = 0;
 
 	if( pybde_volume == NULL )
 	{
@@ -631,7 +629,7 @@ PyObject *pybde_volume_open_file_object(
 		return( NULL );
 	}
 	if( pybde_file_object_initialize(
-	     &file_io_handle,
+	     &( pybde_volume->file_io_handle ),
 	     file_object,
 	     &error ) != 1 )
 	{
@@ -650,7 +648,7 @@ PyObject *pybde_volume_open_file_object(
 
 	result = libbde_volume_open_file_io_handle(
 	          pybde_volume->volume,
-                  file_io_handle,
+                  pybde_volume->file_io_handle,
                   LIBBDE_OPEN_READ,
 	          &error );
 
@@ -675,10 +673,10 @@ PyObject *pybde_volume_open_file_object(
 	return( Py_None );
 
 on_error:
-	if( file_io_handle != NULL )
+	if( pybde_volume->file_io_handle != NULL )
 	{
 		libbfio_handle_free(
-		 &file_io_handle,
+		 &( pybde_volume->file_io_handle ),
 		 NULL );
 	}
 	return( NULL );
@@ -726,6 +724,30 @@ PyObject *pybde_volume_close(
 		 &error );
 
 		return( NULL );
+	}
+	if( pybde_volume->file_io_handle != NULL )
+	{
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbfio_handle_free(
+		          &( pybde_volume->file_io_handle ),
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result != 1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to free libbfio file IO handle.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
 	}
 	Py_IncRef(
 	 Py_None );

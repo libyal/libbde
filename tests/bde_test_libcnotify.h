@@ -1,7 +1,7 @@
 /*
- * Error functions
+ * The internal libcnotify header
  *
- * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,29 +19,31 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_ERROR_H )
-#define _PYBDE_ERROR_H
+#if !defined( _BDE_TEST_LIBCNOTIFY_H )
+#define _BDE_TEST_LIBCNOTIFY_H
 
 #include <common.h>
-#include <types.h>
 
-#include "pybde_libcerror.h"
-#include "pybde_python.h"
+/* Define HAVE_LOCAL_LIBCNOTIFY for local use of libcnotify
+ */
+#if defined( HAVE_LOCAL_LIBCNOTIFY )
 
-#define PYBDE_ERROR_STRING_SIZE		768
+#include <libcnotify_definitions.h>
+#include <libcnotify_print.h>
+#include <libcnotify_stream.h>
+#include <libcnotify_verbose.h>
 
-#if defined( __cplusplus )
-extern "C" {
+#else
+
+/* If libtool DLL support is enabled set LIBCNOTIFY_DLL_IMPORT
+ * before including libcnotify.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBCNOTIFY_DLL_IMPORT
 #endif
 
-void pybde_error_raise(
-      libcerror_error_t *error,
-      PyObject *exception_object,
-      const char *format_string,
-      ... );
+#include <libcnotify.h>
 
-#if defined( __cplusplus )
-}
 #endif
 
 #endif

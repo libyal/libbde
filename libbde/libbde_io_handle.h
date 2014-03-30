@@ -41,10 +41,6 @@ typedef struct libbde_io_handle libbde_io_handle_t;
 
 struct libbde_io_handle
 {
-	/* The current (storage media) offset
-	 */
-	off64_t current_offset;
-
 	/* The format version
 	 */
 	int version;
@@ -103,22 +99,6 @@ struct libbde_io_handle
 	 */
 	libbde_encryption_context_t *encryption_context;
 
-	/* The SHA-256 hash of the password
-	 */
-	uint8_t password_hash[ 32 ];
-
-	/* Value to indicate the password is set
-	 */
-	uint8_t password_is_set;
-
-	/* The SHA-256 hash of the (binary) recovery password
-	 */
-	uint8_t recovery_password_hash[ 32 ];
-
-	/* Value to indicate the recovery password is set
-	 */
-	uint8_t recovery_password_is_set;
-
 	/* External provided full volume encryption key
 	 */
 	uint8_t full_volume_encryption_key[ 32 ];
@@ -150,6 +130,10 @@ int libbde_io_handle_initialize(
 
 int libbde_io_handle_free(
      libbde_io_handle_t **io_handle,
+     libcerror_error_t **error );
+
+int libbde_io_handle_clear(
+     libbde_io_handle_t *io_handle,
      libcerror_error_t **error );
 
 int libbde_io_handle_read_volume_header(

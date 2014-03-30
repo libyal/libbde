@@ -32,6 +32,7 @@
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
+#include "libbde_password_keep.h"
 #include "libbde_types.h"
 
 #if defined( __cplusplus )
@@ -42,6 +43,10 @@ typedef struct libbde_internal_volume libbde_internal_volume_t;
 
 struct libbde_internal_volume
 {
+	/* The current (storage media) offset
+	 */
+	off64_t current_offset;
+
 	/* The encryption method
 	 */
 	uint32_t encryption_method;
@@ -81,6 +86,14 @@ struct libbde_internal_volume
 	/* Value to indicate if the file IO handle was created inside the library
 	 */
 	uint8_t file_io_handle_created_in_library;
+
+	/* Value to indicate if the file IO handle was opened inside the library
+	 */
+	uint8_t file_io_handle_opened_in_library;
+
+	/* The password keep
+	 */
+	libbde_password_keep_t *password_keep;
 };
 
 LIBBDE_EXTERN \
