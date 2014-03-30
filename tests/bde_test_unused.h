@@ -1,5 +1,5 @@
 /*
- * Error functions
+ * The unused definition
  *
  * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,29 +19,25 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_ERROR_H )
-#define _PYBDE_ERROR_H
+#if !defined( _BDE_TEST_UNUSED_H )
+#define _BDE_TEST_UNUSED_H
 
 #include <common.h>
-#include <types.h>
 
-#include "pybde_libcerror.h"
-#include "pybde_python.h"
-
-#define PYBDE_ERROR_STRING_SIZE		768
-
-#if defined( __cplusplus )
-extern "C" {
+#if !defined( BDE_TEST_ATTRIBUTE_UNUSED )
+#if defined( __GNUC__ ) && __GNUC__ >= 3
+#define BDE_TEST_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
+#else
+#define BDE_TEST_ATTRIBUTE_UNUSED
+#endif
 #endif
 
-void pybde_error_raise(
-      libcerror_error_t *error,
-      PyObject *exception_object,
-      const char *format_string,
-      ... );
-
-#if defined( __cplusplus )
-}
+#if defined( _MSC_VER )
+#define BDE_TEST_UNREFERENCED_PARAMETER( parameter ) \
+	UNREFERENCED_PARAMETER( parameter );
+#else
+#define BDE_TEST_UNREFERENCED_PARAMETER( parameter ) \
+	/* parameter */
 #endif
 
 #endif

@@ -222,6 +222,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_password_keep.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_recovery.c"
 				>
 			</File>
@@ -373,6 +377,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_password.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_password_keep.h"
 				>
 			</File>
 			<File

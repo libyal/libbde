@@ -2,7 +2,6 @@ TODO
 * git version
   - make sure dependent local libs are in git
   - fix synclibs.sh for libfvalue Makefile.am
-* check multiple open close
 * add support for passing key directly to library
   - test if keys are valid ?
   - what about issue with key bit size
@@ -28,17 +27,25 @@ Optimizations
 * pass values 32-bit to libcaes
 
 Library
-* add support for passing key directly to library
 * add support for smart card + pin?
 * add support for TPM ?
 
 Test suite:
-* add test scripts
+* add options for
+  - key data
+  - clear key
+  - startup key (bek file)
+  - partial encrypted volume
+* add seek test case
+* add read test case
+* add verify test case
+* test images: for Windows Vista, Windows 7, To Go, Windows 8
 
 Tools:
 * bdeinfo
   - print hostname
   - print more metadata ?
+  - print recovery key ID
 * bdeexport
   - create tool to export decrypted BDE volume to RAW file?
 * bdemount
@@ -52,18 +59,10 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
-Test images:
-* for Windows Vista, Windows 7, To Go, Windows 8
-
-Validate test cases:
-* AES 128
-* AES 128 diffuser
-* AES 256
-* AES 256 diffuser
-* recovery key
-* clear key
-* partial encrypted volume
-* startup key
+20140330
+* worked on Python bindings
+* worked on tests
+* moved password hashes to password keep
 
 20140112
 * 2014 update

@@ -1,5 +1,5 @@
 /*
- * Error functions
+ * The internal libbde header
  *
  * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,30 +19,19 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_ERROR_H )
-#define _PYBDE_ERROR_H
+#if !defined( _BDE_TEST_LIBBDE_H )
+#define _BDE_TEST_LIBBDE_H
 
 #include <common.h>
-#include <types.h>
 
-#include "pybde_libcerror.h"
-#include "pybde_python.h"
-
-#define PYBDE_ERROR_STRING_SIZE		768
-
-#if defined( __cplusplus )
-extern "C" {
+/* If Cygwin libtool DLL support is enabled set LIBBDE_DLL_IMPORT
+ * before including libbde.h
+ */
+#if defined( _WIN32 ) && defined( DLL_EXPORT )
+#define LIBBDE_DLL_IMPORT
 #endif
 
-void pybde_error_raise(
-      libcerror_error_t *error,
-      PyObject *exception_object,
-      const char *format_string,
-      ... );
-
-#if defined( __cplusplus )
-}
-#endif
+#include <libbde.h>
 
 #endif
 
