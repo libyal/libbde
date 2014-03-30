@@ -133,4 +133,5 @@ splint:
 	(cd $(srcdir)/bdetools && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/pybde && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) splint $(AM_MAKEFLAGS))
+	(cd $(srcdir)/tests && $(MAKE) splint $(AM_MAKEFLAGS))
 

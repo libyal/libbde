@@ -1,5 +1,5 @@
 /*
- * Error functions
+ * Password keep functions
  *
  * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,26 +19,46 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _PYBDE_ERROR_H )
-#define _PYBDE_ERROR_H
+#if !defined( _LIBBDE_PASSWORD_KEEP_H )
+#define _LIBBDE_PASSWORD_KEEP_H
 
 #include <common.h>
 #include <types.h>
 
-#include "pybde_libcerror.h"
-#include "pybde_python.h"
-
-#define PYBDE_ERROR_STRING_SIZE		768
+#include "libbde_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-void pybde_error_raise(
-      libcerror_error_t *error,
-      PyObject *exception_object,
-      const char *format_string,
-      ... );
+typedef struct libbde_password_keep libbde_password_keep_t;
+
+struct libbde_password_keep
+{
+	/* The SHA-256 hash of the password
+	 */
+	uint8_t password_hash[ 32 ];
+
+	/* Value to indicate the password is set
+	 */
+	uint8_t password_is_set;
+
+	/* The SHA-256 hash of the (binary) recovery password
+	 */
+	uint8_t recovery_password_hash[ 32 ];
+
+	/* Value to indicate the recovery password is set
+	 */
+	uint8_t recovery_password_is_set;
+};
+
+int libbde_password_keep_initialize(
+     libbde_password_keep_t **password_keep,
+     libcerror_error_t **error );
+
+int libbde_password_keep_free(
+     libbde_password_keep_t **password_keep,
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }

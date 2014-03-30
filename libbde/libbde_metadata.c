@@ -41,6 +41,7 @@
 #include "libbde_metadata.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_password.h"
+#include "libbde_password_keep.h"
 #include "libbde_volume_master_key.h"
 
 #include "bde_metadata.h"
@@ -1540,6 +1541,7 @@ on_error:
 int libbde_metadata_get_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
+     libbde_password_keep_t *password_keep,
      const uint8_t *external_key,
      size_t external_key_size,
      uint8_t *volume_master_key,
@@ -1574,6 +1576,17 @@ int libbde_metadata_get_volume_master_key(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( password_keep == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid password keep.",
 		 function );
 
 		return( -1 );
@@ -2059,7 +2072,7 @@ int libbde_metadata_get_volume_master_key(
 	}
 	if( result == 0 )
 	{
-		if( io_handle->password_is_set != 0 )
+		if( password_keep->password_is_set != 0 )
 		{
 			if( metadata->password_volume_master_key == NULL )
 			{
@@ -2109,7 +2122,7 @@ int libbde_metadata_get_volume_master_key(
 				goto on_error;
 			}
 			if( libbde_password_calculate_key(
-			     io_handle->password_hash,
+			     password_keep->password_hash,
 			     32,
 			     metadata->password_volume_master_key->stretch_key->salt,
 			     16,
@@ -2305,7 +2318,7 @@ int libbde_metadata_get_volume_master_key(
 	}
 	if( result == 0 )
 	{
-		if( io_handle->recovery_password_is_set != 0 )
+		if( password_keep->recovery_password_is_set != 0 )
 		{
 			if( metadata->recovery_password_volume_master_key == NULL )
 			{
@@ -2355,7 +2368,7 @@ int libbde_metadata_get_volume_master_key(
 				goto on_error;
 			}
 			if( libbde_password_calculate_key(
-			     io_handle->recovery_password_hash,
+			     password_keep->recovery_password_hash,
 			     32,
 			     metadata->recovery_password_volume_master_key->stretch_key->salt,
 			     16,

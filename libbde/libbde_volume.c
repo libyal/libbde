@@ -156,6 +156,19 @@ int libbde_volume_initialize(
 
 		goto on_error;
 	}
+	if( libbde_password_keep_initialize(
+	     &( internal_volume->password_keep ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create password keep.",
+		 function );
+
+		goto on_error;
+	}
 	*volume = (libbde_volume_t *) internal_volume;
 
 	return( 1 );
@@ -163,6 +176,12 @@ int libbde_volume_initialize(
 on_error:
 	if( internal_volume != NULL )
 	{
+		if( internal_volume->io_handle != NULL )
+		{
+			libbde_io_handle_free(
+			 &( internal_volume->io_handle ),
+			 NULL );
+		}
 		if( internal_volume->tertiary_metadata != NULL )
 		{
 			libbde_metadata_free(
@@ -279,6 +298,19 @@ int libbde_volume_free(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free IO handle.",
+			 function );
+
+			result = -1;
+		}
+		if( libbde_password_keep_free(
+		     &( internal_volume->password_keep ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free password keep.",
 			 function );
 
 			result = -1;
@@ -649,7 +681,6 @@ int libbde_volume_open_file_io_handle(
 	static char *function                     = "libbde_volume_open_file_io_handle";
 	int bfio_access_flags                     = 0;
 	int file_io_handle_is_open                = 0;
-	int result                                = 0;
 
 	if( volume == NULL )
 	{
@@ -723,10 +754,10 @@ int libbde_volume_open_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open file.",
+		 "%s: unable to determine if file IO handle is open.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	else if( file_io_handle_is_open == 0 )
 	{
@@ -742,15 +773,14 @@ int libbde_volume_open_file_io_handle(
 			 "%s: unable to open file IO handle.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
+		internal_volume->file_io_handle_opened_in_library = 1;
 	}
-	result = libbde_volume_open_read(
-	          internal_volume,
-	          file_io_handle,
-	          error );
-
-	if( result == -1 )
+	if( libbde_volume_open_read(
+	     internal_volume,
+	     file_io_handle,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -759,17 +789,25 @@ int libbde_volume_open_file_io_handle(
 		 "%s: unable to read from volume handle.",
 		 function );
 
-		if( file_io_handle_is_open == 0 )
-		{
-			libbfio_handle_close(
-			 file_io_handle,
-			 error );
-		}
-		return( -1 );
+		goto on_error;
 	}
 	internal_volume->file_io_handle = file_io_handle;
 
-	return( result );
+	return( 1 );
+
+on_error:
+	if( ( file_io_handle_is_open == 0 )
+	 && ( internal_volume->file_io_handle_opened_in_library != 0 ) )
+	{
+		libbfio_handle_close(
+		 file_io_handle,
+		 error );
+
+		internal_volume->file_io_handle_opened_in_library = 0;
+	}
+	internal_volume->file_io_handle = NULL;
+
+	return( -1 );
 }
 
 /* Closes a volume
@@ -807,10 +845,10 @@ int libbde_volume_close(
 
 		return( -1 );
 	}
-	if( internal_volume->file_io_handle_created_in_library != 0 )
-	{
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
+	{
+		if( internal_volume->file_io_handle_created_in_library != 0 )
 		{
 			if( libbde_debug_print_read_offsets(
 			     internal_volume->file_io_handle,
@@ -824,7 +862,10 @@ int libbde_volume_close(
 				 function );
 			}
 		}
+	}
 #endif
+	if( internal_volume->file_io_handle_opened_in_library != 0 )
+	{
 		if( libbfio_handle_close(
 		     internal_volume->file_io_handle,
 		     error ) != 0 )
@@ -838,6 +879,10 @@ int libbde_volume_close(
 
 			result = -1;
 		}
+		internal_volume->file_io_handle_opened_in_library = 0;
+	}
+	if( internal_volume->file_io_handle_created_in_library != 0 )
+	{
 		if( libbfio_handle_free(
 		     &( internal_volume->file_io_handle ),
 		     error ) != 1 )
@@ -851,10 +896,24 @@ int libbde_volume_close(
 
 			result = -1;
 		}
+		internal_volume->file_io_handle_created_in_library = 0;
 	}
-	internal_volume->file_io_handle                    = NULL;
-	internal_volume->file_io_handle_created_in_library = 0;
+	internal_volume->file_io_handle = NULL;
+	internal_volume->current_offset = 0;
 
+	if( libbde_io_handle_clear(
+	     internal_volume->io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to clear IO handle.",
+		 function );
+
+		result = -1;
+	}
 	if( libfdata_vector_free(
 	     &( internal_volume->sectors_vector ),
 	     error ) != 1 )
@@ -1330,6 +1389,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	result = libbde_metadata_get_volume_master_key(
 	          metadata,
 	          internal_volume->io_handle,
+	          internal_volume->password_keep,
 	          external_key,
 	          external_key_size,
 	          volume_master_key,
@@ -1515,6 +1575,7 @@ ssize_t libbde_volume_read_buffer(
 	libbde_sector_data_t *sector_data         = NULL;
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_read_buffer";
+	off64_t element_data_offset               = 0;
 	size_t buffer_offset                      = 0;
 	size_t read_size                          = 0;
 	size_t sector_data_offset                 = 0;
@@ -1566,13 +1627,13 @@ ssize_t libbde_volume_read_buffer(
 
 		return( -1 );
 	}
-	if( internal_volume->io_handle->current_offset < 0 )
+	if( internal_volume->current_offset < 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid internal volume - invalid IO handle - current offset value out of bounds.",
+		 "%s: invalid internal volume - current offset value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -1599,15 +1660,15 @@ ssize_t libbde_volume_read_buffer(
 
 		return( -1 );
 	}
-	if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->io_handle->volume_size )
+	if( (size64_t) internal_volume->current_offset >= internal_volume->io_handle->volume_size )
 	{
 		return( 0 );
 	}
-	if( (size64_t) ( internal_volume->io_handle->current_offset + buffer_size ) >= internal_volume->io_handle->volume_size )
+	if( (size64_t) ( internal_volume->current_offset + buffer_size ) >= internal_volume->io_handle->volume_size )
 	{
-		buffer_size = (size_t) ( internal_volume->io_handle->volume_size - internal_volume->io_handle->current_offset );
+		buffer_size = (size_t) ( internal_volume->io_handle->volume_size - internal_volume->current_offset );
 	}
-	sector_data_offset = (size_t) ( internal_volume->io_handle->current_offset % internal_volume->io_handle->bytes_per_sector );
+	sector_data_offset = (size_t) ( internal_volume->current_offset % internal_volume->io_handle->bytes_per_sector );
 
 	while( buffer_size > 0 )
 	{
@@ -1615,7 +1676,8 @@ ssize_t libbde_volume_read_buffer(
 		     internal_volume->sectors_vector,
 		     (intptr_t *) internal_volume->file_io_handle,
 		     internal_volume->sectors_cache,
-		     internal_volume->io_handle->current_offset,
+		     internal_volume->current_offset,
+		     &element_data_offset,
 		     (intptr_t **) &sector_data,
 		     0,
 		     error ) != 1 )
@@ -1626,7 +1688,7 @@ ssize_t libbde_volume_read_buffer(
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve sector data at offset: %" PRIi64 ".",
 			 function,
-			 internal_volume->io_handle->current_offset );
+			 internal_volume->current_offset );
 
 			return( -1 );
 		}
@@ -1638,7 +1700,7 @@ ssize_t libbde_volume_read_buffer(
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: missing sector data at offset: %" PRIi64 ".",
 			 function,
-			 internal_volume->io_handle->current_offset );
+			 internal_volume->current_offset );
 
 			return( -1 );
 		}
@@ -1671,9 +1733,9 @@ ssize_t libbde_volume_read_buffer(
 		total_read_count  += (ssize_t) read_size;
 		sector_data_offset = 0;
 
-		internal_volume->io_handle->current_offset += (off64_t) read_size;
+		internal_volume->current_offset += (off64_t) read_size;
 
-		if( (size64_t) internal_volume->io_handle->current_offset >= internal_volume->io_handle->volume_size )
+		if( (size64_t) internal_volume->current_offset >= internal_volume->io_handle->volume_size )
 		{
 			break;
 		}
@@ -1848,7 +1910,7 @@ off64_t libbde_volume_seek_offset(
 	}
 	if( whence == SEEK_CUR )
 	{	
-		offset += internal_volume->io_handle->current_offset;
+		offset += internal_volume->current_offset;
 	}
 	else if( whence == SEEK_END )
 	{	
@@ -1874,7 +1936,7 @@ off64_t libbde_volume_seek_offset(
 
 		return( -1 );
 	}
-	internal_volume->io_handle->current_offset = offset;
+	internal_volume->current_offset = offset;
 
 	return( offset );
 }
@@ -1925,7 +1987,7 @@ int libbde_volume_get_offset(
 
 		return( -1 );
 	}
-	*offset = internal_volume->io_handle->current_offset;
+	*offset = internal_volume->current_offset;
 
 	return( 1 );
 }
@@ -2332,13 +2394,13 @@ int libbde_volume_set_utf8_password(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
+	if( internal_volume->password_keep == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
+		 "%s: invalid volume - missing password keep.",
 		 function );
 
 		return( -1 );
@@ -2357,7 +2419,7 @@ int libbde_volume_set_utf8_password(
 	if( libbde_utf8_password_calculate_hash(
 	     utf8_string,
 	     utf8_string_length,
-	     internal_volume->io_handle->password_hash,
+	     internal_volume->password_keep->password_hash,
 	     32,
 	     error ) != 1 )
 	{
@@ -2370,7 +2432,7 @@ int libbde_volume_set_utf8_password(
 
 		return( -1 );
 	}
-	internal_volume->io_handle->password_is_set = 1;
+	internal_volume->password_keep->password_is_set = 1;
 
 	return( 1 );
 }
@@ -2401,13 +2463,13 @@ int libbde_volume_set_utf16_password(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
+	if( internal_volume->password_keep == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
+		 "%s: invalid volume - missing password keep.",
 		 function );
 
 		return( -1 );
@@ -2426,7 +2488,7 @@ int libbde_volume_set_utf16_password(
 	if( libbde_utf16_password_calculate_hash(
 	     utf16_string,
 	     utf16_string_length,
-	     internal_volume->io_handle->password_hash,
+	     internal_volume->password_keep->password_hash,
 	     32,
 	     error ) != 1 )
 	{
@@ -2439,7 +2501,7 @@ int libbde_volume_set_utf16_password(
 
 		return( -1 );
 	}
-	internal_volume->io_handle->password_is_set = 1;
+	internal_volume->password_keep->password_is_set = 1;
 
 	return( 1 );
 }
@@ -2470,13 +2532,13 @@ int libbde_volume_set_utf8_recovery_password(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
+	if( internal_volume->password_keep == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
+		 "%s: invalid volume - missing password keep.",
 		 function );
 
 		return( -1 );
@@ -2495,7 +2557,7 @@ int libbde_volume_set_utf8_recovery_password(
 	if( libbde_utf8_recovery_password_calculate_hash(
 	     utf8_string,
 	     utf8_string_length,
-	     internal_volume->io_handle->recovery_password_hash,
+	     internal_volume->password_keep->recovery_password_hash,
 	     32,
 	     error ) != 1 )
 	{
@@ -2508,7 +2570,7 @@ int libbde_volume_set_utf8_recovery_password(
 
 		return( -1 );
 	}
-	internal_volume->io_handle->recovery_password_is_set = 1;
+	internal_volume->password_keep->recovery_password_is_set = 1;
 
 	return( 1 );
 }
@@ -2539,13 +2601,13 @@ int libbde_volume_set_utf16_recovery_password(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
+	if( internal_volume->password_keep == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
+		 "%s: invalid volume - missing password keep.",
 		 function );
 
 		return( -1 );
@@ -2564,7 +2626,7 @@ int libbde_volume_set_utf16_recovery_password(
 	if( libbde_utf16_recovery_password_calculate_hash(
 	     utf16_string,
 	     utf16_string_length,
-	     internal_volume->io_handle->recovery_password_hash,
+	     internal_volume->password_keep->recovery_password_hash,
 	     32,
 	     error ) != 1 )
 	{
@@ -2577,7 +2639,7 @@ int libbde_volume_set_utf16_recovery_password(
 
 		return( -1 );
 	}
-	internal_volume->io_handle->recovery_password_is_set = 1;
+	internal_volume->password_keep->recovery_password_is_set = 1;
 
 	return( 1 );
 }

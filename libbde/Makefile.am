@@ -54,6 +54,7 @@ libbde_la_SOURCES = \
 	libbde_metadata_entry.c libbde_metadata_entry.h \
 	libbde_notify.c libbde_notify.h \
 	libbde_password.c libbde_password.h \
+	libbde_password_keep.c libbde_password_keep.h \
 	libbde_recovery.c libbde_recovery.h \
 	libbde_sector_data.c libbde_sector_data.h \
 	libbde_stretch_key.c libbde_stretch_key.h \
