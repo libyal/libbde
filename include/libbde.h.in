@@ -353,6 +353,50 @@ int libbde_volume_get_creation_time(
      uint64_t *filetime,
      libbde_error_t **error );
 
+/* Retrieves the UTF-8 string size of the volume description
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_utf8_description_size(
+     libbde_volume_t *volume,
+     size_t *utf8_string_size,
+     libbde_error_t **error );
+
+/* Retrieves the UTF-8 string value of the volume description
+ * The function uses a codepage if necessary, it uses the codepage set for the library
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_utf8_description(
+     libbde_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libbde_error_t **error );
+
+/* Retrieves the UTF-16 string size of the volume description
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_utf16_description_size(
+     libbde_volume_t *volume,
+     size_t *utf16_string_size,
+     libbde_error_t **error );
+
+/* Retrieves the UTF-16 string value of the volume description
+ * The function uses a codepage if necessary, it uses the codepage set for the library
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_utf16_description(
+     libbde_volume_t *volume,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libbde_error_t **error );
+
 /* Sets the keys
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error

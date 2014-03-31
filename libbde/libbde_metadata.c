@@ -38,6 +38,7 @@
 #include "libbde_libcstring.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
+#include "libbde_libuna.h"
 #include "libbde_metadata.h"
 #include "libbde_metadata_entry.h"
 #include "libbde_password.h"
@@ -156,6 +157,11 @@ int libbde_metadata_free(
 	}
 	if( *metadata != NULL )
 	{
+		if( ( *metadata )->description != NULL )
+		{
+			memory_free(
+			 ( *metadata )->description );
+		}
 		if( ( *metadata )->clear_key_volume_master_key != NULL )
 		{
 			if( libbde_volume_master_key_free(
@@ -1062,7 +1068,6 @@ on_error:
 	return( -1 );
 }
 
-
 /* Reads a metadata entries
  * Returns the number of byte read if successful or -1 on error
  */
@@ -1395,6 +1400,61 @@ ssize_t libbde_metadata_read_entries(
 					goto on_error;
 				}
 #endif
+				if( metadata->description != NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+					 "%s: invalid metadata - description value already set.",
+					 function );
+
+					goto on_error;
+				}
+				if( metadata_entry == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+					 "%s: missing metadata entry.",
+					 function );
+
+					goto on_error;
+				}
+				if( ( metadata_entry->value_data != NULL )
+				 && ( metadata_entry->value_data_size > 0 ) )
+				{
+					metadata->description = (uint8_t *) memory_allocate(
+					                                     metadata_entry->value_data_size );
+
+					if( metadata->description == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+						 "%s: unable to create description.",
+						 function );
+
+						goto on_error;
+					}
+					if( memory_copy(
+					     metadata->description,
+					     metadata_entry->value_data,
+					     metadata_entry->value_data_size ) == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+						 "%s: unable to copy description metadata entry value data.",
+						 function );
+
+						goto on_error;
+					}
+					metadata->description_size = metadata_entry->value_data_size;
+				}
 				break;
 
 			case LIBBDE_ENTRY_TYPE_VOLUME_HEADER_BLOCK:
@@ -1520,6 +1580,14 @@ on_error:
 		libbde_volume_master_key_free(
 		 &volume_master_key,
 		 NULL );
+	}
+	if( metadata->description != NULL )
+	{
+		memory_free(
+		 metadata->description );
+
+		metadata->description      = NULL;
+		metadata->description_size = 0;
 	}
 	if( metadata_entry != NULL )
 	{
@@ -3084,6 +3152,196 @@ int libbde_metadata_get_creation_time(
 	}
 	*filetime = metadata->creation_time;
 
+	return( 1 );
+}
+
+/* Retrieves the UTF-8 string size of the metadata description
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_metadata_get_utf8_description_size(
+     libbde_metadata_t *metadata,
+     size_t *utf8_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_utf8_description_size";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( metadata->description == NULL )
+	 || ( metadata->description_size == 0 ) )
+	{
+		return( 0 );
+	}
+	if( libuna_utf8_string_size_from_utf16_stream(
+	     metadata->description,
+	     metadata->description_size,
+	     LIBUNA_ENDIAN_LITTLE,
+	     utf8_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 string size.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-8 string value of the metadata description
+ * The function uses a codepage if necessary, it uses the codepage set for the library
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_metadata_get_utf8_description(
+     libbde_metadata_t *metadata,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_utf8_description";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( metadata->description == NULL )
+	 || ( metadata->description_size == 0 ) )
+	{
+		return( 0 );
+	}
+	if( libuna_utf8_string_copy_from_utf16_stream(
+	     utf8_string,
+	     utf8_string_size,
+	     metadata->description,
+	     metadata->description_size,
+	     LIBUNA_ENDIAN_LITTLE,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 string.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-16 string size of the metadata description
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_metadata_get_utf16_description_size(
+     libbde_metadata_t *metadata,
+     size_t *utf16_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_utf16_description_size";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( metadata->description == NULL )
+	 || ( metadata->description_size == 0 ) )
+	{
+		return( 0 );
+	}
+	if( libuna_utf16_string_size_from_utf16_stream(
+	     metadata->description,
+	     metadata->description_size,
+	     LIBUNA_ENDIAN_LITTLE,
+	     utf16_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 string size.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-16 string value of the metadata description
+ * The function uses a codepage if necessary, it uses the codepage set for the library
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_metadata_get_utf16_description(
+     libbde_metadata_t *metadata,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_utf16_description";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( metadata->description == NULL )
+	 || ( metadata->description_size == 0 ) )
+	{
+		return( 0 );
+	}
+	if( libuna_utf16_string_copy_from_utf16_stream(
+	     utf16_string,
+	     utf16_string_size,
+	     metadata->description,
+	     metadata->description_size,
+	     LIBUNA_ENDIAN_LITTLE,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 string.",
+		 function );
+
+		return( -1 );
+	}
 	return( 1 );
 }
 

@@ -968,12 +968,14 @@ int info_handle_volume_fprint(
 	libcstring_system_character_t filetime_string[ 32 ];
 	libcstring_system_character_t guid_string[ 48 ];
 
-	libfdatetime_filetime_t *filetime = NULL;
-	libfguid_identifier_t *guid       = NULL;
-	static char *function             = "bdeinfo_volume_info_fprint";
-	uint64_t value_64bit              = 0;
-	uint32_t encryption_method        = 0;
-	int result                        = 0;
+	libcstring_system_character_t *value_string = NULL;
+	libfdatetime_filetime_t *filetime           = NULL;
+	libfguid_identifier_t *guid                 = NULL;
+	static char *function                       = "bdeinfo_volume_info_fprint";
+	size_t value_string_size                    = 0;
+	uint64_t value_64bit                        = 0;
+	uint32_t encryption_method                  = 0;
+	int result                                  = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1197,6 +1199,90 @@ int info_handle_volume_fprint(
 	 "\tCreation time:\t\t\t%" PRIs_LIBCSTRING_SYSTEM " UTC\n",
 	 filetime_string );
 
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libbde_volume_get_utf16_description_size(
+	          info_handle->input_volume,
+	          &value_string_size,
+	          error );
+#else
+	result = libbde_volume_get_utf8_description_size(
+	          info_handle->input_volume,
+	          &value_string_size,
+	          error );
+#endif
+	if( result != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume description size.",
+		 function );
+
+		goto on_error;
+	}
+	if( value_string_size > 0 )
+	{
+		if( ( value_string_size > (size_t) SSIZE_MAX )
+		 || ( ( sizeof( libcstring_system_character_t ) * value_string_size ) > (size_t) SSIZE_MAX ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid description size value exceeds maximum.",
+			 function );
+
+			goto on_error;
+		}
+		value_string = libcstring_system_string_allocate(
+		                value_string_size );
+
+		if( value_string == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create description string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_get_utf16_description(
+		          info_handle->input_volume,
+		          (uint16_t *) value_string,
+		          value_string_size,
+		          error );
+#else
+		result = libbde_volume_get_utf8_description(
+		          info_handle->input_volume,
+		          (uint8_t *) value_string,
+		          value_string_size,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume description.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tDescription\t\t\t:%" PRIs_LIBCSTRING_SYSTEM "\n",
+		 value_string );
+
+		memory_free(
+		 value_string );
+
+		value_string = NULL;
+	}
 /* TODO add more info */
 
 	fprintf(
@@ -1232,6 +1318,11 @@ int info_handle_volume_fprint(
 	return( 1 );
 
 on_error:
+	if( value_string != NULL )
+	{
+		memory_free(
+		 value_string );
+	}
 	if( guid != NULL )
 	{
 		libfguid_identifier_free(
