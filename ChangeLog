@@ -19,8 +19,9 @@ TODO
 
 * pybde
   - add function to set the keys
-  - add function to get volume identifier
+  - add function to get volume identifier (libfguid)
   - add function to get creation time
+  - add function to get description
   - setup.py add libfguid see: libvshadow
 
 Optimizations
@@ -43,9 +44,9 @@ Test suite:
 
 Tools:
 * bdeinfo
-  - print hostname
   - print more metadata ?
-  - print recovery key ID
+  - print recovery key ID (VMK key identifiers)
+    multiple keys per metadata
 * bdeexport
   - create tool to export decrypted BDE volume to RAW file?
 * bdemount
@@ -58,6 +59,9 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20140331
+* worked on exposing metadata
 
 20140330
 * worked on Python bindings
