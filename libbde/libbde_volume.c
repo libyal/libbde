@@ -2172,6 +2172,188 @@ int libbde_volume_get_creation_time(
 	return( 1 );
 }
 
+/* Retrieves the UTF-8 string size of the volume description
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_volume_get_utf8_description_size(
+     libbde_volume_t *volume,
+     size_t *utf8_string_size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_utf8_description_size";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_utf8_description_size(
+	     internal_volume->primary_metadata,
+	     utf8_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 description size from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-8 string value of the volume description
+ * The function uses a codepage if necessary, it uses the codepage set for the library
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_volume_get_utf8_description(
+     libbde_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_utf8_description";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_utf8_description(
+	     internal_volume->primary_metadata,
+	     utf8_string,
+	     utf8_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 description from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-16 string size of the volume description
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_volume_get_utf16_description_size(
+     libbde_volume_t *volume,
+     size_t *utf16_string_size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_utf16_description_size";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_utf16_description_size(
+	     internal_volume->primary_metadata,
+	     utf16_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 description size from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-16 string value of the volume description
+ * The function uses a codepage if necessary, it uses the codepage set for the library
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_volume_get_utf16_description(
+     libbde_volume_t *volume,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_utf16_description";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_utf16_description(
+	     internal_volume->primary_metadata,
+	     utf16_string,
+	     utf16_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 description from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Sets the keys
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error

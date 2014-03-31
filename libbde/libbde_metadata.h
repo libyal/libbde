@@ -80,6 +80,14 @@ struct libbde_metadata
 	 */
 	uint64_t creation_time;
 
+	/* The description
+	 */
+	uint8_t *description;
+
+	/* The description size
+	 */
+	size_t description_size;
+
 	/* The startup key external key
 	 */
 	libbde_external_key_t *startup_key_external_key;
@@ -171,6 +179,28 @@ int libbde_metadata_get_volume_identifier(
 int libbde_metadata_get_creation_time(
      libbde_metadata_t *metadata,
      uint64_t *filetime,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_utf8_description_size(
+     libbde_metadata_t *metadata,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_utf8_description(
+     libbde_metadata_t *metadata,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_utf16_description_size(
+     libbde_metadata_t *metadata,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_utf16_description(
+     libbde_metadata_t *metadata,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

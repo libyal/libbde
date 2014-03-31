@@ -220,6 +220,32 @@ int libbde_volume_get_creation_time(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_get_utf8_description_size(
+     libbde_volume_t *volume,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_get_utf8_description(
+     libbde_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_get_utf16_description_size(
+     libbde_volume_t *volume,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_get_utf16_description(
+     libbde_volume_t *volume,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_set_keys(
      libbde_volume_t *volume,
      const uint8_t *full_volume_encryption_key,
