@@ -121,11 +121,32 @@ int libbde_metadata_initialize(
 
 		goto on_error;
 	}
+	if( libcdata_array_initialize(
+	     &( ( *metadata )->volume_master_keys_array ),
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create volume master keys array.",
+		 function );
+
+		goto on_error;
+	}
 	return( 1 );
 
 on_error:
 	if( *metadata != NULL )
 	{
+		if( ( *metadata )->entries_array != NULL )
+		{
+			libcdata_array_free(
+			 &( ( *metadata )->entries_array ),
+			 (int(*)(intptr_t **, libcerror_error_t **)) &libbde_metadata_entry_free,
+			 NULL );
+		}
 		memory_free(
 		 *metadata );
 
@@ -162,70 +183,6 @@ int libbde_metadata_free(
 			memory_free(
 			 ( *metadata )->description );
 		}
-		if( ( *metadata )->clear_key_volume_master_key != NULL )
-		{
-			if( libbde_volume_master_key_free(
-			     &( ( *metadata )->clear_key_volume_master_key ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free clear key volume master key.",
-				 function );
-
-				result = -1;
-			}
-		}
-		if( ( *metadata )->startup_key_volume_master_key != NULL )
-		{
-			if( libbde_volume_master_key_free(
-			     &( ( *metadata )->startup_key_volume_master_key ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free startup key volume master key.",
-				 function );
-
-				result = -1;
-			}
-		}
-		if( ( *metadata )->recovery_password_volume_master_key != NULL )
-		{
-			if( libbde_volume_master_key_free(
-			     &( ( *metadata )->recovery_password_volume_master_key ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free recovery password volume master key.",
-				 function );
-
-				result = -1;
-			}
-		}
-		if( ( *metadata )->password_volume_master_key != NULL )
-		{
-			if( libbde_volume_master_key_free(
-			     &( ( *metadata )->password_volume_master_key ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free password volume master key.",
-				 function );
-
-				result = -1;
-			}
-		}
 		if( ( *metadata )->full_volume_encryption_key != NULL )
 		{
 			if( libbde_aes_ccm_encrypted_key_free(
@@ -252,6 +209,20 @@ int libbde_metadata_free(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free entries array.",
+			 function );
+
+			result = -1;
+		}
+		if( libcdata_array_free(
+		     &( ( *metadata )->volume_master_keys_array ),
+		     (int(*)(intptr_t **, libcerror_error_t **)) &libbde_volume_master_key_free,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free volume master keys array.",
 			 function );
 
 			result = -1;
@@ -1088,7 +1059,7 @@ ssize_t libbde_metadata_read_entries(
 	ssize_t read_count                                    = 0;
 	uint64_t volume_header_offset                         = 0;
 	uint64_t volume_header_size                           = 0;
-	int metadata_entry_index                              = 0;
+	int entry_index                                       = 0;
 
 	if( metadata == NULL )
 	{
@@ -1214,8 +1185,6 @@ ssize_t libbde_metadata_read_entries(
 					if( metadata->clear_key_volume_master_key == NULL )
 					{
 						metadata->clear_key_volume_master_key = volume_master_key;
-
-						volume_master_key = NULL;
 					}
 				}
 				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY )
@@ -1232,8 +1201,6 @@ ssize_t libbde_metadata_read_entries(
 						     16 ) == 0 )
 						{
 							metadata->startup_key_volume_master_key = volume_master_key;
-
-							volume_master_key = NULL;
 						}
 					}
 				}
@@ -1242,8 +1209,6 @@ ssize_t libbde_metadata_read_entries(
 					if( metadata->recovery_password_volume_master_key == NULL )
 					{
 						metadata->recovery_password_volume_master_key = volume_master_key;
-
-						volume_master_key = NULL;
 					}
 				}
 				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_PASSWORD )
@@ -1251,26 +1216,25 @@ ssize_t libbde_metadata_read_entries(
 					if( metadata->password_volume_master_key == NULL )
 					{
 						metadata->password_volume_master_key = volume_master_key;
-
-						volume_master_key = NULL;
 					}
 				}
-				if( volume_master_key != NULL )
+				if( libcdata_array_append_entry(
+				     metadata->volume_master_keys_array,
+				     &entry_index,
+				     (intptr_t *) volume_master_key,
+				     error ) != 1 )
 				{
-					if( libbde_volume_master_key_free(
-					     &volume_master_key,
-					     error ) != 1 )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-						 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-						 "%s: unable to free volume master key.",
-						 function );
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 "%s: unable to append volume mastesr key to array.",
+					 function );
 
-						goto on_error;
-					}
+					goto on_error;
 				}
+				volume_master_key = NULL;
+
 				break;
 
 			case LIBBDE_ENTRY_TYPE_FULL_VOLUME_ENCRYPTION_KEY:
@@ -1530,7 +1494,7 @@ ssize_t libbde_metadata_read_entries(
 		}
 		if( libcdata_array_append_entry(
 		     metadata->entries_array,
-		     &metadata_entry_index,
+		     &entry_index,
 		     (intptr_t *) metadata_entry,
 		     error ) != 1 )
 		{
@@ -1538,7 +1502,7 @@ ssize_t libbde_metadata_read_entries(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to append metadata entry to entries array.",
+			 "%s: unable to append metadata entry to array.",
 			 function );
 
 			goto on_error;
@@ -3338,6 +3302,44 @@ int libbde_metadata_get_utf16_description(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve UTF-16 string.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the number of volume master key protectors
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_metadata_get_number_of_key_protectors(
+     libbde_metadata_t *metadata,
+     int *number_of_key_protectors,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_number_of_key_protectors";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( libcdata_array_get_number_of_entries(
+	     metadata->volume_master_keys_array,
+	     number_of_key_protectors,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volume master keys.",
 		 function );
 
 		return( -1 );

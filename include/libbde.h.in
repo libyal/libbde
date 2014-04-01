@@ -397,6 +397,15 @@ int libbde_volume_get_utf16_description(
      size_t utf16_string_size,
      libbde_error_t **error );
 
+/* Retrieves the number of volume master key protectors
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_number_of_key_protectors(
+     libbde_volume_t *volume,
+     int *number_of_key_protectors,
+     libbde_error_t **error );
+
 /* Sets the keys
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error
@@ -487,6 +496,18 @@ int libbde_volume_read_startup_key_file_io_handle(
      libbfio_handle_t *file_io_handle,
      libbde_error_t **error );
 #endif
+
+/* -------------------------------------------------------------------------
+ * Key protector functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees a key protector
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_key_protector_free(
+     libbde_key_protector_t **key_protector,
+     libbde_error_t **error );
 
 #if defined( __cplusplus )
 }

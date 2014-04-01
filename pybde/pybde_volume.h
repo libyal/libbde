@@ -113,6 +113,14 @@ PyObject *pybde_volume_get_size(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
 
+PyObject *pybde_volume_get_creation_time(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
+PyObject *pybde_volume_get_creation_time_as_integer(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
 PyObject *pybde_volume_set_password(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,

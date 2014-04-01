@@ -1,4 +1,4 @@
-.Dd March 31, 2014
+.Dd April 1, 2014
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -87,6 +87,8 @@ Volume functions
 .Ft int
 .Fn libbde_volume_get_utf16_description "libbde_volume_t *volume, uint16_t *utf16_string, size_t utf16_string_size, libbde_error_t **error"
 .Ft int
+.Fn libbde_volume_get_number_of_key_protectors "libbde_volume_t *volume, int *number_of_key_protectors, libbde_error_t **error"
+.Ft int
 .Fn libbde_volume_set_keys "libbde_volume_t *volume, const uint8_t *full_volume_encryption_key, size_t full_volume_encryption_key_size, const uint8_t *tweak_key, size_t tweak_key_size, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_set_utf8_password "libbde_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libbde_error_t **error"
@@ -110,6 +112,10 @@ Available when compiled with libbfio support:
 .Fn libbde_volume_open_file_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, int flags, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_read_startup_key_file_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, libbde_error_t **error"
+.Pp
+Key protector functions
+.Ft int
+.Fn libbde_key_protector_free "libbde_key_protector_t **key_protector, libbde_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libbde_get_version

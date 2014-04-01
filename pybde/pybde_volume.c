@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #endif
 
+#include "pybde_datetime.h"
 #include "pybde_error.h"
 #include "pybde_file_object_io_handle.h"
 #include "pybde_integer.h"
@@ -139,6 +140,20 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Retrieves the size of the volume data." },
 
+	{ "get_creation_time",
+	  (PyCFunction) pybde_volume_get_creation_time,
+	  METH_NOARGS,
+	  "get_creation_time() -> Datetime\n"
+	  "\n"
+	  "Returns the creation date and time." },
+
+	{ "get_creation_time_as_integer",
+	  (PyCFunction) pybde_volume_get_creation_time_as_integer,
+	  METH_NOARGS,
+	  "get_creation_time_as_integer() -> Integer\n"
+	  "\n"
+	  "Returns the creation date and time as a 64-bit integer containing a FILETIME value." },
+
 	{ "set_password",
 	  (PyCFunction) pybde_volume_set_password,
 	  METH_VARARGS | METH_KEYWORDS,
@@ -163,6 +178,12 @@ PyGetSetDef pybde_volume_object_get_set_definitions[] = {
 	  (getter) pybde_volume_get_size,
 	  (setter) 0,
 	  "The size.",
+	  NULL },
+
+	{ "creation_time",
+	  (getter) pybde_volume_get_creation_time,
+	  (setter) 0,
+	  "The creation date and time.",
 	  NULL },
 
 	/* Sentinel */
@@ -1127,6 +1148,110 @@ PyObject *pybde_volume_get_size(
 	}
 	integer_object = pybde_integer_unsigned_new_from_64bit(
 	                  (uint64_t) size );
+
+	return( integer_object );
+}
+
+/* Retrieves the creation date and time
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_creation_time(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error   = NULL;
+	PyObject *date_time_object = NULL;
+	static char *function      = "pybde_volume_get_creation_time";
+	uint64_t filetime          = 0;
+	int result                 = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_creation_time(
+	          pybde_volume->volume,
+	          &filetime,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve creation time.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	date_time_object = pybde_datetime_new_from_filetime(
+	                    filetime );
+
+	return( date_time_object );
+}
+
+/* Retrieves the creation date and time as an integer
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_creation_time_as_integer(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	PyObject *integer_object = NULL;
+	static char *function    = "pybde_volume_get_creation_time_as_integer";
+	uint64_t filetime        = 0;
+	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_creation_time(
+	          pybde_volume->volume,
+	          &filetime,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve creation time.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	integer_object = pybde_integer_unsigned_new_from_64bit(
+	                  filetime );
 
 	return( integer_object );
 }
