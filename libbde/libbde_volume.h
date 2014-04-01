@@ -246,6 +246,12 @@ int libbde_volume_get_utf16_description(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_get_number_of_key_protectors(
+     libbde_volume_t *volume,
+     int *number_of_key_protectors,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_set_keys(
      libbde_volume_t *volume,
      const uint8_t *full_volume_encryption_key,

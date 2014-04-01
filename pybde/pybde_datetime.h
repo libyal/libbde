@@ -1,5 +1,5 @@
 /*
- * The internal type definitions
+ * Date and time functions
  *
  * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,31 +19,29 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_INTERNAL_TYPES_H )
-#define _LIBBDE_INTERNAL_TYPES_H
+#if !defined( _PYBDE_DATETIME_H )
+#define _PYBDE_DATETIME_H
 
 #include <common.h>
 #include <types.h>
 
-/* Define HAVE_LOCAL_LIBBDE for local use of libbde
- * The definitions in <libbde/types.h> are copied here
- * for local use of libbde
- */
-#if defined( HAVE_LOCAL_LIBBDE )
+#include "pybde_python.h"
 
-/* The following type definitions hide internal data structures
- */
-#if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct libbde_key_protector {}	libbde_key_protector_t;
-typedef struct libbde_volume {}		libbde_volume_t;
-
-#else
-typedef intptr_t libbde_key_protector_t;
-typedef intptr_t libbde_volume_t;
-
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
+PyObject *pybde_datetime_new_from_fat_date_time(
+           uint32_t fat_date_time );
 
+PyObject *pybde_datetime_new_from_filetime(
+           uint64_t filetime );
+
+PyObject *pybde_datetime_new_from_posix_time(
+           uint32_t posix_time );
+
+#if defined( __cplusplus )
+}
 #endif
 
 #endif

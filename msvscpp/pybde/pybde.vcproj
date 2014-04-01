@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\pybde\pybde_datetime.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\pybde\pybde_error.c"
 				>
 			</File>
@@ -212,6 +216,10 @@
 			>
 			<File
 				RelativePath="..\..\pybde\pybde.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pybde\pybde_datetime.h"
 				>
 			</File>
 			<File

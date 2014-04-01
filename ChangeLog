@@ -20,9 +20,8 @@ TODO
 * pybde
   - add function to set the keys
   - add function to get volume identifier (libfguid)
-  - add function to get creation time
-  - add function to get description
-  - setup.py add libfguid see: libvshadow
+    setup.py add libfguid see: libvshadow
+  - add key protector support
 
 Optimizations
 * pass values 32-bit to libcaes
@@ -59,6 +58,10 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20140401
+* worked on exposing metadata
+* worked on Python bindings
 
 20140331
 * worked on exposing metadata
