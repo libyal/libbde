@@ -975,6 +975,7 @@ int info_handle_volume_fprint(
 	size_t value_string_size                    = 0;
 	uint64_t value_64bit                        = 0;
 	uint32_t encryption_method                  = 0;
+	int number_of_key_protectors                = 0;
 	int result                                  = 0;
 
 	if( info_handle == NULL )
@@ -1030,7 +1031,7 @@ int info_handle_volume_fprint(
 		 "%s: unable to retrieve encryption method.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	fprintf(
 	 info_handle->notify_stream,
@@ -1283,6 +1284,25 @@ int info_handle_volume_fprint(
 
 		value_string = NULL;
 	}
+	if( libbde_volume_get_number_of_key_protectors(
+	     info_handle->input_volume,
+	     &number_of_key_protectors,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of key protectors.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tNumber of key protectors:\t%d\n",
+	 number_of_key_protectors );
+
 /* TODO add more info */
 
 	fprintf(

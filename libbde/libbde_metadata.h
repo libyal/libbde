@@ -92,6 +92,18 @@ struct libbde_metadata
 	 */
 	libbde_external_key_t *startup_key_external_key;
 
+	/* The full volume encryption key
+	 */
+	libbde_aes_ccm_encrypted_key_t *full_volume_encryption_key;
+
+	/* The metadata entries array
+	 */
+	libcdata_array_t *entries_array;
+
+	/* The volume master keys array
+	 */
+	libcdata_array_t *volume_master_keys_array;
+
 	/* The clear key protected volume master key
 	 */
 	libbde_volume_master_key_t *clear_key_volume_master_key;
@@ -107,14 +119,6 @@ struct libbde_metadata
 	/* The password protected volume master key
 	 */
 	libbde_volume_master_key_t *password_volume_master_key;
-
-	/* The full volume encryption key
-	 */
-	libbde_aes_ccm_encrypted_key_t *full_volume_encryption_key;
-
-	/* The metadata entries array
-	 */
-	libcdata_array_t *entries_array;
 };
 
 int libbde_metadata_initialize(
@@ -201,6 +205,11 @@ int libbde_metadata_get_utf16_description(
      libbde_metadata_t *metadata,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_number_of_key_protectors(
+     libbde_metadata_t *metadata,
+     int *number_of_key_protectors,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

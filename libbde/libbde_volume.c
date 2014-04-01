@@ -498,8 +498,26 @@ int libbde_volume_open(
 
 		goto on_error;
 	}
-	internal_volume->file_io_handle_created_in_library = 1;
+	else if( result != 0 )
+	{
+		internal_volume->file_io_handle_created_in_library = 1;
+	}
+	else
+	{
+		if( libbfio_handle_free(
+		     &file_io_handle,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file IO handle.",
+			 function );
 
+			goto on_error;
+		}
+	}
 	return( result );
 
 on_error:
@@ -652,8 +670,26 @@ int libbde_volume_open_wide(
 
 		goto on_error;
 	}
-	internal_volume->file_io_handle_created_in_library = 1;
+	else if( result != 0 )
+	{
+		internal_volume->file_io_handle_created_in_library = 1;
+	}
+	else
+	{
+		if( libbfio_handle_free(
+		     &file_io_handle,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file IO handle.",
+			 function );
 
+			goto on_error;
+		}
+	}
 	return( result );
 
 on_error:
@@ -681,6 +717,8 @@ int libbde_volume_open_file_io_handle(
 	static char *function                     = "libbde_volume_open_file_io_handle";
 	int bfio_access_flags                     = 0;
 	int file_io_handle_is_open                = 0;
+	int file_io_handle_opened_in_library      = 0;
+	int result                                = 0;
 
 	if( volume == NULL )
 	{
@@ -775,37 +813,59 @@ int libbde_volume_open_file_io_handle(
 
 			goto on_error;
 		}
-		internal_volume->file_io_handle_opened_in_library = 1;
+		file_io_handle_opened_in_library = 1;
 	}
-	if( libbde_volume_open_read(
-	     internal_volume,
-	     file_io_handle,
-	     error ) != 1 )
+	result = libbde_volume_open_read(
+	          internal_volume,
+	          file_io_handle,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read from volume handle.",
+		 "%s: unable to read from file IO handle.",
 		 function );
 
 		goto on_error;
 	}
-	internal_volume->file_io_handle = file_io_handle;
+	else if( result != 0 )
+	{
+		internal_volume->file_io_handle                   = file_io_handle;
+		internal_volume->file_io_handle_opened_in_library = file_io_handle_opened_in_library;
+	}
+	else if( file_io_handle_opened_in_library != 0 )
+	{
+		file_io_handle_opened_in_library = 0;
 
-	return( 1 );
+		if( libbfio_handle_close(
+		     file_io_handle,
+		     error ) != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
+			 "%s: unable to close file IO handle.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	return( result );
 
 on_error:
-	if( ( file_io_handle_is_open == 0 )
-	 && ( internal_volume->file_io_handle_opened_in_library != 0 ) )
+	if( file_io_handle_opened_in_library != 0 )
 	{
 		libbfio_handle_close(
 		 file_io_handle,
-		 error );
+		 NULL );
 
-		internal_volume->file_io_handle_opened_in_library = 0;
 	}
-	internal_volume->file_io_handle = NULL;
+	internal_volume->file_io_handle                   = NULL;
+	internal_volume->file_io_handle_opened_in_library = 0;
 
 	return( -1 );
 }
@@ -2347,6 +2407,49 @@ int libbde_volume_get_utf16_description(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve UTF-16 description from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the number of volume master key protectors
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_get_number_of_key_protectors(
+     libbde_volume_t *volume,
+     int *number_of_key_protectors,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_number_of_key_protectors";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	/* TODO: add support to fallback on other metadata blocks
+	 */
+	if( libbde_metadata_get_number_of_key_protectors(
+	     internal_volume->primary_metadata,
+	     number_of_key_protectors,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of key protectors from primary metadata.",
 		 function );
 
 		return( -1 );

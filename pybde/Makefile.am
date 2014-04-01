@@ -16,6 +16,7 @@ pyexec_LTLIBRARIES = pybde.la
 
 pybde_la_SOURCES = \
 	pybde.c pybde.h \
+	pybde_datetime.c pybde_datetime.h \
 	pybde_error.c pybde_error.h \
 	pybde_file_object_io_handle.c pybde_file_object_io_handle.h \
 	pybde_integer.c pybde_integer.h \

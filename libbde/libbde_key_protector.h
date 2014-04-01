@@ -1,5 +1,5 @@
 /*
- * The internal type definitions
+ * Key protector functions
  *
  * Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,31 +19,41 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_INTERNAL_TYPES_H )
-#define _LIBBDE_INTERNAL_TYPES_H
+#if !defined( _LIBBDE_INTERNAL_KEY_PROTECTOR_H )
+#define _LIBBDE_INTERNAL_KEY_PROTECTOR_H
 
 #include <common.h>
 #include <types.h>
 
-/* Define HAVE_LOCAL_LIBBDE for local use of libbde
- * The definitions in <libbde/types.h> are copied here
- * for local use of libbde
- */
-#if defined( HAVE_LOCAL_LIBBDE )
+#include "libbde_extern.h"
+#include "libbde_types.h"
+#include "libbde_volume_master_key.h"
 
-/* The following type definitions hide internal data structures
- */
-#if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
-typedef struct libbde_key_protector {}	libbde_key_protector_t;
-typedef struct libbde_volume {}		libbde_volume_t;
-
-#else
-typedef intptr_t libbde_key_protector_t;
-typedef intptr_t libbde_volume_t;
-
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
+typedef struct libbde_internal_key_protector libbde_internal_key_protector_t;
 
+struct libbde_internal_key_protector
+{
+	/* The volume master key
+	 */
+	libbde_volume_master_key_t *volume_master_key;
+};
+
+LIBBDE_EXTERN \
+int libbde_key_protector_initialize(
+     libbde_key_protector_t **key_protector,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_key_protector_free(
+     libbde_key_protector_t **key_protector,
+     libcerror_error_t **error );
+
+#if defined( __cplusplus )
+}
 #endif
 
 #endif

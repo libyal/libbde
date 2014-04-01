@@ -36,6 +36,7 @@ libbde_la_SOURCES = \
 	libbde_external_key.c libbde_external_key.h \
 	libbde_io_handle.c libbde_io_handle.h \
 	libbde_key.c libbde_key.h \
+	libbde_key_protector.c libbde_key_protector.h \
 	libbde_libbfio.h \
 	libbde_libcaes.h \
 	libbde_libcdata.h \
