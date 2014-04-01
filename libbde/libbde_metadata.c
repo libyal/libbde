@@ -1044,6 +1044,9 @@ ssize_t libbde_metadata_read_header(
 
 		goto on_error;
 	}
+	/* Ignore the MSB for now */
+	metadata->encryption_method &= 0x7fffffffUL;
+
 	return( sizeof( bde_metadata_header_v1_t ) );
 
 on_error:
