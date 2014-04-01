@@ -1,7 +1,7 @@
 <pkmkdoc spec="1.12">
 	<properties>
 		<title>libbde</title>
-		<build>/home/lordyesta/Projects/libbde/macosx/libbde.mpkg</build>
+		<build>/usr/local/google/home/jbmetz/Projects/libbde/macosx/libbde.mpkg</build>
 		<organization>com.google.code.p</organization>
 		<userSees ui="both"/>
 		<min-target os="1"/>
