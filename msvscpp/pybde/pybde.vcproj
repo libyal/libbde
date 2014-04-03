@@ -201,7 +201,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\pybde\pybde_guid.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\pybde\pybde_integer.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pybde\pybde_key_protector.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pybde\pybde_key_protectors.c"
 				>
 			</File>
 			<File
@@ -231,7 +243,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\pybde\pybde_guid.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\pybde\pybde_integer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pybde\pybde_key_protector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pybde\pybde_key_protectors.h"
 				>
 			</File>
 			<File
@@ -252,6 +276,10 @@
 			</File>
 			<File
 				RelativePath="..\..\pybde\pybde_libcstring.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\pybde\pybde_libfguid.h"
 				>
 			</File>
 			<File

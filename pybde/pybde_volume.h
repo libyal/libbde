@@ -113,6 +113,10 @@ PyObject *pybde_volume_get_size(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
 
+PyObject *pybde_volume_get_volume_identifier(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
 PyObject *pybde_volume_get_creation_time(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
@@ -120,6 +124,15 @@ PyObject *pybde_volume_get_creation_time(
 PyObject *pybde_volume_get_creation_time_as_integer(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
+
+PyObject *pybde_volume_get_description(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
+PyObject *pybde_volume_set_keys(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords );
 
 PyObject *pybde_volume_set_password(
            pybde_volume_t *pybde_volume,
@@ -130,6 +143,23 @@ PyObject *pybde_volume_set_recovery_password(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
            PyObject *keywords );
+
+PyObject *pybde_volume_get_number_of_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
+PyObject *pybde_volume_get_key_protector_by_index(
+           pybde_volume_t *pybde_volume,
+           int key_protector_index );
+
+PyObject *pybde_volume_get_key_protector(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pybde_volume_get_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
 
 #if defined( __cplusplus )
 }

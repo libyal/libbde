@@ -1,4 +1,5 @@
 TODO
+* fix pybde open/close test case add password support
 * git version
   - make sure dependent local libs are in git
   - fix synclibs.sh for libfvalue Makefile.am
@@ -9,7 +10,6 @@ TODO
 * update manuals
 * metadata
   - compare the metadata values ?
-  - move free metadata to volume_close()
   - check metadata number_of_volume_header_sectors ?
 * error tolerance
   - add handling of BDE volumes with corrupt metadata, e.g. file header
@@ -18,10 +18,8 @@ TODO
 * check TODOs
 
 * pybde
-  - add function to set the keys
-  - add function to get volume identifier (libfguid)
-    setup.py add libfguid see: libvshadow
-  - add key protector support
+  - add function to get the encryption type
+  - add encryption type defintion object
 
 Optimizations
 * pass values 32-bit to libcaes
@@ -44,12 +42,9 @@ Test suite:
 Tools:
 * bdeinfo
   - print more metadata ?
-  - print recovery key ID (VMK key identifiers)
-    multiple keys per metadata
 * bdeexport
   - create tool to export decrypted BDE volume to RAW file?
 * bdemount
-  - implement Dokan version for WINAPI
   - implement native MacOS-X version
 
 Format:
@@ -58,6 +53,10 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20140403
+* worked on exposing metadata
+* worked on Python bindings
 
 20140401
 * worked on exposing metadata

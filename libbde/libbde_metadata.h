@@ -153,7 +153,7 @@ ssize_t libbde_metadata_read_entries(
          size_t startup_key_identifier_size,
          libcerror_error_t **error );
 
-int libbde_metadata_get_volume_master_key(
+int libbde_metadata_read_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      libbde_password_keep_t *password_keep,
@@ -163,7 +163,7 @@ int libbde_metadata_get_volume_master_key(
      size_t volume_master_key_size,
      libcerror_error_t **error );
 
-int libbde_metadata_get_full_volume_encryption_key(
+int libbde_metadata_read_full_volume_encryption_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      const uint8_t *volume_master_key,
@@ -207,9 +207,15 @@ int libbde_metadata_get_utf16_description(
      size_t utf16_string_size,
      libcerror_error_t **error );
 
-int libbde_metadata_get_number_of_key_protectors(
+int libbde_metadata_get_number_of_volume_master_keys(
      libbde_metadata_t *metadata,
-     int *number_of_key_protectors,
+     int *number_of_keys,
+     libcerror_error_t **error );
+
+int libbde_metadata_get_volume_master_key_by_index(
+     libbde_metadata_t *metadata,
+     int key_index,
+     libbde_volume_master_key_t **key,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

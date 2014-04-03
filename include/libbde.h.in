@@ -335,7 +335,7 @@ int libbde_volume_get_encryption_method(
 
 /* Retrieves the volume identifier
  * The identifier is a GUID and is 16 bytes of size
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if not or or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_get_volume_identifier(
@@ -345,7 +345,7 @@ int libbde_volume_get_volume_identifier(
      libbde_error_t **error );
 
 /* Retrieves the creation date and time
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if not or or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_get_creation_time(
@@ -404,6 +404,16 @@ LIBBDE_EXTERN \
 int libbde_volume_get_number_of_key_protectors(
      libbde_volume_t *volume,
      int *number_of_key_protectors,
+     libbde_error_t **error );
+
+/* Retrieves a specific volume master key protector
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_key_protector(
+     libbde_volume_t *volume,
+     int key_protector_index,
+     libbde_key_protector_t **key_protector,
      libbde_error_t **error );
 
 /* Sets the keys
@@ -507,6 +517,26 @@ int libbde_volume_read_startup_key_file_io_handle(
 LIBBDE_EXTERN \
 int libbde_key_protector_free(
      libbde_key_protector_t **key_protector,
+     libbde_error_t **error );
+
+/* Retrieves the identifier
+ * The identifier is a GUID and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_key_protector_get_identifier(
+     libbde_key_protector_t *key_protector,
+     uint8_t *identifier,
+     size_t size,
+     libbde_error_t **error );
+
+/* Retrieves the type
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_key_protector_get_type(
+     libbde_key_protector_t *key_protector,
+     uint16_t *type,
      libbde_error_t **error );
 
 #if defined( __cplusplus )
