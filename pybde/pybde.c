@@ -28,6 +28,8 @@
 
 #include "pybde.h"
 #include "pybde_error.h"
+#include "pybde_key_protector.h"
+#include "pybde_key_protectors.h"
 #include "pybde_libcerror.h"
 #include "pybde_libcstring.h"
 #include "pybde_libbde.h"
@@ -276,9 +278,11 @@ on_error:
 PyMODINIT_FUNC initpybde(
                 void )
 {
-	PyObject *module                 = NULL;
-	PyTypeObject *volume_type_object = NULL;
-	PyGILState_STATE gil_state       = 0;
+	PyObject *module                         = NULL;
+	PyTypeObject *key_protector_type_object  = NULL;
+	PyTypeObject *key_protectors_type_object = NULL;
+	PyTypeObject *volume_type_object         = NULL;
+	PyGILState_STATE gil_state               = 0;
 
 	/* Create the module
 	 * This function must be called before grabbing the GIL
@@ -309,8 +313,46 @@ PyMODINIT_FUNC initpybde(
 
 	PyModule_AddObject(
 	 module,
-	"volume",
-	(PyObject *) volume_type_object );
+	 "volume",
+	 (PyObject *) volume_type_object );
+
+	/* Setup the key protectors type object
+	 */
+	pybde_key_protectors_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pybde_key_protectors_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pybde_key_protectors_type_object );
+
+	key_protectors_type_object = &pybde_key_protectors_type_object;
+
+	PyModule_AddObject(
+	 module,
+	 "_key_protectors",
+	 (PyObject *) key_protectors_type_object );
+
+	/* Setup the key protector type object
+	 */
+	pybde_key_protector_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pybde_key_protector_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pybde_key_protector_type_object );
+
+	key_protector_type_object = &pybde_key_protector_type_object;
+
+	PyModule_AddObject(
+	 module,
+	 "key_protector",
+	 (PyObject *) key_protector_type_object );
 
 on_error:
 	PyGILState_Release(

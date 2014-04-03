@@ -83,6 +83,17 @@ int libbde_volume_master_key_read(
      libbde_metadata_entry_t *metadata_entry,
      libcerror_error_t **error );
 
+int libbde_volume_master_key_get_identifier(
+     libbde_volume_master_key_t *volume_master_key,
+     uint8_t *identifier,
+     size_t size,
+     libcerror_error_t **error );
+
+int libbde_volume_master_key_get_protection_type(
+     libbde_volume_master_key_t *volume_master_key,
+     uint16_t *protection_type,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

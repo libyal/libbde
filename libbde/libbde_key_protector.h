@@ -42,14 +42,27 @@ struct libbde_internal_key_protector
 	libbde_volume_master_key_t *volume_master_key;
 };
 
-LIBBDE_EXTERN \
 int libbde_key_protector_initialize(
      libbde_key_protector_t **key_protector,
+     libbde_volume_master_key_t *volume_master_key,
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_key_protector_free(
      libbde_key_protector_t **key_protector,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_key_protector_get_identifier(
+     libbde_key_protector_t *key_protector,
+     uint8_t *identifier,
+     size_t size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_key_protector_get_type(
+     libbde_key_protector_t *key_protector,
+     uint16_t *type,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

@@ -182,6 +182,9 @@ int bde_test_single_open_close_volume(
 
 	if( error != NULL )
 	{
+		libcerror_error_backtrace_fprint(
+		 error,
+		 stderr );
 		libcerror_error_free(
 		 &error );
 	}
@@ -383,6 +386,9 @@ int bde_test_multi_open_close_volume(
 
 	if( error != NULL )
 	{
+		libcerror_error_backtrace_fprint(
+		 error,
+		 stderr );
 		libcerror_error_free(
 		 &error );
 	}

@@ -252,6 +252,13 @@ int libbde_volume_get_number_of_key_protectors(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_get_key_protector(
+     libbde_volume_t *volume,
+     int key_protector_index,
+     libbde_key_protector_t **key_protector,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_set_keys(
      libbde_volume_t *volume,
      const uint8_t *full_volume_encryption_key,

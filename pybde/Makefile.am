@@ -10,7 +10,8 @@ AM_CFLAGS = \
 	@LIBUNA_CPPFLAGS@ \
 	@LIBCFILE_CPPFLAGS@ \
 	@LIBCPATH_CPPFLAGS@ \
-	@LIBBFIO_CPPFLAGS@
+	@LIBBFIO_CPPFLAGS@ \
+	@LIBFGUID_CPPFLAGS@
 
 pyexec_LTLIBRARIES = pybde.la
 
@@ -19,12 +20,16 @@ pybde_la_SOURCES = \
 	pybde_datetime.c pybde_datetime.h \
 	pybde_error.c pybde_error.h \
 	pybde_file_object_io_handle.c pybde_file_object_io_handle.h \
+	pybde_guid.c pybde_guid.h \
 	pybde_integer.c pybde_integer.h \
+	pybde_key_protector.c pybde_key_protector.h \
+	pybde_key_protectors.c pybde_key_protectors.h \
 	pybde_libbde.h \
 	pybde_libbfio.h \
 	pybde_libcerror.h \
 	pybde_libclocale.h \
 	pybde_libcstring.h \
+	pybde_libfguid.h \
 	pybde_python.h \
 	pybde_unused.h \
 	pybde_volume.c pybde_volume.h
@@ -39,7 +44,8 @@ pybde_la_LIBADD = \
 	@LIBUNA_LIBADD@ \
 	@LIBCFILE_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
-	@LIBBFIO_LIBADD@
+	@LIBBFIO_LIBADD@ \
+	@LIBFGUID_LIBADD@
 
 pybde_la_CPPFLAGS = $(PYTHON_CPPFLAGS)
 pybde_la_LDFLAGS  = -module -avoid-version $(PYTHON_LDFLAGS)

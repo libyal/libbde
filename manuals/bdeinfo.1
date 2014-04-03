@@ -1,4 +1,4 @@
-.Dd April 1, 2014
+.Dd April 3, 2014
 .Dt bdeinfo
 .Os libbde
 .Sh NAME
@@ -54,7 +54,7 @@ None
 .Sh EXAMPLES
 .Bd -literal
 # bdeinfo -p Password /dev/sda1
-bdeinfo 20140401
+bdeinfo 20140403
 
 BitLocker Drive Encryption information:
 	Encryption method:		AES 128-bit
@@ -62,6 +62,14 @@ BitLocker Drive Encryption information:
 	Creation time:			Aug 05, 2011 11:04:38.739926900 UTC
 	Description			:MYPC BDE TEST 8/5/2011
 	Number of key protectors:	2
+
+Key protector 0:
+	Identifier:			240c5287-d4a5-4f2d-8d38-06a2e563257f
+	Type:				Password
+
+Key protector 1:
+	Identifier:			e70fad99-e63f-45c1-92e0-1cadabe08ae9
+	Type:				Recovery password
 
 .Ed
 .Sh DIAGNOSTICS
