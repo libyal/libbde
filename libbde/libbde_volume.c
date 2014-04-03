@@ -33,6 +33,7 @@
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
+#include "libbde_key_protector.h"
 #include "libbde_password.h"
 #include "libbde_recovery.h"
 #include "libbde_sector_data.h"
@@ -104,45 +105,6 @@ int libbde_volume_initialize(
 
 		return( -1 );
 	}
-	if( libbde_metadata_initialize(
-	     &( internal_volume->primary_metadata ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create primary metadata.",
-		 function );
-
-		goto on_error;
-	}
-	if( libbde_metadata_initialize(
-	     &( internal_volume->secondary_metadata ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create secondary metadata.",
-		 function );
-
-		goto on_error;
-	}
-	if( libbde_metadata_initialize(
-	     &( internal_volume->tertiary_metadata ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create tertiary metadata.",
-		 function );
-
-		goto on_error;
-	}
 	if( libbde_io_handle_initialize(
 	     &( internal_volume->io_handle ),
 	     error ) != 1 )
@@ -180,24 +142,6 @@ on_error:
 		{
 			libbde_io_handle_free(
 			 &( internal_volume->io_handle ),
-			 NULL );
-		}
-		if( internal_volume->tertiary_metadata != NULL )
-		{
-			libbde_metadata_free(
-			 &( internal_volume->tertiary_metadata ),
-			 NULL );
-		}
-		if( internal_volume->secondary_metadata != NULL )
-		{
-			libbde_metadata_free(
-			 &( internal_volume->secondary_metadata ),
-			 NULL );
-		}
-		if( internal_volume->primary_metadata != NULL )
-		{
-			libbde_metadata_free(
-			 &( internal_volume->primary_metadata ),
 			 NULL );
 		}
 		memory_free(
@@ -250,45 +194,6 @@ int libbde_volume_free(
 		}
 		*volume = NULL;
 
-		if( libbde_metadata_free(
-		     &( internal_volume->primary_metadata ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free primary metadata.",
-			 function );
-
-			result = -1;
-		}
-		if( libbde_metadata_free(
-		     &( internal_volume->secondary_metadata ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free secondary metadata.",
-			 function );
-
-			result = -1;
-		}
-		if( libbde_metadata_free(
-		     &( internal_volume->tertiary_metadata ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free tertiary metadata.",
-			 function );
-
-			result = -1;
-		}
 		if( libbde_io_handle_free(
 		     &( internal_volume->io_handle ),
 		     error ) != 1 )
@@ -1000,18 +905,53 @@ int libbde_volume_close(
 
 		result = -1;
 	}
-	if( libbde_encryption_free(
-	     &( internal_volume->io_handle->encryption_context ),
-	     error ) != 1 )
+	if( internal_volume->primary_metadata != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free encryption context.",
-		 function );
+		if( libbde_metadata_free(
+		     &( internal_volume->primary_metadata ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free primary metadata.",
+			 function );
 
-		result = -1;
+			result = -1;
+		}
+	}
+	if( internal_volume->secondary_metadata != NULL )
+	{
+		if( libbde_metadata_free(
+		     &( internal_volume->secondary_metadata ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free secondary metadata.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->tertiary_metadata != NULL )
+	{
+		if( libbde_metadata_free(
+		     &( internal_volume->tertiary_metadata ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free tertiary metadata.",
+			 function );
+
+			result = -1;
+		}
 	}
 	return( result );
 }
@@ -1052,6 +992,39 @@ int libbde_volume_open_read(
 
 		return( -1 );
 	}
+	if( internal_volume->primary_metadata != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal file - primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->secondary_metadata != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal file - secondary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->tertiary_metadata != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal file - tertiary metadata.",
+		 function );
+
+		return( -1 );
+	}
 	if( internal_volume->sectors_vector != NULL )
 	{
 		libcerror_error_set(
@@ -1073,6 +1046,45 @@ int libbde_volume_open_read(
 		 function );
 
 		return( -1 );
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->primary_metadata ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create primary metadata.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->secondary_metadata ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create secondary metadata.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_metadata_initialize(
+	     &( internal_volume->tertiary_metadata ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create tertiary metadata.",
+		 function );
+
+		goto on_error;
 	}
 	if( ( internal_volume->external_key_metadata != NULL )
 	 && ( internal_volume->external_key_metadata->startup_key_external_key != NULL ) )
@@ -1335,6 +1347,24 @@ on_error:
 		 &( internal_volume->sectors_vector ),
 		 NULL );
 	}
+	if( internal_volume->tertiary_metadata != NULL )
+	{
+		libbde_metadata_free(
+		 &( internal_volume->tertiary_metadata ),
+		 NULL );
+	}
+	if( internal_volume->secondary_metadata != NULL )
+	{
+		libbde_metadata_free(
+		 &( internal_volume->secondary_metadata ),
+		 NULL );
+	}
+	if( internal_volume->primary_metadata != NULL )
+	{
+		libbde_metadata_free(
+		 &( internal_volume->primary_metadata ),
+		 NULL );
+	}
 	return( -1 );
 }
 
@@ -1446,7 +1476,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	volume_header_size    = metadata->volume_header_size;
 	encryption_method     = metadata->encryption_method;
 
-	result = libbde_metadata_get_volume_master_key(
+	result = libbde_metadata_read_volume_master_key(
 	          metadata,
 	          internal_volume->io_handle,
 	          internal_volume->password_keep,
@@ -1462,14 +1492,14 @@ int libbde_volume_open_read_keys_from_metadata(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume master key from metadata.",
+		 "%s: unable to read volume master key from metadata.",
 		 function );
 
 		goto on_error;
 	}
 	else if( result != 0 )
 	{
-		result = libbde_metadata_get_full_volume_encryption_key(
+		result = libbde_metadata_read_full_volume_encryption_key(
 		          metadata,
 		          internal_volume->io_handle,
 		          volume_master_key,
@@ -1486,7 +1516,7 @@ int libbde_volume_open_read_keys_from_metadata(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve full volume encryption key from metadata.",
+			 "%s: unable to read full volume encryption key from metadata.",
 			 function );
 
 			goto on_error;
@@ -2145,7 +2175,7 @@ int libbde_volume_get_encryption_method(
 
 /* Retrieves the volume identifier
  * The identifier is a GUID and is 16 bytes of size
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if not or or -1 on error
  */
 int libbde_volume_get_volume_identifier(
      libbde_volume_t *volume,
@@ -2154,6 +2184,7 @@ int libbde_volume_get_volume_identifier(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_volume_identifier";
 
 	if( volume == NULL )
@@ -2169,10 +2200,22 @@ int libbde_volume_get_volume_identifier(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
 	if( libbde_metadata_get_volume_identifier(
-	     internal_volume->primary_metadata,
+	     metadata,
 	     volume_identifier,
 	     size,
 	     error ) != 1 )
@@ -2198,6 +2241,7 @@ int libbde_volume_get_creation_time(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_creation_time";
 
 	if( volume == NULL )
@@ -2213,10 +2257,22 @@ int libbde_volume_get_creation_time(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
 	if( libbde_metadata_get_creation_time(
-	     internal_volume->primary_metadata,
+	     metadata,
 	     filetime,
 	     error ) != 1 )
 	{
@@ -2242,6 +2298,7 @@ int libbde_volume_get_utf8_description_size(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_utf8_description_size";
 
 	if( volume == NULL )
@@ -2257,10 +2314,22 @@ int libbde_volume_get_utf8_description_size(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
 	if( libbde_metadata_get_utf8_description_size(
-	     internal_volume->primary_metadata,
+	     metadata,
 	     utf8_string_size,
 	     error ) != 1 )
 	{
@@ -2288,6 +2357,7 @@ int libbde_volume_get_utf8_description(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_utf8_description";
 
 	if( volume == NULL )
@@ -2303,10 +2373,22 @@ int libbde_volume_get_utf8_description(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
 	if( libbde_metadata_get_utf8_description(
-	     internal_volume->primary_metadata,
+	     metadata,
 	     utf8_string,
 	     utf8_string_size,
 	     error ) != 1 )
@@ -2333,6 +2415,7 @@ int libbde_volume_get_utf16_description_size(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_utf16_description_size";
 
 	if( volume == NULL )
@@ -2348,10 +2431,22 @@ int libbde_volume_get_utf16_description_size(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
 	if( libbde_metadata_get_utf16_description_size(
-	     internal_volume->primary_metadata,
+	     metadata,
 	     utf16_string_size,
 	     error ) != 1 )
 	{
@@ -2379,6 +2474,7 @@ int libbde_volume_get_utf16_description(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_utf16_description";
 
 	if( volume == NULL )
@@ -2394,10 +2490,22 @@ int libbde_volume_get_utf16_description(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
 	if( libbde_metadata_get_utf16_description(
-	     internal_volume->primary_metadata,
+	     metadata,
 	     utf16_string,
 	     utf16_string_size,
 	     error ) != 1 )
@@ -2423,6 +2531,7 @@ int libbde_volume_get_number_of_key_protectors(
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_number_of_key_protectors";
 
 	if( volume == NULL )
@@ -2438,10 +2547,22 @@ int libbde_volume_get_number_of_key_protectors(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	/* TODO: add support to fallback on other metadata blocks
-	 */
-	if( libbde_metadata_get_number_of_key_protectors(
-	     internal_volume->primary_metadata,
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
+	if( libbde_metadata_get_number_of_volume_master_keys(
+	     metadata,
 	     number_of_key_protectors,
 	     error ) != 1 )
 	{
@@ -2449,7 +2570,81 @@ int libbde_volume_get_number_of_key_protectors(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of key protectors from primary metadata.",
+		 "%s: unable to retrieve number of volume master key from primary metadata.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves a specific volume master key protector
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_get_key_protector(
+     libbde_volume_t *volume,
+     int key_protector_index,
+     libbde_key_protector_t **key_protector,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume     = NULL;
+	libbde_metadata_t *metadata               = NULL;
+	libbde_volume_master_key_t *volume_master_key = NULL;
+	static char *function                         = "libbde_volume_get_key_protector";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		return( 0 );
+	}
+	if( libbde_metadata_get_volume_master_key_by_index(
+	     metadata,
+	     key_protector_index,
+	     &volume_master_key,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume master key: %d from primary metadata.",
+		 function,
+		 key_protector_index );
+
+		return( -1 );
+	}
+	if( libbde_key_protector_initialize(
+	     key_protector,
+	     volume_master_key,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create key protector.",
 		 function );
 
 		return( -1 );

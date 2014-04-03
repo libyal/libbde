@@ -968,6 +968,7 @@ int info_handle_volume_fprint(
 	libcstring_system_character_t filetime_string[ 32 ];
 	libcstring_system_character_t guid_string[ 48 ];
 
+	libbde_key_protector_t *key_protector       = NULL;
 	libcstring_system_character_t *value_string = NULL;
 	libfdatetime_filetime_t *filetime           = NULL;
 	libfguid_identifier_t *guid                 = NULL;
@@ -975,6 +976,8 @@ int info_handle_volume_fprint(
 	size_t value_string_size                    = 0;
 	uint64_t value_64bit                        = 0;
 	uint32_t encryption_method                  = 0;
+	uint16_t key_protector_type                 = 0;
+	int key_protector_index                     = 0;
 	int number_of_key_protectors                = 0;
 	int result                                  = 0;
 
@@ -1303,12 +1306,186 @@ int info_handle_volume_fprint(
 	 "\tNumber of key protectors:\t%d\n",
 	 number_of_key_protectors );
 
-/* TODO add more info */
-
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );
 
+	if( number_of_key_protectors > 0 )
+	{
+		for( key_protector_index = 0;
+		     key_protector_index < number_of_key_protectors;
+		     key_protector_index++ )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "Key protector %d:\n",
+			 key_protector_index );
+
+			if( libbde_volume_get_key_protector(
+			     info_handle->input_volume,
+			     key_protector_index,
+			     &key_protector,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve key protector: %d.",
+				 function,
+				 key_protector_index );
+
+				goto on_error;
+			}
+			if( libbde_key_protector_get_identifier(
+			     key_protector,
+			     guid_buffer,
+			     16,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve key protector: %d identifier.",
+				 function,
+				 key_protector_index );
+
+				goto on_error;
+			}
+			if( libfguid_identifier_copy_from_byte_stream(
+			     guid,
+			     guid_buffer,
+			     16,
+			     LIBFGUID_ENDIAN_LITTLE,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+				 "%s: unable to copy byte stream to GUID.",
+				 function );
+
+				goto on_error;
+			}
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+			result = libfguid_identifier_copy_to_utf16_string(
+				  guid,
+				  (uint16_t *) guid_string,
+				  48,
+				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+				  error );
+#else
+			result = libfguid_identifier_copy_to_utf8_string(
+				  guid,
+				  (uint8_t *) guid_string,
+				  48,
+				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+				  error );
+#endif
+			if( result != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+				 "%s: unable to copy GUID to string.",
+				 function );
+
+				goto on_error;
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tIdentifier:\t\t\t%" PRIs_LIBCSTRING_SYSTEM "\n",
+			 guid_string );
+
+			if( libbde_key_protector_get_type(
+			     key_protector,
+			     &key_protector_type,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve key protector: %d type.",
+				 function,
+				 key_protector_index );
+
+				goto on_error;
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tType:\t\t\t\t" );
+
+			switch( key_protector_type )
+			{
+				case LIBBDE_KEY_PROTECTION_TYPE_CLEAR_KEY:
+					fprintf(
+					 info_handle->notify_stream,
+					 "Clear key" );
+
+					break;
+
+				case LIBBDE_KEY_PROTECTION_TYPE_TPM:
+					fprintf(
+					 info_handle->notify_stream,
+					 "TPM" );
+
+					break;
+
+				case LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY:
+					fprintf(
+					 info_handle->notify_stream,
+					 "Startup key" );
+
+					break;
+
+				case LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD:
+					fprintf(
+					 info_handle->notify_stream,
+					 "Recovery password" );
+
+					break;
+
+				case LIBBDE_KEY_PROTECTION_TYPE_PASSWORD:
+					fprintf(
+					 info_handle->notify_stream,
+					 "Password" );
+
+					break;
+
+				default:
+					fprintf(
+					 info_handle->notify_stream,
+					 "Unknown" );
+
+					break;
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "\n" );
+
+			if( libbde_key_protector_free(
+			     &key_protector,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free key protector: %d.",
+				 function,
+				 key_protector_index );
+
+				goto on_error;
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "\n" );
+		}
+	}
 	if( libfguid_identifier_free(
 	     &guid,
 	     error ) != 1 )
@@ -1338,6 +1515,12 @@ int info_handle_volume_fprint(
 	return( 1 );
 
 on_error:
+	if( key_protector != NULL )
+	{
+		libbde_key_protector_free(
+		 &key_protector,
+		 NULL );
+	}
 	if( value_string != NULL )
 	{
 		memory_free(

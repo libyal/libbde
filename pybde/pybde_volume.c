@@ -30,6 +30,9 @@
 #include "pybde_error.h"
 #include "pybde_file_object_io_handle.h"
 #include "pybde_integer.h"
+#include "pybde_guid.h"
+#include "pybde_key_protector.h"
+#include "pybde_key_protectors.h"
 #include "pybde_libbfio.h"
 #include "pybde_libcerror.h"
 #include "pybde_libclocale.h"
@@ -140,6 +143,13 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Retrieves the size of the volume data." },
 
+	{ "get_volume_identifier",
+	  (PyCFunction) pybde_volume_get_volume_identifier,
+	  METH_NOARGS,
+	  "get_volume_identifier() -> Unicode string or None\n"
+	  "\n"
+	  "Retrieves the volume identifier (GUID)." },
+
 	{ "get_creation_time",
 	  (PyCFunction) pybde_volume_get_creation_time,
 	  METH_NOARGS,
@@ -153,6 +163,20 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "get_creation_time_as_integer() -> Integer\n"
 	  "\n"
 	  "Returns the creation date and time as a 64-bit integer containing a FILETIME value." },
+
+	{ "get_description",
+	  (PyCFunction) pybde_volume_get_description,
+	  METH_NOARGS,
+	  "get_description() -> Unicode string or None\n"
+	  "\n"
+	  "Retrieves the description." },
+
+	{ "set_keys",
+	  (PyCFunction) pybde_volume_set_keys,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "set_keys(full_volume_encryption_key, tweak_key) -> None\n"
+	  "\n"
+	  "Sets the keys." },
 
 	{ "set_password",
 	  (PyCFunction) pybde_volume_set_password,
@@ -180,10 +204,22 @@ PyGetSetDef pybde_volume_object_get_set_definitions[] = {
 	  "The size.",
 	  NULL },
 
+	{ "identifier",
+	  (getter) pybde_volume_get_volume_identifier,
+	  (setter) 0,
+	  "The volume identifier.",
+	  NULL },
+
 	{ "creation_time",
 	  (getter) pybde_volume_get_creation_time,
 	  (setter) 0,
 	  "The creation date and time.",
+	  NULL },
+
+	{ "description",
+	  (getter) pybde_volume_get_description,
+	  (setter) 0,
+	  "The description.",
 	  NULL },
 
 	/* Sentinel */
@@ -1152,6 +1188,68 @@ PyObject *pybde_volume_get_size(
 	return( integer_object );
 }
 
+/* Retrieves the volume identifier
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_volume_identifier(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	uint8_t guid_data[ 16 ];
+
+	libcerror_error_t *error = NULL;
+	PyObject *string_object  = NULL;
+	static char *function    = "pybde_volume_get_volume_identifier";
+	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_volume_identifier(
+	          pybde_volume->volume,
+	          guid_data,
+	          16,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve volume identifier.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	string_object = pybde_string_new_from_guid(
+			 guid_data,
+			 16 );
+
+	return( string_object );
+}
+
 /* Retrieves the creation date and time
  * Returns a Python object if successful or NULL on error
  */
@@ -1185,7 +1283,7 @@ PyObject *pybde_volume_get_creation_time(
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -1197,6 +1295,13 @@ PyObject *pybde_volume_get_creation_time(
 		 &error );
 
 		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
 	}
 	date_time_object = pybde_datetime_new_from_filetime(
 	                    filetime );
@@ -1254,6 +1359,204 @@ PyObject *pybde_volume_get_creation_time_as_integer(
 	                  filetime );
 
 	return( integer_object );
+}
+
+/* Retrieves the description
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_description(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	PyObject *string_object  = NULL;
+	const char *errors       = NULL;
+	uint8_t *description     = NULL;
+	static char *function    = "pybde_volume_get_description";
+	size_t description_size  = 0;
+	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_utf8_description_size(
+	          pybde_volume->volume,
+	          &description_size,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve description size.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	else if( ( result == 0 )
+	      || ( description_size == 0 ) )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	description = (uint8_t *) PyMem_Malloc(
+	                           sizeof( uint8_t ) * description_size );
+
+	if( description == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to create description.",
+		 function );
+
+		goto on_error;
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_utf8_description(
+		  pybde_volume->volume,
+		  description,
+		  description_size,
+		  &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve description.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	/* Pass the string length to PyUnicode_DecodeUTF8
+	 * otherwise it makes the end of string character is part
+	 * of the string
+	 */
+	string_object = PyUnicode_DecodeUTF8(
+			 (char *) description,
+			 (Py_ssize_t) description_size - 1,
+			 errors );
+
+	PyMem_Free(
+	 description );
+
+	return( string_object );
+
+on_error:
+	if( description != NULL )
+	{
+		PyMem_Free(
+		 description );
+	}
+	return( NULL );
+}
+
+/* Sets the keys
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_set_keys(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	libcerror_error_t *error                        = NULL;
+	char *full_volume_encryption_key_string         = NULL;
+	char *tweak_key_string                          = NULL;
+	static char *keyword_list[]                     = { "full_volume_encryption_key", "tweak_key", NULL };
+	static char *function                           = "pybde_volume_set_keys";
+	size_t full_volume_encryption_key_string_length = 0;
+	size_t tweak_key_string_length                  = 0;
+	int result                                      = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "s|s",
+	     keyword_list,
+	     &full_volume_encryption_key_string,
+	     &tweak_key_string ) == 0 )
+        {
+                return( NULL );
+        }
+	if( full_volume_encryption_key_string == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid full volume encryption key string.",
+		 function );
+
+		return( NULL );
+	}
+	full_volume_encryption_key_string_length = libcstring_narrow_string_length(
+	                                            full_volume_encryption_key_string );
+
+	if( tweak_key_string != NULL )
+	{
+		tweak_key_string_length = libcstring_narrow_string_length(
+		                           tweak_key_string );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_set_keys(
+	          pybde_volume->volume,
+	          (uint8_t *) full_volume_encryption_key_string,
+	          full_volume_encryption_key_string_length,
+	          (uint8_t *) tweak_key_string,
+	          tweak_key_string_length,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to set keys.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	Py_IncRef(
+	 Py_None );
+
+	return( Py_None );
 }
 
 /* Sets the password
@@ -1402,5 +1705,216 @@ PyObject *pybde_volume_set_recovery_password(
 	 Py_None );
 
 	return( Py_None );
+}
+
+/* Retrieves the number of key protectors
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_number_of_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error     = NULL;
+	static char *function        = "pybde_volume_get_number_of_key_protectors";
+	int number_of_key_protectors = 0;
+	int result                   = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_number_of_key_protectors(
+	          pybde_volume->volume,
+	          &number_of_key_protectors,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of key protectors.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	return( PyInt_FromLong(
+	         (long) number_of_key_protectors ) );
+}
+
+/* Retrieves a specific key protector by index
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_key_protector_by_index(
+           pybde_volume_t *pybde_volume,
+           int key_protector_index )
+{
+	libcerror_error_t *error              = NULL;
+	libbde_key_protector_t *key_protector = NULL;
+	PyObject *key_protector_object        = NULL;
+	static char *function                 = "pybde_volume_get_key_protector_by_index";
+	int result                            = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_key_protector(
+	          pybde_volume->volume,
+	          key_protector_index,
+	          &key_protector,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve key protector: %d.",
+		 function,
+		 key_protector_index );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	key_protector_object = pybde_key_protector_new(
+	                        key_protector,
+	                        pybde_volume );
+
+	if( key_protector_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create key protector object.",
+		 function );
+
+		goto on_error;
+	}
+	return( key_protector_object );
+
+on_error:
+	if( key_protector != NULL )
+	{
+		libbde_key_protector_free(
+		 &key_protector,
+		 NULL );
+	}
+	return( NULL );
+}
+
+/* Retrieves a specific key protector
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_key_protector(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *key_protector_object = NULL;
+	static char *keyword_list[]    = { "key_protector_index", NULL };
+	int key_protector_index        = 0;
+
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "i",
+	     keyword_list,
+	     &key_protector_index ) == 0 )
+        {
+		return( NULL );
+        }
+	key_protector_object = pybde_volume_get_key_protector_by_index(
+	                        pybde_volume,
+	                        key_protector_index );
+
+	return( key_protector_object );
+}
+
+/* Retrieves a key protectors sequence and iterator object for the key protectors
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error        = NULL;
+	PyObject *key_protectors_object = NULL;
+	static char *function           = "pybde_volume_get_key_protectors";
+	int number_of_key_protectors    = 0;
+	int result                      = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_number_of_key_protectors(
+	          pybde_volume->volume,
+	          &number_of_key_protectors,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of key protectors.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	key_protectors_object = pybde_key_protectors_new(
+	                         pybde_volume,
+	                         &pybde_volume_get_key_protector_by_index,
+	                         number_of_key_protectors );
+
+	if( key_protectors_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create key protectors object.",
+		 function );
+
+		return( NULL );
+	}
+	return( key_protectors_object );
 }
 

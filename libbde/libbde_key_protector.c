@@ -33,6 +33,7 @@
  */
 int libbde_key_protector_initialize(
      libbde_key_protector_t **key_protector,
+     libbde_volume_master_key_t *volume_master_key,
      libcerror_error_t **error )
 {
 	libbde_internal_key_protector_t *internal_key_protector = NULL;
@@ -91,6 +92,8 @@ int libbde_key_protector_initialize(
 
 		return( -1 );
 	}
+	internal_key_protector->volume_master_key = volume_master_key;
+
 	*key_protector = (libbde_key_protector_t *) internal_key_protector;
 
 	return( 1 );
@@ -135,5 +138,90 @@ int libbde_key_protector_free(
 		 internal_key_protector );
 	}
 	return( result );
+}
+
+/* Retrieves the identifier
+ * The identifier is a GUID and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_key_protector_get_identifier(
+     libbde_key_protector_t *key_protector,
+     uint8_t *identifier,
+     size_t size,
+     libcerror_error_t **error )
+{
+	libbde_internal_key_protector_t *internal_key_protector = NULL;
+	static char *function                                   = "libbde_key_protector_get_identifier";
+
+	if( key_protector == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key protector.",
+		 function );
+
+		return( -1 );
+	}
+	internal_key_protector = (libbde_internal_key_protector_t *) key_protector;
+
+	if( libbde_volume_master_key_get_identifier(
+	     internal_key_protector->volume_master_key,
+	     identifier,
+	     size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier from volume master key.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the type
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_key_protector_get_type(
+     libbde_key_protector_t *key_protector,
+     uint16_t *type,
+     libcerror_error_t **error )
+{
+	libbde_internal_key_protector_t *internal_key_protector = NULL;
+	static char *function                                   = "libbde_key_protector_get_type";
+
+	if( key_protector == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key protector.",
+		 function );
+
+		return( -1 );
+	}
+	internal_key_protector = (libbde_internal_key_protector_t *) key_protector;
+
+	if( libbde_volume_master_key_get_protection_type(
+	     internal_key_protector->volume_master_key,
+	     type,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve protection type from volume master key.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
 }
 

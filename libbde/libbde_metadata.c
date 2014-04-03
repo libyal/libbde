@@ -1567,10 +1567,10 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the volume master key from the metadata
+/* Reads the volume master key from the metadata
  * Returns 1 if successful, 0 if no key could be obtained or -1 on error
  */
-int libbde_metadata_get_volume_master_key(
+int libbde_metadata_read_volume_master_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      libbde_password_keep_t *password_keep,
@@ -1584,7 +1584,7 @@ int libbde_metadata_get_volume_master_key(
 
 	libcaes_context_t *aes_context = NULL;
 	uint8_t *unencrypted_data      = NULL;
-	static char *function          = "libbde_metadata_get_volume_master_key";
+	static char *function          = "libbde_metadata_read_volume_master_key";
 	size_t unencrypted_data_size   = 0;
 	uint32_t data_size             = 0;
 	uint32_t version               = 0;
@@ -2624,10 +2624,10 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the full volume encryption key from the metadata
+/* Reads the full volume encryption key from the metadata
  * Returns 1 if successful, 0 if no key could be obtained or -1 on error
  */
-int libbde_metadata_get_full_volume_encryption_key(
+int libbde_metadata_read_full_volume_encryption_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      const uint8_t *volume_master_key,
@@ -2640,7 +2640,7 @@ int libbde_metadata_get_full_volume_encryption_key(
 {
 	uint8_t *unencrypted_data      = NULL;
 	libcaes_context_t *aes_context = NULL;
-	static char *function          = "libbde_metadata_get_full_volume_encryption_key";
+	static char *function          = "libbde_metadata_read_full_volume_encryption_key";
 	size_t unencrypted_data_size   = 0;
 	uint32_t data_size             = 0;
 	uint32_t version               = 0;
@@ -3309,15 +3309,15 @@ int libbde_metadata_get_utf16_description(
 	return( 1 );
 }
 
-/* Retrieves the number of volume master key protectors
+/* Retrieves the number of volume master keys
  * Returns 1 if successful or -1 on error
  */
-int libbde_metadata_get_number_of_key_protectors(
+int libbde_metadata_get_number_of_volume_master_keys(
      libbde_metadata_t *metadata,
-     int *number_of_key_protectors,
+     int *number_of_keys,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_metadata_get_number_of_key_protectors";
+	static char *function = "libbde_metadata_get_number_of_volume_master_keys";
 
 	if( metadata == NULL )
 	{
@@ -3332,7 +3332,7 @@ int libbde_metadata_get_number_of_key_protectors(
 	}
 	if( libcdata_array_get_number_of_entries(
 	     metadata->volume_master_keys_array,
-	     number_of_key_protectors,
+	     number_of_keys,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -3341,6 +3341,47 @@ int libbde_metadata_get_number_of_key_protectors(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve number of volume master keys.",
 		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves a specific volume master key
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_metadata_get_volume_master_key_by_index(
+     libbde_metadata_t *metadata,
+     int key_index,
+     libbde_volume_master_key_t **key,
+     libcerror_error_t **error )
+{
+	static char *function = "libbde_metadata_get_volume_master_key_by_index";
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( libcdata_array_get_entry_by_index(
+	     metadata->volume_master_keys_array,
+	     key_index,
+	     (intptr_t **) key,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume master key: %d.",
+		 function,
+		 key_index );
 
 		return( -1 );
 	}
