@@ -66,18 +66,18 @@ test_open_close_password()
 	INPUT_FILE=$2;
 	BASENAME=`basename ${INPUT_FILE}`;
 	RESULT=${EXIT_FAILURE};
-	PASSWORDFILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
+	PASSWORD_FILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
 
-	if test -f "${PASSWORDFILE}";
+	if test -f "${PASSWORD_FILE}";
 	then
 		rm -rf tmp;
 		mkdir tmp;
 
-		PASSWORD=`cat "${PASSWORDFILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+		PASSWORD=`cat "${PASSWORD_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
 
 		echo "Testing open close with password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} "-p${PASSWORD}" ${INPUT_FILE};
+		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} -p${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -85,7 +85,7 @@ test_open_close_password()
 
 		echo "";
 	else
-		echo "Testing open close of input: ${INPUT_FILE} (FAIL)";
+		echo "Testing open close with password of input: ${INPUT_FILE} (FAIL)";
 	fi
 
 	return ${RESULT};
@@ -97,18 +97,18 @@ test_open_close_recovery_password()
 	INPUT_FILE=$2;
 	BASENAME=`basename ${INPUT_FILE}`;
 	RESULT=${EXIT_FAILURE};
-	PASSWORDFILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
+	PASSWORD_FILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
 
-	if test -f "${PASSWORDFILE}";
+	if test -f "${PASSWORD_FILE}";
 	then
 		rm -rf tmp;
 		mkdir tmp;
 
-		PASSWORD=`cat "${PASSWORDFILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+		PASSWORD=`cat "${PASSWORD_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
 
 		echo "Testing open close with recovery password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} "-r${PASSWORD}" ${INPUT_FILE};
+		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} -r${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -116,7 +116,7 @@ test_open_close_recovery_password()
 
 		echo "";
 	else
-		echo "Testing open close of input: ${INPUT_FILE} (FAIL)";
+		echo "Testing open close with recovery password of input: ${INPUT_FILE} (FAIL)";
 	fi
 
 	return ${RESULT};
@@ -169,11 +169,11 @@ then
 
 	EXIT_RESULT=${EXIT_IGNORE};
 else
-	IGNORELIST="";
+	IGNORE_LIST="";
 
 	if test -f "input/.libbde/ignore";
 	then
-		IGNORELIST=`cat input/.libbde/ignore | sed '/^#/d'`;
+		IGNORE_LIST=`cat input/.libbde/ignore | sed '/^#/d'`;
 	fi
 	for TESTDIR in input/*;
 	do
@@ -181,28 +181,28 @@ else
 		then
 			DIRNAME=`basename ${TESTDIR}`;
 
-			if ! list_contains "${IGNORELIST}" "${DIRNAME}";
+			if ! list_contains "${IGNORE_LIST}" "${DIRNAME}";
 			then
 				if test -f "input/.libbde/${DIRNAME}/files";
 				then
-					TESTFILES=`cat input/.libbde/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
+					TEST_FILES=`cat input/.libbde/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
 				else
-					TESTFILES=`ls ${TESTDIR}/*`;
+					TEST_FILES=`ls ${TESTDIR}/*`;
 				fi
-				for TESTFILE in ${TESTFILES};
+				for TEST_FILE in ${TEST_FILES};
 				do
-					BASENAME=`basename ${TESTFILE}`;
+					BASENAME=`basename ${TEST_FILE}`;
 
 					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
 					then
-						if ! test_open_close_password "${DIRNAME}" "${TESTFILE}";
+						if ! test_open_close_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi
 					fi
 					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
 					then
-						if ! test_open_close_recovery_password "${DIRNAME}" "${TESTFILE}";
+						if ! test_open_close_recovery_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi
