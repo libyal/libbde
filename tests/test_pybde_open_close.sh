@@ -40,6 +40,86 @@ list_contains()
 	return ${EXIT_FAILURE};
 }
 
+test_open_close()
+{ 
+	INPUT_FILE=$1;
+
+	rm -rf tmp;
+	mkdir tmp;
+
+	echo "Testing open close of input: ${INPUT_FILE}";
+
+	PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py ${INPUT_FILE};
+
+	rm -rf tmp;
+
+	RESULT=$?;
+
+	return ${RESULT};
+}
+
+test_open_close_password()
+{ 
+	DIRNAME=$1;
+	INPUT_FILE=$2;
+	BASENAME=`basename ${INPUT_FILE}`;
+	RESULT=${EXIT_FAILURE};
+	PASSWORDFILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
+
+	if test -f "${PASSWORDFILE}";
+	then
+		rm -rf tmp;
+		mkdir tmp;
+
+		PASSWORD=`cat "${PASSWORDFILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+
+		echo "Testing open close with password of input: ${INPUT_FILE}";
+
+		PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py -p${PASSWORD} ${INPUT_FILE};
+
+		RESULT=$?;
+
+		rm -rf tmp;
+
+		echo "";
+	else
+		echo "Testing open close with password of input: ${INPUT_FILE} (FAIL)";
+	fi
+
+	return ${RESULT};
+}
+
+test_open_close_recovery_password()
+{ 
+	DIRNAME=$1;
+	INPUT_FILE=$2;
+	BASENAME=`basename ${INPUT_FILE}`;
+	RESULT=${EXIT_FAILURE};
+	PASSWORDFILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
+
+	if test -f "${PASSWORDFILE}";
+	then
+		rm -rf tmp;
+		mkdir tmp;
+
+		PASSWORD=`cat "${PASSWORDFILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+
+		echo "Testing open close with recovery password of input: ${INPUT_FILE}";
+
+		PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py -r${PASSWORD} ${INPUT_FILE};
+
+		RESULT=$?;
+
+		rm -rf tmp;
+
+		echo "";
+	else
+		echo "Testing open close with recovery password of input: ${INPUT_FILE} (FAIL)";
+	fi
+
+	return ${RESULT};
+}
+
 PYTHON="/usr/bin/python";
 
 if ! test -x ${PYTHON};
@@ -90,9 +170,21 @@ else
 				fi
 				for TESTFILE in ${TESTFILES};
 				do
-					if ! PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py ${TESTFILE};
+					BASENAME=`basename ${TESTFILE}`;
+
+					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
 					then
-						exit ${EXIT_FAILURE};
+						if ! test_open_close_password "${DIRNAME}" "${TESTFILE}";
+						then
+							exit ${EXIT_FAILURE};
+						fi
+					fi
+					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
+					then
+						if ! test_open_close_recovery_password "${DIRNAME}" "${TESTFILE}";
+						then
+							exit ${EXIT_FAILURE};
+						fi
 					fi
 				done
 			fi
