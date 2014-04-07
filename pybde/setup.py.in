@@ -99,7 +99,6 @@ if platform.system() == "Windows":
 
 	LIBRARY_DLL_FILES = [
 		"%s.dll" % (LIBRARY_NAME),
-		"zlib.dll",
 	]
 	for library_dll_filename in LIBRARY_DLL_FILES:
 		library_dll_file = os.path.join(library_directory, library_dll_filename)
