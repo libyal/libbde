@@ -131,6 +131,8 @@ int libbde_volume_initialize(
 
 		goto on_error;
 	}
+	internal_volume->is_locked = 1;
+
 	*volume = (libbde_volume_t *) internal_volume;
 
 	return( 1 );
@@ -620,9 +622,9 @@ int libbde_volume_open_file_io_handle(
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open_file_io_handle";
+	uint8_t file_io_handle_opened_in_library  = 0;
 	int bfio_access_flags                     = 0;
 	int file_io_handle_is_open                = 0;
-	int file_io_handle_opened_in_library      = 0;
 	int result                                = 0;
 
 	if( volume == NULL )
@@ -865,6 +867,7 @@ int libbde_volume_close(
 	}
 	internal_volume->file_io_handle = NULL;
 	internal_volume->current_offset = 0;
+	internal_volume->is_locked      = 1;
 
 	if( libbde_io_handle_clear(
 	     internal_volume->io_handle,
@@ -976,7 +979,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid internal volume.",
+		 "%s: invalid volume.",
 		 function );
 
 		return( -1 );
@@ -987,7 +990,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal volume - missing IO handle.",
+		 "%s: invalid volume - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -998,7 +1001,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal file - primary metadata.",
+		 "%s: invalid file - primary metadata.",
 		 function );
 
 		return( -1 );
@@ -1009,7 +1012,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal file - secondary metadata.",
+		 "%s: invalid file - secondary metadata.",
 		 function );
 
 		return( -1 );
@@ -1020,7 +1023,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal file - tertiary metadata.",
+		 "%s: invalid file - tertiary metadata.",
 		 function );
 
 		return( -1 );
@@ -1031,7 +1034,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal file - sectors vector already set.",
+		 "%s: invalid file - sectors vector already set.",
 		 function );
 
 		return( -1 );
@@ -1042,7 +1045,7 @@ int libbde_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal file - sectors cache already set.",
+		 "%s: invalid file - sectors cache already set.",
 		 function );
 
 		return( -1 );
@@ -1331,6 +1334,7 @@ int libbde_volume_open_read(
 
 			goto on_error;
 		}
+		internal_volume->is_locked = 0;
 	}
 	return( result );
 
@@ -1395,7 +1399,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid internal volume.",
+		 "%s: invalid volume.",
 		 function );
 
 		return( -1 );
@@ -1406,7 +1410,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal volume - missing IO handle.",
+		 "%s: invalid volume - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -1653,6 +1657,32 @@ on_error:
 	return( -1 );
 }
 
+/* Determines if the volume is locked
+ * Returns 1 if locked, 0 if not or -1 on error
+ */
+int libbde_volume_is_locked(
+     libbde_volume_t *volume,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_is_locked";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	return( internal_volume->is_locked );
+}
+
 /* Reads data at the current offset into a buffer
  * Returns the number of bytes read or -1 on error
  */
@@ -1701,7 +1731,7 @@ ssize_t libbde_volume_read_buffer(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal file - missing sectors vector.",
+		 "%s: invalid file - missing sectors vector.",
 		 function );
 
 		return( -1 );
@@ -1712,7 +1742,7 @@ ssize_t libbde_volume_read_buffer(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal file - missing sectors cache.",
+		 "%s: invalid file - missing sectors cache.",
 		 function );
 
 		return( -1 );
@@ -1723,7 +1753,7 @@ ssize_t libbde_volume_read_buffer(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid internal volume - current offset value out of bounds.",
+		 "%s: invalid volume - current offset value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -1840,6 +1870,54 @@ ssize_t libbde_volume_read_buffer(
 /* Reads (media) data at a specific offset
  * Returns the number of bytes read or -1 on error
  */
+ssize_t libbde_volume_read_buffer_at_offset(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libcerror_error_t **error )
+{
+	static char *function = "libbde_volume_read_buffer_at_offset";
+	ssize_t read_count    = 0;
+
+	if( libbde_volume_seek_offset(
+	     volume,
+	     offset,
+	     SEEK_SET,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek offset.",
+		 function );
+
+		return( -1 );
+	}
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              buffer,
+	              buffer_size,
+	              error );
+
+	if( read_count < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read buffer.",
+		 function );
+
+		return( -1 );
+	}
+	return( read_count );
+}
+
+/* Reads (media) data at a specific offset
+ * Returns the number of bytes read or -1 on error
+ */
 ssize_t libbde_volume_read_random(
          libbde_volume_t *volume,
          void *buffer,
@@ -1902,14 +1980,14 @@ ssize_t libbde_volume_write_buffer(
 /* Writes (media) data at a specific offset,
  * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
  */
-ssize_t libbde_volume_write_random(
+ssize_t libbde_volume_write_buffer_at_offset(
          libbde_volume_t *volume,
          const void *buffer,
          size_t buffer_size,
          off64_t offset,
          libcerror_error_t **error )
 {
-	static char *function = "libbde_volume_write_random";
+	static char *function = "libbde_volume_write_buffer_at_offset";
 	ssize_t write_count   = 0;
 
 	if( libbde_volume_seek_offset(

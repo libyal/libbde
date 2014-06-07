@@ -104,7 +104,7 @@ PyTypeObject pybde_key_protector_type_object = {
 	0,
 	/* tp_as_buffer */
 	0,
-        /* tp_flags */
+	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
 	"pybde key_protector object (wraps libbde_key_protector_t)",

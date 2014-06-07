@@ -159,6 +159,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfcache\libfcache_date_time.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfcache\libfcache_error.c"
 				>
 			</File>

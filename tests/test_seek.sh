@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Library open close testing script
+# Library seek testing script
 #
-# Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
+# Copyright (c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
 #
 # Refer to AUTHORS for acknowledgements.
 #
@@ -40,16 +40,16 @@ list_contains()
 	return ${EXIT_FAILURE};
 }
 
-test_open_close()
+test_seek()
 { 
 	INPUT_FILE=$1;
+
+	echo "Testing seek offset of input:" ${INPUT_FILE};
 
 	rm -rf tmp;
 	mkdir tmp;
 
-	echo "Testing open close of input: ${INPUT_FILE}";
-
-	${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} ${INPUT_FILE};
+	${TEST_RUNNER} ./${BDE_TEST_SEEK} ${INPUT_FILE};
 
 	RESULT=$?;
 
@@ -60,7 +60,7 @@ test_open_close()
 	return ${RESULT};
 }
 
-test_open_close_password()
+test_seek_password()
 { 
 	DIRNAME=$1;
 	INPUT_FILE=$2;
@@ -75,9 +75,9 @@ test_open_close_password()
 
 		PASSWORD=`cat "${PASSWORD_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
 
-		echo "Testing open close with password of input: ${INPUT_FILE}";
+		echo "Testing seek with password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} -p${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} ./${BDE_TEST_SEEK} -p${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -85,13 +85,13 @@ test_open_close_password()
 
 		echo "";
 	else
-		echo "Testing open close with password of input: ${INPUT_FILE} (FAIL)";
+		echo "Testing seek with password of input: ${INPUT_FILE} (FAIL)";
 	fi
 
 	return ${RESULT};
 }
 
-test_open_close_recovery_password()
+test_seek_recovery_password()
 { 
 	DIRNAME=$1;
 	INPUT_FILE=$2;
@@ -106,9 +106,9 @@ test_open_close_recovery_password()
 
 		PASSWORD=`cat "${PASSWORD_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
 
-		echo "Testing open close with recovery password of input: ${INPUT_FILE}";
+		echo "Testing seek with recovery password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} -r${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} ./${BDE_TEST_SEEK} -r${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -116,22 +116,22 @@ test_open_close_recovery_password()
 
 		echo "";
 	else
-		echo "Testing open close with recovery password of input: ${INPUT_FILE} (FAIL)";
+		echo "Testing seek with recovery password of input: ${INPUT_FILE} (FAIL)";
 	fi
 
 	return ${RESULT};
 }
 
-BDE_TEST_OPEN_CLOSE="bde_test_open_close";
+BDE_TEST_SEEK="bde_test_seek";
 
-if ! test -x ${BDE_TEST_OPEN_CLOSE};
+if ! test -x ${BDE_TEST_SEEK};
 then
-	BDE_TEST_OPEN_CLOSE="bde_test_open_close.exe";
+	BDE_TEST_SEEK="bde_test_seek.exe";
 fi
 
-if ! test -x ${BDE_TEST_OPEN_CLOSE};
+if ! test -x ${BDE_TEST_SEEK};
 then
-	echo "Missing executable: ${BDE_TEST_OPEN_CLOSE}";
+	echo "Missing executable: ${BDE_TEST_SEEK}";
 
 	exit ${EXIT_FAILURE};
 fi
@@ -169,11 +169,11 @@ then
 
 	EXIT_RESULT=${EXIT_IGNORE};
 else
-	IGNORE_LIST="";
+	IGNORELIST="";
 
 	if test -f "input/.libbde/ignore";
 	then
-		IGNORE_LIST=`cat input/.libbde/ignore | sed '/^#/d'`;
+		IGNORELIST=`cat input/.libbde/ignore | sed '/^#/d'`;
 	fi
 	for TESTDIR in input/*;
 	do
@@ -181,7 +181,7 @@ else
 		then
 			DIRNAME=`basename ${TESTDIR}`;
 
-			if ! list_contains "${IGNORE_LIST}" "${DIRNAME}";
+			if ! list_contains "${IGNORELIST}" "${DIRNAME}";
 			then
 				if test -f "input/.libbde/${DIRNAME}/files";
 				then
@@ -195,14 +195,14 @@ else
 
 					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
 					then
-						if ! test_open_close_password "${DIRNAME}" "${TEST_FILE}";
+						if ! test_seek_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi
 					fi
 					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
 					then
-						if ! test_open_close_recovery_password "${DIRNAME}" "${TEST_FILE}";
+						if ! test_seek_recovery_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi

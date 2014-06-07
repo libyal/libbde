@@ -1,4 +1,4 @@
-.Dd April 3, 2014
+.Dd May 31, 2014
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -62,10 +62,12 @@ Volume functions
 .Fn libbde_volume_open "libbde_volume_t *volume, const char *filename, int flags, libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_close "libbde_volume_t *volume, libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_is_locked "libbde_volume_t *volume, libbde_error_t **error"
 .Ft ssize_t
 .Fn libbde_volume_read_buffer "libbde_volume_t *volume, void *buffer, size_t buffer_size, libbde_error_t **error"
 .Ft ssize_t
-.Fn libbde_volume_read_random "libbde_volume_t *volume, void *buffer, size_t buffer_size, off64_t offset, libbde_error_t **error"
+.Fn libbde_volume_read_buffer_at_offset "libbde_volume_t *volume, void *buffer, size_t buffer_size, off64_t offset, libbde_error_t **error"
 .Ft off64_t
 .Fn libbde_volume_seek_offset "libbde_volume_t *volume, off64_t offset, int whence, libbde_error_t **error"
 .Ft int

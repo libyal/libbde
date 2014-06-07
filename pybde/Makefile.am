@@ -18,10 +18,12 @@ pyexec_LTLIBRARIES = pybde.la
 pybde_la_SOURCES = \
 	pybde.c pybde.h \
 	pybde_datetime.c pybde_datetime.h \
+	pybde_encryption_methods.c pybde_encryption_methods.h \
 	pybde_error.c pybde_error.h \
 	pybde_file_object_io_handle.c pybde_file_object_io_handle.h \
 	pybde_guid.c pybde_guid.h \
 	pybde_integer.c pybde_integer.h \
+	pybde_key_protection_types.c pybde_key_protection_types.h \
 	pybde_key_protector.c pybde_key_protector.h \
 	pybde_key_protectors.c pybde_key_protectors.h \
 	pybde_libbde.h \

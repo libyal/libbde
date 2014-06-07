@@ -83,6 +83,13 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Closes a volume." },
 
+	{ "is_locked",
+	  (PyCFunction) pybde_volume_is_locked,
+	  METH_NOARGS,
+	  "is_locked() -> Boolean\n"
+	  "\n"
+	  "Indicates if the volume is locked." },
+
 	{ "read_buffer",
 	  (PyCFunction) pybde_volume_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
@@ -90,10 +97,10 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Reads a buffer of volume data." },
 
-	{ "read_random",
-	  (PyCFunction) pybde_volume_read_random,
+	{ "read_buffer_at_offset",
+	  (PyCFunction) pybde_volume_read_buffer_at_offset,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read_random(size, offset) -> String\n"
+	  "read_buffer_at_offset(size, offset) -> String\n"
 	  "\n"
 	  "Reads a buffer of volume data at a specific offset." },
 
@@ -192,11 +199,24 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Sets the recovery password." },
 
+	{ "read_startup_key",
+	  (PyCFunction) pybde_volume_read_startup_key,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "read_startup_key(filename) -> None\n"
+	  "\n"
+	  "Reads the startup key from a file." },
+
 	/* Sentinel */
 	{ NULL, NULL, 0, NULL }
 };
 
 PyGetSetDef pybde_volume_object_get_set_definitions[] = {
+
+	{ "is_locked",
+	  (getter) pybde_volume_is_locked,
+	  (setter) 0,
+	  "Value to indicate the volume is locked.",
+	  NULL },
 
 	{ "size",
 	  (getter) pybde_volume_get_size,
@@ -267,7 +287,7 @@ PyTypeObject pybde_volume_type_object = {
 	0,
 	/* tp_as_buffer */
 	0,
-        /* tp_flags */
+	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
 	"pybde volume object (wraps libbde_volume_t)",
@@ -566,6 +586,209 @@ PyObject *pybde_volume_signal_abort(
 	return( Py_None );
 }
 
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+
+/* Opens a volume
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_open(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *exception_string    = NULL;
+	PyObject *exception_traceback = NULL;
+	PyObject *exception_type      = NULL;
+	PyObject *exception_value     = NULL;
+	PyObject *string_object       = NULL;
+	libcerror_error_t *error      = NULL;
+	static char *function         = "pybde_volume_open";
+	static char *keyword_list[]   = { "filename", "mode", NULL };
+	const wchar_t *filename_wide  = NULL;
+	const char *filename_narrow   = NULL;
+	char *error_string            = NULL;
+	int result                    = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * On Windows the narrow character strings contains an extended ASCII string with a codepage. Hence we get a conversion
+	 * exception. We cannot use "u" here either since that does not allow us to pass non Unicode string objects and
+	 * Python (at least 2.7) does not seems to automatically upcast them.
+	 */
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "O|s",
+	     keyword_list,
+	     &string_object ) == 0 )
+	{
+		return( NULL );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+	          string_object,
+	          (PyObject *) &PyUnicode_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+		                    exception_value );
+
+		error_string = PyString_AsString(
+		                exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		filename_wide = (wchar_t *) PyUnicode_AsUnicode(
+		                             string_object );
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_open_wide(
+		          pybde_volume->volume,
+		          filename_wide,
+		          LIBBDE_OPEN_READ,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to open volume.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+		  string_object,
+		  (PyObject *) &PyString_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+				    exception_value );
+
+		error_string = PyString_AsString(
+				exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		filename_narrow = PyString_AsString(
+				   string_object );
+
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_open(
+		          pybde_volume->volume,
+		          filename_narrow,
+		          LIBBDE_OPEN_READ,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to open volume.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Format(
+	 PyExc_TypeError,
+	 "%s: unsupported string object type",
+	 function );
+
+	return( NULL );
+}
+
+#else
+
 /* Opens a volume
  * Returns a Python object if successful or NULL on error
  */
@@ -590,6 +813,9 @@ PyObject *pybde_volume_open(
 
 		return( NULL );
 	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * For systems that support UTF-8 this works for Unicode string objects as well.
+	 */
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
@@ -597,9 +823,9 @@ PyObject *pybde_volume_open(
 	     keyword_list,
 	     &filename,
 	     &mode ) == 0 )
-        {
-                return( NULL );
-        }
+	{
+		return( NULL );
+	}
 	if( ( mode != NULL )
 	 && ( mode[ 0 ] != 'r' ) )
 	{
@@ -615,13 +841,13 @@ PyObject *pybde_volume_open(
 
 	result = libbde_volume_open(
 	          pybde_volume->volume,
-                  filename,
-                  LIBBDE_OPEN_READ,
+	          filename,
+	          LIBBDE_OPEN_READ,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -639,6 +865,8 @@ PyObject *pybde_volume_open(
 
 	return( Py_None );
 }
+
+#endif /* defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER ) */
 
 /* Opens a volume using a file-like object
  * Returns a Python object if successful or NULL on error
@@ -671,9 +899,9 @@ PyObject *pybde_volume_open_file_object(
 	     keyword_list,
 	     &file_object,
 	     &mode ) == 0 )
-        {
-                return( NULL );
-        }
+	{
+		return( NULL );
+	}
 	if( ( mode != NULL )
 	 && ( mode[ 0 ] != 'r' ) )
 	{
@@ -705,13 +933,13 @@ PyObject *pybde_volume_open_file_object(
 
 	result = libbde_volume_open_file_io_handle(
 	          pybde_volume->volume,
-                  pybde_volume->file_io_handle,
-                  LIBBDE_OPEN_READ,
+	          pybde_volume->file_io_handle,
+	          LIBBDE_OPEN_READ,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -810,6 +1038,56 @@ PyObject *pybde_volume_close(
 	 Py_None );
 
 	return( Py_None );
+}
+
+/* ADetermines if the volume is locked
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_is_locked(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "pybde_volume_is_locked";
+	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_is_locked(
+	          pybde_volume->volume,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	if( result != 0 )
+	{
+		return( Py_True );
+	}
+	return( Py_False );
 }
 
 /* Reads (volume) data at the current offset into a buffer
@@ -913,14 +1191,14 @@ PyObject *pybde_volume_read_buffer(
 /* Reads (volume) data at a specific offset
  * Returns a Python object if successful or NULL on error
  */
-PyObject *pybde_volume_read_random(
+PyObject *pybde_volume_read_buffer_at_offset(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
            PyObject *keywords )
 {
 	libcerror_error_t *error    = NULL;
 	PyObject *string_object     = NULL;
-	static char *function       = "pybde_volume_read_random";
+	static char *function       = "pybde_volume_read_buffer_at_offset";
 	static char *keyword_list[] = { "size", "offset", NULL };
 	off64_t read_offset         = 0;
 	ssize_t read_count          = 0;
@@ -982,7 +1260,7 @@ PyObject *pybde_volume_read_random(
 
 	Py_BEGIN_ALLOW_THREADS
 
-	read_count = libbde_volume_read_random(
+	read_count = libbde_volume_read_buffer_at_offset(
 	              pybde_volume->volume,
 	              PyString_AsString(
 	               string_object ),
@@ -1508,9 +1786,9 @@ PyObject *pybde_volume_set_keys(
 	     keyword_list,
 	     &full_volume_encryption_key_string,
 	     &tweak_key_string ) == 0 )
-        {
-                return( NULL );
-        }
+	{
+		return( NULL );
+	}
 	if( full_volume_encryption_key_string == NULL )
 	{
 		PyErr_Format(
@@ -1559,6 +1837,217 @@ PyObject *pybde_volume_set_keys(
 	return( Py_None );
 }
 
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+
+/* Sets the password
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_set_password(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *exception_string           = NULL;
+	PyObject *exception_traceback        = NULL;
+	PyObject *exception_type             = NULL;
+	PyObject *exception_value            = NULL;
+	PyObject *string_object              = NULL;
+	libcerror_error_t *error             = NULL;
+	static char *function                = "pybde_volume_set_password";
+	static char *keyword_list[]          = { "password", NULL };
+	const wchar_t *password_string_wide  = NULL;
+	const char *password_string_narrow   = NULL;
+	char *error_string                   = NULL;
+	size_t password_string_length        = 0;
+	int result                           = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * On Windows the narrow character strings contains an extended ASCII string with a codepage. Hence we get a conversion
+	 * exception. We cannot use "u" here either since that does not allow us to pass non Unicode string objects and
+	 * Python (at least 2.7) does not seems to automatically upcast them.
+	 */
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "O",
+	     keyword_list,
+	     &string_object ) == 0 )
+	{
+		return( NULL );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+	          string_object,
+	          (PyObject *) &PyUnicode_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+		                    exception_value );
+
+		error_string = PyString_AsString(
+		                exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		password_string_wide = (wchar_t *) PyUnicode_AsUnicode(
+		                                    string_object );
+
+		password_string_length = libcstring_wide_string_length(
+		                          password_string_wide );
+
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_set_utf16_password(
+		          pybde_volume->volume,
+		          (uint16_t *) password_string_wide,
+		          password_string_length,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to set password.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+		  string_object,
+		  (PyObject *) &PyString_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+				    exception_value );
+
+		error_string = PyString_AsString(
+				exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		password_string_narrow = PyString_AsString(
+				          string_object );
+
+		password_string_length = libcstring_narrow_string_length(
+		                          password_string_narrow );
+
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_set_utf8_password(
+		          pybde_volume->volume,
+		          (uint8_t *) password_string_narrow,
+		          password_string_length,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to set password.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Format(
+	 PyExc_TypeError,
+	 "%s: unsupported string object type",
+	 function );
+
+	return( NULL );
+}
+
+#else
+
 /* Sets the password
  * Returns a Python object if successful or NULL on error
  */
@@ -1583,15 +2072,18 @@ PyObject *pybde_volume_set_password(
 
 		return( NULL );
 	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * For systems that support UTF-8 this works for Unicode string objects as well.
+	 */
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
 	     "s",
 	     keyword_list,
 	     &password_string ) == 0 )
-        {
-                return( NULL );
-        }
+	{
+		return( NULL );
+	}
 	if( password_string == NULL )
 	{
 		PyErr_Format(
@@ -1633,6 +2125,219 @@ PyObject *pybde_volume_set_password(
 	return( Py_None );
 }
 
+#endif /* defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER ) */
+
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+
+/* Sets the recovery password
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_set_recovery_password(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *exception_string                    = NULL;
+	PyObject *exception_traceback                 = NULL;
+	PyObject *exception_type                      = NULL;
+	PyObject *exception_value                     = NULL;
+	PyObject *string_object                       = NULL;
+	libcerror_error_t *error                      = NULL;
+	static char *function                         = "pybde_volume_set_recovery_password";
+	static char *keyword_list[]                   = { "recovery_password", NULL };
+	const wchar_t *recovery_password_string_wide  = NULL;
+	const char *recovery_password_string_narrow   = NULL;
+	char *error_string                            = NULL;
+	size_t recovery_password_string_length        = 0;
+	int result                                    = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * On Windows the narrow character strings contains an extended ASCII string with a codepage. Hence we get a conversion
+	 * exception. We cannot use "u" here either since that does not allow us to pass non Unicode string objects and
+	 * Python (at least 2.7) does not seems to automatically upcast them.
+	 */
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "O",
+	     keyword_list,
+	     &string_object ) == 0 )
+	{
+		return( NULL );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+	          string_object,
+	          (PyObject *) &PyUnicode_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+		                    exception_value );
+
+		error_string = PyString_AsString(
+		                exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		recovery_password_string_wide = (wchar_t *) PyUnicode_AsUnicode(
+		                                             string_object );
+
+		recovery_password_string_length = libcstring_wide_string_length(
+		                                   recovery_password_string_wide );
+
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_set_utf16_recovery_password(
+		          pybde_volume->volume,
+		          (uint16_t *) recovery_password_string_wide,
+		          recovery_password_string_length,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to set recovery password.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+		  string_object,
+		  (PyObject *) &PyString_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+				    exception_value );
+
+		error_string = PyString_AsString(
+				exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		recovery_password_string_narrow = PyString_AsString(
+		                                   string_object );
+
+		recovery_password_string_length = libcstring_narrow_string_length(
+		                                   recovery_password_string_narrow );
+
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_set_utf8_recovery_password(
+		          pybde_volume->volume,
+		          (uint8_t *) recovery_password_string_narrow,
+		          recovery_password_string_length,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to set recovery password.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Format(
+	 PyExc_TypeError,
+	 "%s: unsupported string object type",
+	 function );
+
+	return( NULL );
+}
+
+#else
+
 /* Sets the recovery password
  * Returns a Python object if successful or NULL on error
  */
@@ -1657,15 +2362,18 @@ PyObject *pybde_volume_set_recovery_password(
 
 		return( NULL );
 	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * For systems that support UTF-8 this works for Unicode string objects as well.
+	 */
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
 	     "s",
 	     keyword_list,
 	     &recovery_password_string ) == 0 )
-        {
-                return( NULL );
-        }
+	{
+		return( NULL );
+	}
 	if( recovery_password_string == NULL )
 	{
 		PyErr_Format(
@@ -1706,6 +2414,283 @@ PyObject *pybde_volume_set_recovery_password(
 
 	return( Py_None );
 }
+
+#endif /* defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER ) */
+
+#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+
+/* Sets the startup key
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_read_startup_key(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *exception_string    = NULL;
+	PyObject *exception_traceback = NULL;
+	PyObject *exception_type      = NULL;
+	PyObject *exception_value     = NULL;
+	PyObject *string_object       = NULL;
+	libcerror_error_t *error      = NULL;
+	static char *function         = "pybde_volume_read_startup_key";
+	static char *keyword_list[]   = { "filename", NULL };
+	const wchar_t *filename_wide  = NULL;
+	const char *filename_narrow   = NULL;
+	char *error_string            = NULL;
+	int result                    = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * On Windows the narrow character strings contains an extended ASCII string with a codepage. Hence we get a conversion
+	 * exception. We cannot use "u" here either since that does not allow us to pass non Unicode string objects and
+	 * Python (at least 2.7) does not seems to automatically upcast them.
+	 */
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "O",
+	     keyword_list,
+	     &string_object ) == 0 )
+	{
+		return( NULL );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+	          string_object,
+	          (PyObject *) &PyUnicode_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+		                    exception_value );
+
+		error_string = PyString_AsString(
+		                exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type unicode.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		filename_wide = (wchar_t *) PyUnicode_AsUnicode(
+		                             string_object );
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_read_startup_key_wide(
+		          pybde_volume->volume,
+		          filename_wide,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to read startup key.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Clear();
+
+	result = PyObject_IsInstance(
+		  string_object,
+		  (PyObject *) &PyString_Type );
+
+	if( result == -1 )
+	{
+		PyErr_Fetch(
+		 &exception_type,
+		 &exception_value,
+		 &exception_traceback );
+
+		exception_string = PyObject_Repr(
+				    exception_value );
+
+		error_string = PyString_AsString(
+				exception_string );
+
+		if( error_string != NULL )
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string with error: %s.",
+			 function,
+			 error_string );
+		}
+		else
+		{
+			PyErr_Format(
+		         PyExc_RuntimeError,
+			 "%s: unable to determine if string object is of type string.",
+			 function );
+		}
+		Py_DecRef(
+		 exception_string );
+
+		return( NULL );
+	}
+	else if( result != 0 )
+	{
+		PyErr_Clear();
+
+		filename_narrow = PyString_AsString(
+				   string_object );
+
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_read_startup_key(
+		          pybde_volume->volume,
+		          filename_narrow,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result == -1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to read startup key.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	PyErr_Format(
+	 PyExc_TypeError,
+	 "%s: unsupported string object type",
+	 function );
+
+	return( NULL );
+}
+
+#else
+
+/* Sets the startup key
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_read_startup_key(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	libcerror_error_t *error    = NULL;
+	char *filename              = NULL;
+	static char *keyword_list[] = { "filename", NULL };
+	static char *function       = "pybde_volume_read_startup_key";
+	int result                  = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	/* Note that PyArg_ParseTupleAndKeywords with "s" will force Unicode strings to be converted to narrow character string.
+	 * For systems that support UTF-8 this works for Unicode string objects as well.
+	 */
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "s",
+	     keyword_list,
+	     &filename ) == 0 )
+	{
+		return( NULL );
+	}
+	if( filename == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid filename.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_read_startup_key(
+	          pybde_volume->volume,
+	          filename,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to read startup key.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	Py_IncRef(
+	 Py_None );
+
+	return( Py_None );
+}
+
+#endif /* defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER ) */
 
 /* Retrieves the number of key protectors
  * Returns a Python object if successful or NULL on error
@@ -1845,9 +2830,9 @@ PyObject *pybde_volume_get_key_protector(
 	     "i",
 	     keyword_list,
 	     &key_protector_index ) == 0 )
-        {
+	{
 		return( NULL );
-        }
+	}
 	key_protector_object = pybde_volume_get_key_protector_by_index(
 	                        pybde_volume,
 	                        key_protector_index );
