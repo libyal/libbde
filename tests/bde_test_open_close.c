@@ -114,7 +114,7 @@ int bde_test_single_open_close_volume(
 			 &error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set password.",
+			 "%s: unable to set recovery password.",
 			 function );
 
 			goto on_error;
@@ -463,7 +463,7 @@ int main( int argc, char * const argv[] )
 	}
 	source = argv[ optind ];
 
-#if defined( HAVE_DEBUG_OUTPUT ) && defined( EWF_TEST_WRITE_VERBOSE )
+#if defined( HAVE_DEBUG_OUTPUT ) && defined( EWF_TEST_OPEN_CLOSE_VERBOSE )
 	libbde_notify_set_verbose(
 	 1 );
 	libbde_notify_set_stream(

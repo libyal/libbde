@@ -106,6 +106,10 @@ int mount_handle_close_input(
      mount_handle_t *mount_handle,
      libcerror_error_t **error );
 
+int mount_handle_input_is_locked(
+     mount_handle_t *mount_handle,
+     libcerror_error_t **error );
+
 ssize_t mount_handle_read_buffer(
          mount_handle_t *mount_handle,
          uint8_t *buffer,

@@ -1,4 +1,6 @@
 TODO
+* add unlock function?
+* deprecate use of open return 0  in favor of is locked function?
 * fix pybde open/close test case add password support
 * git version
   - make sure dependent local libs are in git
@@ -20,6 +22,7 @@ TODO
 * pybde
   - add function to get the encryption type
   - add encryption type defintion object
+  - add set keys function
 
 Optimizations
 * pass values 32-bit to libcaes
@@ -53,6 +56,15 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20140607
+* worked on tests
+* updated msvscpp files
+
+20140531
+* updated dependencies
+* worked on Python bindings
+* added is locked function
 
 20140405
 * worked on setup.py

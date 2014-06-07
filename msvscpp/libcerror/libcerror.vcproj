@@ -41,10 +41,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcstring"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCSTRING;HAVE_LOCAL_LIBCERROR"
-				SmallerTypeCheck="false"
 				RuntimeLibrary="2"
 				WarningLevel="4"
-				WarnAsError="false"
 				CompileAs="1"
 			/>
 			<Tool
@@ -109,7 +107,6 @@
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
 				WarningLevel="4"
-				WarnAsError="false"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -197,6 +194,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libcerror\libcerror_types.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcerror\libcerror_unused.h"
 				>
 			</File>
 		</Filter>

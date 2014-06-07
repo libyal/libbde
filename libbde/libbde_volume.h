@@ -94,6 +94,10 @@ struct libbde_internal_volume
 	/* The password keep
 	 */
 	libbde_password_keep_t *password_keep;
+
+	/* Value to indicate if the volume is locked
+	 */
+	uint8_t is_locked;
 };
 
 LIBBDE_EXTERN \
@@ -150,10 +154,23 @@ int libbde_volume_open_read_keys_from_metadata(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_is_locked(
+     libbde_volume_t *volume,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 ssize_t libbde_volume_read_buffer(
          libbde_volume_t *volume,
          void *buffer,
          size_t buffer_size,
+         libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+ssize_t libbde_volume_read_buffer_at_offset(
+         libbde_volume_t *volume,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
          libcerror_error_t **error );
 
 LIBBDE_EXTERN \
@@ -173,7 +190,7 @@ ssize_t libbde_volume_write_buffer(
          libcerror_error_t **error );
 
 LIBBDE_EXTERN \
-ssize_t libbde_volume_write_random(
+ssize_t libbde_volume_write_buffer_at_offset(
          libbde_volume_t *volume,
          const void *buffer,
          size_t buffer_size,
