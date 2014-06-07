@@ -332,7 +332,7 @@ int main( int argc, char * const argv[] )
 	          source,
 	          &error );
 
-	if( result == -1 )
+	if( result != 1 )
 	{
 		fprintf(
 		 stderr,
@@ -351,11 +351,15 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( result == 0 )
+	result = info_handle_input_is_locked(
+	          bdeinfo_info_handle,
+	          &error );
+
+	if( result != 0 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to unlock keys.\n" );
+		 "Unable to unlock volume.\n" );
 
 		goto on_error;
 	}

@@ -106,6 +106,10 @@ int info_handle_close_input(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
+int info_handle_input_is_locked(
+     info_handle_t *info_handle,
+     libcerror_error_t **error );
+
 int info_handle_volume_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );

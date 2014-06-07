@@ -97,7 +97,7 @@ PyTypeObject pybde_key_protectors_type_object = {
 	0,
 	/* tp_as_buffer */
 	0,
-        /* tp_flags */
+	/* tp_flags */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER,
 	/* tp_doc */
 	"internal pybde key protectors sequence and iterator object",

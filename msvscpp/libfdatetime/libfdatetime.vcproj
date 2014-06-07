@@ -179,11 +179,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_systemtime.c"
+				RelativePath="..\..\libfdatetime\libfdatetime_support.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_support.c"
+				RelativePath="..\..\libfdatetime\libfdatetime_systemtime.c"
 				>
 			</File>
 		</Filter>
@@ -237,11 +237,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_systemtime.h"
+				RelativePath="..\..\libfdatetime\libfdatetime_support.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdatetime\libfdatetime_support.h"
+				RelativePath="..\..\libfdatetime\libfdatetime_systemtime.h"
 				>
 			</File>
 			<File

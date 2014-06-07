@@ -23,6 +23,8 @@ endif
 
 TESTS = \
 	test_open_close.sh \
+	test_seek.sh \
+	test_read.sh \
 	test_bdeinfo.sh \
 	$(TESTS_PYBDE)
 
@@ -30,13 +32,17 @@ check_SCRIPTS = \
 	pybde_test_open_close.py \
 	test_bdeinfo.sh \
 	test_open_close.sh \
+	test_read.sh \
+	test_seek.sh \
 	test_runner.sh
 
 EXTRA_DIST = \
 	$(check_SCRIPTS)
 
 check_PROGRAMS = \
-	bde_test_open_close
+	bde_test_open_close \
+	bde_test_read \
+	bde_test_seek
 
 bde_test_open_close_SOURCES = \
 	bde_test_libbde.h \
@@ -48,6 +54,36 @@ bde_test_open_close_SOURCES = \
 	bde_test_unused.h
 
 bde_test_open_close_LDADD = \
+	@LIBCSYSTEM_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	@LIBCSTRING_LIBADD@ \
+	@PTHREAD_LIBADD@
+
+bde_test_read_SOURCES = \
+	bde_test_libcerror.h \
+	bde_test_libcstring.h \
+	bde_test_libbde.h \
+	bde_test_read.c \
+	bde_test_unused.h
+
+bde_test_read_LDADD = \
+	@LIBCSYSTEM_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	@LIBCSTRING_LIBADD@ \
+	@PTHREAD_LIBADD@
+
+bde_test_seek_SOURCES = \
+	bde_test_libcerror.h \
+	bde_test_libcstring.h \
+	bde_test_libbde.h \
+	bde_test_seek.c \
+	bde_test_unused.h
+
+bde_test_seek_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCNOTIFY_LIBADD@ \

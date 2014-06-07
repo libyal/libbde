@@ -851,7 +851,7 @@ int mount_handle_set_volume_offset(
 }
 
 /* Opens the mount handle
- * Returns 1 if successful, 0 if the keys could not be read or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int mount_handle_open_input(
      mount_handle_t *mount_handle,
@@ -931,7 +931,7 @@ int mount_handle_open_input(
 
 		return( -1 );
 	}
-	return( result );
+	return( 1 );
 }
 
 /* Closes the mount handle
@@ -968,6 +968,45 @@ int mount_handle_close_input(
 		return( -1 );
 	}
 	return( 0 );
+}
+
+/* Determine if the input is locked
+ * Returns 1 if locked, 0 if not or -1 on error
+ */
+int mount_handle_input_is_locked(
+     mount_handle_t *mount_handle,
+     libcerror_error_t **error )
+{
+	static char *function = "mount_handle_input_is_locked";
+	int result            = 0;
+
+	if( mount_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	result = libbde_volume_is_locked(
+	          mount_handle->input_volume,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		return( -1 );
+	}
+	return( result );
 }
 
 /* Read a buffer from the input volume

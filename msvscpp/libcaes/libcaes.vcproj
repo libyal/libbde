@@ -205,6 +205,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libcaes\libcaes_libcerror.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libcaes\libcaes_libcstring.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libcaes\libcaes_support.h"
 				>
 			</File>

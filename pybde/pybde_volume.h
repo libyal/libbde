@@ -90,12 +90,16 @@ PyObject *pybde_volume_close(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
 
+PyObject *pybde_volume_is_locked(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
 PyObject *pybde_volume_read_buffer(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
            PyObject *keywords );
 
-PyObject *pybde_volume_read_random(
+PyObject *pybde_volume_read_buffer_at_offset(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
            PyObject *keywords );
@@ -140,6 +144,11 @@ PyObject *pybde_volume_set_password(
            PyObject *keywords );
 
 PyObject *pybde_volume_set_recovery_password(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pybde_volume_read_startup_key(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
            PyObject *keywords );
