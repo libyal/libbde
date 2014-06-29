@@ -36,7 +36,7 @@
 const char *libbde_debug_print_encryption_method(
              uint32_t encryption_method )
 {
-	switch( encryption_method )
+	switch( encryption_method & 0x0000ffffUL )
 	{
 		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
 			return( "AES-CBC 128-bit encryption with diffuser" );

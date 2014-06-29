@@ -148,7 +148,10 @@ int libbde_encryption_initialize(
 
 		goto on_error;
 	}
-	( *context )->method = method;
+	/* The known encryption methods seem to be stored in the lower 16-bit
+	 * the upper 16-bit sometimes has the MSB set.
+	 */
+	( *context )->method = method & 0x0000ffffUL;
 
 	return( 1 );
 

@@ -1079,7 +1079,7 @@ int info_handle_volume_fprint(
 	 info_handle->notify_stream,
 	 "\tEncryption method:\t\t" );
 
-	switch( encryption_method )
+	switch( encryption_method & 0x0000ffffUL )
 	{
 		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
 			fprintf(
