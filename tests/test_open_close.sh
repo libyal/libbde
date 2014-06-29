@@ -66,7 +66,7 @@ test_open_close_password()
 	INPUT_FILE=$2;
 	BASENAME=`basename ${INPUT_FILE}`;
 	RESULT=${EXIT_FAILURE};
-	PASSWORD_FILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
+	PASSWORD_FILE="input/.libbde/${DIRNAME}/${BASENAME}.password";
 
 	if test -f "${PASSWORD_FILE}";
 	then
@@ -97,7 +97,7 @@ test_open_close_recovery_password()
 	INPUT_FILE=$2;
 	BASENAME=`basename ${INPUT_FILE}`;
 	RESULT=${EXIT_FAILURE};
-	PASSWORD_FILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
+	PASSWORD_FILE="input/.libbde/${DIRNAME}/${BASENAME}.recovery_password";
 
 	if test -f "${PASSWORD_FILE}";
 	then
@@ -187,20 +187,20 @@ else
 				then
 					TEST_FILES=`cat input/.libbde/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
 				else
-					TEST_FILES=`ls ${TESTDIR}/* 2> /dev/null`;
+					TEST_FILES=`ls -1 ${TESTDIR}/* 2> /dev/null`;
 				fi
 				for TEST_FILE in ${TEST_FILES};
 				do
 					BASENAME=`basename ${TEST_FILE}`;
 
-					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
+					if test -f "input/.libbde/${DIRNAME}/${BASENAME}.password";
 					then
 						if ! test_open_close_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi
 					fi
-					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
+					if test -f "input/.libbde/${DIRNAME}/${BASENAME}.recovery_password";
 					then
 						if ! test_open_close_recovery_password "${DIRNAME}" "${TEST_FILE}";
 						then

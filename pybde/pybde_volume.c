@@ -212,7 +212,7 @@ PyMethodDef pybde_volume_object_methods[] = {
 
 PyGetSetDef pybde_volume_object_get_set_definitions[] = {
 
-	{ "is_locked",
+	{ "locked",
 	  (getter) pybde_volume_is_locked,
 	  (setter) 0,
 	  "Value to indicate the volume is locked.",
