@@ -75,7 +75,7 @@ PyTypeObject pybde_encryption_methods_type_object = {
 	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
-	"pybde encryption_methods object (wraps LIBBDE_ENCRYPTION_METHODS)",
+	"pybde encryption methods object (wraps LIBBDE_ENCRYPTION_METHODS)",
 	/* tp_traverse */
 	0,
 	/* tp_clear */

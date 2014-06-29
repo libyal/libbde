@@ -1714,6 +1714,17 @@ ssize_t libbde_volume_read_buffer(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
+	if( internal_volume->is_locked != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - volume is locked.",
+		 function );
+
+		return( -1 );
+	}
 	if( internal_volume->io_handle == NULL )
 	{
 		libcerror_error_set(
@@ -2052,6 +2063,17 @@ off64_t libbde_volume_seek_offset(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
+	if( internal_volume->is_locked != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - volume is locked.",
+		 function );
+
+		return( -1 );
+	}
 	if( internal_volume->io_handle == NULL )
 	{
 		libcerror_error_set(
