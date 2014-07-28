@@ -155,6 +155,10 @@ void bdemount_signal_handler(
 static char *bdemount_fuse_path         = "/bde1";
 static size_t bdemount_fuse_path_length = 5;
 
+#if defined( HAVE_TIME )
+time_t bdemount_timestamp               = 0;
+#endif
+
 /* Opens a file
  * Returns 0 if successful or a negative errno value otherwise
  */
@@ -363,6 +367,250 @@ on_error:
 	return( result );
 }
 
+/* Sets the values in a stat info structure
+ * Returns 1 if successful or -1 on error
+ */
+int bdemount_fuse_set_stat_info(
+     struct stat *stat_info,
+     uint64_t creation_time,
+     uint64_t modification_time,
+     uint64_t access_time,
+     size64_t size,
+     int number_of_sub_items,
+     uint8_t use_mount_time,
+     libcerror_error_t **error )
+{
+	static char *function = "bdemount_fuse_set_stat_info";
+
+	if( stat_info == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid stat info.",
+		 function );
+
+		return( -1 );
+	}
+	if( use_mount_time == 0 )
+	{
+/* TODO check size fo time_t if 64-bit allow for more precision */
+		if( creation_time != 0 )
+		{
+			creation_time /= 10000000;
+
+			if( creation_time < 11644473600UL )
+			{
+				creation_time = 0;
+			}
+			else
+			{
+				creation_time -= 11644473600UL;
+			}
+/* TODO check upper bound */
+			stat_info->st_ctime = (time_t) creation_time;
+		}
+		if( modification_time != 0 )
+		{
+			modification_time /= 10000000;
+
+			if( modification_time < 11644473600UL )
+			{
+				modification_time = 0;
+			}
+			else
+			{
+				modification_time -= 11644473600UL;
+			}
+/* TODO check upper bound */
+			stat_info->st_mtime = (time_t) modification_time;
+		}
+		if( access_time != 0 )
+		{
+			access_time /= 10000000;
+
+			if( access_time < 11644473600UL )
+			{
+				access_time = 0;
+			}
+			else
+			{
+				access_time -= 11644473600UL;
+			}
+/* TODO check upper bound */
+			stat_info->st_atime = (time_t) access_time;
+		}
+	}
+#if defined( HAVE_TIME )
+	else
+	{
+		if( bdemount_timestamp == 0 )
+		{
+			if( time(
+			     &bdemount_timestamp ) == (time_t) -1 )
+			{
+				bdemount_timestamp = 0;
+			}
+		}
+		stat_info->st_atime = bdemount_timestamp;
+		stat_info->st_mtime = bdemount_timestamp;
+		stat_info->st_ctime = bdemount_timestamp;
+	}
+#endif
+	if( size != 0 )
+	{
+#if SIZEOF_OFF_T <= 4
+		if( size > (size64_t) UINT32_MAX )
+#else
+		if( size > (size64_t) INT64_MAX )
+#endif
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid size value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
+		stat_info->st_size = (off_t) size;
+	}
+	if( number_of_sub_items > 0 )
+	{
+		stat_info->st_mode  = S_IFDIR | 0555;
+		stat_info->st_nlink = 2;
+	}
+	else
+	{
+		stat_info->st_mode  = S_IFREG | 0444;
+		stat_info->st_nlink = 1;
+	}
+#if defined( HAVE_GETEUID )
+	stat_info->st_uid = geteuid();
+#endif
+#if defined( HAVE_GETEGID )
+	stat_info->st_gid = getegid();
+#endif
+	return( 1 );
+}
+
+/* Fills a directory entry
+ * Returns 1 if successful or -1 on error
+ */
+int bdemount_fuse_filldir(
+     void *buffer,
+     fuse_fill_dir_t filler,
+     char *name,
+     size_t name_size,
+     struct stat *stat_info,
+     libbde_volume_t *volume,
+     uint8_t use_mount_time,
+     libcerror_error_t **error )
+{
+	static char *function   = "bdemount_fuse_filldir";
+	size64_t volume_size    = 0;
+	uint64_t creation_time  = 0;
+	int number_of_sub_items = 0;
+
+	if( filler == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filler.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume == NULL )
+	{
+		number_of_sub_items = 1;
+	}
+	else
+	{
+		if( libbde_volume_get_creation_time(
+		     volume,
+		     &creation_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve creation time.",
+			 function );
+
+			return( -1 );
+		}
+		if( libbde_volume_get_size(
+		     volume,
+		     &volume_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume size.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( memory_set(
+	     stat_info,
+	     0,
+	     sizeof( struct stat ) ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear stat info.",
+		 function );
+
+		return( -1 );
+	}
+	if( bdemount_fuse_set_stat_info(
+	     stat_info,
+	     creation_time,
+	     creation_time,
+	     creation_time,
+	     volume_size,
+	     number_of_sub_items,
+	     use_mount_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set stat info.",
+		 function );
+
+		return( -1 );
+	}
+	if( filler(
+	     buffer,
+	     name,
+	     stat_info,
+	     0 ) == 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set directory entry.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Reads a directory
  * Returns 0 if successful or a negative errno value otherwise
  */
@@ -374,6 +622,7 @@ int bdemount_fuse_readdir(
      struct fuse_file_info *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
+	struct stat *stat_info   = NULL;
 	static char *function    = "bdemount_fuse_readdir";
 	size_t path_length       = 0;
 	int result               = 0;
@@ -411,11 +660,31 @@ int bdemount_fuse_readdir(
 
 		goto on_error;
 	}
-	if( filler(
+	stat_info = memory_allocate_structure(
+	             struct stat );
+
+	if( stat_info == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create stat info.",
+		 function );
+
+		result = errno;
+
+		goto on_error;
+	}
+	if( bdemount_fuse_filldir(
 	     buffer,
+	     filler,
 	     ".",
+	     2,
+	     stat_info,
 	     NULL,
-	     0 ) == 1 )
+	     1,
+	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
@@ -428,11 +697,15 @@ int bdemount_fuse_readdir(
 
 		goto on_error;
 	}
-	if( filler(
+	if( bdemount_fuse_filldir(
 	     buffer,
+	     filler,
 	     "..",
+	     3,
+	     stat_info,
 	     NULL,
-	     0 ) == 1 )
+	     0,
+	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
@@ -445,11 +718,15 @@ int bdemount_fuse_readdir(
 
 		goto on_error;
 	}
-	if( filler(
+	if( bdemount_fuse_filldir(
 	     buffer,
+	     filler,
 	     &( bdemount_fuse_path[ 1 ] ),
-	     NULL,
-	     0 ) == 1 )
+	     bdemount_fuse_path_length + 1,
+	     stat_info,
+	     bdemount_mount_handle->input_volume,
+	     0,
+	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
@@ -462,6 +739,11 @@ int bdemount_fuse_readdir(
 
 		goto on_error;
 	}
+	memory_free(
+	 stat_info );
+
+	stat_info = NULL;
+
 	return( 0 );
 
 on_error:
@@ -471,6 +753,11 @@ on_error:
 		 error );
 		libcerror_error_free(
 		 &error );
+	}
+	if( stat_info != NULL )
+	{
+		memory_free(
+		 stat_info );
 	}
 	return( result );
 }
@@ -485,12 +772,11 @@ int bdemount_fuse_getattr(
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_fuse_getattr";
 	size64_t volume_size     = 0;
+	uint64_t creation_time   = 0;
 	size_t path_length       = 0;
+	int number_of_sub_items  = 0;
 	int result               = -ENOENT;
-
-#if defined( HAVE_TIME )
-	time_t timestamp         = 0;
-#endif
+	uint8_t use_mount_time   = 0;
 
 	if( path == NULL )
 	{
@@ -541,10 +827,9 @@ int bdemount_fuse_getattr(
 	{
 		if( path[ 0 ] == '/' )
 		{
-			stat_info->st_mode  = S_IFDIR | 0755;
-			stat_info->st_nlink = 2;
-
-			result = 0;
+			number_of_sub_items = 1;
+			use_mount_time      = 1;
+			result              = 0;
 		}
 	}
 	else if( path_length == bdemount_fuse_path_length )
@@ -554,11 +839,24 @@ int bdemount_fuse_getattr(
 		     bdemount_fuse_path,
 		     bdemount_fuse_path_length ) == 0 )
 		{
-			stat_info->st_mode  = S_IFREG | 0444;
-			stat_info->st_nlink = 1;
+			if( libbde_volume_get_creation_time(
+			     bdemount_mount_handle->input_volume,
+			     &creation_time,
+			     &error ) != 1 )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve creation time.",
+				 function );
 
-			if( mount_handle_get_size(
-			     bdemount_mount_handle,
+				result = -EIO;
+
+				goto on_error;
+			}
+			if( libbde_volume_get_size(
+			     bdemount_mount_handle->input_volume,
 			     &volume_size,
 			     &error ) != 1 )
 			{
@@ -573,48 +871,32 @@ int bdemount_fuse_getattr(
 
 				goto on_error;
 			}
-#if SIZEOF_OFF_T == 4
-			if( volume_size > (size64_t) UINT32_MAX )
-			{
-				libcerror_error_set(
-				 &error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: invalid volume size value out of bounds.",
-				 function );
-
-				result = -ERANGE;
-
-				goto on_error;
-			}
-#endif
-			stat_info->st_size = (off_t) volume_size;
-
 			result = 0;
 		}
 	}
 	if( result == 0 )
 	{
-#if defined( HAVE_TIME )
-		if( time( &timestamp ) == (time_t) -1 )
+		if( bdemount_fuse_set_stat_info(
+		     stat_info,
+		     creation_time,
+		     creation_time,
+		     creation_time,
+		     volume_size,
+		     number_of_sub_items,
+		     use_mount_time,
+		     &error ) != 1 )
 		{
-			timestamp = 0;
-		}
-#endif
-		stat_info->st_atime = timestamp;
-		stat_info->st_mtime = timestamp;
-		stat_info->st_ctime = timestamp;
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set stat info.",
+			 function );
 
-#if defined( HAVE_GETEUID )
-		stat_info->st_uid = geteuid();
-#else
-		stat_info->st_uid = 0;
-#endif
-#if defined( HAVE_GETEGID )
-		stat_info->st_gid = getegid();
-#else
-		stat_info->st_gid = 0;
-#endif
+			result = -EIO;
+
+			goto on_error;
+		}
 	}
 	return( result );
 
@@ -1049,6 +1331,235 @@ on_error:
 	return( result );
 }
 
+/* Sets the values in a find data structure
+ * Returns 1 if successful or -1 on error
+ */
+int bdemount_dokan_set_find_data(
+     WIN32_FIND_DATAW *find_data,
+     uint64_t creation_time,
+     uint64_t modification_time,
+     uint64_t access_time,
+     size64_t size,
+     int number_of_sub_items,
+     uint8_t use_mount_time,
+     libcerror_error_t **error )
+{
+	static char *function = "bdemount_dokan_set_find_data";
+
+	if( find_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid find data.",
+		 function );
+
+		return( -1 );
+	}
+	if( use_mount_time == 0 )
+	{
+		if( creation_time != 0 )
+		{
+			find_data->ftCreationTime.dwLowDateTime  = (uint32_t) ( creation_time & 0x00000000ffffffffULL );
+			find_data->ftCreationTime.dwHighDateTime = creation_time >> 32;
+		}
+		if( modification_time != 0 )
+		{
+			find_data->ftLastWriteTime.dwLowDateTime  = (uint32_t) ( modification_time & 0x00000000ffffffffULL );
+			find_data->ftLastWriteTime.dwHighDateTime = modification_time >> 32;
+		}
+		if( access_time != 0 )
+		{
+			find_data->ftLastAccessTime.dwLowDateTime  = (uint32_t) ( access_time & 0x00000000ffffffffULL );
+			find_data->ftLastAccessTime.dwHighDateTime = access_time >> 32;
+		}
+	}
+/* TODO implement
+	else
+	{
+	}
+*/
+	if( size > 0 )
+	{
+		find_data->nFileSizeHigh = (DWORD) ( size >> 32 );
+		find_data->nFileSizeLow  = (DWORD) ( size & 0xffffffffUL );
+	}
+	find_data->dwFileAttributes = FILE_ATTRIBUTE_READONLY;
+
+	if( number_of_sub_items > 0 )
+	{
+		find_data->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
+	}
+	return( 1 );
+}
+
+/* Fills a directory entry
+ * Returns 1 if successful or -1 on error
+ */
+int bdemount_dokan_filldir(
+     PFillFindData fill_find_data,
+     DOKAN_FILE_INFO *file_info,
+     wchar_t *name,
+     size_t name_size,
+     WIN32_FIND_DATAW *find_data,
+     libbde_volume_t *volume,
+     uint8_t use_mount_time,
+     libcerror_error_t **error )
+{
+	static char *function   = "bdemount_dokan_filldir";
+	size64_t volume_size    = 0;
+	uint64_t creation_time  = 0;
+	int number_of_sub_items = 0;
+
+	if( fill_find_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid fill find data.",
+		 function );
+
+		return( -1 );
+	}
+	if( name == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid name.",
+		 function );
+
+		return( -1 );
+	}
+	if( name_size > (size_t) MAX_PATH )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid name size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume == NULL )
+	{
+		number_of_sub_items = 1;
+	}
+	else
+	{
+		if( libbde_volume_get_creation_time(
+		     volume,
+		     &creation_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve creation time.",
+			 function );
+
+			return( -1 );
+		}
+		if( libbde_volume_get_size(
+		     volume,
+		     &volume_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume size.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( memory_set(
+	     find_data,
+	     0,
+	     sizeof( WIN32_FIND_DATAW ) ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear find data.",
+		 function );
+
+		return( -1 );
+	}
+	if( libcstring_wide_string_copy(
+	     find_data->cFileName,
+	     name,
+	     name_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy filename.",
+		 function );
+
+		return( -1 );
+	}
+	if( name_size <= (size_t) 14 )
+	{
+		if( libcstring_wide_string_copy(
+		     find_data->cAlternateFileName,
+		     name,
+		     name_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy alternate filename.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( bdemount_dokan_set_find_data(
+	     find_data,
+	     creation_time,
+	     creation_time,
+	     creation_time,
+	     volume_size,
+	     number_of_sub_items,
+	     use_mount_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set find data.",
+		 function );
+
+		return( -1 );
+	}
+	if( fill_find_data(
+	     find_data,
+	     file_info ) != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set directory entry.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Reads a directory
  * Returns 0 if successful or a negative error code otherwise
  */
@@ -1061,7 +1572,6 @@ int __stdcall bdemount_dokan_FindFiles(
 
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_dokan_FindFiles";
-	size64_t volume_size     = 0;
 	size_t path_length       = 0;
 	int result               = 0;
 
@@ -1096,219 +1606,69 @@ int __stdcall bdemount_dokan_FindFiles(
 
 		goto on_error;
 	}
-	if( memory_set(
-	     &find_data,
-	     0,
-	     sizeof( WIN32_FIND_DATAW ) ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear find data.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	if( libcstring_wide_string_copy(
-	     find_data.cFileName,
+	if( bdemount_dokan_filldir(
+	     fill_find_data,
+	     file_info,
 	     L".",
-	     1 ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy filename.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	if( libcstring_wide_string_copy(
-	     find_data.cAlternateFileName,
-	     L".",
-	     1 ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy alternate filename.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	find_data.dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
-/* TODO set timestamps
-	find_data.ftCreationTime   = { 0, 0 };
-	find_data.ftLastAccessTime = { 0, 0 };
-	find_data.ftLastWriteTime  = { 0, 0 };
-*/
-
-	if( fill_find_data(
+	     2,
 	     &find_data,
-	     file_info ) != 0 )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set directory entry.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	if( memory_set(
-	     &find_data,
-	     0,
-	     sizeof( WIN32_FIND_DATAW ) ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear find data.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	if( libcstring_wide_string_copy(
-	     find_data.cFileName,
-	     L"..",
-	     2 ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy filename.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	if( libcstring_wide_string_copy(
-	     find_data.cAlternateFileName,
-	     L"..",
-	     2 ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy alternate filename.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	find_data.dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
-/* TODO set timestamps
-	find_data.ftCreationTime   = { 0, 0 };
-	find_data.ftLastAccessTime = { 0, 0 };
-	find_data.ftLastWriteTime  = { 0, 0 };
-*/
-
-	if( fill_find_data(
-	     &find_data,
-	     file_info ) != 0 )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set directory entry.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	if( mount_handle_get_size(
-	     bdemount_mount_handle,
-	     &volume_size,
+	     NULL,
+	     1,
 	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume size.",
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set find data.",
 		 function );
 
 		result = -ERROR_GEN_FAILURE;
 
 		goto on_error;
 	}
-	if( memory_set(
+	if( bdemount_dokan_filldir(
+	     fill_find_data,
+	     file_info,
+	     L"..",
+	     3,
 	     &find_data,
+	     NULL,
 	     0,
-	     sizeof( WIN32_FIND_DATAW ) ) == NULL )
+	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear find data.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set find data.",
 		 function );
 
 		result = -ERROR_GEN_FAILURE;
 
 		goto on_error;
 	}
-	if( libcstring_wide_string_copy(
-	     find_data.cFileName,
+	if( bdemount_dokan_filldir(
+	     fill_find_data,
+	     file_info,
 	     &( bdemount_dokan_path[ 1 ] ),
-	     bdemount_dokan_path_length - 1 ) == NULL )
+	     bdemount_dokan_path_length,
+	     &find_data,
+	     bdemount_mount_handle->input_volume,
+	     0,
+	     &error ) != 1 )
 	{
 		libcerror_error_set(
 		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy filename.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set find data.",
 		 function );
 
 		result = -ERROR_GEN_FAILURE;
 
 		goto on_error;
 	}
-	if( libcstring_wide_string_copy(
-	     find_data.cAlternateFileName,
-	     &( bdemount_dokan_path[ 1 ] ),
-	     bdemount_dokan_path_length - 1 ) == NULL )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy alternate filename.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
-	find_data.dwFileAttributes = FILE_ATTRIBUTE_READONLY;
-/* TODO set timestamps
-	find_data.ftCreationTime   = { 0, 0 };
-	find_data.ftLastAccessTime = { 0, 0 };
-	find_data.ftLastWriteTime  = { 0, 0 };
-*/
-	find_data.nFileSizeHigh    = (DWORD) ( volume_size >> 32 );
-	find_data.nFileSizeLow     = (DWORD) ( volume_size & 0xffffffffUL );
-
 	if( fill_find_data(
 	     &find_data,
 	     file_info ) != 0 )
@@ -1337,6 +1697,72 @@ on_error:
 	return( result );
 }
 
+/* Sets the values in a file information structure
+ * Returns 1 if successful or -1 on error
+ */
+int bdemount_dokan_set_file_information(
+     BY_HANDLE_FILE_INFORMATION *file_information,
+     uint64_t creation_time,
+     uint64_t modification_time,
+     uint64_t access_time,
+     size64_t size,
+     int number_of_sub_items,
+     uint8_t use_mount_time,
+     libcerror_error_t **error )
+{
+	static char *function = "bdemount_dokan_set_file_information";
+
+	if( file_information == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file information.",
+		 function );
+
+		return( -1 );
+	}
+	if( use_mount_time == 0 )
+	{
+		if( creation_time != 0 )
+		{
+			file_information->ftCreationTime.dwLowDateTime  = (uint32_t) ( creation_time & 0x00000000ffffffffULL );
+			file_information->ftCreationTime.dwHighDateTime = creation_time >> 32;
+		}
+		if( modification_time != 0 )
+		{
+			file_information->ftLastWriteTime.dwLowDateTime  = (uint32_t) ( modification_time & 0x00000000ffffffffULL );
+			file_information->ftLastWriteTime.dwHighDateTime = modification_time >> 32;
+		}
+		if( access_time != 0 )
+		{
+			file_information->ftLastAccessTime.dwLowDateTime  = (uint32_t) ( access_time & 0x00000000ffffffffULL );
+			file_information->ftLastAccessTime.dwHighDateTime = access_time >> 32;
+		}
+	}
+/* TODO implement
+	else
+	{
+	}
+*/
+	if( size > 0 )
+	{
+		file_information->nFileSizeHigh = (DWORD) ( size >> 32 );
+		file_information->nFileSizeLow  = (DWORD) ( size & 0xffffffffUL );
+	}
+	file_information->dwFileAttributes = FILE_ATTRIBUTE_READONLY;
+
+	if( number_of_sub_items > 0 )
+	{
+		file_information->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
+	}
+	return( 1 );
+}
+
+/* Retrieves the file information
+ * Returns 0 if successful or a negative error code otherwise
+ */
 int __stdcall bdemount_dokan_GetFileInformation(
                const wchar_t *path,
                BY_HANDLE_FILE_INFORMATION *file_information,
@@ -1345,8 +1771,11 @@ int __stdcall bdemount_dokan_GetFileInformation(
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_dokan_GetFileInformation";
 	size64_t volume_size     = 0;
+	uint64_t creation_time   = 0;
 	size_t path_length       = 0;
+	int number_of_sub_items  = 0;
 	int result               = 0;
+	uint8_t use_mount_time   = 0;
 
 	if( path == NULL )
 	{
@@ -1393,12 +1822,8 @@ int __stdcall bdemount_dokan_GetFileInformation(
 
 			goto on_error;
 		}
-		file_information->dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
-/* TODO set timestamps
-		file_information->ftCreationTime   = { 0, 0 };
-		file_information->ftLastAccessTime = { 0, 0 };
-		file_information->ftLastWriteTime  = { 0, 0 };
-*/
+		number_of_sub_items = 1;
+		use_mount_time      = 1;
 	}
 	else
 	{
@@ -1420,8 +1845,24 @@ int __stdcall bdemount_dokan_GetFileInformation(
 
 			goto on_error;
 		}
-		if( mount_handle_get_size(
-		     bdemount_mount_handle,
+		if( libbde_volume_get_creation_time(
+		     bdemount_mount_handle->input_volume,
+		     &creation_time,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve creation time.",
+			 function );
+
+			result = -ERROR_GEN_FAILURE;
+
+			goto on_error;
+		}
+		if( libbde_volume_get_size(
+		     bdemount_mount_handle->input_volume,
 		     &volume_size,
 		     &error ) != 1 )
 		{
@@ -1436,14 +1877,25 @@ int __stdcall bdemount_dokan_GetFileInformation(
 
 			goto on_error;
 		}
-		file_information->dwFileAttributes = FILE_ATTRIBUTE_READONLY;
-/* TODO set timestamps
-		file_information->ftCreationTime   = { 0, 0 };
-		file_information->ftLastAccessTime = { 0, 0 };
-		file_information->ftLastWriteTime  = { 0, 0 };
-*/
-		file_information->nFileSizeHigh    = (DWORD) ( volume_size >> 32 );
-		file_information->nFileSizeLow     = (DWORD) ( volume_size & 0xffffffffUL );
+	}
+	if( bdemount_dokan_set_file_information(
+	     file_information,
+	     creation_time,
+	     creation_time,
+	     creation_time,
+	     volume_size,
+	     number_of_sub_items,
+	     use_mount_time,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set file info.",
+		 function );
+
+		return( -1 );
 	}
 	return( 0 );
 
