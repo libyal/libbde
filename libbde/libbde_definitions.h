@@ -34,11 +34,11 @@
  * for local use of libbde
  */
 #else
-#define LIBBDE_VERSION					20140727
+#define LIBBDE_VERSION					20140728
 
 /* The version string
  */
-#define LIBBDE_VERSION_STRING				"20140727"
+#define LIBBDE_VERSION_STRING				"20140728"
 
 /* The file access
  * bit 1        set to 1 for read access
