@@ -1669,21 +1669,6 @@ int __stdcall bdemount_dokan_FindFiles(
 
 		goto on_error;
 	}
-	if( fill_find_data(
-	     &find_data,
-	     file_info ) != 0 )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set directory entry.",
-		 function );
-
-		result = -ERROR_GEN_FAILURE;
-
-		goto on_error;
-	}
 	return( 0 );
 
 on_error:
