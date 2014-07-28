@@ -20,8 +20,8 @@ TODO
 * check TODOs
 
 * pybde
-  - add function to get the encryption type
-  - add encryption type defintion object
+  - add function to get the encryption method
+  - add encryption method definition object
   - add set keys function
 
 Optimizations
@@ -56,6 +56,12 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20140724
+* updated dependencies
+* updated msvscpp files
+* fixes for FreeBSD 8 compilation
+* worked on bdemount
 
 20140629
 * small improvements to error reporting

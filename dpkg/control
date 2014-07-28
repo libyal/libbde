@@ -10,8 +10,16 @@ Package: libbde
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: libbde-dbg
 Description: Library to access the BitLocker Drive Encryption (BDE) format
  libbde is a library to access the BitLocker Drive Encryption (BDE) format
+
+Package: libbde-dbg
+Architecture: any
+Section: debug
+Depends: libbde (= ${Source-Version}), ${misc:Depends}
+Description: Debugging symbols for libbde
+ Debugging symbols for libbde.
 
 Package: libbde-dev
 Section: libdevel
@@ -31,6 +39,14 @@ Package: libbde-python
 Section: python
 Architecture: any
 Depends: libbde (= ${Source-Version}), ${shlibs:Depends}, ${python:Depends}
+Suggests: libbde-python-dbg
 Description: Python bindings for libbde
  Python bindings for libbde.
+
+Package: libbde-python-dbg
+Section: debug
+Architecture: any
+Depends: libbde-python (= ${Source-Version})
+Description: Debugging symbols for libbde-python
+ Debugging symbols for libbde-python.
 
