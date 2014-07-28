@@ -57,7 +57,10 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
-20140724
+20140728
+* small change in bdemount for Dokan support
+
+20140727
 * updated dependencies
 * updated msvscpp files
 * fixes for FreeBSD 8 compilation
