@@ -56,12 +56,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\dokan.dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
 				RandomizedBaseAddress="2"
 				DataExecutionPrevention="2"
 				TargetMachine="1"
-				ImportLibrary="$(OutDir)\dokan.lib"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -130,13 +130,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\dokan.dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
 				GenerateDebugInformation="true"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="1"
 				TargetMachine="1"
-				ImportLibrary="$(OutDir)\dokan.lib"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
