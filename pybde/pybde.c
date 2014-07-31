@@ -229,8 +229,14 @@ PyObject *pybde_check_volume_signature(
 		}
 		if( result != 0 )
 		{
+			Py_IncRef(
+			 (PyObject *) Py_True );
+
 			return( Py_True );
 		}
+		Py_IncRef(
+		 (PyObject *) Py_False );
+
 		return( Py_False );
 	}
 	PyErr_Clear();
@@ -302,8 +308,14 @@ PyObject *pybde_check_volume_signature(
 		}
 		if( result != 0 )
 		{
+			Py_IncRef(
+			 (PyObject *) Py_True );
+
 			return( Py_True );
 		}
+		Py_IncRef(
+		 (PyObject *) Py_False );
+
 		return( Py_False );
 	}
 	PyErr_Format(
@@ -367,8 +379,14 @@ PyObject *pybde_check_volume_signature(
 	}
 	if( result != 0 )
 	{
+		Py_IncRef(
+		 (PyObject *) Py_True );
+
 		return( Py_True );
 	}
+	Py_IncRef(
+	 (PyObject *) Py_False );
+
 	return( Py_False );
 }
 
@@ -454,8 +472,14 @@ PyObject *pybde_check_volume_signature_file_object(
 	}
 	if( result != 0 )
 	{
+		Py_IncRef(
+		 (PyObject *) Py_True );
+
 		return( Py_True );
 	}
+	Py_IncRef(
+	 (PyObject *) Py_False );
+
 	return( Py_False );
 
 on_error:
