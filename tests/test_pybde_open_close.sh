@@ -164,24 +164,24 @@ else
 			then
 				if test -f "input/.libbde/${DIRNAME}/files";
 				then
-					TESTFILES=`cat input/.libbde/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
+					TEST_FILES=`cat input/.libbde/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
 				else
-					TESTFILES=`ls ${TESTDIR}/*`;
+					TEST_FILES=`ls -1 ${TESTDIR}/* 2> /dev/null`;
 				fi
-				for TESTFILE in ${TESTFILES};
+				for TEST_FILE in ${TEST_FILES};
 				do
-					BASENAME=`basename ${TESTFILE}`;
+					BASENAME=`basename ${TEST_FILE}`;
 
 					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
 					then
-						if ! test_open_close_password "${DIRNAME}" "${TESTFILE}";
+						if ! test_open_close_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi
 					fi
 					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
 					then
-						if ! test_open_close_recovery_password "${DIRNAME}" "${TESTFILE}";
+						if ! test_open_close_recovery_password "${DIRNAME}" "${TEST_FILE}";
 						then
 							exit ${EXIT_FAILURE};
 						fi

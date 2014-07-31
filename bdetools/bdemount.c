@@ -505,7 +505,7 @@ int bdemount_fuse_filldir(
      char *name,
      size_t name_size,
      struct stat *stat_info,
-     libbde_volume_t *volume,
+     mount_handle_t *mount_handle,
      uint8_t use_mount_time,
      libcerror_error_t **error )
 {
@@ -525,14 +525,14 @@ int bdemount_fuse_filldir(
 
 		return( -1 );
 	}
-	if( volume == NULL )
+	if( mount_handle == NULL )
 	{
 		number_of_sub_items = 1;
 	}
 	else
 	{
-		if( libbde_volume_get_creation_time(
-		     volume,
+		if( mount_handle_get_creation_time(
+		     mount_handle,
 		     &creation_time,
 		     error ) != 1 )
 		{
@@ -545,8 +545,8 @@ int bdemount_fuse_filldir(
 
 			return( -1 );
 		}
-		if( libbde_volume_get_size(
-		     volume,
+		if( mount_handle_get_size(
+		     mount_handle,
 		     &volume_size,
 		     error ) != 1 )
 		{
@@ -724,7 +724,7 @@ int bdemount_fuse_readdir(
 	     &( bdemount_fuse_path[ 1 ] ),
 	     bdemount_fuse_path_length + 1,
 	     stat_info,
-	     bdemount_mount_handle->input_volume,
+	     bdemount_mount_handle,
 	     0,
 	     &error ) != 1 )
 	{
@@ -741,8 +741,6 @@ int bdemount_fuse_readdir(
 	}
 	memory_free(
 	 stat_info );
-
-	stat_info = NULL;
 
 	return( 0 );
 
@@ -839,8 +837,8 @@ int bdemount_fuse_getattr(
 		     bdemount_fuse_path,
 		     bdemount_fuse_path_length ) == 0 )
 		{
-			if( libbde_volume_get_creation_time(
-			     bdemount_mount_handle->input_volume,
+			if( mount_handle_get_creation_time(
+			     bdemount_mount_handle,
 			     &creation_time,
 			     &error ) != 1 )
 			{
@@ -855,8 +853,8 @@ int bdemount_fuse_getattr(
 
 				goto on_error;
 			}
-			if( libbde_volume_get_size(
-			     bdemount_mount_handle->input_volume,
+			if( mount_handle_get_size(
+			     bdemount_mount_handle,
 			     &volume_size,
 			     &error ) != 1 )
 			{
@@ -1403,7 +1401,7 @@ int bdemount_dokan_filldir(
      wchar_t *name,
      size_t name_size,
      WIN32_FIND_DATAW *find_data,
-     libbde_volume_t *volume,
+     mount_handle_t *mount_handle,
      uint8_t use_mount_time,
      libcerror_error_t **error )
 {
@@ -1445,14 +1443,14 @@ int bdemount_dokan_filldir(
 
 		return( -1 );
 	}
-	if( volume == NULL )
+	if( mount_handle == NULL )
 	{
 		number_of_sub_items = 1;
 	}
 	else
 	{
-		if( libbde_volume_get_creation_time(
-		     volume,
+		if( mount_handle_get_creation_time(
+		     mount_handle,
 		     &creation_time,
 		     error ) != 1 )
 		{
@@ -1465,8 +1463,8 @@ int bdemount_dokan_filldir(
 
 			return( -1 );
 		}
-		if( libbde_volume_get_size(
-		     volume,
+		if( mount_handle_get_size(
+		     mount_handle,
 		     &volume_size,
 		     error ) != 1 )
 		{
@@ -1654,7 +1652,7 @@ int __stdcall bdemount_dokan_FindFiles(
 	     &( bdemount_dokan_path[ 1 ] ),
 	     bdemount_dokan_path_length,
 	     &find_data,
-	     bdemount_mount_handle->input_volume,
+	     bdemount_mount_handle,
 	     0,
 	     &error ) != 1 )
 	{
@@ -1830,8 +1828,8 @@ int __stdcall bdemount_dokan_GetFileInformation(
 
 			goto on_error;
 		}
-		if( libbde_volume_get_creation_time(
-		     bdemount_mount_handle->input_volume,
+		if( mount_handle_get_creation_time(
+		     bdemount_mount_handle,
 		     &creation_time,
 		     &error ) != 1 )
 		{
@@ -1846,8 +1844,8 @@ int __stdcall bdemount_dokan_GetFileInformation(
 
 			goto on_error;
 		}
-		if( libbde_volume_get_size(
-		     bdemount_mount_handle->input_volume,
+		if( mount_handle_get_size(
+		     bdemount_mount_handle,
 		     &volume_size,
 		     &error ) != 1 )
 		{

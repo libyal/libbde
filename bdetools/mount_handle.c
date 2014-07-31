@@ -1132,3 +1132,41 @@ int mount_handle_get_size(
 	return( 1 );
 }
 
+/* Retrieves the creation time of the input volume
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_get_creation_time(
+     mount_handle_t *mount_handle,
+     uint64_t *creation_time,
+     libcerror_error_t **error )
+{
+	static char *function = "mount_handle_get_creation_time";
+
+	if( mount_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_volume_get_creation_time(
+	     mount_handle->input_volume,
+	     creation_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve creation time from input volume.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
