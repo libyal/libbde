@@ -1040,7 +1040,7 @@ PyObject *pybde_volume_close(
 	return( Py_None );
 }
 
-/* ADetermines if the volume is locked
+/* Determines if the volume is locked
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_is_locked(
@@ -1085,8 +1085,14 @@ PyObject *pybde_volume_is_locked(
 	}
 	if( result != 0 )
 	{
+		Py_IncRef(
+		 (PyObject *) Py_True );
+
 		return( Py_True );
 	}
+	Py_IncRef(
+	 (PyObject *) Py_False );
+
 	return( Py_False );
 }
 
