@@ -96,7 +96,7 @@ void usage_fprint(
 	fprintf( stream, "\t-k:          the full volume encryption key and tweak key\n"
 	                 "\t             formatted in base16 and separated by a : character\n"
 	                 "\t             e.g. FKEV:TWEAK\n" );
-	fprintf( stream, "\t-o:          specify the volume offset\n" );
+	fprintf( stream, "\t-o:          specify the volume offset in bytes\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
 	fprintf( stream, "\t-s:          specify the file containing the startup key.\n"
@@ -1878,7 +1878,9 @@ int __stdcall bdemount_dokan_GetFileInformation(
 		 "%s: unable to set file info.",
 		 function );
 
-		return( -1 );
+		result = -ERROR_GEN_FAILURE;
+
+		goto on_error;
 	}
 	return( 0 );
 

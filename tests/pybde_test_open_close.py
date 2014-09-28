@@ -189,27 +189,27 @@ def pybde_test_multi_open_close_file_object(
 
 def main():
   args_parser = argparse.ArgumentParser(description=(
-      'Tests open and close.'))
+      "Tests open and close."))
 
   args_parser.add_argument(
-      'source', nargs='?', action='store', metavar='FILENAME',
-      default=None, help='The source filename.')
+      "source", nargs="?", action="store", metavar="FILENAME",
+      default=None, help="The source filename.")
 
   args_parser.add_argument(
-      '-p', dest='password', action='store', metavar='PASSWORD',
-      default=None, help='The password.')
+      "-p", dest="password", action="store", metavar="PASSWORD",
+      default=None, help="The password.")
 
   args_parser.add_argument(
-      '-r', dest='recovery_password', action='store', metavar='PASSWORD',
-      default=None, help='The recovery password.')
+      "-r", dest="recovery_password", action="store", metavar="PASSWORD",
+      default=None, help="The recovery password.")
 
   options = args_parser.parse_args()
 
   if not options.source:
-    print u'Source value is missing.'
-    print u''
+    print u"Source value is missing."
+    print u""
     args_parser.print_help()
-    print u''
+    print u""
     return False
 
   if not pybde_test_single_open_close_file(
