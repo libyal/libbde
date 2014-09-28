@@ -22,6 +22,7 @@ Additional features:
 Work in progress:
 * Dokan library support
 * Multi-threading support
+* Python 3 support
 
 For more information see:
 * Project documentation: https://github.com/libyal/libbde/wiki/Home
