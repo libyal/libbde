@@ -57,6 +57,9 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20140928
+* removed README.macosx
+
 20140731
 * bug fix in Python bindings
 
