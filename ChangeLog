@@ -60,6 +60,8 @@ Format:
 20140928
 * removed README.macosx
 * changes for project site move
+* updated utility scripts
+* updates for latest libfdata
 
 20140731
 * bug fix in Python bindings
