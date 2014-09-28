@@ -77,6 +77,11 @@ SED_SCRIPT="
 }";
 			sed "${SED_SCRIPT}" -i ${LOCAL_LIB}/Makefile.am;
 
+			if [ ${LOCAL_LIB} = "libfvalue" ];
+			then
+				sed "/@LIBFWNT_CPPFLAGS@/d" -i ${LOCAL_LIB}/Makefile.am;
+			fi
+
 			rm -f ${LOCAL_LIB}/${LOCAL_LIB}.c;
 
 			cp ${LOCAL_LIB}-$$/${LOCAL_LIB}/${LOCAL_LIB}_definitions.h.in ${LOCAL_LIB}/${LOCAL_LIB}_definitions.h;
