@@ -1,12 +1,13 @@
 # Files to ignore by git
 #
-# Version: 20130922
+# Version: 20141004
 
 # Generic auto-generated build files
 *~
 *.a
 *.la
 *.lai
+*.lineno
 *.lo
 *.Plo
 *.Po
@@ -101,6 +102,8 @@ stamp-h1
 /include/libbde/types.h
 /libbde/libbde.rc
 /libbde/libbde_definitions.h
+/bdetools/bdeinfo
+/bdetools/bdemount
 /pybde/setup.py
 /tests/bde_test_open_close
 /tests/input
@@ -116,6 +119,8 @@ stamp-h1
 /libcnotify
 /libcpath
 /libcsplit
+/libcstring
+/libcsystem
 /libcthreads
 /libfcache
 /libfdata

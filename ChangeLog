@@ -57,6 +57,9 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20141013
+* worked on utility scripts
+
 20140928
 * removed README.macosx
 * changes for project site move
