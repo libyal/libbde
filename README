@@ -2,6 +2,10 @@ libbde is a library to access the BitLocker Drive Encryption (BDE) format.
 BitLocker Drive Encryption (BDE) is a volume-based encryption method used by Microsoft Windows,
 as of Vista, to encrypt data on a storage media volume.
 
+Project information:
+* Status: alpha
+* Licence: LGPLv3+
+
 Supported BDE formats:
 * BitLocker Windows Vista
 * BitLocker Windows 7 
