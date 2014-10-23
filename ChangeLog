@@ -57,6 +57,9 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20141023
+* changes for deployment
+
 20141017
 * changes for deployment
 
