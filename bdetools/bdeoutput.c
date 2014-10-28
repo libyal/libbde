@@ -24,12 +24,6 @@
 #include <memory.h>
 #include <types.h>
 
-#if defined( HAVE_LOCAL_LIBUNA )
-#include <libuna_definitions.h>
-#elif defined( HAVE_LIBUNA_H )
-#include <libuna.h>
-#endif
-
 #include "bdeoutput.h"
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
@@ -39,6 +33,7 @@
 #include "bdetools_libcstring.h"
 #include "bdetools_libcsystem.h"
 #include "bdetools_libfdatetime.h"
+#include "bdetools_libuna.h"
 
 /* Prints the copyright information
  */
