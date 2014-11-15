@@ -20,12 +20,14 @@
  */
 
 #include <common.h>
+#include <memory.h>
 #include <types.h>
 
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libcerror.h"
 #include "libbde_libclocale.h"
+#include "libbde_libcstring.h"
 #include "libbde_support.h"
 
 #if !defined( HAVE_LOCAL_LIBBDE )
@@ -310,7 +312,7 @@ int libbde_check_volume_signature_wide(
 	return( result );
 }
 
-#endif
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Determines if a volume is a VSS volume (check for the VSS identifier) using a Basic File IO (bfio) handle
  * Returns 1 if true, 0 if not or -1 on error
