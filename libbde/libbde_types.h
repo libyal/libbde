@@ -43,8 +43,7 @@ typedef intptr_t libbde_volume_t;
 
 #endif
 
-
-#endif
+#endif /* defined( HAVE_LOCAL_LIBBDE ) */
 
 #endif
 

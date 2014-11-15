@@ -609,7 +609,7 @@ on_error:
         return( -1 );
 }
 
-#endif
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Opens a volume using a Basic File IO (bfio) handle
  * Returns 1 if successful, 0 if the keys could not be read or -1 on error
@@ -622,9 +622,9 @@ int libbde_volume_open_file_io_handle(
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	static char *function                     = "libbde_volume_open_file_io_handle";
-	uint8_t file_io_handle_opened_in_library  = 0;
 	int bfio_access_flags                     = 0;
 	int file_io_handle_is_open                = 0;
+	int file_io_handle_opened_in_library      = 0;
 	int result                                = 0;
 
 	if( volume == NULL )
@@ -769,7 +769,6 @@ on_error:
 		libbfio_handle_close(
 		 file_io_handle,
 		 NULL );
-
 	}
 	internal_volume->file_io_handle                   = NULL;
 	internal_volume->file_io_handle_opened_in_library = 0;
@@ -3438,7 +3437,7 @@ on_error:
         return( -1 );
 }
 
-#endif
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 /* Sets the startup key from a .BEK file using a Basic File IO (bfio) handle
  * This function needs to be used before one of the open functions
