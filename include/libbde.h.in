@@ -73,7 +73,7 @@ int libbde_set_codepage(
      int codepage,
      libbde_error_t **error );
 
-/* Determines if a volume is a VSS volume (check for the VSS identifier)
+/* Determines if a volume is a BitLocker Drive Encryption (BVE) volume (check for the BDE signature)
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBBDE_EXTERN \
@@ -81,7 +81,7 @@ int libbde_check_volume_signature(
      const char *filename,
      libbde_error_t **error );
 
-/* Determines if a volume is a VSS volume (check for the VSS identifier)
+/* Determines if a volume is a BitLocker Drive Encryption (BVE) volume (check for the BDE signature)
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBBDE_EXTERN \
@@ -90,7 +90,7 @@ int libbde_check_volume_signature_wide(
      libbde_error_t **error );
 
 #if defined( LIBBDE_HAVE_BFIO )
-/* Determines if a volume is a VSS volume (check for the VSS identifier) using a Basic File IO (bfio) handle
+/* Determines if a volume is a BitLocker Drive Encryption (BVE) volume (check for the BDE signature) using a Basic File IO (bfio) handle
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBBDE_EXTERN \
