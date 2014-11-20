@@ -117,6 +117,10 @@ PyObject *pybde_volume_get_size(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
 
+PyObject *pybde_volume_get_encryption_method(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
 PyObject *pybde_volume_get_volume_identifier(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );

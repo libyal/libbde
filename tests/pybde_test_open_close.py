@@ -60,7 +60,7 @@ def pybde_test_single_open_close_file(
 
   except TypeError, exception:
     if (not filename and
-        exception.message == "argument 1 must be string, not None"):
+        exception.message == "pybde_volume_open: unsupported string object type."):
       pass
 
     else:

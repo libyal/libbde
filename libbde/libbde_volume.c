@@ -1925,55 +1925,7 @@ ssize_t libbde_volume_read_buffer_at_offset(
 	return( read_count );
 }
 
-/* Reads (media) data at a specific offset
- * Returns the number of bytes read or -1 on error
- */
-ssize_t libbde_volume_read_random(
-         libbde_volume_t *volume,
-         void *buffer,
-         size_t buffer_size,
-         off64_t offset,
-         libcerror_error_t **error )
-{
-	static char *function = "libbde_volume_read_random";
-	ssize_t read_count    = 0;
-
-	if( libbde_volume_seek_offset(
-	     volume,
-	     offset,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek offset.",
-		 function );
-
-		return( -1 );
-	}
-	read_count = libbde_volume_read_buffer(
-	              volume,
-	              buffer,
-	              buffer_size,
-	              error );
-
-	if( read_count < 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read buffer.",
-		 function );
-
-		return( -1 );
-	}
-	return( read_count );
-}
-
-#ifdef TODO
+#ifdef TODO_WRITE_SUPPORT
 
 /* Writes (media) data at the current offset
  * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
@@ -2035,7 +1987,7 @@ ssize_t libbde_volume_write_buffer_at_offset(
 	return( write_count );
 }
 
-#endif
+#endif /* TODO_WRITE_SUPPORT */
 
 /* Seeks a certain offset of the data
  * Returns the offset if seek is successful or -1 on error
