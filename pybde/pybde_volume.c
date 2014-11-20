@@ -150,6 +150,13 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Retrieves the size of the volume data." },
 
+	{ "get_encryption_method",
+	  (PyCFunction) pybde_volume_get_encryption_method,
+	  METH_NOARGS,
+	  "get_encryption_method() -> Integer\n"
+	  "\n"
+	  "Retrieves the encryption method." },
+
 	{ "get_volume_identifier",
 	  (PyCFunction) pybde_volume_get_volume_identifier,
 	  METH_NOARGS,
@@ -222,6 +229,12 @@ PyGetSetDef pybde_volume_object_get_set_definitions[] = {
 	  (getter) pybde_volume_get_size,
 	  (setter) 0,
 	  "The size.",
+	  NULL },
+
+	{ "encryption_method",
+	  (getter) pybde_volume_get_encryption_method,
+	  (setter) 0,
+	  "The encryption method.",
 	  NULL },
 
 	{ "identifier",
@@ -1456,6 +1469,58 @@ PyObject *pybde_volume_get_size(
 	}
 	integer_object = pybde_integer_unsigned_new_from_64bit(
 	                  (uint64_t) size );
+
+	return( integer_object );
+}
+
+/* Retrieves the encryption method
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_encryption_method(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error   = NULL;
+	PyObject *integer_object   = NULL;
+	static char *function      = "pybde_volume_get_encryption_method";
+	uint32_t encryption_method = 0;
+	int result                 = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_encryption_method(
+	          pybde_volume->volume,
+	          &encryption_method,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: failed to retrieve encryption method.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	integer_object = pybde_integer_unsigned_new_from_64bit(
+	                  (uint64_t) encryption_method );
 
 	return( integer_object );
 }

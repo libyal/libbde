@@ -123,12 +123,14 @@ int libbde_volume_open(
      libcerror_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
+
 LIBBDE_EXTERN \
 int libbde_volume_open_wide(
      libbde_volume_t *volume,
      const wchar_t *filename,
      int access_flags,
      libcerror_error_t **error );
+
 #endif
 
 LIBBDE_EXTERN \
@@ -173,15 +175,8 @@ ssize_t libbde_volume_read_buffer_at_offset(
          off64_t offset,
          libcerror_error_t **error );
 
-LIBBDE_EXTERN \
-ssize_t libbde_volume_read_random(
-         libbde_volume_t *volume,
-         void *buffer,
-         size_t buffer_size,
-         off64_t offset,
-         libcerror_error_t **error );
+#ifdef TODO_WRITE_SUPPORT
 
-#ifdef TODO
 LIBBDE_EXTERN \
 ssize_t libbde_volume_write_buffer(
          libbde_volume_t *volume,
@@ -196,7 +191,8 @@ ssize_t libbde_volume_write_buffer_at_offset(
          size_t buffer_size,
          off64_t offset,
          libcerror_error_t **error );
-#endif
+
+#endif /* TODO_WRITE_SUPPORT */
 
 LIBBDE_EXTERN \
 off64_t libbde_volume_seek_offset(

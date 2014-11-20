@@ -1,10 +1,7 @@
 TODO
+* add thread-safety
 * add unlock function?
-* deprecate use of open return 0  in favor of is locked function?
-* fix pybde open/close test case add password support
-* git version
-  - make sure dependent local libs are in git
-  - fix synclibs.sh for libfvalue Makefile.am
+* deprecate use of open return 0 in favor of is locked function?
 * add support for passing key directly to library
   - test if keys are valid ?
   - what about issue with key bit size
@@ -20,8 +17,6 @@ TODO
 * check TODOs
 
 * pybde
-  - add function to get the encryption method
-  - add encryption method definition object
   - add set keys function
 
 Optimizations
@@ -37,8 +32,6 @@ Test suite:
   - clear key
   - startup key (bek file)
   - partial encrypted volume
-* add seek test case
-* add read test case
 * add verify test case
 * test images: for Windows Vista, Windows 7, To Go, Windows 8
 
@@ -56,6 +49,12 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20141120
+* code clean up
+* removed libbde_volume_read_random
+* fixed pybde open close test
+* pybde added get encryption method functionality
 
 20141028
 * changes for deployment
