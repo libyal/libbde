@@ -1915,14 +1915,14 @@ int __stdcall bdemount_dokan_GetVolumeInformation(
 	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
 
 	if( ( volume_name != NULL )
-	 && ( volume_name_size > (DWORD) ( sizeof( wchar_t ) * 5 ) ) )
+	 && ( volume_name_size > (DWORD) ( sizeof( wchar_t ) * 4 ) ) )
 	{
 		/* Using wcsncpy seems to cause strange behavior here
 		 */
 		if( memory_copy(
 		     volume_name,
-		     L"QCOW",
-		     sizeof( wchar_t ) * 5 ) == NULL )
+		     L"BDE",
+		     sizeof( wchar_t ) * 4 ) == NULL )
 		{
 			libcerror_error_set(
 			 &error,
@@ -2002,7 +2002,6 @@ int __stdcall bdemount_dokan_Unmount(
 }
 
 #endif
-
 
 /* The main program
  */
