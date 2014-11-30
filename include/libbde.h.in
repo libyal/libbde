@@ -73,7 +73,7 @@ int libbde_set_codepage(
      int codepage,
      libbde_error_t **error );
 
-/* Determines if a volume is a BitLocker Drive Encryption (BVE) volume (check for the BDE signature)
+/* Determines if a file contains a BDE volume signature
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBBDE_EXTERN \
@@ -81,7 +81,9 @@ int libbde_check_volume_signature(
      const char *filename,
      libbde_error_t **error );
 
-/* Determines if a volume is a BitLocker Drive Encryption (BVE) volume (check for the BDE signature)
+#if defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE )
+
+/* Determines if a file contains a BDE volume signature
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBBDE_EXTERN \
@@ -89,15 +91,19 @@ int libbde_check_volume_signature_wide(
      const wchar_t *filename,
      libbde_error_t **error );
 
+#endif /* defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE ) */
+
 #if defined( LIBBDE_HAVE_BFIO )
-/* Determines if a volume is a BitLocker Drive Encryption (BVE) volume (check for the BDE signature) using a Basic File IO (bfio) handle
+
+/* Determines if a file contains a BDE volume signature using a Basic File IO (bfio) handle
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_check_volume_signature_file_io_handle(
      libbfio_handle_t *file_io_handle,
      libbde_error_t **error );
-#endif
+
+#endif /* defined( LIBBDE_HAVE_BFIO ) */
 
 /* -------------------------------------------------------------------------
  * Notify functions
@@ -219,6 +225,7 @@ int libbde_volume_open(
      libbde_error_t **error );
 
 #if defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE )
+
 /* Opens a volume
  * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
@@ -228,9 +235,11 @@ int libbde_volume_open_wide(
      const wchar_t *filename,
      int access_flags,
      libbde_error_t **error );
-#endif
+
+#endif /* defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE ) */
 
 #if defined( LIBBDE_HAVE_BFIO )
+
 /* Opens a volume using a Basic File IO (bfio) handle
  * Returns 1 if successful, 0 if the keys could not be read or -1 on error
  */
@@ -240,7 +249,8 @@ int libbde_volume_open_file_io_handle(
      libbfio_handle_t *file_io_handle,
      int access_flags,
      libbde_error_t **error );
-#endif
+
+#endif /* defined( LIBBDE_HAVE_BFIO ) */
 
 /* Closes a volume
  * Returns 0 if successful or -1 on error
