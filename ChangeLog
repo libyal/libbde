@@ -50,6 +50,9 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20141130
+* code clean up
+
 20141120
 * code clean up
 * removed libbde_volume_read_random
