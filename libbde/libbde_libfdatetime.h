@@ -19,7 +19,7 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBVFBDE_LIBFDATETIME_H )
+#if !defined( _LIBBDE_LIBFDATETIME_H )
 #define _LIBBDE_LIBFDATETIME_H
 
 #include <common.h>
