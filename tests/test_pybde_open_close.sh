@@ -49,11 +49,16 @@ test_open_close()
 
 	echo "Testing open close of input: ${INPUT_FILE}";
 
-	PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py ${INPUT_FILE};
+	if test `uname -s` = 'Darwin';
+	then
+		DYLD_LIBRARY_PATH="../libbde/.libs/" PYTHONPATH="../pybde/.libs/" ${PYTHON} ${SCRIPT} ${INPUT_FILE};
+		RESULT=$?;
+	else
+		LD_LIBRARY_PATH="../libbde/.libs/" PYTHONPATH="../pybde/.libs/" ${PYTHON} ${SCRIPT} ${INPUT_FILE};
+		RESULT=$?;
+	fi
 
 	rm -rf tmp;
-
-	RESULT=$?;
 
 	return ${RESULT};
 }
@@ -75,9 +80,14 @@ test_open_close_password()
 
 		echo "Testing open close with password of input: ${INPUT_FILE}";
 
-		PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py -p${PASSWORD} ${INPUT_FILE};
-
-		RESULT=$?;
+		if test `uname -s` = 'Darwin';
+		then
+			DYLD_LIBRARY_PATH="../libbde/.libs/" PYTHONPATH="../pybde/.libs/" ${PYTHON} ${SCRIPT} -p${PASSWORD} ${INPUT_FILE};
+			RESULT=$?;
+		else
+			LD_LIBRARY_PATH="../libbde/.libs/" PYTHONPATH="../pybde/.libs/" ${PYTHON} ${SCRIPT} -p${PASSWORD} ${INPUT_FILE};
+			RESULT=$?;
+		fi
 
 		rm -rf tmp;
 
@@ -106,9 +116,14 @@ test_open_close_recovery_password()
 
 		echo "Testing open close with recovery password of input: ${INPUT_FILE}";
 
-		PYTHONPATH=../pybde/.libs/ ${PYTHON} pybde_test_open_close.py -r${PASSWORD} ${INPUT_FILE};
-
-		RESULT=$?;
+		if test `uname -s` = 'Darwin';
+		then
+			DYLD_LIBRARY_PATH="../libbde/.libs/" PYTHONPATH="../pybde/.libs/" ${PYTHON} ${SCRIPT} -r${PASSWORD} ${INPUT_FILE};
+			RESULT=$?;
+		else
+			LD_LIBRARY_PATH="../libbde/.libs/" PYTHONPATH="../pybde/.libs/" ${PYTHON} ${SCRIPT} -r${PASSWORD} ${INPUT_FILE};
+			RESULT=$?;
+		fi
 
 		rm -rf tmp;
 
@@ -120,7 +135,7 @@ test_open_close_recovery_password()
 	return ${RESULT};
 }
 
-PYTHON="/usr/bin/python";
+PYTHON=`which python`;
 
 if ! test -x ${PYTHON};
 then
@@ -134,6 +149,15 @@ then
 	echo "No input directory found.";
 
 	exit ${EXIT_IGNORE};
+fi
+
+SCRIPT="pybde_test_open_close.py";
+
+if ! test -f ${SCRIPT};
+then
+	echo "Missing script: ${SCRIPT}";
+
+	exit ${EXIT_FAILURE};
 fi
 
 OLDIFS=${IFS};
