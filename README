@@ -25,7 +25,9 @@ Additional features:
 
 Work in progress:
 * Dokan library support
-* Multi-threading support
+* Thread-safety in volume API functions
+
+Planned:
 * Python 3 support
 
 For more information see:

@@ -1,5 +1,6 @@
 TODO
-* add thread-safety
+* tread safety
+  - libbde_key_protector functions ?
 * add unlock function?
 * deprecate use of open return 0 in favor of is locked function?
 * add support for passing key directly to library
@@ -49,6 +50,10 @@ Format:
 * VMK date time - change password on USB encrypted drive
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
+
+20141205
+* worked on test scripts
+* worked on thread-safety
 
 20141130
 * code clean up

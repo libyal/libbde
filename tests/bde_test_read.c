@@ -32,13 +32,15 @@
 #include "bde_test_libcnotify.h"
 #include "bde_test_libcstring.h"
 #include "bde_test_libcsystem.h"
+#include "bde_test_libcthreads.h"
 #include "bde_test_unused.h"
 
 /* Define to make bde_test_read generate verbose output
 #define BDE_TEST_READ_VERBOSE
  */
 
-#define BDE_TEST_READ_BUFFER_SIZE	4096
+#define BDE_TEST_READ_BUFFER_SIZE		4096
+#define BDE_TEST_READ_NUMBER_OF_THREADS	4
 
 /* Tests libbde_volume_seek_offset
  * Returns 1 if successful, 0 if not or -1 on error
@@ -49,9 +51,9 @@ int bde_test_seek_offset(
      int input_whence,
      off64_t expected_offset )
 {
-	libbde_error_t *error = NULL;
-	off64_t result_offset   = 0;
-	int result              = 0;
+	libcerror_error_t *error = NULL;
+	off64_t result_offset    = 0;
+	int result               = 0;
 
 	if( volume == NULL )
 	{
@@ -98,12 +100,12 @@ int bde_test_read_buffer(
 {
 	uint8_t buffer[ BDE_TEST_READ_BUFFER_SIZE ];
 
-	libbde_error_t *error = NULL;
-	size64_t remaining_size = 0;
-	size64_t result_size    = 0;
-	size_t read_size        = 0;
-	ssize_t read_count      = 0;
-	int result              = 0;
+	libcerror_error_t *error = NULL;
+	size64_t remaining_size  = 0;
+	size64_t result_size     = 0;
+	size_t read_size         = 0;
+	ssize_t read_count       = 0;
+	int result               = 0;
 
 	if( volume == NULL )
 	{
@@ -174,13 +176,13 @@ int bde_test_read_buffer_at_offset(
 {
 	uint8_t buffer[ BDE_TEST_READ_BUFFER_SIZE ];
 
-	libbde_error_t *error = NULL;
-	off64_t result_offset   = 0;
-	size64_t remaining_size = 0;
-	size64_t result_size    = 0;
-	size_t read_size        = 0;
-	ssize_t read_count      = 0;
-	int result              = 0;
+	libcerror_error_t *error = NULL;
+	off64_t result_offset    = 0;
+	size64_t remaining_size  = 0;
+	size64_t result_size     = 0;
+	size_t read_size         = 0;
+	ssize_t read_count       = 0;
+	int result               = 0;
 
 	if( volume == NULL )
 	{
@@ -190,7 +192,7 @@ int bde_test_read_buffer_at_offset(
 
 	fprintf(
 	 stdout,
-	 "Testing reading buffer at offset: %" PRIi64 " with size: %" PRIu64 "\t",
+	 "Testing reading buffer at offset: %" PRIi64 " and size: %" PRIu64 "\t",
 	 input_offset,
 	 input_size );
 
@@ -313,7 +315,7 @@ int bde_test_seek_offset_and_read_buffer(
 	}
 	fprintf(
 	 stdout,
-	 "Testing reading buffer at offset: %" PRIi64 " with whence: %s and size: %" PRIu64 "\t",
+	 "Testing reading buffer at offset: %" PRIi64 ", whence: %s and size: %" PRIu64 "\t",
 	 input_offset,
 	 whence_string,
 	 input_size );
@@ -585,6 +587,272 @@ int bde_test_read_from_volume(
 	return( 1 );
 }
 
+#if defined( HAVE_MULTI_THREAD_SUPPORT )
+
+/* The thread pool callback function
+ * Returns 1 if successful or -1 on error
+ */
+int bde_test_read_callback_function(
+     libbde_volume_t *volume,
+     void *arguments BDE_TEST_ATTRIBUTE_UNUSED )
+{
+	uint8_t buffer[ BDE_TEST_READ_BUFFER_SIZE ];
+
+	libcerror_error_t *error = NULL;
+	static char *function    = "bde_test_read_callback_function";
+	size_t read_size         = BDE_TEST_READ_BUFFER_SIZE;
+	ssize_t read_count       = 0;
+	int number_of_iterations = 3;
+	int result               = 0;
+
+	BDE_TEST_UNREFERENCED_PARAMETER( arguments )
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		goto on_error;
+	}
+	while( number_of_iterations > 0 )
+	{
+		read_count = libbde_volume_read_buffer(
+		              volume,
+		              buffer,
+		              read_size,
+		              &error );
+
+		if( read_count != (ssize_t) read_size )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read from volume.",
+			 function );
+
+			goto on_error;
+		}
+		number_of_iterations--;
+
+		if( number_of_iterations > 0 )
+		{
+			if( libbde_volume_seek_offset(
+			     volume,
+			     (off64_t) -read_size,
+			     SEEK_CUR,
+			     &error ) == -1 )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_SEEK_FAILED,
+				 "%s: unable to seek in volume.",
+				 function );
+
+				goto on_error;
+			}
+		}
+	}
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_backtrace_fprint(
+		 error,
+		 stderr );
+
+		libcerror_error_free(
+		 &error );
+	}
+	return( -1 );
+}
+
+/* Tests reading data from a volume in multiple threads
+ * This test requires multi-threading support
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int bde_test_read_from_volume_multi_thread(
+     libbde_volume_t *volume,
+     size64_t volume_size,
+     int number_of_threads )
+{
+	libcerror_error_t *error               = NULL;
+	libcthreads_thread_pool_t *thread_pool = NULL;
+	static char *function                  = "bde_test_read_from_volume_multi_thread";
+	off64_t expected_offset                = 0;
+	off64_t result_offset                  = 0;
+	int iteration                          = 0;
+	int number_of_iterations               = 0;
+	int result                             = 0;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_volume_seek_offset(
+	     volume,
+	     0,
+	     SEEK_SET,
+	     &error ) == -1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek in volume.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_threads > 1 )
+	{
+		number_of_iterations = number_of_threads * 32;
+
+		expected_offset = (off64_t) number_of_iterations * BDE_TEST_READ_BUFFER_SIZE;
+
+		if( expected_offset > volume_size )
+		{
+			expected_offset = volume_size;
+
+			number_of_iterations = volume_size / BDE_TEST_READ_BUFFER_SIZE;
+
+			if( ( volume_size % BDE_TEST_READ_BUFFER_SIZE ) != 0 )
+			{
+				number_of_iterations += 1;
+			}
+		}
+		if( libcthreads_thread_pool_create(
+		     &thread_pool,
+		     NULL,
+		     number_of_threads,
+		     number_of_iterations,
+		     (int (*)(intptr_t *, void *)) &bde_test_read_callback_function,
+		     NULL,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create thread pool.",
+			 function );
+
+			goto on_error;
+		}
+		for( iteration = 0;
+		     iteration < number_of_iterations;
+		     iteration++ )
+		{
+			if( libcthreads_thread_pool_push(
+			     thread_pool,
+			     (intptr_t *) volume,
+			     &error ) == -1 )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+				 "%s: unable to push volume onto queue.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		if( libcthreads_thread_pool_join(
+		     &thread_pool,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to join thread pool.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libbde_volume_get_offset(
+	     volume,
+	     &result_offset,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve offset.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 stdout,
+	 "Testing multi-threaded read buffer at offset: 0\t" );
+
+	if( expected_offset != result_offset )
+	{
+		fprintf(
+		 stderr,
+		 "Unexpected offset: %" PRIi64 "\n",
+		 result_offset );
+	}
+	else
+	{
+		result = 1;
+	}
+	if( result == 1 )
+	{
+		fprintf(
+		 stdout,
+		 "(PASS)" );
+	}
+	else
+	{
+		fprintf(
+		 stdout,
+		 "(FAIL)" );
+	}
+	fprintf(
+	 stdout,
+	 "\n" );
+
+	return( result );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_backtrace_fprint(
+		 error,
+		 stderr );
+
+		libcerror_error_free(
+		 &error );
+	}
+	if( thread_pool != NULL )
+	{
+		libcthreads_thread_pool_join(
+		 &thread_pool,
+		 NULL );
+	}
+	return( -1 );
+}
+
+#endif /* defined( HAVE_MULTI_THREAD_SUPPORT ) */
+
 /* The main program
  */
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
@@ -594,10 +862,10 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libbde_volume_t *volume                                 = NULL;
+	libcerror_error_t *error                                = NULL;
 	libcstring_system_character_t *option_password          = NULL;
 	libcstring_system_character_t *option_recovery_password = NULL;
 	libcstring_system_character_t *source                   = NULL;
-	libcerror_error_t *error                                = NULL;
 	libcstring_system_integer_t option                      = 0;
 	size64_t volume_size                                    = 0;
 	size_t string_length                                    = 0;
@@ -639,7 +907,7 @@ int main( int argc, char * const argv[] )
 	}
 	source = argv[ optind ];
 
-#if defined( HAVE_DEBUG_OUTPUT ) && defined( BDE_TEST_OPEN_CLOSE_VERBOSE )
+#if defined( HAVE_DEBUG_OUTPUT ) && defined( BDE_TEST_READ_VERBOSE )
 	libbde_notify_set_verbose(
 	 1 );
 	libbde_notify_set_stream(
@@ -726,7 +994,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open file.\n" );
+		 "Unable to open volume.\n" );
 
 		goto on_error;
 	}
@@ -756,6 +1024,19 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+#if defined( HAVE_MULTI_THREAD_SUPPORT )
+	if( bde_test_read_from_volume_multi_thread(
+	     volume,
+	     volume_size,
+	     BDE_TEST_READ_NUMBER_OF_THREADS ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to read from volume in multiple threads.\n" );
+
+		goto on_error;
+	}
+#endif
 	/* Clean up
 	 */
 	if( libbde_volume_close(

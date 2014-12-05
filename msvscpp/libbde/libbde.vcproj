@@ -346,6 +346,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_libcthreads.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_libfcache.h"
 				>
 			</File>

@@ -29,6 +29,7 @@
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
+#include "libbde_libcthreads.h"
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
@@ -98,6 +99,12 @@ struct libbde_internal_volume
 	/* Value to indicate if the volume is locked
 	 */
 	uint8_t is_locked;
+
+#if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
 LIBBDE_EXTERN \
@@ -160,6 +167,13 @@ int libbde_volume_is_locked(
      libbde_volume_t *volume,
      libcerror_error_t **error );
 
+ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
+         libbde_internal_volume_t *internal_volume,
+         libbfio_handle_t *file_io_handle,
+         void *buffer,
+         size_t buffer_size,
+         libcerror_error_t **error );
+
 LIBBDE_EXTERN \
 ssize_t libbde_volume_read_buffer(
          libbde_volume_t *volume,
@@ -193,6 +207,12 @@ ssize_t libbde_volume_write_buffer_at_offset(
          libcerror_error_t **error );
 
 #endif /* TODO_WRITE_SUPPORT */
+
+off64_t libbde_internal_volume_seek_offset(
+         libbde_internal_volume_t *internal_volume,
+         off64_t offset,
+         int whence,
+         libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 off64_t libbde_volume_seek_offset(
