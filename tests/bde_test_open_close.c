@@ -463,7 +463,7 @@ int main( int argc, char * const argv[] )
 	}
 	source = argv[ optind ];
 
-#if defined( HAVE_DEBUG_OUTPUT ) && defined( EWF_TEST_OPEN_CLOSE_VERBOSE )
+#if defined( HAVE_DEBUG_OUTPUT ) && defined( BDE_TEST_OPEN_CLOSE_VERBOSE )
 	libbde_notify_set_verbose(
 	 1 );
 	libbde_notify_set_stream(

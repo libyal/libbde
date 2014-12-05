@@ -46,8 +46,8 @@ int bde_test_seek_offset(
      int input_whence,
      off64_t output_offset )
 {
-	const char *whence_string = NULL;
 	libcerror_error_t *error  = NULL;
+	const char *whence_string = NULL;
 	off64_t result_offset     = 0;
 	int result                = 0;
 

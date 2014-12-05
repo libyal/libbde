@@ -502,6 +502,7 @@ int libbde_volume_read_startup_key(
      libbde_error_t **error );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
+
 /* Reads the startup key from a .BEK file
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error
@@ -511,9 +512,11 @@ int libbde_volume_read_startup_key_wide(
      libbde_volume_t *volume,
      const wchar_t *filename,
      libbde_error_t **error );
-#endif
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 #if defined( LIBBDE_HAVE_BFIO )
+
 /* Reads the startup key from a .BEK file using a Basic File IO (bfio) handle
  * This function needs to be used before one of the open functions
  * Returns 1 if successful or -1 on error
@@ -523,7 +526,8 @@ int libbde_volume_read_startup_key_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
      libbde_error_t **error );
-#endif
+
+#endif /* defined( LIBBDE_HAVE_BFIO ) */
 
 /* -------------------------------------------------------------------------
  * Key protector functions

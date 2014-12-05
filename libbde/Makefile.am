@@ -44,6 +44,7 @@ libbde_la_SOURCES = \
 	libbde_libclocale.h \
 	libbde_libcnotify.h \
 	libbde_libcstring.h \
+	libbde_libcthreads.h \
 	libbde_libfcache.h \
 	libbde_libfdata.h \
 	libbde_libfdatetime.h \

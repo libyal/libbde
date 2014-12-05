@@ -24,9 +24,12 @@
 
 /* The libbde type support features
  */
-#if @HAVE_WIDE_CHARACTER_TYPE@ || defined( HAVE_WIDE_CHARACTER_TYPE )
+#if defined( HAVE_WIDE_CHARACTER_TYPE ) || @HAVE_WIDE_CHARACTER_TYPE@
 #define LIBBDE_HAVE_WIDE_CHARACTER_TYPE		1
+#endif
 
+#if defined( WINAPI ) || @HAVE_MULTI_THREAD_SUPPORT@
+#define LIBBDE_HAVE_MULTI_THREAD_SUPPORT	1
 #endif
 
 #if defined( HAVE_LIBBFIO ) || ( !defined( WINAPI ) && @HAVE_LIBBFIO@ )
