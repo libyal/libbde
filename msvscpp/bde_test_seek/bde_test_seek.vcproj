@@ -194,10 +194,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\bde_test_libcnotify.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\tests\bde_test_libcstring.h"
 				>
 			</File>

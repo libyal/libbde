@@ -29,7 +29,6 @@
 
 #include "bde_test_libbde.h"
 #include "bde_test_libcerror.h"
-#include "bde_test_libcnotify.h"
 #include "bde_test_libcstring.h"
 #include "bde_test_libcsystem.h"
 
@@ -420,10 +419,10 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
+	libcerror_error_t *error                                = NULL;
 	libcstring_system_character_t *option_password          = NULL;
 	libcstring_system_character_t *option_recovery_password = NULL;
 	libcstring_system_character_t *source                   = NULL;
-	libcerror_error_t *error                                = NULL;
 	libcstring_system_integer_t option                      = 0;
 
 	while( ( option = libcsystem_getopt(

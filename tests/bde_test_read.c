@@ -29,7 +29,6 @@
 
 #include "bde_test_libbde.h"
 #include "bde_test_libcerror.h"
-#include "bde_test_libcnotify.h"
 #include "bde_test_libcstring.h"
 #include "bde_test_libcsystem.h"
 #include "bde_test_libcthreads.h"
@@ -40,7 +39,7 @@
  */
 
 #define BDE_TEST_READ_BUFFER_SIZE		4096
-#define BDE_TEST_READ_NUMBER_OF_THREADS	4
+#define BDE_TEST_READ_NUMBER_OF_THREADS		4
 
 /* Tests libbde_volume_seek_offset
  * Returns 1 if successful, 0 if not or -1 on error
