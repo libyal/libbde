@@ -29,7 +29,6 @@
 
 #include "bde_test_libbde.h"
 #include "bde_test_libcerror.h"
-#include "bde_test_libcnotify.h"
 #include "bde_test_libcstring.h"
 #include "bde_test_libcsystem.h"
 
