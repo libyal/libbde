@@ -18,7 +18,8 @@ AM_CPPFLAGS = \
 
 if HAVE_PYTHON
 TESTS_PYBDE = \
-	test_pybde_open_close.sh
+	test_pybde_open_close.sh \
+	test_pybde_seek.sh
 endif
 
 TESTS = \
@@ -30,9 +31,11 @@ TESTS = \
 
 check_SCRIPTS = \
 	pybde_test_open_close.py \
+	pybde_test_seek.py \
 	test_bdeinfo.sh \
 	test_open_close.sh \
 	test_pybde_open_close.sh \
+	test_pybde_seek.sh \
 	test_read.sh \
 	test_seek.sh \
 	test_runner.sh
