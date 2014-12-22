@@ -25,10 +25,8 @@ Additional features:
 
 Work in progress:
 * Dokan library support
-* Thread-safety in volume API functions
-
-Planned:
 * Python 3 support
+* Thread-safety in volume API functions
 
 For more information see:
 * Project documentation: https://github.com/libyal/libbde/wiki/Home

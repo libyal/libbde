@@ -51,6 +51,10 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20141222
+* worked on Python 3 support
+* worked on tests
+
 20141205
 * worked on test scripts
 * worked on thread-safety

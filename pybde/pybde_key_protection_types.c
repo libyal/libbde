@@ -32,10 +32,8 @@
 #include "pybde_unused.h"
 
 PyTypeObject pybde_key_protection_types_type_object = {
-	PyObject_HEAD_INIT( NULL )
+	PyVarObject_HEAD_INIT( NULL, 0 )
 
-	/* ob_size */
-	0,
 	/* tp_name */
 	"pybde.key_protection_types",
 	/* tp_basicsize */
@@ -134,6 +132,8 @@ PyTypeObject pybde_key_protection_types_type_object = {
 int pybde_key_protection_types_init_type(
      PyTypeObject *type_object )
 {
+	PyObject *value_object = NULL;
+
 	if( type_object == NULL )
 	{
 		return( -1 );
@@ -144,43 +144,73 @@ int pybde_key_protection_types_init_type(
 	{
 		return( -1 );
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_CLEAR_KEY );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_CLEAR_KEY );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "CLEAR_KEY",
-	     PyInt_FromLong(
-	      LIBBDE_KEY_PROTECTION_TYPE_CLEAR_KEY ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_TPM );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_TPM );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "TPM",
-	     PyInt_FromLong(
-	      LIBBDE_KEY_PROTECTION_TYPE_TPM ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "STARTUP_KEY",
-	     PyInt_FromLong(
-	      LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "RECOVERY_PASSWORD",
-	     PyInt_FromLong(
-	      LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_PASSWORD );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_PASSWORD );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "PASSWORD",
-	     PyInt_FromLong(
-	      LIBBDE_KEY_PROTECTION_TYPE_PASSWORD ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
@@ -265,7 +295,8 @@ int pybde_key_protection_types_init(
 void pybde_key_protection_types_free(
       pybde_key_protection_types_t *pybde_key_protection_types )
 {
-	static char *function = "pybde_key_protection_types_free";
+	struct _typeobject *ob_type = NULL;
+	static char *function       = "pybde_key_protection_types_free";
 
 	if( pybde_key_protection_types == NULL )
 	{
@@ -276,25 +307,28 @@ void pybde_key_protection_types_free(
 
 		return;
 	}
-	if( pybde_key_protection_types->ob_type == NULL )
+	ob_type = Py_TYPE(
+	           pybde_key_protection_types );
+
+	if( ob_type == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid key protection types - missing ob_type.",
+		 PyExc_ValueError,
+		 "%s: missing ob_type.",
 		 function );
 
 		return;
 	}
-	if( pybde_key_protection_types->ob_type->tp_free == NULL )
+	if( ob_type->tp_free == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid key protection types - invalid ob_type - missing tp_free.",
+		 PyExc_ValueError,
+		 "%s: invalid ob_type - missing tp_free.",
 		 function );
 
 		return;
 	}
-	pybde_key_protection_types->ob_type->tp_free(
+	ob_type->tp_free(
 	 (PyObject*) pybde_key_protection_types );
 }
 

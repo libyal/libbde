@@ -57,10 +57,8 @@ PySequenceMethods pybde_key_protectors_sequence_methods = {
 };
 
 PyTypeObject pybde_key_protectors_type_object = {
-	PyObject_HEAD_INIT( NULL )
+	PyVarObject_HEAD_INIT( NULL, 0 )
 
-	/* ob_size */
-	0,
 	/* tp_name */
 	"pybde._key_protectors",
 	/* tp_basicsize */
@@ -259,7 +257,8 @@ int pybde_key_protectors_init(
 void pybde_key_protectors_free(
       pybde_key_protectors_t *pybde_key_protectors )
 {
-	static char *function = "pybde_key_protectors_free";
+	struct _typeobject *ob_type = NULL;
+	static char *function       = "pybde_key_protectors_free";
 
 	if( pybde_key_protectors == NULL )
 	{
@@ -270,30 +269,33 @@ void pybde_key_protectors_free(
 
 		return;
 	}
-	if( pybde_key_protectors->ob_type == NULL )
-	{
-		PyErr_Format(
-		 PyExc_ValueError,
-		 "%s: invalid key protectors - missing ob_type.",
-		 function );
-
-		return;
-	}
-	if( pybde_key_protectors->ob_type->tp_free == NULL )
-	{
-		PyErr_Format(
-		 PyExc_ValueError,
-		 "%s: invalid key protectors - invalid ob_type - missing tp_free.",
-		 function );
-
-		return;
-	}
 	if( pybde_key_protectors->volume_object != NULL )
 	{
 		Py_DecRef(
 		 (PyObject *) pybde_key_protectors->volume_object );
 	}
-	pybde_key_protectors->ob_type->tp_free(
+	ob_type = Py_TYPE(
+	           pybde_key_protectors );
+
+	if( ob_type == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: missing ob_type.",
+		 function );
+
+		return;
+	}
+	if( ob_type->tp_free == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid ob_type - missing tp_free.",
+		 function );
+
+		return;
+	}
+	ob_type->tp_free(
 	 (PyObject*) pybde_key_protectors );
 }
 
