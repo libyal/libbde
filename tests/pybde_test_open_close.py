@@ -44,9 +44,10 @@ def pybde_test_single_open_close_file(
   else:
     filename_string = filename
 
-  print "Testing single open close of: {0:s} with access: {1:s}\t".format(
-      filename_string, get_mode_string(mode))
+  print("Testing single open close of: {0:s} with access: {1:s}\t".format(
+      filename_string, get_mode_string(mode)))
 
+  result = True
   try:
     bde_volume = pybde.volume()
 
@@ -58,37 +59,44 @@ def pybde_test_single_open_close_file(
     bde_volume.open(filename, mode)
     bde_volume.close()
 
-  except TypeError, exception:
-    if (not filename and
-        exception.message == "pybde_volume_open: unsupported string object type."):
+  except TypeError as exception:
+    expected_message = (
+        "{0:s}: unsupported string object type.").format(
+            "pybde_volume_open")
+
+    if not filename and str(exception) == expected_message:
       pass
 
     else:
-      print "(FAIL)"
-      return False
+      print(str(exception))
+      result = False
 
-  except ValueError, exception:
-    if (mode == "w" and
-        exception.message == "pybde_volume_open: unsupported mode: w."):
-      pass
+  except ValueError as exception:
+    expected_message = (
+        "{0:s}: unsupported mode: w.").format(
+            "pybde_volume_open")
 
-    else:
-      print "(FAIL)"
-      return False
+    if mode != "w" or str(exception) != expected_message:
+      print(str(exception))
+      result = False
 
-  except:
-    print "(FAIL)"
-    return False
+  except Exception as exception:
+    print(str(exception))
+    result = False
 
-  print "(PASS)"
-  return True
+  if not result:
+    print("(FAIL)")
+  else:
+    print("(PASS)")
+  return result
 
 
 def pybde_test_multi_open_close_file(
     filename, mode, password=None, recovery_password=None):
-  print "Testing multi open close of: {0:s} with access: {1:s}\t".format(
-      filename, get_mode_string(mode))
+  print("Testing multi open close of: {0:s} with access: {1:s}\t".format(
+      filename, get_mode_string(mode)))
 
+  result = True
   try:
     bde_volume = pybde.volume()
 
@@ -102,21 +110,25 @@ def pybde_test_multi_open_close_file(
     bde_volume.open(filename, mode)
     bde_volume.close()
 
-  except:
-    print "(FAIL)"
-    return False
+  except Exception as exception:
+    print(str(exception))
+    result = False
 
-  print "(PASS)"
-  return True
+  if not result:
+    print("(FAIL)")
+  else:
+    print("(PASS)")
+  return result
 
 
 def pybde_test_single_open_close_file_object(
     filename, mode, password=None, recovery_password=None):
-  print ("Testing single open close of file-like object of: {0:s} with access: "
-         "{1:s}\t").format(filename, get_mode_string(mode))
+  print(("Testing single open close of file-like object of: {0:s} "
+         "with access: {1:s}\t").format(filename, get_mode_string(mode)))
 
+  result = True
   try:
-    file_object = open(filename, mode)
+    file_object = open(filename, "rb")
     bde_volume = pybde.volume()
 
     if password:
@@ -127,21 +139,26 @@ def pybde_test_single_open_close_file_object(
     bde_volume.open_file_object(file_object, mode)
     bde_volume.close()
 
-  except:
-    print "(FAIL)"
-    return False
+  except Exception as exception:
+    print(str(exception))
+    result = False
 
-  print "(PASS)"
-  return True
+  if not result:
+    print("(FAIL)")
+  else:
+    print("(PASS)")
+  return result
 
 
 def pybde_test_single_open_close_file_object_with_dereference(
     filename, mode, password=None, recovery_password=None):
-  print ("Testing single open close of file-like object with dereference of: "
-         "{0:s} with access: {1:s}\t").format(filename, get_mode_string(mode))
+  print(("Testing single open close of file-like object with dereference "
+         "of: {0:s} with access: {1:s}\t").format(
+      filename, get_mode_string(mode)))
 
+  result = True
   try:
-    file_object = open(filename, mode)
+    file_object = open(filename, "rb")
     bde_volume = pybde.volume()
 
     if password:
@@ -153,21 +170,25 @@ def pybde_test_single_open_close_file_object_with_dereference(
     del file_object
     bde_volume.close()
 
-  except:
-    print "(FAIL)"
-    return False
+  except Exception as exception:
+    print(str(exception))
+    result = False
 
-  print "(PASS)"
-  return True
+  if not result:
+    print("(FAIL)")
+  else:
+    print("(PASS)")
+  return result
 
 
 def pybde_test_multi_open_close_file_object(
     filename, mode, password=None, recovery_password=None):
-  print ("Testing multi open close of file-like object of: {0:s} with access: "
-         "{1:s}\t").format(filename, get_mode_string(mode))
+  print(("Testing multi open close of file-like object of: {0:s} "
+         "with access: {1:s}\t").format(filename, get_mode_string(mode)))
 
+  result = True
   try:
-    file_object = open(filename, mode)
+    file_object = open(filename, "rb")
     bde_volume = pybde.volume()
 
     if password:
@@ -179,12 +200,16 @@ def pybde_test_multi_open_close_file_object(
     bde_volume.close()
     bde_volume.open_file_object(file_object, mode)
     bde_volume.close()
-  except:
-    print "(FAIL)"
-    return False
 
-  print "(PASS)"
-  return True
+  except Exception as exception:
+    print(str(exception))
+    result = False
+
+  if not result:
+    print("(FAIL)")
+  else:
+    print("(PASS)")
+  return result
 
 
 def main():
@@ -206,10 +231,10 @@ def main():
   options = args_parser.parse_args()
 
   if not options.source:
-    print u"Source value is missing."
-    print u""
+    print("Source value is missing.")
+    print("")
     args_parser.print_help()
-    print u""
+    print("")
     return False
 
   if not pybde_test_single_open_close_file(
@@ -248,6 +273,7 @@ def main():
     return False
 
   return True
+
 
 if __name__ == "__main__":
   if not main():
