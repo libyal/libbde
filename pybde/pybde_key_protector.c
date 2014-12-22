@@ -64,10 +64,8 @@ PyGetSetDef pybde_key_protector_object_get_set_definitions[] = {
 };
 
 PyTypeObject pybde_key_protector_type_object = {
-	PyObject_HEAD_INIT( NULL )
+	PyVarObject_HEAD_INIT( NULL, 0 )
 
-	/* ob_size */
-	0,
 	/* tp_name */
 	"pybde.key_protector",
 	/* tp_basicsize */
@@ -248,8 +246,9 @@ int pybde_key_protector_init(
 void pybde_key_protector_free(
       pybde_key_protector_t *pybde_key_protector )
 {
-	libcerror_error_t *error = NULL;
-	static char *function    = "pybde_key_protector_free";
+	libcerror_error_t *error    = NULL;
+	struct _typeobject *ob_type = NULL;
+	static char *function       = "pybde_key_protector_free";
 
 	if( pybde_key_protector == NULL )
 	{
@@ -260,29 +259,32 @@ void pybde_key_protector_free(
 
 		return;
 	}
-	if( pybde_key_protector->ob_type == NULL )
-	{
-		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid key protector - missing ob_type.",
-		 function );
-
-		return;
-	}
-	if( pybde_key_protector->ob_type->tp_free == NULL )
-	{
-		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid key protector - invalid ob_type - missing tp_free.",
-		 function );
-
-		return;
-	}
 	if( pybde_key_protector->key_protector == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
 		 "%s: invalid key protector - missing libbde key protector.",
+		 function );
+
+		return;
+	}
+	ob_type = Py_TYPE(
+	           pybde_key_protector );
+
+	if( ob_type == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: missing ob_type.",
+		 function );
+
+		return;
+	}
+	if( ob_type->tp_free == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid ob_type - missing tp_free.",
 		 function );
 
 		return;
@@ -305,7 +307,7 @@ void pybde_key_protector_free(
 		Py_DecRef(
 		 (PyObject *) pybde_key_protector->volume_object );
 	}
-	pybde_key_protector->ob_type->tp_free(
+	ob_type->tp_free(
 	 (PyObject*) pybde_key_protector );
 }
 

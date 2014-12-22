@@ -32,10 +32,8 @@
 #include "pybde_unused.h"
 
 PyTypeObject pybde_encryption_methods_type_object = {
-	PyObject_HEAD_INIT( NULL )
+	PyVarObject_HEAD_INIT( NULL, 0 )
 
-	/* ob_size */
-	0,
 	/* tp_name */
 	"pybde.encryption_methods",
 	/* tp_basicsize */
@@ -134,6 +132,8 @@ PyTypeObject pybde_encryption_methods_type_object = {
 int pybde_encryption_methods_init_type(
      PyTypeObject *type_object )
 {
+	PyObject *value_object = NULL;
+
 	if( type_object == NULL )
 	{
 		return( -1 );
@@ -144,35 +144,59 @@ int pybde_encryption_methods_init_type(
 	{
 		return( -1 );
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "AES_128_CBC_DIFFUSER",
-	     PyInt_FromLong(
-	      LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "AES_256_CBC_DIFFUSER",
-	     PyInt_FromLong(
-	      LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_128_CBC );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_128_CBC );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "AES_128_CBC",
-	     PyInt_FromLong(
-	      LIBBDE_ENCRYPTION_METHOD_AES_128_CBC ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_256_CBC );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_256_CBC );
+#endif
 	if( PyDict_SetItemString(
 	     type_object->tp_dict,
 	     "AES_256_CBC",
-	     PyInt_FromLong(
-	      LIBBDE_ENCRYPTION_METHOD_AES_256_CBC ) ) != 0 )
+	     value_object ) != 0 )
 	{
 		goto on_error;
 	}
@@ -257,7 +281,8 @@ int pybde_encryption_methods_init(
 void pybde_encryption_methods_free(
       pybde_encryption_methods_t *pybde_encryption_methods )
 {
-	static char *function = "pybde_encryption_methods_free";
+	struct _typeobject *ob_type = NULL;
+	static char *function       = "pybde_encryption_methods_free";
 
 	if( pybde_encryption_methods == NULL )
 	{
@@ -268,25 +293,28 @@ void pybde_encryption_methods_free(
 
 		return;
 	}
-	if( pybde_encryption_methods->ob_type == NULL )
+	ob_type = Py_TYPE(
+	           pybde_encryption_methods );
+
+	if( ob_type == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid encryption methods - missing ob_type.",
+		 PyExc_ValueError,
+		 "%s: missing ob_type.",
 		 function );
 
 		return;
 	}
-	if( pybde_encryption_methods->ob_type->tp_free == NULL )
+	if( ob_type->tp_free == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid encryption methods - invalid ob_type - missing tp_free.",
+		 PyExc_ValueError,
+		 "%s: invalid ob_type - missing tp_free.",
 		 function );
 
 		return;
 	}
-	pybde_encryption_methods->ob_type->tp_free(
+	ob_type->tp_free(
 	 (PyObject*) pybde_encryption_methods );
 }
 
