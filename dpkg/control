@@ -1,13 +1,12 @@
 Source: libbde
-Section: unknown
+Section: libs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
 Build-Depends: debhelper (>= 7), autotools-dev, libssl-dev, libfuse-dev, python-dev
-Standards-Version: 3.8.3
+Standards-Version: 3.9.5
 Homepage: https://github.com/libyal/libbde/
 
 Package: libbde
-Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: libbde-dbg
@@ -17,28 +16,28 @@ Description: Library to access the BitLocker Drive Encryption (BDE) format
 Package: libbde-dbg
 Architecture: any
 Section: debug
-Depends: libbde (= ${Source-Version}), ${misc:Depends}
+Depends: libbde (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for libbde
  Debugging symbols for libbde.
 
 Package: libbde-dev
 Section: libdevel
 Architecture: any
-Depends: libbde (= ${Source-Version})
+Depends: libbde (= ${binary:Version}), ${misc:Depends}
 Description: Header files and libraries for developing applications for libbde
  Header files and libraries for developing applications for libbde.
 
 Package: libbde-tools
 Section: utils
 Architecture: any
-Depends: libbde (= ${Source-Version}), ${shlibs:Depends}
+Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Several tools for reading BitLocker Drive Encryption volumes
  Several tools for reading BitLocker Drive Encryption volumes.
 
 Package: libbde-python
 Section: python
 Architecture: any
-Depends: libbde (= ${Source-Version}), ${shlibs:Depends}, ${python:Depends}
+Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Suggests: libbde-python-dbg
 Description: Python bindings for libbde
  Python bindings for libbde.
@@ -46,7 +45,7 @@ Description: Python bindings for libbde
 Package: libbde-python-dbg
 Section: debug
 Architecture: any
-Depends: libbde-python (= ${Source-Version})
+Depends: libbde-python (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for libbde-python
  Debugging symbols for libbde-python.
 

@@ -1,7 +1,7 @@
 /*
  * Python bindings module for libbde (pybde)
  *
- * Copyright (c) 2011-2014, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2015, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -460,6 +460,14 @@ PyMODINIT_FUNC initpybde(
 	PyTypeObject *key_protectors_type_object       = NULL;
 	PyTypeObject *volume_type_object               = NULL;
 	PyGILState_STATE gil_state                     = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	libbde_notify_set_stream(
+	 stderr,
+	 NULL );
+	libbde_notify_set_verbose(
+	 1 );
+#endif
 
 	/* Create the module
 	 * This function must be called before grabbing the GIL
