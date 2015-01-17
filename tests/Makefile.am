@@ -75,6 +75,7 @@ bde_test_read_SOURCES = \
 bde_test_read_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
+	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@LIBCSTRING_LIBADD@ \
 	@PTHREAD_LIBADD@
