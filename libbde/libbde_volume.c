@@ -1128,6 +1128,7 @@ int libbde_volume_open_read(
 {
 	uint8_t *startup_key_identifier    = NULL;
 	static char *function              = "libbde_volume_open_read";
+	size64_t file_size                 = 0;
 	size_t startup_key_identifier_size = 0;
 	int element_index                  = 0;
 	int result                         = 0;
@@ -1455,6 +1456,27 @@ int libbde_volume_open_read(
 			 "\n" );
 		}
 #endif
+		if( libbfio_handle_get_size(
+		     file_io_handle,
+		     &file_size,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file size.",
+			 function );
+
+			goto on_error;
+		}
+		/* Correct a volume size that is 1 sector short
+		 */
+		if( ( internal_volume->io_handle->encrypted_volume_size == ( internal_volume->io_handle->volume_size + internal_volume->io_handle->bytes_per_sector ) )
+		 && ( ( internal_volume->io_handle->volume_size + internal_volume->io_handle->bytes_per_sector ) <= file_size ) )
+		{
+			internal_volume->io_handle->volume_size += internal_volume->io_handle->bytes_per_sector;
+		}
 /* TODO clone function ? */
 		if( libfdata_vector_initialize(
 		     &( internal_volume->sectors_vector ),
@@ -2666,7 +2688,7 @@ int libbde_volume_get_size(
 		return( -1 );
 	}
 #endif
-	*size = internal_volume->io_handle->encrypted_volume_size;
+	*size = internal_volume->io_handle->volume_size;
 
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
