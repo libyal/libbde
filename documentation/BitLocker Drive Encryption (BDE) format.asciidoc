@@ -1,6 +1,11 @@
 = BitLocker Drive Encryption (BDE) format specification
 Analysis of theBitLocker Drive Encryption (BDE) volume format
 
+:toc:
+:toc-placement: manual
+:toc-title: 
+:toclevels: 4
+
 :numbered!:
 [abstract]
 == Summary
@@ -32,6 +37,10 @@ published by the Free Software Foundation; with no Invariant Sections, no
 Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included 
 in the section entitled "GNU Free Documentation License".
 ....
+
+[preface]
+== Table of contents
+toc::[]
 
 [preface]
 == Revision history
