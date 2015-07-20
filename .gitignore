@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20141227
+# Version: 20150720
 
 # Generic auto-generated build files
 *~
@@ -117,7 +117,7 @@ stamp-h[1-9]
 /tests/bde_test_read
 /tests/bde_test_seek
 /tests/input
-/tests/tmp
+/tests/tmp*
 
 # Local library dependencies specific files
 /libbfio
