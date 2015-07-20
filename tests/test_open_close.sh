@@ -49,7 +49,7 @@ test_open_close()
 
 	echo "Testing open close of input: ${INPUT_FILE}";
 
-	${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} ${INPUT_FILE};
+	${TEST_RUNNER} "tmp" ./${BDE_TEST_OPEN_CLOSE} ${INPUT_FILE};
 
 	RESULT=$?;
 
@@ -77,7 +77,7 @@ test_open_close_password()
 
 		echo "Testing open close with password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} -p${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} "tmp" ./${BDE_TEST_OPEN_CLOSE} -p${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -108,7 +108,7 @@ test_open_close_recovery_password()
 
 		echo "Testing open close with recovery password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_OPEN_CLOSE} -r${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} "tmp" ./${BDE_TEST_OPEN_CLOSE} -r${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
