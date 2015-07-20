@@ -49,7 +49,7 @@ test_seek()
 	rm -rf tmp;
 	mkdir tmp;
 
-	${TEST_RUNNER} ./${BDE_TEST_SEEK} ${INPUT_FILE};
+	${TEST_RUNNER} "tmp" ./${BDE_TEST_SEEK} ${INPUT_FILE};
 
 	RESULT=$?;
 
@@ -77,7 +77,7 @@ test_seek_password()
 
 		echo "Testing seek with password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_SEEK} -p${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} "tmp" ./${BDE_TEST_SEEK} -p${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -108,7 +108,7 @@ test_seek_recovery_password()
 
 		echo "Testing seek with recovery password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_SEEK} -r${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} "tmp" ./${BDE_TEST_SEEK} -r${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 

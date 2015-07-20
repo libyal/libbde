@@ -69,7 +69,7 @@ test_info()
 
 	# Note that options should not contain spaces otherwise the test_runner
 	# will fail parsing the arguments.
-	${TEST_RUNNER} ${INFO_TOOL} ${OPTIONS} ${INPUT_FILE} | sed '1,2d' > ${TEST_RESULTS};
+	${TEST_RUNNER} ${TMPDIR} ${INFO_TOOL} ${OPTIONS} ${INPUT_FILE} | sed '1,2d' > ${TEST_RESULTS};
 
 	RESULT=$?;
 
