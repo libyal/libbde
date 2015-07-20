@@ -30,9 +30,22 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-if test $# -le 0;
+if test $# -lt 2;
 then
-	echo "Missing arguments";
+	echo "Usage: ./test_runner.sh TMPDIR EXECUTABLE [ARGUMENTS]";
+	echo "";
+
+	exit ${EXIT_FAILURE};
+fi
+
+TMPDIR=$1;
+
+shift
+
+if ! test -d "${TMPDIR}";
+then
+	echo "Missing ${TMPDIR} directory.";
+	echo "";
 
 	exit ${EXIT_FAILURE};
 fi
@@ -44,13 +57,7 @@ shift
 if ! test -x ${EXECUTABLE};
 then
 	echo "Invalid executable: ${EXECUTABLE}";
-
-	exit ${EXIT_FAILURE};
-fi
-
-if ! test -d "tmp";
-then
-	echo "Missing tmp directory.";
+	echo "";
 
 	exit ${EXIT_FAILURE};
 fi
@@ -97,7 +104,7 @@ then
 	if ! test -z ${CHECK_WITH_VALGRIND};
 	then
 		IFS="
-"; LD_LIBRARY_PATH="../${LIBRARY}/.libs/" valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-reachable=yes --log-file=tmp/valgrind.log ${EXECUTABLE} $*;
+"; LD_LIBRARY_PATH="../${LIBRARY}/.libs/" valgrind --tool=memcheck --leak-check=full --track-origins=yes --show-reachable=yes --log-file=${TMPDIR}/valgrind.log ${EXECUTABLE} $*;
 	else
 		IFS="
 "; LD_LIBRARY_PATH="../${LIBRARY}/.libs/" gdb -ex r --args ${EXECUTABLE} $*;
@@ -109,18 +116,18 @@ then
 	then
 		if test ${EXIT_RESULT} -eq 0;
 		then
-			grep "All heap blocks were freed -- no leaks are possible" tmp/valgrind.log > /dev/null 2>&1;
+			grep "All heap blocks were freed -- no leaks are possible" ${TMPDIR}/valgrind.log > /dev/null 2>&1;
 
 			if test $? -ne 0;
 			then
 				echo "Memory leakage detected.";
 
-				cat tmp/valgrind.log;
+				cat ${TMPDIR}/valgrind.log;
 
 				EXIT_RESULT=${EXIT_FAILURE};
 			fi
 		fi
-		rm -f tmp/valgrind.log;
+		rm -f ${TMPDIR}/valgrind.log;
 	fi
 else
 	IFS="

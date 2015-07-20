@@ -49,7 +49,7 @@ test_read()
 	rm -rf tmp;
 	mkdir tmp;
 
-	${TEST_RUNNER} ./${BDE_TEST_READ} ${INPUT_FILE};
+	${TEST_RUNNER} "tmp" ./${BDE_TEST_READ} ${INPUT_FILE};
 
 	RESULT=$?;
 
@@ -77,7 +77,7 @@ test_read_password()
 
 		echo "Testing read with password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_READ} -p${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} "tmp" ./${BDE_TEST_READ} -p${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
@@ -108,7 +108,7 @@ test_read_recovery_password()
 
 		echo "Testing read with recovery password of input: ${INPUT_FILE}";
 
-		${TEST_RUNNER} ./${BDE_TEST_READ} -r${PASSWORD} ${INPUT_FILE};
+		${TEST_RUNNER} "tmp" ./${BDE_TEST_READ} -r${PASSWORD} ${INPUT_FILE};
 
 		RESULT=$?;
 
