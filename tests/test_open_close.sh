@@ -24,14 +24,17 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
+TEST_PREFIX="bde";
+OPTION_SETS="password recovery_password";
+
 list_contains()
 {
 	LIST=$1;
 	SEARCH=$2;
 
-	for LINE in $LIST;
+	for LINE in ${LIST};
 	do
-		if test $LINE = $SEARCH;
+		if test ${LINE} = ${SEARCH};
 		then
 			return ${EXIT_SUCCESS};
 		fi
@@ -42,108 +45,54 @@ list_contains()
 
 test_open_close()
 { 
-	INPUT_FILE=$1;
+	TEST_SET=$1;
+	INPUT_FILE=$2;
+	OPTION_SET=$3;
 
-	rm -rf tmp;
-	mkdir tmp;
+	BASENAME=`basename ${INPUT_FILE}`;
 
-	echo "Testing open close of input: ${INPUT_FILE}";
+	if test -z "${OPTION_SET}";
+	then
+		OPTIONS="";
+	else
+		OPTIONS=`cat "${TEST_SET}/${BASENAME}.${OPTION_SET}" | head -n 1 | sed 's/[\r\n]*$//'`;
+	fi
+	TMPDIR="tmp$$";
 
-	${TEST_RUNNER} "tmp" ./${BDE_TEST_OPEN_CLOSE} ${INPUT_FILE};
+	rm -rf ${TMPDIR};
+	mkdir ${TMPDIR};
+
+	${TEST_RUNNER} ${TMPDIR} ${TEST_OPEN_CLOSE} ${OPTIONS} ${INPUT_FILE};
 
 	RESULT=$?;
 
-	rm -rf tmp;
-
-	echo "";
+	rm -rf ${TMPDIR};
 
 	return ${RESULT};
 }
 
-test_open_close_password()
-{ 
-	DIRNAME=$1;
-	INPUT_FILE=$2;
-	BASENAME=`basename ${INPUT_FILE}`;
-	RESULT=${EXIT_FAILURE};
-	PASSWORD_FILE="input/.libbde/${DIRNAME}/${BASENAME}.password";
+TEST_OPEN_CLOSE="./${TEST_PREFIX}_test_open_close";
 
-	if test -f "${PASSWORD_FILE}";
-	then
-		rm -rf tmp;
-		mkdir tmp;
-
-		PASSWORD=`cat "${PASSWORD_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
-
-		echo "Testing open close with password of input: ${INPUT_FILE}";
-
-		${TEST_RUNNER} "tmp" ./${BDE_TEST_OPEN_CLOSE} -p${PASSWORD} ${INPUT_FILE};
-
-		RESULT=$?;
-
-		rm -rf tmp;
-
-		echo "";
-	else
-		echo "Testing open close with password of input: ${INPUT_FILE} (FAIL)";
-	fi
-
-	return ${RESULT};
-}
-
-test_open_close_recovery_password()
-{ 
-	DIRNAME=$1;
-	INPUT_FILE=$2;
-	BASENAME=`basename ${INPUT_FILE}`;
-	RESULT=${EXIT_FAILURE};
-	PASSWORD_FILE="input/.libbde/${DIRNAME}/${BASENAME}.recovery_password";
-
-	if test -f "${PASSWORD_FILE}";
-	then
-		rm -rf tmp;
-		mkdir tmp;
-
-		PASSWORD=`cat "${PASSWORD_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
-
-		echo "Testing open close with recovery password of input: ${INPUT_FILE}";
-
-		${TEST_RUNNER} "tmp" ./${BDE_TEST_OPEN_CLOSE} -r${PASSWORD} ${INPUT_FILE};
-
-		RESULT=$?;
-
-		rm -rf tmp;
-
-		echo "";
-	else
-		echo "Testing open close with recovery password of input: ${INPUT_FILE} (FAIL)";
-	fi
-
-	return ${RESULT};
-}
-
-BDE_TEST_OPEN_CLOSE="bde_test_open_close";
-
-if ! test -x ${BDE_TEST_OPEN_CLOSE};
+if ! test -x "${TEST_OPEN_CLOSE}";
 then
-	BDE_TEST_OPEN_CLOSE="bde_test_open_close.exe";
+	TEST_OPEN_CLOSE="./${TEST_PREFIX}_test_open_close.exe";
 fi
 
-if ! test -x ${BDE_TEST_OPEN_CLOSE};
+if ! test -x "${TEST_OPEN_CLOSE}";
 then
-	echo "Missing executable: ${BDE_TEST_OPEN_CLOSE}";
+	echo "Missing executable: ${TEST_OPEN_CLOSE}";
 
 	exit ${EXIT_FAILURE};
 fi
 
 TEST_RUNNER="tests/test_runner.sh";
 
-if ! test -x ${TEST_RUNNER};
+if ! test -x "${TEST_RUNNER}";
 then
 	TEST_RUNNER="./test_runner.sh";
 fi
 
-if ! test -x ${TEST_RUNNER};
+if ! test -x "${TEST_RUNNER}";
 then
 	echo "Missing test runner: ${TEST_RUNNER}";
 
@@ -167,55 +116,105 @@ if test ${RESULT} -eq 0;
 then
 	echo "No files or directories found in the input directory.";
 
-	EXIT_RESULT=${EXIT_IGNORE};
-else
-	IGNORE_LIST="";
+	IFS=${OLDIFS};
 
-	if test -f "input/.libbde/ignore";
+	exit ${EXIT_IGNORE};
+fi
+
+TEST_PROFILE="input/.lib${TEST_PREFIX}";
+
+if ! test -d "${TEST_PROFILE}";
+then
+	mkdir ${TEST_PROFILE};
+fi
+
+IGNORE_FILE="${TEST_PROFILE}/ignore";
+IGNORE_LIST="";
+
+if test -f "${IGNORE_FILE}";
+then
+	IGNORE_LIST=`cat ${IGNORE_FILE} | sed '/^#/d'`;
+fi
+
+for TESTDIR in input/*;
+do
+	if ! test -d "${TESTDIR}";
 	then
-		IGNORE_LIST=`cat input/.libbde/ignore | sed '/^#/d'`;
+		continue
 	fi
-	for TESTDIR in input/*;
+	DIRNAME=`basename ${TESTDIR}`;
+
+	if list_contains "${IGNORE_LIST}" "${DIRNAME}";
+	then
+		continue
+	fi
+	TEST_SET="${TEST_PROFILE}/${DIRNAME}";
+
+	if ! test -d "${TEST_SET}";
+	then
+		mkdir "${TEST_SET}";
+	fi
+
+	if test -f "${TEST_SET}/files";
+	then
+		TEST_FILES=`cat ${TEST_SET}/files | sed "s?^?${TESTDIR}/?"`;
+	else
+		TEST_FILES=`ls ${TESTDIR}/*`;
+	fi
+
+	for TEST_FILE in ${TEST_FILES};
 	do
-		if test -d "${TESTDIR}";
-		then
-			DIRNAME=`basename ${TESTDIR}`;
+		BASENAME=`basename ${TEST_FILE}`;
 
-			if ! list_contains "${IGNORE_LIST}" "${DIRNAME}";
+		for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
+		do
+			OPTION_FILE="${TEST_SET}/${BASENAME}.${OPTION_SET}";
+
+			if ! test -f "${OPTION_FILE}";
 			then
-				if test -f "input/.libbde/${DIRNAME}/files";
-				then
-					TEST_FILES=`cat input/.libbde/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
-				else
-					TEST_FILES=`ls -1 ${TESTDIR}/* 2> /dev/null`;
-				fi
-				for TEST_FILE in ${TEST_FILES};
-				do
-					BASENAME=`basename ${TEST_FILE}`;
+				continue
+			fi
+			echo "Testing open close with option: ${OPTION_SET} and input: ${INPUT_FILE}";
 
-					if test -f "input/.libbde/${DIRNAME}/${BASENAME}.password";
-					then
-						if ! test_open_close_password "${DIRNAME}" "${TEST_FILE}";
-						then
-							exit ${EXIT_FAILURE};
-						fi
-					fi
-					if test -f "input/.libbde/${DIRNAME}/${BASENAME}.recovery_password";
-					then
-						if ! test_open_close_recovery_password "${DIRNAME}" "${TEST_FILE}";
-						then
-							exit ${EXIT_FAILURE};
-						fi
-					fi
-				done
+			if test_open_close "${TEST_SET}" "${TEST_FILE}" "${OPTION_SET}";
+			then
+				RESULT=${EXIT_SUCCESS};
+			else
+				RESULT=${EXIT_FAILURE};
+			fi
+			echo "";
+
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				IFS=${OLDIFS};
+
+				exit ${EXIT_FAILURE};
+			fi
+		done
+
+		if test -z "${OPTION_SETS}";
+		then
+			echo "Testing open close with input: ${INPUT_FILE}";
+
+			if test_open_close "${TEST_SET}" "${TEST_FILE}" "";
+			then
+				RESULT=${EXIT_SUCCESS};
+			else
+				RESULT=${EXIT_FAILURE};
+			fi
+			echo "";
+
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				IFS=${OLDIFS};
+
+				exit ${EXIT_FAILURE};
 			fi
 		fi
 	done
-
-	EXIT_RESULT=${EXIT_SUCCESS};
-fi
+done
 
 IFS=${OLDIFS};
 
-exit ${EXIT_RESULT};
+exit ${EXIT_SUCCESS};
 

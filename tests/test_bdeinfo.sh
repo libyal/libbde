@@ -44,7 +44,7 @@ list_contains()
 
 test_info()
 { 
-	DIRNAME=$1;
+	TEST_SET=$1;
 	INPUT_FILE=$2;
 	OPTION_SET=$3;
 	RESULT=${EXIT_FAILURE};
@@ -193,7 +193,7 @@ do
 				continue
 			fi
 
-			if test_info "${DIRNAME}" "${TEST_FILE}" "${OPTION_SET}";
+			if test_info "${TEST_SET}" "${TEST_FILE}" "${OPTION_SET}";
 			then
 				RESULT=${EXIT_SUCCESS};
 			else
@@ -205,6 +205,8 @@ do
 			then
 				echo " (FAIL)";
 
+				IFS=${OLDIFS};
+
 				exit ${EXIT_FAILURE};
 			fi
 			echo " (PASS)";
@@ -212,7 +214,7 @@ do
 
 		if test -z "${OPTION_SETS}";
 		then
-			if test_info "${DIRNAME}" "${TEST_FILE}" "";
+			if test_info "${TEST_SET}" "${TEST_FILE}" "";
 			then
 				RESULT=${EXIT_SUCCESS};
 			else
@@ -223,6 +225,8 @@ do
 			if test ${RESULT} -ne ${EXIT_SUCCESS};
 			then
 				echo " (FAIL)";
+
+				IFS=${OLDIFS};
 
 				exit ${EXIT_FAILURE};
 			fi
