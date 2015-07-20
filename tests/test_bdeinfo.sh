@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# bdeinfo tool testing script
+# Info tool testing script
 #
 # Copyright (C) 2011-2015, Joachim Metz <joachim.metz@gmail.com>
 #
@@ -18,20 +18,22 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this software.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
+
+TEST_PREFIX="bde";
+OPTION_SETS="password recovery_password";
 
 list_contains()
 {
 	LIST=$1;
 	SEARCH=$2;
 
-	for LINE in $LIST;
+	for LINE in ${LIST};
 	do
-		if test $LINE = $SEARCH;
+		if test ${LINE} = ${SEARCH};
 		then
 			return ${EXIT_SUCCESS};
 		fi
@@ -44,115 +46,71 @@ test_info()
 { 
 	DIRNAME=$1;
 	INPUT_FILE=$2;
-	OPTIONS=$3;
-	BASENAME=`basename ${INPUT_FILE}`;
+	OPTION_SET=$3;
 	RESULT=${EXIT_FAILURE};
 
-	rm -rf tmp;
-	mkdir tmp;
+	BASENAME=`basename ${INPUT_FILE}`;
+
+	if test -z "${OPTION_SET}";
+	then
+		OPTIONS="";
+		TEST_OUTPUT="${BASENAME}";
+	else
+		OPTIONS=`cat "${TEST_SET}/${BASENAME}.${OPTION_SET}" | head -n 1 | sed 's/[\r\n]*$//'`;
+		TEST_OUTPUT="${BASENAME}-${OPTION_SET}";
+	fi
+	TMPDIR="tmp$$";
+
+	rm -rf ${TMPDIR};
+	mkdir ${TMPDIR};
+
+	STORED_TEST_RESULTS="${TEST_SET}/${TEST_OUTPUT}.log.gz";
+	TEST_RESULTS="${TMPDIR}/${TEST_OUTPUT}.log";
 
 	# Note that options should not contain spaces otherwise the test_runner
 	# will fail parsing the arguments.
-	${TEST_RUNNER} ${BDEINFO} ${OPTIONS} ${INPUT_FILE} | sed '1,2d' > tmp/${BASENAME}.log;
+	${TEST_RUNNER} ${INFO_TOOL} ${OPTIONS} ${INPUT_FILE} | sed '1,2d' > ${TEST_RESULTS};
 
 	RESULT=$?;
 
-	if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.log.gz";
+	if test -f "${STORED_TEST_RESULTS}";
 	then
-		zdiff "input/.bdeinfo/${DIRNAME}/${BASENAME}.log.gz" "tmp/${BASENAME}.log";
+		zdiff ${STORED_TEST_RESULTS} ${TEST_RESULTS};
 
 		RESULT=$?;
 	else
-		mv "tmp/${BASENAME}.log" "input/.bdeinfo/${DIRNAME}";
+		gzip ${TEST_RESULTS};
 
-		gzip "input/.bdeinfo/${DIRNAME}/${BASENAME}.log";
+		mv "${TEST_RESULTS}.gz" ${TEST_SET};
 	fi
 
-	rm -rf tmp;
+	rm -rf ${TMPDIR};
 
 	return ${RESULT};
 }
 
-test_info_password()
-{ 
-	DIRNAME=$1;
-	INPUT_FILE=$2;
-	BASENAME=`basename ${INPUT_FILE}`;
-	RESULT=${EXIT_FAILURE};
-	PASSWORDFILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
+INFO_TOOL="../${TEST_PREFIX}tools/${TEST_PREFIX}info";
 
-	if test -f "${PASSWORDFILE}";
-	then
-		PASSWORD=`cat "${PASSWORDFILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
-
-		if test_info "${DIRNAME}" "${INPUT_FILE}" "-p${PASSWORD}";
-		then
-			RESULT=${EXIT_SUCCESS};
-		fi
-	fi
-
-	echo -n "Testing bdeinfo with password of input: ${INPUT_FILE} ";
-
-	if test ${RESULT} -ne ${EXIT_SUCCESS};
-	then
-		echo " (FAIL)";
-	else
-		echo " (PASS)";
-	fi
-	return ${RESULT};
-}
-
-test_info_recovery_password()
-{ 
-	DIRNAME=$1;
-	INPUT_FILE=$2;
-	BASENAME=`basename ${INPUT_FILE}`;
-	RESULT=${EXIT_FAILURE};
-	PASSWORDFILE="input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
-
-	if test -f "${PASSWORDFILE}";
-	then
-		PASSWORD=`cat "${PASSWORDFILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
-
-		if test_info "${DIRNAME}" "${INPUT_FILE}" "-r${PASSWORD}";
-		then
-			RESULT=${EXIT_SUCCESS};
-		fi
-	fi
-
-	echo -n "Testing bdeinfo with recovery password of input: ${INPUT_FILE} ";
-
-	if test ${RESULT} -ne ${EXIT_SUCCESS};
-	then
-		echo " (FAIL)";
-	else
-		echo " (PASS)";
-	fi
-	return ${RESULT};
-}
-
-BDEINFO="../bdetools/bdeinfo";
-
-if ! test -x ${BDEINFO};
+if ! test -x "${INFO_TOOL}";
 then
-	BDEINFO="../bdetools/bdeinfo.exe";
+	INFO_TOOL="../${TEST_PREFIX}tools/${TEST_PREFIX}info";
 fi
 
-if ! test -x ${BDEINFO};
+if ! test -x "${INFO_TOOL}";
 then
-	echo "Missing executable: ${BDEINFO}";
+	echo "Missing executable: ${INFO_TOOL}";
 
 	exit ${EXIT_FAILURE};
 fi
 
 TEST_RUNNER="tests/test_runner.sh";
 
-if ! test -x ${TEST_RUNNER};
+if ! test -x "${TEST_RUNNER}";
 then
 	TEST_RUNNER="./test_runner.sh";
 fi
 
-if ! test -x ${TEST_RUNNER};
+if ! test -x "${TEST_RUNNER}";
 then
 	echo "Missing test runner: ${TEST_RUNNER}";
 
@@ -176,63 +134,104 @@ if test ${RESULT} -eq 0;
 then
 	echo "No files or directories found in the input directory.";
 
-	EXIT_RESULT=${EXIT_IGNORE};
-else
-	IGNORELIST="";
+	IFS=${OLDIFS};
 
-	if ! test -d "input/.bdeinfo";
+	exit ${EXIT_IGNORE};
+fi
+
+TEST_PROFILE="input/.${TEST_PREFIX}info";
+
+if ! test -d "${TEST_PROFILE}";
+then
+	mkdir ${TEST_PROFILE};
+fi
+
+IGNORE_FILE="${TEST_PROFILE}/ignore";
+IGNORE_LIST="";
+
+if test -f "${IGNORE_FILE}";
+then
+	IGNORE_LIST=`cat ${IGNORE_FILE} | sed '/^#/d'`;
+fi
+
+for TESTDIR in input/*;
+do
+	if ! test -d "${TESTDIR}";
 	then
-		mkdir "input/.bdeinfo";
+		continue
 	fi
-	if test -f "input/.bdeinfo/ignore";
+	DIRNAME=`basename ${TESTDIR}`;
+
+	if list_contains "${IGNORE_LIST}" "${DIRNAME}";
 	then
-		IGNORELIST=`cat input/.bdeinfo/ignore | sed '/^#/d'`;
+		continue
 	fi
-	for TESTDIR in input/*;
+	TEST_SET="${TEST_PROFILE}/${DIRNAME}";
+
+	if ! test -d "${TEST_SET}";
+	then
+		mkdir "${TEST_SET}";
+	fi
+
+	if test -f "${TEST_SET}/files";
+	then
+		TEST_FILES=`cat ${TEST_SET}/files | sed "s?^?${TESTDIR}/?"`;
+	else
+		TEST_FILES=`ls ${TESTDIR}/*`;
+	fi
+
+	for TEST_FILE in ${TEST_FILES};
 	do
-		if test -d "${TESTDIR}";
-		then
-			DIRNAME=`basename ${TESTDIR}`;
+		BASENAME=`basename ${TEST_FILE}`;
 
-			if ! list_contains "${IGNORELIST}" "${DIRNAME}";
+		for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
+		do
+			OPTION_FILE="${TEST_SET}/${BASENAME}.${OPTION_SET}";
+
+			if ! test -f "${OPTION_FILE}";
 			then
-				if ! test -d "input/.bdeinfo/${DIRNAME}";
-				then
-					mkdir "input/.bdeinfo/${DIRNAME}";
-				fi
-				if test -f "input/.bdeinfo/${DIRNAME}/files";
-				then
-					TESTFILES=`cat input/.bdeinfo/${DIRNAME}/files | sed "s?^?${TESTDIR}/?"`;
-				else
-					TESTFILES=`ls ${TESTDIR}/*`;
-				fi
-				for TESTFILE in ${TESTFILES};
-				do
-					BASENAME=`basename ${TESTFILE}`;
-
-					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.password";
-					then
-						if ! test_info_password "${DIRNAME}" "${TESTFILE}";
-						then
-							exit ${EXIT_FAILURE};
-						fi
-					fi
-					if test -f "input/.bdeinfo/${DIRNAME}/${BASENAME}.recovery_password";
-					then
-						if ! test_info_recovery_password "${DIRNAME}" "${TESTFILE}";
-						then
-							exit ${EXIT_FAILURE};
-						fi
-					fi
-				done
+				continue
 			fi
+
+			if test_info "${DIRNAME}" "${TEST_FILE}" "${OPTION_SET}";
+			then
+				RESULT=${EXIT_SUCCESS};
+			else
+				RESULT=${EXIT_FAILURE};
+			fi
+			echo -n "Testing ${TEST_PREFIX}info with option: ${OPTION_SET} and input: ${INPUT_FILE} ";
+
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				echo " (FAIL)";
+
+				exit ${EXIT_FAILURE};
+			fi
+			echo " (PASS)";
+		done
+
+		if test -z "${OPTION_SETS}";
+		then
+			if test_info "${DIRNAME}" "${TEST_FILE}" "";
+			then
+				RESULT=${EXIT_SUCCESS};
+			else
+				RESULT=${EXIT_FAILURE};
+			fi
+			echo -n "Testing ${TEST_PREFIX}info with input: ${INPUT_FILE} ";
+
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				echo " (FAIL)";
+
+				exit ${EXIT_FAILURE};
+			fi
+			echo " (PASS)";
 		fi
 	done
-
-	EXIT_RESULT=${EXIT_SUCCESS};
-fi
+done
 
 IFS=${OLDIFS};
 
-exit ${EXIT_RESULT};
+exit ${EXIT_SUCCESS};
 
