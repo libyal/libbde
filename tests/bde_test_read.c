@@ -79,11 +79,11 @@ int bde_test_seek_offset(
 	{
 		if( result != 1 )
 		{
-			libbde_error_backtrace_fprint(
+			libcerror_error_backtrace_fprint(
 			 error,
 			 stderr );
 		}
-		libbde_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
@@ -153,11 +153,11 @@ int bde_test_read_buffer(
 	{
 		if( result != 1 )
 		{
-			libbde_error_backtrace_fprint(
+			libcerror_error_backtrace_fprint(
 			 error,
 			 stderr );
 		}
-		libbde_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
@@ -268,11 +268,11 @@ int bde_test_read_buffer_at_offset(
 	{
 		if( result != 1 )
 		{
-			libbde_error_backtrace_fprint(
+			libcerror_error_backtrace_fprint(
 			 error,
 			 stderr );
 		}
-		libbde_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	return( result );
@@ -1063,10 +1063,10 @@ int main( int argc, char * const argv[] )
 on_error:
 	if( error != NULL )
 	{
-		libbde_error_backtrace_fprint(
+		libcerror_error_backtrace_fprint(
 		 error,
 		 stderr );
-		libbde_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	if( volume != NULL )

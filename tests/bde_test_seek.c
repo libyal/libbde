@@ -84,11 +84,11 @@ int bde_test_seek_offset(
 
 	if( result_offset == -1 )
 	{
-		libbde_error_backtrace_fprint(
+		libcerror_error_backtrace_fprint(
 		 error,
 		 stderr );
 
-		libbde_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	if( result_offset == output_offset )
@@ -584,10 +584,10 @@ int main( int argc, char * const argv[] )
 on_error:
 	if( error != NULL )
 	{
-		libbde_error_backtrace_fprint(
+		libcerror_error_backtrace_fprint(
 		 error,
 		 stderr );
-		libbde_error_free(
+		libcerror_error_free(
 		 &error );
 	}
 	if( volume != NULL )
