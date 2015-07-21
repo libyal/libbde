@@ -51,6 +51,12 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20150721
+* worked on signature check
+
+20150720
+* worked on tests
+
 20150204
 * added correction for volume size being 1 sector short
 
