@@ -43,32 +43,149 @@ list_contains()
 	return ${EXIT_FAILURE};
 }
 
-test_read()
+run_test()
 { 
-	TEST_SET=$1;
-	INPUT_FILE=$2;
-	OPTION_SET=$3;
+	TEST_SET_DIR=$1;
+	TEST_DESCRIPTION=$2;
+	TEST_EXECUTABLE=$3;
+	INPUT_FILE=$4;
+	OPTION_SET=$5;
 
-	BASENAME=`basename ${INPUT_FILE}`;
+	TEST_RUNNER="tests/test_runner.sh";
+
+	if ! test -x "${TEST_RUNNER}";
+	then
+		TEST_RUNNER="./test_runner.sh";
+	fi
+
+	if ! test -x "${TEST_RUNNER}";
+	then
+		echo "Missing test runner: ${TEST_RUNNER}";
+
+		return ${EXIT_FAILURE};
+	fi
+
+	INPUT_NAME=`basename ${INPUT_FILE}`;
 
 	if test -z "${OPTION_SET}";
 	then
 		OPTIONS="";
 	else
-		OPTIONS=`cat "${TEST_SET}/${BASENAME}.${OPTION_SET}" | head -n 1 | sed 's/[\r\n]*$//'`;
+		OPTIONS=`cat "${TEST_SET_DIR}/${INPUT_NAME}.${OPTION_SET}" | head -n 1 | sed 's/[\r\n]*$//'`;
 	fi
 	TMPDIR="tmp$$";
 
 	rm -rf ${TMPDIR};
 	mkdir ${TMPDIR};
 
-	${TEST_RUNNER} ${TMPDIR} ${TEST_READ} ${OPTIONS} ${INPUT_FILE};
+	if test -z "${OPTION_SET}";
+	then
+		echo "Testing ${TEST_DESCRIPTION} with input: ${INPUT_FILE}";
+	else
+		echo "Testing ${TEST_DESCRIPTION} with option: ${OPTION_SET} and input: ${INPUT_FILE}";
+	fi
+
+	${TEST_RUNNER} ${TMPDIR} ${TEST_EXECUTABLE} ${OPTIONS} ${INPUT_FILE};
 
 	RESULT=$?;
 
 	rm -rf ${TMPDIR};
 
+	echo "";
+
 	return ${RESULT};
+}
+
+run_tests()
+{
+	TEST_PROFILE=$1;
+	TEST_DESCRIPTION=$2;
+	TEST_EXECUTABLE=$3;
+
+	if ! test -d "input";
+	then
+		echo "No input directory found.";
+
+		return ${EXIT_IGNORE};
+	fi
+	RESULT=`ls input/* | tr ' ' '\n' | wc -l`;
+
+	if test ${RESULT} -eq 0;
+	then
+		echo "No files or directories found in the input directory.";
+
+		return ${EXIT_IGNORE};
+	fi
+	TEST_PROFILE_DIR="input/.${TEST_PROFILE}";
+
+	if ! test -d "${TEST_PROFILE_DIR}";
+	then
+		mkdir ${TEST_PROFILE_DIR};
+	fi
+	IGNORE_FILE="${TEST_PROFILE_DIR}/ignore";
+	IGNORE_LIST="";
+
+	if test -f "${IGNORE_FILE}";
+	then
+		IGNORE_LIST=`cat ${IGNORE_FILE} | sed '/^#/d'`;
+	fi
+
+	for INPUT_DIR in input/*;
+	do
+		if ! test -d "${INPUT_DIR}";
+		then
+			continue
+		fi
+		INPUT_NAME=`basename ${INPUT_DIR}`;
+
+		if list_contains "${IGNORE_LIST}" "${INPUT_NAME}";
+		then
+			continue
+		fi
+		TEST_SET_DIR="${TEST_PROFILE_DIR}/${INPUT_NAME}";
+
+		if ! test -d "${TEST_SET_DIR}";
+		then
+			mkdir "${TEST_SET_DIR}";
+		fi
+
+		if test -f "${TEST_SET_DIR}/files";
+		then
+			INPUT_FILES=`cat ${TEST_SET_DIR}/files | sed "s?^?${INPUT_DIR}/?"`;
+		else
+			INPUT_FILES=`ls ${INPUT_DIR}/*`;
+		fi
+
+		for INPUT_FILE in ${INPUT_FILES};
+		do
+			INPUT_NAME=`basename ${INPUT_FILE}`;
+
+			for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
+			do
+				OPTION_FILE="${TEST_SET_DIR}/${INPUT_NAME}.${OPTION_SET}";
+
+				if ! test -f "${OPTION_FILE}";
+				then
+					continue
+				fi
+
+				if ! run_test "${TEST_SET_DIR}" "${TEST_DESCRIPTION}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "${OPTION_SET}";
+				then
+					return ${EXIT_FAILURE};
+				fi
+			done
+
+			if test -z "${OPTION_SETS}";
+			then
+				if ! run_test "${TEST_SET_DIR}" "${TEST_DESCRIPTION}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "";
+				then
+					return ${EXIT_FAILURE};
+				fi
+			fi
+		done
+	done
+
+	return ${EXIT_SUCCESS};
 }
 
 TEST_READ="./${TEST_PREFIX}_test_read";
@@ -85,136 +202,15 @@ then
 	exit ${EXIT_FAILURE};
 fi
 
-TEST_RUNNER="tests/test_runner.sh";
-
-if ! test -x "${TEST_RUNNER}";
-then
-	TEST_RUNNER="./test_runner.sh";
-fi
-
-if ! test -x "${TEST_RUNNER}";
-then
-	echo "Missing test runner: ${TEST_RUNNER}";
-
-	exit ${EXIT_FAILURE};
-fi
-
-if ! test -d "input";
-then
-	echo "No input directory found.";
-
-	exit ${EXIT_IGNORE};
-fi
-
 OLDIFS=${IFS};
 IFS="
 ";
 
-RESULT=`ls input/* | tr ' ' '\n' | wc -l`;
+run_tests "lib${TEST_PREFIX}" "read" "${TEST_READ}";
 
-if test ${RESULT} -eq 0;
-then
-	echo "No files or directories found in the input directory.";
-
-	IFS=${OLDIFS};
-
-	exit ${EXIT_IGNORE};
-fi
-
-TEST_PROFILE="input/.lib${TEST_PREFIX}";
-
-if ! test -d "${TEST_PROFILE}";
-then
-	mkdir ${TEST_PROFILE};
-fi
-
-IGNORE_FILE="${TEST_PROFILE}/ignore";
-IGNORE_LIST="";
-
-if test -f "${IGNORE_FILE}";
-then
-	IGNORE_LIST=`cat ${IGNORE_FILE} | sed '/^#/d'`;
-fi
-
-for TESTDIR in input/*;
-do
-	if ! test -d "${TESTDIR}";
-	then
-		continue
-	fi
-	DIRNAME=`basename ${TESTDIR}`;
-
-	if list_contains "${IGNORE_LIST}" "${DIRNAME}";
-	then
-		continue
-	fi
-	TEST_SET="${TEST_PROFILE}/${DIRNAME}";
-
-	if ! test -d "${TEST_SET}";
-	then
-		mkdir "${TEST_SET}";
-	fi
-
-	if test -f "${TEST_SET}/files";
-	then
-		TEST_FILES=`cat ${TEST_SET}/files | sed "s?^?${TESTDIR}/?"`;
-	else
-		TEST_FILES=`ls ${TESTDIR}/*`;
-	fi
-
-	for TEST_FILE in ${TEST_FILES};
-	do
-		BASENAME=`basename ${TEST_FILE}`;
-
-		for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
-		do
-			OPTION_FILE="${TEST_SET}/${BASENAME}.${OPTION_SET}";
-
-			if ! test -f "${OPTION_FILE}";
-			then
-				continue
-			fi
-			echo "Testing read with option: ${OPTION_SET} and input: ${INPUT_FILE}";
-
-			if test_read "${TEST_SET}" "${TEST_FILE}" "${OPTION_SET}";
-			then
-				RESULT=${EXIT_SUCCESS};
-			else
-				RESULT=${EXIT_FAILURE};
-			fi
-			echo "";
-
-			if test ${RESULT} -ne ${EXIT_SUCCESS};
-			then
-				IFS=${OLDIFS};
-
-				exit ${EXIT_FAILURE};
-			fi
-		done
-
-		if test -z "${OPTION_SETS}";
-		then
-			echo "Testing read with input: ${INPUT_FILE}";
-
-			if test_read "${TEST_SET}" "${TEST_FILE}" "";
-			then
-				RESULT=${EXIT_SUCCESS};
-			else
-				RESULT=${EXIT_FAILURE};
-			fi
-			echo "";
-
-			if test ${RESULT} -ne ${EXIT_SUCCESS};
-			then
-				IFS=${OLDIFS};
-
-				exit ${EXIT_FAILURE};
-			fi
-		fi
-	done
-done
+RESULT=$?;
 
 IFS=${OLDIFS};
 
-exit ${EXIT_SUCCESS};
+exit ${RESULT};
 
