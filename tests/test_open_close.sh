@@ -157,6 +157,7 @@ run_tests()
 
 		for INPUT_FILE in ${INPUT_FILES};
 		do
+			TESTED_WITH_OPTIONS=0;
 			INPUT_NAME=`basename ${INPUT_FILE}`;
 
 			for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
@@ -172,9 +173,10 @@ run_tests()
 				then
 					return ${EXIT_FAILURE};
 				fi
+				TESTED_WITH_OPTIONS=1;
 			done
 
-			if test -z "${OPTION_SETS}";
+			if test ${TESTED_WITH_OPTIONS} -eq 0;
 			then
 				if ! run_test "${TEST_SET_DIR}" "${TEST_DESCRIPTION}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "";
 				then
