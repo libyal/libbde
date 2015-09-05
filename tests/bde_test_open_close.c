@@ -419,7 +419,6 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libcerror_error_t *error                                = NULL;
 	libcstring_system_character_t *option_password          = NULL;
 	libcstring_system_character_t *option_recovery_password = NULL;
 	libcstring_system_character_t *source                   = NULL;
