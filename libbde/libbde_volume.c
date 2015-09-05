@@ -4030,7 +4030,7 @@ int libbde_volume_set_utf8_recovery_password(
 		 "%s: unable to set recovery password hash.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	internal_volume->password_keep->recovery_password_is_set = 1;
 
@@ -4137,7 +4137,7 @@ int libbde_volume_set_utf16_recovery_password(
 		 "%s: unable to set recovery password hash.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	internal_volume->password_keep->recovery_password_is_set = 1;
 

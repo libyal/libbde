@@ -602,7 +602,6 @@ int bde_test_read_callback_function(
 	size_t read_size         = BDE_TEST_READ_BUFFER_SIZE;
 	ssize_t read_count       = 0;
 	int number_of_iterations = 3;
-	int result               = 0;
 
 	BDE_TEST_UNREFERENCED_PARAMETER( arguments )
 
