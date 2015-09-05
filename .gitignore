@@ -114,7 +114,6 @@ stamp-h[1-9]
 /libbde/libbde_definitions.h
 /bdetools/bdeinfo
 /bdetools/bdemount
-/pybde/setup.py
 /tests/bde_test_open_close
 /tests/bde_test_read
 /tests/bde_test_seek
