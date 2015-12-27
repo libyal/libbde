@@ -200,6 +200,34 @@ int pybde_encryption_methods_init_type(
 	{
 		goto on_error;
 	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_128_XTS );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_128_XTS );
+#endif
+	if( PyDict_SetItemString(
+	     type_object->tp_dict,
+	     "AES_128_XTS",
+	     value_object ) != 0 )
+	{
+		goto on_error;
+	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_256_XTS );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_ENCRYPTION_METHOD_AES_256_XTS );
+#endif
+	if( PyDict_SetItemString(
+	     type_object->tp_dict,
+	     "AES_256_XTS",
+	     value_object ) != 0 )
+	{
+		goto on_error;
+	}
 	return( 1 );
 
 on_error:

@@ -1455,7 +1455,7 @@ PyObject *pybde_volume_get_encryption_method(
 	libcerror_error_t *error   = NULL;
 	PyObject *integer_object   = NULL;
 	static char *function      = "pybde_volume_get_encryption_method";
-	uint32_t encryption_method = 0;
+	uint16_t encryption_method = 0;
 	int result                 = 0;
 
 	PYBDE_UNREFERENCED_PARAMETER( arguments )

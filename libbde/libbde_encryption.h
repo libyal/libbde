@@ -38,7 +38,7 @@ struct libbde_encryption_context
 {
 	/* The encryption method
 	 */
-	uint32_t method;
+	uint16_t method;
 
 	/* The FVEK (AES) decryption context
 	 */
@@ -55,11 +55,19 @@ struct libbde_encryption_context
 	/* The TWEAK key (AES) encryption context
 	 */
 	libcaes_context_t *tweak_encryption_context;
+
+	/* The FVEK (AES) decryption tweaked context
+	 */
+	libcaes_tweaked_context_t *fvek_decryption_tweaked_context;
+
+	/* The FVEK (AES) encryption tweaked context
+	 */
+	libcaes_tweaked_context_t *fvek_encryption_tweaked_context;
 };
 
 int libbde_encryption_initialize(
      libbde_encryption_context_t **context,
-     uint32_t method,
+     uint16_t method,
      libcerror_error_t **error );
 
 int libbde_encryption_free(

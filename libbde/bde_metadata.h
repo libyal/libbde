@@ -186,9 +186,14 @@ struct bde_metadata_header_v1
 	uint8_t next_nonce_counter[ 4 ];
 
 	/* The encryption method
-	 * Consists of 4 bytes
+	 * Consists of 2 bytes
 	 */
-	uint8_t encryption_method[ 4 ];
+	uint8_t encryption_method[ 2 ];
+
+	/* The encryption method copy
+	 * Consists of 2 bytes
+	 */
+	uint8_t encryption_method_copy[ 2 ];
 
 	/* The creation date and time
 	 * Consists of 8 bytes

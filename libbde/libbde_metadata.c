@@ -671,6 +671,7 @@ ssize_t libbde_metadata_read_header(
 	uint32_t metadata_header_size     = 0;
 	uint32_t metadata_size_copy       = 0;
 	uint32_t version                  = 0;
+	uint16_t encryption_method_copy   = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libcstring_system_character_t filetime_string[ 32 ];
@@ -779,9 +780,13 @@ ssize_t libbde_metadata_read_header(
 
 		goto on_error;
 	}
-	byte_stream_copy_to_uint32_little_endian(
+	byte_stream_copy_to_uint16_little_endian(
 	 ( (bde_metadata_header_v1_t *) header_data )->encryption_method,
 	 metadata->encryption_method );
+
+	byte_stream_copy_to_uint16_little_endian(
+	 ( (bde_metadata_header_v1_t *) header_data )->encryption_method_copy,
+	 encryption_method_copy );
 
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (bde_metadata_header_v1_t *) header_data )->creation_time,
@@ -908,6 +913,13 @@ ssize_t libbde_metadata_read_header(
 		 metadata->encryption_method,
 		 libbde_debug_print_encryption_method(
 		  metadata->encryption_method ) );
+
+		libcnotify_printf(
+		 "%s: encryption method copy\t\t\t: 0x%08" PRIx32 " (%s)\n",
+		 function,
+		 encryption_method_copy,
+		 libbde_debug_print_encryption_method(
+		  encryption_method_copy ) );
 
 		if( libfdatetime_filetime_initialize(
 		     &filetime,

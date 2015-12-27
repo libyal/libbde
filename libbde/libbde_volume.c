@@ -1596,7 +1596,7 @@ int libbde_volume_open_read_keys_from_metadata(
      libbde_metadata_t *metadata,
      libcerror_error_t **error )
 {
-	uint8_t full_volume_encryption_key[ 32 ];
+	uint8_t full_volume_encryption_key[ 64 ];
 	uint8_t tweak_key[ 32 ];
 	uint8_t volume_master_key[ 32 ];
 
@@ -1606,7 +1606,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	size64_t volume_header_size    = 0;
 	size64_t encrypted_volume_size = 0;
 	size_t external_key_size       = 0;
-	uint32_t encryption_method     = 0;
+	uint16_t encryption_method     = 0;
 	int result                     = 0;
 
 	if( internal_volume == NULL )
@@ -1645,7 +1645,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	if( memory_set(
 	     full_volume_encryption_key,
 	     0,
-	     32 ) == NULL )
+	     64 ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -1725,7 +1725,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		          volume_master_key,
 		          32,
 		          full_volume_encryption_key,
-		          32,
+		          64,
 		          tweak_key,
 		          32,
 		          error );
@@ -1778,7 +1778,7 @@ int libbde_volume_open_read_keys_from_metadata(
 			 function );
 			libcnotify_print_data(
 			 full_volume_encryption_key,
-			 32,
+			 64,
 			 0 );
 
 			libcnotify_printf(
@@ -1793,7 +1793,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		if( libbde_encryption_set_keys(
 		     internal_volume->io_handle->encryption_context,
 		     full_volume_encryption_key,
-		     32,
+		     64,
 		     tweak_key,
 		     32,
 		     error ) != 1 )
@@ -1811,7 +1811,7 @@ int libbde_volume_open_read_keys_from_metadata(
 	if( memory_set(
 	     full_volume_encryption_key,
 	     0,
-	     32 ) == NULL )
+	     64 ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -2053,7 +2053,7 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 	{
 		if( libfdata_vector_get_element_value_at_offset(
 		     internal_volume->sectors_vector,
-		     (intptr_t *) internal_volume->file_io_handle,
+		     (intptr_t *) file_io_handle,
 		     internal_volume->sectors_cache,
 		     internal_volume->current_offset,
 		     &element_data_offset,
@@ -2712,7 +2712,7 @@ int libbde_volume_get_size(
  */
 int libbde_volume_get_encryption_method(
      libbde_volume_t *volume,
-     uint32_t *encryption_method,
+     uint16_t *encryption_method,
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;

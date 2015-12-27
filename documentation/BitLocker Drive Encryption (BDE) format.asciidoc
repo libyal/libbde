@@ -28,7 +28,7 @@ forensic tooling to be able to process this volume type.
 [preface]
 == License
 ....
-Copyright (C) 2011-2014, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2011-2015, Joachim Metz <joachim.metz@gmail.com>.
 Permission is granted to copy, distribute and/or modify this document under the 
 terms of the GNU Free Documentation License, Version 1.3 or any later version 
 published by the Free Software Foundation; with no Invariant Sections, no 
@@ -53,6 +53,7 @@ September  2011 | Worked on initial version.
 | 0.0.5 | J.B. Metz | June 2013 | Additional information regarding encryption method MSB with thanks to S. Hansen.
 | 0.0.6 | J.B. Metz | June 2014 | Additional information regarding encryption method MSB with thanks to J. Van Tubbergh.
 | 0.0.7 | J.B. Metz | October 2014 | Switched to asccidoc format.
+| 0.0.8 | J.B. Metz | December 2015 | Additional information regarding AES-XTS encryption method with thanks to github user anocs.
 |===
 
 :numbered:
@@ -66,6 +67,7 @@ Windows as of Vista. There are multiple versions of BitLocker Drive Encryption
 * BitLocker Windows 7
 * BitLocker To Go
 * BitLocker Windows 8
+* BitLocker Windows 10
 
 Both BitLocker Windows Vista and BitLocker Windows 7 are intended to encrypt 
 NTFS volumes on fixed storage media, like harddisks. BitLocker To Go was 
@@ -276,6 +278,11 @@ The sector key 32-byte of size and contains:
 
 === AES-CCM
 The key data is encrypted using AES-CCM with an initialization vector of 0.
+
+=== AES-XTS
+[yellow-background]*TODO: complete this section*
+
+The FKEV contains both XTS keys.
 
 === Elephant Diffuser
 The Elephant Diffuser A and B variants are described in `[FERGUSON06]`.
@@ -559,22 +566,24 @@ Contains a FILETIME
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x0000 | | [yellow-background]*Not encrypted/External Key*
+| 0x0000 | | [yellow-background]*Unknown (Not encrypted/External Key)*
 | | | 
-| 0x1000 | | [yellow-background]*Stretch key*
-| 0x1001 | | [yellow-background]*Stretch key*
+| 0x1000 | | [yellow-background]*Unknown (Stretch key)*
+| 0x1001 | | [yellow-background]*Unknown (Stretch key)*
 | | | 
-| 0x2000 | | [yellow-background]*AES-CCM 256 bit encryption*
-| 0x2001 | | [yellow-background]*AES-CCM 256 bit encryption*
-| 0x2002 | | [yellow-background]*AES-CCM 256 bit encryption*
-| 0x2003 | | [yellow-background]*AES-CCM 256 bit encryption*
-| 0x2004 | | [yellow-background]*AES-CCM 256 bit encryption*
-| 0x2005 | | [yellow-background]*AES-CCM 256 bit encryption*
+| 0x2000 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
+| 0x2001 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
+| 0x2002 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
+| 0x2003 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
+| 0x2004 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
+| 0x2005 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
 | | | 
 | 0x8000 | | AES-CBC 128-bit encryption with Elephant Diffuser
 | 0x8001 | | AES-CBC 256-bit encryption with Elephant Diffuser
 | 0x8002 | | AES-CBC 128-bit encryption
 | 0x8003 | | AES-CBC 256-bit encryption
+| 0x8004 | | AES-XTS 128-bit encryption
+| 0x8005 | | [yellow-background]*Unknown (AES-XTS 256-bit encryption)*
 |===
 
 === FVE metadata entry (version 1)
