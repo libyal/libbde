@@ -51,6 +51,13 @@ Format:
 * what is entry type 0x000b ?
 * why does Windows hide the last 4096 bytes of the volume?
 
+20151227
+* updated dependencies
+
+20151216
+* worked on splitting encryption method and copy
+* worked on AES-XTS support
+
 20150905
 * updated dependencies
 * code clean up

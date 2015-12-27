@@ -47,7 +47,7 @@ struct libbde_metadata
 
 	/* The encryption method
 	 */
-	uint32_t encryption_method;
+	uint16_t encryption_method;
 
 	/* The encrypted volume size
 	 */

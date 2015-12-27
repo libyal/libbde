@@ -34,9 +34,9 @@
 /* Prints the encryption method
  */
 const char *libbde_debug_print_encryption_method(
-             uint32_t encryption_method )
+             uint16_t encryption_method )
 {
-	switch( encryption_method & 0x0000ffffUL )
+	switch( encryption_method )
 	{
 		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
 			return( "AES-CBC 128-bit encryption with diffuser" );
@@ -49,6 +49,12 @@ const char *libbde_debug_print_encryption_method(
 
 		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC:
 			return( "AES-CBC 256-bit encryption" );
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_XTS:
+			return( "AES-XTS 128-bit encryption" );
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_XTS:
+			return( "AES-XTS 256-bit encryption" );
 	}
 	return( "_UNKNOWN_" );
 }
