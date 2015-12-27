@@ -35,7 +35,7 @@ extern "C" {
 #if defined( HAVE_DEBUG_OUTPUT )
 
 const char *libbde_debug_print_encryption_method(
-             uint32_t encryption_method );
+             uint16_t encryption_method );
 
 const char *libbde_debug_print_entry_type(
              uint16_t entry_type );

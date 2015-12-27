@@ -29,6 +29,7 @@
 #include "libbde_encryption.h"
 #include "libbde_libcaes.h"
 #include "libbde_libcerror.h"
+#include "libbde_libcnotify.h"
 
 /* Creates an encryption context
  * Make sure the value encryption context is referencing, is set to NULL
@@ -36,7 +37,7 @@
  */
 int libbde_encryption_initialize(
      libbde_encryption_context_t **context,
-     uint32_t method,
+     uint16_t method,
      libcerror_error_t **error )
 {
 	static char *function = "libbde_encryption_initialize";
@@ -59,6 +60,22 @@ int libbde_encryption_initialize(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid context value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( method != LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported method.",
 		 function );
 
 		return( -1 );
@@ -96,68 +113,123 @@ int libbde_encryption_initialize(
 
 		return( -1 );
 	}
-	if( libcaes_context_initialize(
-	     &( ( *context )->fvek_decryption_context ),
-	     error ) != 1 )
+	if( ( method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER )
+	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize FVEK decryption context.",
-		 function );
+		if( libcaes_context_initialize(
+		     &( ( *context )->fvek_decryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize FVEK decryption context.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		if( libcaes_context_initialize(
+		     &( ( *context )->fvek_encryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize FVEK encryption context.",
+			 function );
+
+			goto on_error;
+		}
 	}
-	if( libcaes_context_initialize(
-	     &( ( *context )->fvek_encryption_context ),
-	     error ) != 1 )
+	if( ( method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize FVEK encryption context.",
-		 function );
+		if( libcaes_context_initialize(
+		     &( ( *context )->tweak_decryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize TWEAK decryption context.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		if( libcaes_context_initialize(
+		     &( ( *context )->tweak_encryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize TWEAK encryption context.",
+			 function );
+
+			goto on_error;
+		}
 	}
-	if( libcaes_context_initialize(
-	     &( ( *context )->tweak_decryption_context ),
-	     error ) != 1 )
+	if( ( method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize TWEAK decryption context.",
-		 function );
+		if( libcaes_tweaked_context_initialize(
+		     &( ( *context )->fvek_decryption_tweaked_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize FVEK decryption tweaked context.",
+			 function );
 
-		goto on_error;
-	}
-	if( libcaes_context_initialize(
-	     &( ( *context )->tweak_encryption_context ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize TWEAK encryption context.",
-		 function );
+			goto on_error;
+		}
+		if( libcaes_tweaked_context_initialize(
+		     &( ( *context )->fvek_encryption_tweaked_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize FVEK encryption tweaked context.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
-	/* The known encryption methods seem to be stored in the lower 16-bit
-	 * the upper 16-bit sometimes has the MSB set.
-	 */
-	( *context )->method = method & 0x0000ffffUL;
+	( *context )->method = method;
 
 	return( 1 );
 
 on_error:
 	if( *context != NULL )
 	{
+		if( ( *context )->fvek_encryption_tweaked_context != NULL )
+		{
+			libcaes_tweaked_context_free(
+			 &( ( *context )->fvek_encryption_tweaked_context ),
+			 NULL );
+		}
+		if( ( *context )->fvek_decryption_tweaked_context != NULL )
+		{
+			libcaes_tweaked_context_free(
+			 &( ( *context )->fvek_decryption_tweaked_context ),
+			 NULL );
+		}
+		if( ( *context )->tweak_encryption_context != NULL )
+		{
+			libcaes_context_free(
+			 &( ( *context )->tweak_encryption_context ),
+			 NULL );
+		}
 		if( ( *context )->tweak_decryption_context != NULL )
 		{
 			libcaes_context_free(
@@ -207,57 +279,101 @@ int libbde_encryption_free(
 	}
 	if( *context != NULL )
 	{
-		if( libcaes_context_free(
-		     &( ( *context )->fvek_decryption_context ),
-		     error ) != 1 )
+		if( ( *context )->fvek_decryption_context != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable free FVEK decryption context.",
-			 function );
+			if( libcaes_context_free(
+			     &( ( *context )->fvek_decryption_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable free FVEK decryption context.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
 		}
-		if( libcaes_context_free(
-		     &( ( *context )->fvek_encryption_context ),
-		     error ) != 1 )
+		if( ( *context )->fvek_encryption_context != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable free FVEK encryption context.",
-			 function );
+			if( libcaes_context_free(
+			     &( ( *context )->fvek_encryption_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable free FVEK encryption context.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
 		}
-		if( libcaes_context_free(
-		     &( ( *context )->tweak_decryption_context ),
-		     error ) != 1 )
+		if( ( *context )->tweak_decryption_context != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable free TWEAK decryption context.",
-			 function );
+			if( libcaes_context_free(
+			     &( ( *context )->tweak_decryption_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable free TWEAK decryption context.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
 		}
-		if( libcaes_context_free(
-		     &( ( *context )->tweak_encryption_context ),
-		     error ) != 1 )
+		if( ( *context )->tweak_encryption_context != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable free TWEAK encryption context.",
-			 function );
+			if( libcaes_context_free(
+			     &( ( *context )->tweak_encryption_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable free TWEAK encryption context.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
+		}
+		if( ( *context )->fvek_decryption_tweaked_context != NULL )
+		{
+			if( libcaes_tweaked_context_free(
+			     &( ( *context )->fvek_decryption_tweaked_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable free FVEK decryption tweaked context.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( ( *context )->fvek_encryption_tweaked_context != NULL )
+		{
+			if( libcaes_tweaked_context_free(
+			     &( ( *context )->fvek_encryption_tweaked_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable free FVEK encryption tweaked context.",
+				 function );
+
+				result = -1;
+			}
 		}
 		memory_free(
 		 *context );
@@ -280,6 +396,7 @@ int libbde_encryption_set_keys(
 {
 	static char *function = "libbde_encryption_set_keys";
 	size_t key_bit_size   = 0;
+	size_t key_byte_size  = 0;
 
 	if( context == NULL )
 	{
@@ -339,14 +456,22 @@ int libbde_encryption_set_keys(
 	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER ) )
 	{
-		key_bit_size = 16;
+		key_byte_size = 16;
 	}
 	else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		key_bit_size = 32;
+		key_byte_size = 32;
 	}
-	if( full_volume_encryption_key_size < key_bit_size )
+	else if( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+	{
+		key_byte_size = 32;
+	}
+	else if( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS )
+	{
+		key_byte_size = 64;
+	}
+	if( full_volume_encryption_key_size < key_byte_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -357,7 +482,7 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( tweak_key_size < key_bit_size )
+	if( tweak_key_size < key_byte_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -368,51 +493,17 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	key_bit_size *= 8;
+	key_bit_size = key_byte_size * 8;
 
-	/* The volume master key is always 256-bit in size
-	 */
-	if( libcaes_crypt_set_key(
-	     context->fvek_decryption_context,
-	     LIBCAES_CRYPT_MODE_DECRYPT,
-	     full_volume_encryption_key,
-	     key_bit_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set full volume encryption key in decryption context.",
-		 function );
-
-		return( -1 );
-	}
-	if( libcaes_crypt_set_key(
-	     context->fvek_encryption_context,
-	     LIBCAES_CRYPT_MODE_ENCRYPT,
-	     full_volume_encryption_key,
-	     key_bit_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set full volume encryption key in encryption context.",
-		 function );
-
-		return( -1 );
-	}
-	/* The TWEAK key is only used with diffuser
-	 */
-	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
 		if( libcaes_crypt_set_key(
-		     context->tweak_decryption_context,
+		     context->fvek_decryption_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
-		     tweak_key,
+		     full_volume_encryption_key,
 		     key_bit_size,
 		     error ) != 1 )
 		{
@@ -420,15 +511,15 @@ int libbde_encryption_set_keys(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set tweak key in decryption context.",
+			 "%s: unable to set full volume encryption key in decryption context.",
 			 function );
 
 			return( -1 );
 		}
 		if( libcaes_crypt_set_key(
-		     context->tweak_encryption_context,
+		     context->fvek_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
-		     tweak_key,
+		     full_volume_encryption_key,
 		     key_bit_size,
 		     error ) != 1 )
 		{
@@ -436,7 +527,88 @@ int libbde_encryption_set_keys(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set tweak key in encryption context.",
+			 "%s: unable to set full volume encryption key in encryption context.",
+			 function );
+
+			return( -1 );
+		}
+		/* The TWEAK key is only used with diffuser
+		 */
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
+		{
+			if( libcaes_crypt_set_key(
+			     context->tweak_decryption_context,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
+			     tweak_key,
+			     key_bit_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to set tweak key in decryption context.",
+				 function );
+
+				return( -1 );
+			}
+			if( libcaes_crypt_set_key(
+			     context->tweak_encryption_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
+			     tweak_key,
+			     key_bit_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to set tweak key in encryption context.",
+				 function );
+
+				return( -1 );
+			}
+		}
+	}
+	else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+	      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+	{
+		key_byte_size /= 2;
+		key_bit_size  /= 2;
+
+		if( libcaes_tweaked_context_set_keys(
+		     context->fvek_decryption_tweaked_context,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
+		     full_volume_encryption_key,
+		     key_bit_size,
+		     &( full_volume_encryption_key[ key_byte_size ] ),
+		     key_bit_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set full volume encryption key in decryption tweaked context.",
+			 function );
+
+			return( -1 );
+		}
+		if( libcaes_tweaked_context_set_keys(
+		     context->fvek_encryption_tweaked_context,
+		     LIBCAES_CRYPT_MODE_ENCRYPT,
+		     full_volume_encryption_key,
+		     key_bit_size,
+		     &( full_volume_encryption_key[ key_byte_size ] ),
+		     key_bit_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set full volume encryption key in encryption tweaked context.",
 			 function );
 
 			return( -1 );
@@ -531,43 +703,24 @@ int libbde_encryption_crypt(
 
 		return( -1 );
 	}
-	byte_stream_copy_from_uint64_little_endian(
-	 block_key_data,
-	 block_key );
-
-	/* The block key for the initialization vector is encrypted
-	 * with the FVEK
-	 */
-	if( libcaes_crypt_ecb(
-	     context->fvek_encryption_context,
-	     LIBCAES_CRYPT_MODE_ENCRYPT,
-	     block_key_data,
-	     16,
-	     initialization_vector,
-	     16,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-		 "%s: unable to encrypt initialization vector.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		/* The block key for the sector key data is encrypted
-		 * with the TWEAK key
+		byte_stream_copy_from_uint64_little_endian(
+		 block_key_data,
+		 block_key );
+
+		/* The block key for the initialization vector is encrypted
+		 * with the FVEK
 		 */
 		if( libcaes_crypt_ecb(
-		     context->tweak_encryption_context,
+		     context->fvek_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     block_key_data,
 		     16,
-		     sector_key_data,
+		     initialization_vector,
 		     16,
 		     error ) != 1 )
 		{
@@ -575,34 +728,80 @@ int libbde_encryption_crypt(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
 			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt sector key data.",
+			 "%s: unable to encrypt initialization vector.",
 			 function );
 
 			return( -1 );
 		}
-		/* Set the last byte to contain 0x80 (128)
-		 */
-		block_key_data[ 15 ] = 0x80;
-
-		if( libcaes_crypt_ecb(
-		     context->tweak_encryption_context,
-		     LIBCAES_CRYPT_MODE_ENCRYPT,
-		     block_key_data,
-		     16,
-		     &( sector_key_data[ 16 ] ),
-		     16,
-		     error ) != 1 )
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to encrypt sector key data.",
-			 function );
+			/* The block key for the sector key data is encrypted
+			 * with the TWEAK key
+			 */
+			if( libcaes_crypt_ecb(
+			     context->tweak_encryption_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
+			     block_key_data,
+			     16,
+			     sector_key_data,
+			     16,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to encrypt sector key data.",
+				 function );
 
-			return( -1 );
+				return( -1 );
+			}
+			/* Set the last byte to contain 0x80 (128)
+			 */
+			block_key_data[ 15 ] = 0x80;
+
+			if( libcaes_crypt_ecb(
+			     context->tweak_encryption_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
+			     block_key_data,
+			     16,
+			     &( sector_key_data[ 16 ] ),
+			     16,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to encrypt sector key data.",
+				 function );
+
+				return( -1 );
+			}
 		}
 	}
+	else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+	      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+	{
+		byte_stream_copy_from_uint64_little_endian(
+		 initialization_vector,
+		 block_key );
+
+/* TODO: implement */
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: initialization vector:\n",
+		 function );
+		libcnotify_print_data(
+		 initialization_vector,
+		 16,
+		 0 );
+	}
+#endif
 	if( mode == LIBBDE_ENCRYPTION_CRYPT_MODE_ENCRYPT )
 	{
 /* TODO safe guard input data ? */
@@ -639,48 +838,108 @@ int libbde_encryption_crypt(
 				return( -1 );
 			}
 		}
-		if( libcaes_crypt_cbc(
-		     context->fvek_encryption_context,
-		     LIBCAES_CRYPT_MODE_ENCRYPT,
-		     initialization_vector,
-		     16,
-		     input_data,
-		     input_data_size,
-		     output_data,
-		     output_data_size,
-		     error ) != 1 )
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to AES-CBC encrypt output data.",
-			 function );
+			if( libcaes_crypt_cbc(
+			     context->fvek_encryption_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
+			     initialization_vector,
+			     16,
+			     input_data,
+			     input_data_size,
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to AES-CBC encrypt output data.",
+				 function );
 
-			return( -1 );
+				return( -1 );
+			}
+		}
+		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+		{
+			if( libcaes_crypt_xts(
+			     context->fvek_decryption_tweaked_context,
+			     LIBCAES_CRYPT_MODE_ENCRYPT,
+			     initialization_vector,
+			     16,
+			     input_data,
+			     input_data_size,
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to AES-XTS decrypt output data.",
+				 function );
+
+				return( -1 );
+			}
 		}
 	}
 	else
 	{
-		if( libcaes_crypt_cbc(
-		     context->fvek_decryption_context,
-		     LIBCAES_CRYPT_MODE_DECRYPT,
-		     initialization_vector,
-		     16,
-		     input_data,
-		     input_data_size,
-		     output_data,
-		     output_data_size,
-		     error ) != 1 )
+		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to AES-CBC decrypt output data.",
-			 function );
+			if( libcaes_crypt_cbc(
+			     context->fvek_decryption_context,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
+			     initialization_vector,
+			     16,
+			     input_data,
+			     input_data_size,
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to AES-CBC decrypt output data.",
+				 function );
 
-			return( -1 );
+				return( -1 );
+			}
+		}
+		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+		{
+			if( libcaes_crypt_xts(
+			     context->fvek_decryption_tweaked_context,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
+			     initialization_vector,
+			     16,
+			     input_data,
+			     input_data_size,
+			     output_data,
+			     output_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to AES-XTS decrypt output data.",
+				 function );
+
+				return( -1 );
+			}
 		}
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )

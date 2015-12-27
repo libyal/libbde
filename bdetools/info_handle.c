@@ -1014,7 +1014,7 @@ int info_handle_volume_fprint(
 	static char *function                       = "bdeinfo_volume_info_fprint";
 	size_t value_string_size                    = 0;
 	uint64_t value_64bit                        = 0;
-	uint32_t encryption_method                  = 0;
+	uint16_t encryption_method                  = 0;
 	uint16_t key_protector_type                 = 0;
 	int key_protector_index                     = 0;
 	int number_of_key_protectors                = 0;
@@ -1079,40 +1079,54 @@ int info_handle_volume_fprint(
 	 info_handle->notify_stream,
 	 "\tEncryption method:\t\t" );
 
-	switch( encryption_method & 0x0000ffffUL )
+	switch( encryption_method )
 	{
 		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER:
 			fprintf(
 			 info_handle->notify_stream,
-			 "AES 128-bit with Diffuser" );
+			 "AES-CBC 128-bit with Diffuser" );
 
 			break;
 
 		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER:
 			fprintf(
 			 info_handle->notify_stream,
-			 "AES 256-bit with Diffuser" );
+			 "AES-CBC 256-bit with Diffuser" );
 
 			break;
 
 		case LIBBDE_ENCRYPTION_METHOD_AES_128_CBC:
 			fprintf(
 			 info_handle->notify_stream,
-			 "AES 128-bit" );
+			 "AES-CBC 128-bit" );
 
 			break;
 
 		case LIBBDE_ENCRYPTION_METHOD_AES_256_CBC:
 			fprintf(
 			 info_handle->notify_stream,
-			 "AES 256-bit" );
+			 "AES-CBC 256-bit" );
+
+			break;
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_128_XTS:
+			fprintf(
+			 info_handle->notify_stream,
+			 "AES-XTS 128-bit" );
+
+			break;
+
+		case LIBBDE_ENCRYPTION_METHOD_AES_256_XTS:
+			fprintf(
+			 info_handle->notify_stream,
+			 "AES-XTS 256-bit" );
 
 			break;
 
 		default:
 			fprintf(
 			 info_handle->notify_stream,
-			 "Unknown (0x%08" PRIx32 ")",
+			 "Unknown (0x%04" PRIx16 ")",
 			 encryption_method );
 
 			break;

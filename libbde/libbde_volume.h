@@ -50,7 +50,7 @@ struct libbde_internal_volume
 
 	/* The encryption method
 	 */
-	uint32_t encryption_method;
+	uint16_t encryption_method;
 
 	/* The metadata at the first metadata offset
 	 */
@@ -236,7 +236,7 @@ int libbde_volume_get_size(
 LIBBDE_EXTERN \
 int libbde_volume_get_encryption_method(
      libbde_volume_t *volume,
-     uint32_t *encryption_method,
+     uint16_t *encryption_method,
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20151005
+# Version: 20151219
 
+from __future__ import print_function
 import glob
 import platform
 import os
@@ -140,14 +141,20 @@ class ProjectInformation(object):
     for line in file_object.readlines():
       line = line.strip()
       if found_library_name:
-        self.library_version = line[1:-2]
+        library_version = line[1:-2]
+        if sys.version_info[0] >= 3:
+          library_version = library_version.decode("utf-8")
+        self.library_version = library_version
         break
 
       elif found_ac_init:
-        self.library_name = line[1:-2]
+        library_name = line[1:-2]
+        if sys.version_info[0] >= 3:
+          library_name = library_name.decode("utf-8")
+        self.library_name = library_name
         found_library_name = True
 
-      elif line.startswith("AC_INIT"):
+      elif line.startswith(b"AC_INIT"):
         found_ac_init = True
 
     file_object.close()
@@ -169,7 +176,9 @@ class ProjectInformation(object):
     for line in file_object.readlines():
       line = line.strip()
       if found_subdirs:
-        library_name, _, _ = line.partition(" ")
+        library_name, _, _ = line.partition(b" ")
+        if sys.version_info[0] >= 3:
+          library_name = library_name.decode("utf-8")
 
         self.include_directories.append(library_name)
 
@@ -179,7 +188,7 @@ class ProjectInformation(object):
         if library_name == self.library_name:
           break
 
-      elif line.startswith("SUBDIRS"):
+      elif line.startswith(b"SUBDIRS"):
         found_subdirs = True
 
     file_object.close()
@@ -216,6 +225,7 @@ SOURCES = []
 # TODO: replace by detection of MSC
 DEFINE_MACROS = []
 if platform.system() == "Windows":
+  DEFINE_MACROS.append(("WINVER", "0x0501"))
   # TODO: determine how to handle third party DLLs.
   for library_name in project_information.library_names:
     if library_name != project_information.library_name:
