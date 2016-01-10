@@ -25,8 +25,8 @@ SUBDIRS = \
 	libcsystem \
 	bdetools \
 	pybde \
-	pybde2 \
-	pybde3 \
+	pybde-python2 \
+	pybde-python3 \
 	po \
 	manuals \
 	tests \
