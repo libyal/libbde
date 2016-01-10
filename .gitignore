@@ -112,6 +112,7 @@ stamp-h[1-9]
 /include/libbde/types.h
 /libbde/libbde.rc
 /libbde/libbde_definitions.h
+/pybde[23]/*.[ch]
 /bdetools/bdeinfo
 /bdetools/bdemount
 /tests/bde_test_open_close
