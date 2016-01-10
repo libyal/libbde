@@ -2,7 +2,7 @@ Source: libbde
 Section: libs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
-Build-Depends: debhelper (>= 7), autotools-dev, libssl-dev, libfuse-dev, python-dev
+Build-Depends: debhelper (>= 7), autotools-dev, libssl-dev, libfuse-dev, python-dev, python3-dev
 Standards-Version: 3.9.5
 Homepage: https://github.com/libyal/libbde/
 
@@ -39,8 +39,8 @@ Section: python
 Architecture: any
 Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Suggests: libbde-python-dbg
-Description: Python bindings for libbde
- Python bindings for libbde.
+Description: Python 2 bindings for libbde
+ Python 2 bindings for libbde.
 
 Package: libbde-python-dbg
 Section: debug
@@ -48,4 +48,19 @@ Architecture: any
 Depends: libbde-python (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for libbde-python
  Debugging symbols for libbde-python.
+
+Package: libbde-python3
+Section: python
+Architecture: any
+Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Suggests: libbde-python3-dbg
+Description: Python 3 bindings for libbde
+ Python 3 bindings for libbde.
+
+Package: libbde-python3-dbg
+Section: debug
+Architecture: any
+Depends: libbde-python3 (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libbde-python3
+ Debugging symbols for libbde-python3.
 
