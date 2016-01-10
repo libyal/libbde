@@ -25,6 +25,8 @@ SUBDIRS = \
 	libcsystem \
 	bdetools \
 	pybde \
+	pybde2 \
+	pybde3 \
 	po \
 	manuals \
 	tests \
@@ -38,8 +40,10 @@ DPKG_FILES = \
 	dpkg/copyright \
 	dpkg/copyright.in \
 	dpkg/rules \
-	dpkg/libbde-dev.docs \
 	dpkg/libbde.docs \
+	dpkg/libbde-dev.docs \
+	dpkg/libbde-python.docs \
+	dpkg/libbde-python3.docs \
 	dpkg/libbde-tools.docs \
 	dpkg/source/format
 

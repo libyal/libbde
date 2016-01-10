@@ -3,16 +3,19 @@ BitLocker Drive Encryption (BDE) is a volume-based encryption method used by
 Microsoft Windows, as of Vista, to encrypt data on a storage media volume.
 
 Project information:
+
 * Status: alpha
 * Licence: LGPLv3+
 
 Supported BDE formats:
+
 * BitLocker Windows Vista
 * BitLocker Windows 7 
 * BitLocker Windows 8 (Consumer Preview)
 * BitLocker To Go
 
 Supported protection methods:
+
 * clear key
 * password
 * recovery password
@@ -20,15 +23,18 @@ Supported protection methods:
 * FKEV and/or TWEAK key data
 
 Additional features:
+
 * support for partial encrypted volumes
 * zeros out the BDE metadata, matches behavior seen on Windows
 
 Work in progress:
+
 * Dokan library support
-* Python 3 support
 * Thread-safety in volume API functions
+* BitLocker Windows 10 AES-XTS support
 
 For more information see:
+
 * Project documentation: https://github.com/libyal/libbde/wiki/Home
 * How to build from source: https://github.com/libyal/libbde/wiki/Building
 

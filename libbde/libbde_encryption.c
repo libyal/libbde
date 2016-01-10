@@ -114,7 +114,7 @@ int libbde_encryption_initialize(
 		return( -1 );
 	}
 	if( ( method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
-	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER )
+	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	 || ( method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
