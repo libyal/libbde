@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBBDE_DLL_IMPORT@
 
-if HAVE_PYTHON
+if HAVE_PYTHON_TESTS
 TESTS_PYBDE = \
 	test_pybde_open_close.sh \
 	test_pybde_seek.sh
