@@ -28,7 +28,7 @@
 #include "pybde_libcerror.h"
 #include "pybde_python.h"
 
-#define PYBDE_ERROR_STRING_SIZE		2048
+#define PYBDE_ERROR_STRING_SIZE	2048
 
 #if defined( __cplusplus )
 extern "C" {
@@ -56,5 +56,5 @@ void pybde_error_raise(
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_ERROR_H ) */
 
