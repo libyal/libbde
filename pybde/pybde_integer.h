@@ -52,5 +52,5 @@ int pybde_integer_unsigned_copy_to_64bit(
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_INTEGER_H ) */
 

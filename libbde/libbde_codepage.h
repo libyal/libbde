@@ -80,11 +80,11 @@ enum LIBBDE_CODEPAGES
 	LIBBDE_CODEPAGE_WINDOWS_1258			= 1258
 };
 
-#endif
+#endif /* !defined( HAVE_LOCAL_LIBBDE ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_INTERNAL_CODEPAGE_H ) */
 
