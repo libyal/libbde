@@ -53,11 +53,11 @@ LIBBDE_EXTERN \
 int libbde_notify_stream_close(
      libcerror_error_t **error );
 
-#endif
+#endif /* !defined( HAVE_LOCAL_LIBBDE ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_NOTIFY_H ) */
 

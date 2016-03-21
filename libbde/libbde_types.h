@@ -41,9 +41,9 @@ typedef struct libbde_volume {}		libbde_volume_t;
 typedef intptr_t libbde_key_protector_t;
 typedef intptr_t libbde_volume_t;
 
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI ) */
 
 #endif /* defined( HAVE_LOCAL_LIBBDE ) */
 
-#endif
+#endif /* !defined( _LIBBDE_INTERNAL_TYPES_H ) */
 
