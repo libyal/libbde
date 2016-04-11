@@ -1512,7 +1512,8 @@ int info_handle_volume_fprint(
 				default:
 					fprintf(
 					 info_handle->notify_stream,
-					 "Unknown" );
+					 "Unknown (0x%04" PRIx16 ")",
+					 key_protector_type );
 
 					break;
 			}
