@@ -1332,7 +1332,7 @@ int info_handle_volume_fprint(
 		}
 		fprintf(
 		 info_handle->notify_stream,
-		 "\tDescription\t\t\t:%" PRIs_LIBCSTRING_SYSTEM "\n",
+		 "\tDescription\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 		 value_string );
 
 		memory_free(
