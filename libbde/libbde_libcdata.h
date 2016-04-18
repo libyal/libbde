@@ -33,8 +33,8 @@
 #include <libcdata_definitions.h>
 #include <libcdata_list.h>
 #include <libcdata_list_element.h>
-#include <libcdata_tree_node.h>
 #include <libcdata_range_list.h>
+#include <libcdata_tree_node.h>
 #include <libcdata_types.h>
 
 #else
@@ -48,7 +48,7 @@
 
 #include <libcdata.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBCDATA ) */
 
-#endif
+#endif /* !defined( _LIBBDE_LIBCDATA_H ) */
 

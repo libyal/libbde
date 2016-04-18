@@ -1,4 +1,5 @@
 MSVSCPP_FILES = \
+	bde_test_get_version/bde_test_get_version.vcproj \
 	bde_test_open_close/bde_test_open_close.vcproj \
 	bde_test_read/bde_test_read.vcproj \
 	bde_test_seek/bde_test_seek.vcproj \
