@@ -27,6 +27,7 @@ TESTS = \
 	$(TESTS_PYBDE)
 
 check_SCRIPTS = \
+	pybde_test_get_version.py \
 	pybde_test_open_close.py \
 	pybde_test_seek.py \
 	test_api_functions.sh \
