@@ -52,7 +52,7 @@
 
 #include <libuna.h>
 
-#endif
+#endif /* defined( HAVE_LOCAL_LIBUNA ) */
 
-#endif
+#endif /* !defined( _LIBBDE_LIBUNA_H ) */
 

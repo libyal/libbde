@@ -18,35 +18,39 @@ AM_CPPFLAGS = \
 
 if HAVE_PYTHON_TESTS
 TESTS_PYBDE = \
-	test_pybde_open_close.sh \
-	test_pybde_seek.sh
+	test_python_functions.sh
 endif
 
 TESTS = \
-	test_open_close.sh \
-	test_seek.sh \
-	test_read.sh \
+	test_api_functions.sh \
 	test_bdeinfo.sh \
 	$(TESTS_PYBDE)
 
 check_SCRIPTS = \
 	pybde_test_open_close.py \
 	pybde_test_seek.py \
+	test_api_functions.sh \
 	test_bdeinfo.sh \
-	test_open_close.sh \
-	test_pybde_open_close.sh \
-	test_pybde_seek.sh \
-	test_read.sh \
-	test_seek.sh \
+	test_python_functions.sh \
 	test_runner.sh
 
 EXTRA_DIST = \
 	$(check_SCRIPTS)
 
 check_PROGRAMS = \
+	bde_test_get_version \
 	bde_test_open_close \
 	bde_test_read \
 	bde_test_seek
+
+bde_test_get_version_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcstring.h \
+	bde_test_get_version.c
+
+bde_test_get_version_LDADD = \
+	../libbde/libbde.la \
+	@LIBCSTRING_LIBADD@
 
 bde_test_open_close_SOURCES = \
 	bde_test_libbde.h \
