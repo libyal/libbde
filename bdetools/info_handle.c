@@ -1077,7 +1077,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tEncryption method:\t\t" );
+	 "\tEncryption method\t\t: " );
 
 	switch( encryption_method )
 	{
@@ -1194,7 +1194,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tVolume identifier:\t\t%" PRIs_LIBCSTRING_SYSTEM "\n",
+	 "\tVolume identifier\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 	 guid_string );
 
 	if( libbde_volume_get_creation_time(
@@ -1253,7 +1253,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tCreation time:\t\t\t%" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+	 "\tCreation time\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
 	 filetime_string );
 
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
@@ -1356,7 +1356,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tNumber of key protectors:\t%d\n",
+	 "\tNumber of key protectors\t: %d\n",
 	 number_of_key_protectors );
 
 	fprintf(
@@ -1450,7 +1450,7 @@ int info_handle_volume_fprint(
 			}
 			fprintf(
 			 info_handle->notify_stream,
-			 "\tIdentifier:\t\t\t%" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "\tIdentifier\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
 			 guid_string );
 
 			if( libbde_key_protector_get_type(
@@ -1470,7 +1470,7 @@ int info_handle_volume_fprint(
 			}
 			fprintf(
 			 info_handle->notify_stream,
-			 "\tType:\t\t\t\t" );
+			 "\tType\t\t\t\t: " );
 
 			switch( key_protector_type )
 			{
@@ -1512,7 +1512,8 @@ int info_handle_volume_fprint(
 				default:
 					fprintf(
 					 info_handle->notify_stream,
-					 "Unknown" );
+					 "Unknown (0x%04" PRIx16 ")",
+					 key_protector_type );
 
 					break;
 			}
