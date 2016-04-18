@@ -35,6 +35,8 @@ Test suite:
   - partial encrypted volume
 * add verify test case
 * test images: for Windows Vista, Windows 7, To Go, Windows 8
+* python get version
+* python read
 
 Tools:
 * bdeinfo
