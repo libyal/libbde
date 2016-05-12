@@ -1772,7 +1772,7 @@ int libbde_metadata_read_volume_master_key(
 
 			goto on_error;
 		}
-		if( libcaes_crypt_set_key(
+		if( libcaes_context_set_key(
 		     aes_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     aes_ccm_key,
@@ -2003,7 +2003,7 @@ int libbde_metadata_read_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_crypt_set_key(
+			if( libcaes_context_set_key(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     aes_ccm_key,
@@ -2249,7 +2249,7 @@ int libbde_metadata_read_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_crypt_set_key(
+			if( libcaes_context_set_key(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     aes_ccm_key,
@@ -2495,7 +2495,7 @@ int libbde_metadata_read_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_crypt_set_key(
+			if( libcaes_context_set_key(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     aes_ccm_key,
@@ -2811,7 +2811,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libcaes_crypt_set_key(
+	if( libcaes_context_set_key(
 	     aes_context,
 	     LIBCAES_CRYPT_MODE_ENCRYPT,
 	     volume_master_key,

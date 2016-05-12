@@ -500,7 +500,7 @@ int libbde_encryption_set_keys(
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		if( libcaes_crypt_set_key(
+		if( libcaes_context_set_key(
 		     context->fvek_decryption_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     full_volume_encryption_key,
@@ -516,7 +516,7 @@ int libbde_encryption_set_keys(
 
 			return( -1 );
 		}
-		if( libcaes_crypt_set_key(
+		if( libcaes_context_set_key(
 		     context->fvek_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
 		     full_volume_encryption_key,
@@ -537,7 +537,7 @@ int libbde_encryption_set_keys(
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
-			if( libcaes_crypt_set_key(
+			if( libcaes_context_set_key(
 			     context->tweak_decryption_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     tweak_key,
@@ -553,7 +553,7 @@ int libbde_encryption_set_keys(
 
 				return( -1 );
 			}
-			if( libcaes_crypt_set_key(
+			if( libcaes_context_set_key(
 			     context->tweak_encryption_context,
 			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     tweak_key,

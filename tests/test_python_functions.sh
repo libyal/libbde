@@ -1,19 +1,19 @@
 #!/bin/bash
 # Python module functions testing script
 #
-# Version: 20160401
+# Version: 20160420
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
 TEST_PREFIX=`dirname ${PWD}`;
-TEST_PREFIX=`basename ${TEST_PREFIX} | sed 's/^lib\([^-]*\)/\1/'`;
+TEST_PREFIX=`basename ${TEST_PREFIX} | sed 's/^lib\([^-]*\).*$/\1/'`;
 
 TEST_PROFILE="py${TEST_PREFIX}";
-TEST_FUNCTIONS="";
+TEST_FUNCTIONS="get_version";
 TEST_FUNCTIONS_WITH_INPUT="open_close seek";
-OPTION_SETS="";
+OPTION_SETS="password recovery_password";
 
 TEST_TOOL_DIRECTORY=".";
 INPUT_DIRECTORY="input";
@@ -62,15 +62,6 @@ then
 	exit ${EXIT_IGNORE};
 fi
 
-PYTHON=`which python${PYTHON_VERSION} 2> /dev/null`;
-
-if ! test -x ${PYTHON};
-then
-	echo "Missing executable: ${PYTHON}";
-
-	exit ${EXIT_FAILURE};
-fi
-
 TEST_RUNNER="tests/test_runner.sh";
 
 if ! test -f "${TEST_RUNNER}";
@@ -100,7 +91,7 @@ do
 	fi
 done
 
-if test ${RESULT} -ne ${EXIT_SUCCESS};
+if test ${RESULT} -ne ${EXIT_SUCCESS} && test ${RESULT} -ne ${EXIT_IGNORE};
 then
 	exit ${RESULT};
 fi
