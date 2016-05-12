@@ -45,5 +45,5 @@
 
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_LIBFGUID_H ) */
 
