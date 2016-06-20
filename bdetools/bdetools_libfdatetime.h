@@ -44,7 +44,7 @@
 /* If libtool DLL support is enabled set LIBFDATETIME_DLL_IMPORT
  * before including libfdatetime.h
  */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
 #define LIBFDATETIME_DLL_IMPORT
 #endif
 
