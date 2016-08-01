@@ -37,13 +37,15 @@
 #include "info_handle.h"
 
 #if !defined( LIBBDE_HAVE_BFIO )
+
 extern \
 int libbde_volume_open_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
      int access_flags,
      libbde_error_t **error );
-#endif
+
+#endif /* !defined( LIBBDE_HAVE_BFIO ) */
 
 #define INFO_HANDLE_NOTIFY_STREAM		stdout
 

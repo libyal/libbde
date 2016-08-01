@@ -2362,7 +2362,7 @@ PyObject *pybde_volume_set_recovery_password(
 
 #if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
 
-/* Sets the startup key
+/* Reads the startup key from a file
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_read_startup_key(
@@ -2517,7 +2517,7 @@ PyObject *pybde_volume_read_startup_key(
 
 #else
 
-/* Sets the startup key
+/* Reads the startup key from a file
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_read_startup_key(

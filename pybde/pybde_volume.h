@@ -178,5 +178,5 @@ PyObject *pybde_volume_get_key_protectors(
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_VOLUME_H ) */
 
