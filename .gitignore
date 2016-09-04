@@ -122,6 +122,7 @@ stamp-h[1-9]
 /pybde-python[23]/*.[ch]
 /bdetools/bdeinfo
 /bdetools/bdemount
+/tests/bde_test_error
 /tests/bde_test_get_version
 /tests/bde_test_open_close
 /tests/bde_test_read

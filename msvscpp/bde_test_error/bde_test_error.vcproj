@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="bde_test_get_version"
-	ProjectGUID="{BE919F44-8DB1-4CF0-A6D9-CB238EDBBA44}"
-	RootNamespace="bde_test_get_version"
+	Name="bde_test_error"
+	ProjectGUID="{10A45585-35B3-4248-9911-BDCC22674D04}"
+	RootNamespace="bde_test_error"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\bde_test_get_version.c"
+				RelativePath="..\..\tests\bde_test_error.c"
 				>
 			</File>
 		</Filter>
