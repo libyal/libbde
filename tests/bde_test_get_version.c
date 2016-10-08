@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #endif
 
-#include "bde_test_libcstring.h"
 #include "bde_test_libbde.h"
+#include "bde_test_libcstring.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 
@@ -74,7 +74,7 @@ int main(
 
 	BDE_TEST_RUN(
 	 "libbde_get_version",
-	 bde_test_get_version() )
+	 bde_test_get_version );
 
 	return( EXIT_SUCCESS );
 

@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #endif
 
-#include "bde_test_libcerror.h"
 #include "bde_test_libbde.h"
+#include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 
@@ -123,23 +123,23 @@ int main(
 
 	BDE_TEST_RUN(
 	 "libbde_error_free",
-	 bde_test_error_free() )
+	 bde_test_error_free );
 
 	BDE_TEST_RUN(
 	 "libbde_error_fprint",
-	 bde_test_error_fprint() )
+	 bde_test_error_fprint );
 
 	BDE_TEST_RUN(
 	 "libbde_error_sprint",
-	 bde_test_error_sprint() )
+	 bde_test_error_sprint );
 
 	BDE_TEST_RUN(
 	 "libbde_error_backtrace_fprint",
-	 bde_test_error_backtrace_fprint() )
+	 bde_test_error_backtrace_fprint );
 
 	BDE_TEST_RUN(
 	 "libbde_error_backtrace_sprint",
-	 bde_test_error_backtrace_sprint() )
+	 bde_test_error_backtrace_sprint );
 
 	return( EXIT_SUCCESS );
 
