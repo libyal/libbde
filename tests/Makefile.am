@@ -40,10 +40,10 @@ EXTRA_DIST = \
 
 check_PROGRAMS = \
 	bde_test_error \
-	bde_test_get_version \
 	bde_test_open_close \
 	bde_test_read \
-	bde_test_seek
+	bde_test_seek \
+	bde_test_support
 
 bde_test_error_SOURCES = \
 	bde_test_error.c \
@@ -53,17 +53,6 @@ bde_test_error_SOURCES = \
 	bde_test_unused.h
 
 bde_test_error_LDADD = \
-	../libbde/libbde.la \
-	@LIBCSTRING_LIBADD@
-
-bde_test_get_version_SOURCES = \
-	bde_test_get_version.c \
-	bde_test_libbde.h \
-	bde_test_libcstring.h \
-	bde_test_macros.h \
-	bde_test_unused.h
-
-bde_test_get_version_LDADD = \
 	../libbde/libbde.la \
 	@LIBCSTRING_LIBADD@
 
@@ -113,6 +102,17 @@ bde_test_seek_LDADD = \
 	@LIBCERROR_LIBADD@ \
 	@LIBCSTRING_LIBADD@ \
 	@PTHREAD_LIBADD@
+
+bde_test_support_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcstring.h \
+	bde_test_macros.h \
+	bde_test_support.c \
+	bde_test_unused.h
+
+bde_test_support_LDADD = \
+	../libbde/libbde.la \
+	@LIBCSTRING_LIBADD@
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
