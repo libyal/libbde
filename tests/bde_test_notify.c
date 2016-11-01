@@ -1,5 +1,5 @@
 /*
- * Library support functions test program
+ * Library notification functions test program
  *
  * Copyright (C) 2011-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -26,35 +26,66 @@
 #endif
 
 #include "bde_test_libbde.h"
-#include "bde_test_libcstring.h"
+#include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 
-/* Tests the libbde_get_version function
+/* Tests the libbde_notify_set_verbose function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_get_version(
+int bde_test_notify_set_verbose(
      void )
 {
-	const char *version_string = NULL;
-	int result                 = 0;
-
-	version_string = libbde_get_version();
-
-	result = libcstring_narrow_string_compare(
-	          version_string,
-	          LIBBDE_VERSION_STRING,
-	          9 );
-
-	BDE_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
+	/* Test invocation of function only
+	 */
+	libbde_notify_set_verbose(
 	 0 );
 
 	return( 1 );
+}
 
-on_error:
-	return( 0 );
+/* Tests the libbde_notify_set_stream function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_notify_set_stream(
+     void )
+{
+	/* Test invocation of function only
+	 */
+	libbde_notify_set_stream(
+	 NULL,
+	 NULL );
+
+	return( 1 );
+}
+
+/* Tests the libbde_notify_stream_open function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_notify_stream_open(
+     void )
+{
+	/* Test invocation of function only
+	 */
+	libbde_notify_stream_open(
+	 NULL,
+	 NULL );
+
+	return( 1 );
+}
+
+/* Tests the libbde_notify_stream_close function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_notify_stream_close(
+     void )
+{
+	/* Test invocation of function only
+	 */
+	libbde_notify_stream_close(
+	 NULL );
+
+	return( 1 );
 }
 
 /* The main program
@@ -73,8 +104,20 @@ int main(
 	BDE_TEST_UNREFERENCED_PARAMETER( argv )
 
 	BDE_TEST_RUN(
-	 "libbde_get_version",
-	 bde_test_get_version );
+	 "libbde_notify_set_verbose",
+	 bde_test_notify_set_verbose )
+
+	BDE_TEST_RUN(
+	 "libbde_notify_set_stream",
+	 bde_test_notify_set_stream )
+
+	BDE_TEST_RUN(
+	 "libbde_notify_stream_open",
+	 bde_test_notify_stream_open )
+
+	BDE_TEST_RUN(
+	 "libbde_notify_stream_close",
+	 bde_test_notify_stream_close )
 
 	return( EXIT_SUCCESS );
 

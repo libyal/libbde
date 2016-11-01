@@ -118,5 +118,5 @@ enum LIBBDE_CODEPAGES
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_CODEPAGE_H ) */
 
