@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBEVT_TYPES_H )
-#define _LIBEVT_TYPES_H
+#if !defined( _LIBBDE_TYPES_H )
+#define _LIBBDE_TYPES_H
 
 #include <libbde/features.h>
 
@@ -208,5 +208,5 @@ typedef intptr_t libbde_volume_t;
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_TYPES_H ) */
 

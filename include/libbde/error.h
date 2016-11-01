@@ -39,7 +39,7 @@ enum LIBBDE_ERROR_DOMAINS
 	LIBBDE_ERROR_DOMAIN_INPUT			= (int) 'i',
 	LIBBDE_ERROR_DOMAIN_MEMORY			= (int) 'm',
 	LIBBDE_ERROR_DOMAIN_OUTPUT			= (int) 'o',
-	LIBBDE_ERROR_DOMAIN_RUNTIME			= (int) 'r',
+	LIBBDE_ERROR_DOMAIN_RUNTIME			= (int) 'r'
 };
 
 /* The argument error codes
@@ -208,6 +208,17 @@ enum LIBBDE_MEMORY_ERROR
 	LIBBDE_MEMORY_ERROR_SET_FAILED			= 3
 };
 
+/* The output error codes
+ */
+enum LIBBDE_OUTPUT_ERROR
+{
+	LIBBDE_OUTPUT_ERROR_GENERIC			= 0,
+
+	/* There is insuficient space to write the output
+	 */
+	LIBBDE_OUTPUT_ERROR_INSUFFICIENT_SPACE		= 1
+};
+
 /* The runtime error codes
  * to signify errors regarding runtime processing
  */
@@ -276,16 +287,5 @@ enum LIBBDE_RUNTIME_ERROR
 	LIBBDE_RUNTIME_ERROR_ABORT_REQUESTED		= 15
 };
 
-/* The output error codes
- */
-enum LIBBDE_OUTPUT_ERROR
-{
-	LIBBDE_OUTPUT_ERROR_GENERIC			= 0,
-
-	/* There is insuficient space to write the output
-	 */
-	LIBBDE_OUTPUT_ERROR_INSUFFICIENT_SPACE		= 1
-};
-
-#endif
+#endif /* !defined( _LIBBDE_ERROR_H ) */
 

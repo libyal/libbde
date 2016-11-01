@@ -1,5 +1,5 @@
 /*
- * Library support functions test program
+ * Library key_protector type testing program
  *
  * Copyright (C) 2011-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -20,40 +20,55 @@
  */
 
 #include <common.h>
+#include <file_stream.h>
+#include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
 
 #include "bde_test_libbde.h"
+#include "bde_test_libcerror.h"
 #include "bde_test_libcstring.h"
 #include "bde_test_macros.h"
+#include "bde_test_memory.h"
 #include "bde_test_unused.h"
 
-/* Tests the libbde_get_version function
+/* Tests the libbde_key_protector_free function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_get_version(
+int bde_test_key_protector_free(
      void )
 {
-	const char *version_string = NULL;
-	int result                 = 0;
+	libcerror_error_t *error = NULL;
+	int result               = 0;
 
-	version_string = libbde_get_version();
-
-	result = libcstring_narrow_string_compare(
-	          version_string,
-	          LIBBDE_VERSION_STRING,
-	          9 );
+	/* Test error cases
+	 */
+	result = libbde_key_protector_free(
+	          NULL,
+	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 0 );
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
 
 	return( 1 );
 
 on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
 	return( 0 );
 }
 
@@ -73,8 +88,8 @@ int main(
 	BDE_TEST_UNREFERENCED_PARAMETER( argv )
 
 	BDE_TEST_RUN(
-	 "libbde_get_version",
-	 bde_test_get_version );
+	 "libbde_key_protector_free",
+	 bde_test_key_protector_free );
 
 	return( EXIT_SUCCESS );
 
