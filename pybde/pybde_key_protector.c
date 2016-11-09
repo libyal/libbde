@@ -31,7 +31,6 @@
 #include "pybde_guid.h"
 #include "pybde_key_protector.h"
 #include "pybde_libcerror.h"
-#include "pybde_libcstring.h"
 #include "pybde_libbde.h"
 #include "pybde_python.h"
 #include "pybde_unused.h"

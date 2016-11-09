@@ -22,6 +22,7 @@
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
+#include <system_string.h>
 #include <types.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
@@ -35,7 +36,6 @@
 #include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
-#include "libbde_libcstring.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_libfguid.h"
 #include "libbde_libuna.h"
@@ -674,8 +674,8 @@ ssize_t libbde_metadata_read_header(
 	uint16_t encryption_method_copy   = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t filetime_string[ 32 ];
-	libcstring_system_character_t guid_string[ 48 ];
+	system_character_t filetime_string[ 32 ];
+	system_character_t guid_string[ 48 ];
 
 	libfdatetime_filetime_t *filetime = NULL;
 	libfguid_identifier_t *guid       = NULL;
@@ -855,7 +855,7 @@ ssize_t libbde_metadata_read_header(
 
 			goto on_error;
 		}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libfguid_identifier_copy_to_utf16_string(
 			  guid,
 			  (uint16_t *) guid_string,
@@ -882,7 +882,7 @@ ssize_t libbde_metadata_read_header(
 			goto on_error;
 		}
 		libcnotify_printf(
-		 "%s: volume identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+		 "%s: volume identifier\t\t\t\t: %" PRIs_SYSTEM "\n",
 		 function,
 		 guid_string );
 
@@ -950,7 +950,7 @@ ssize_t libbde_metadata_read_header(
 
 			goto on_error;
 		}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libfdatetime_filetime_copy_to_utf16_string(
 			  filetime,
 			  (uint16_t *) filetime_string,
@@ -977,7 +977,7 @@ ssize_t libbde_metadata_read_header(
 			goto on_error;
 		}
 		libcnotify_printf(
-		 "%s: creation time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 "%s: creation time\t\t\t\t: %" PRIs_SYSTEM " UTC\n",
 		 function,
 		 filetime_string );
 

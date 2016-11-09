@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCTHREADS_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
@@ -43,7 +42,6 @@ libbde_la_SOURCES = \
 	libbde_libcerror.h \
 	libbde_libclocale.h \
 	libbde_libcnotify.h \
-	libbde_libcstring.h \
 	libbde_libcthreads.h \
 	libbde_libfcache.h \
 	libbde_libfdata.h \
@@ -69,7 +67,6 @@ libbde_la_SOURCES = \
 	bde_volume.h
 
 libbde_la_LIBADD = \
-	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCDATA_LIBADD@ \

@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCTHREADS_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
@@ -53,20 +52,17 @@ check_PROGRAMS = \
 bde_test_error_SOURCES = \
 	bde_test_error.c \
 	bde_test_libbde.h \
-	bde_test_libcstring.h \
 	bde_test_macros.h \
 	bde_test_unused.h
 
 bde_test_error_LDADD = \
-	../libbde/libbde.la \
-	@LIBCSTRING_LIBADD@
+	../libbde/libbde.la
 
 bde_test_key_protector_SOURCES = \
 	bde_test_key_protector.c \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
 	bde_test_libclocale.h \
-	bde_test_libcstring.h \
 	bde_test_libcsystem.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
@@ -76,25 +72,21 @@ bde_test_key_protector_SOURCES = \
 bde_test_key_protector_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
 bde_test_notify_SOURCES = \
 	bde_test_libbde.h \
-	bde_test_libcstring.h \
 	bde_test_macros.h \
 	bde_test_notify.c \
 	bde_test_unused.h
 
 bde_test_notify_LDADD = \
-	../libbde/libbde.la \
-	@LIBCSTRING_LIBADD@
+	../libbde/libbde.la
 
 bde_test_open_close_SOURCES = \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
-	bde_test_libcstring.h \
 	bde_test_libcsystem.h \
 	bde_test_open_close.c \
 	bde_test_unused.h
@@ -102,13 +94,11 @@ bde_test_open_close_SOURCES = \
 bde_test_open_close_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
 bde_test_read_SOURCES = \
 	bde_test_libcerror.h \
-	bde_test_libcstring.h \
 	bde_test_libcsystem.h \
 	bde_test_libcthreads.h \
 	bde_test_libbde.h \
@@ -119,13 +109,11 @@ bde_test_read_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCTHREADS_LIBADD@ \
-	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
 bde_test_seek_SOURCES = \
 	bde_test_libcerror.h \
-	bde_test_libcstring.h \
 	bde_test_libcsystem.h \
 	bde_test_libbde.h \
 	bde_test_seek.c \
@@ -134,26 +122,24 @@ bde_test_seek_SOURCES = \
 bde_test_seek_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
 bde_test_support_SOURCES = \
 	bde_test_libbde.h \
-	bde_test_libcstring.h \
+	bde_test_libcerror.h \
 	bde_test_macros.h \
 	bde_test_support.c \
 	bde_test_unused.h
 
 bde_test_support_LDADD = \
 	../libbde/libbde.la \
-	@LIBCSTRING_LIBADD@
+	@LIBCERROR_LIBADD@
 
 bde_test_volume_SOURCES = \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
 	bde_test_libclocale.h \
-	bde_test_libcstring.h \
 	bde_test_libcsystem.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
@@ -164,8 +150,7 @@ bde_test_volume_SOURCES = \
 bde_test_volume_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
+	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
 MAINTAINERCLEANFILES = \

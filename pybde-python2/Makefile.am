@@ -8,7 +8,6 @@ if HAVE_PYTHON2
 AM_CFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
@@ -36,7 +35,6 @@ BUILT_SOURCES = \
 	pybde_libbfio.h \
 	pybde_libcerror.h \
 	pybde_libclocale.h \
-	pybde_libcstring.h \
 	pybde_libfguid.h \
 	pybde_python.h \
 	pybde_unused.h \
@@ -47,7 +45,6 @@ pyexec_LTLIBRARIES = pybde.la
 nodist_pybde_la_SOURCES = $(BUILT_SOURCES)
 
 pybde_la_LIBADD = \
-	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCDATA_LIBADD@ \

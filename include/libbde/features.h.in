@@ -24,7 +24,7 @@
 
 /* The libbde type support features
  */
-#if defined( HAVE_WIDE_CHARACTER_TYPE ) || @HAVE_WIDE_CHARACTER_TYPE@
+#if defined( WINAPI ) || @HAVE_WIDE_CHARACTER_TYPE@
 #define LIBBDE_HAVE_WIDE_CHARACTER_TYPE	1
 #endif
 

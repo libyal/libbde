@@ -22,13 +22,13 @@
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
+#include <system_string.h>
 #include <types.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
 #include "libbde_definitions.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
-#include "libbde_libcstring.h"
 #include "libbde_libfdatetime.h"
 #include "libbde_metadata_entry.h"
 
@@ -155,7 +155,7 @@ int libbde_aes_ccm_encrypted_key_read(
 	size_t value_data_size            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t filetime_string[ 32 ];
+	system_character_t filetime_string[ 32 ];
 
 	libfdatetime_filetime_t *filetime = NULL;
 	uint32_t value_32bit              = 0;
@@ -253,7 +253,7 @@ int libbde_aes_ccm_encrypted_key_read(
 
 			goto on_error;
 		}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libfdatetime_filetime_copy_to_utf16_string(
 			  filetime,
 			  (uint16_t *) filetime_string,
@@ -280,7 +280,7 @@ int libbde_aes_ccm_encrypted_key_read(
 			goto on_error;
 		}
 		libcnotify_printf(
-		 "%s: nonce time\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+		 "%s: nonce time\t\t\t\t: %" PRIs_SYSTEM " UTC\n",
 		 function,
 		 filetime_string );
 

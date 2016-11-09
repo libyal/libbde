@@ -29,7 +29,6 @@
 
 #include "bde_test_libbde.h"
 #include "bde_test_libcerror.h"
-#include "bde_test_libcstring.h"
 #include "bde_test_macros.h"
 #include "bde_test_memory.h"
 #include "bde_test_unused.h"
@@ -74,7 +73,7 @@ on_error:
 
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
      int argc BDE_TEST_ATTRIBUTE_UNUSED,
      wchar_t * const argv[] BDE_TEST_ATTRIBUTE_UNUSED )

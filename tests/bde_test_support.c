@@ -20,13 +20,16 @@
  */
 
 #include <common.h>
+#include <file_stream.h>
+#include <narrow_string.h>
+#include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
 
 #include "bde_test_libbde.h"
-#include "bde_test_libcstring.h"
+#include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 
@@ -41,7 +44,7 @@ int bde_test_get_version(
 
 	version_string = libbde_get_version();
 
-	result = libcstring_narrow_string_compare(
+	result = narrow_string_compare(
 	          version_string,
 	          LIBBDE_VERSION_STRING,
 	          9 );
@@ -57,9 +60,133 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libbde_get_access_flags_read function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_get_access_flags_read(
+     void )
+{
+	int access_flags = 0;
+
+	access_flags = libbde_get_access_flags_read();
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "access_flags",
+	 access_flags,
+	 LIBBDE_ACCESS_FLAG_READ );
+
+	return( 1 );
+
+on_error:
+	return( 0 );
+}
+
+/* Tests the libbde_get_codepage function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_get_codepage(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int codepage             = 0;
+	int result               = 0;
+
+	result = libbde_get_codepage(
+	          &codepage,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        BDE_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libbde_get_codepage(
+	          NULL,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libbde_set_codepage function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_set_codepage(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	result = libbde_set_codepage(
+	          0,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        BDE_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libbde_set_codepage(
+	          -1,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
      int argc BDE_TEST_ATTRIBUTE_UNUSED,
      wchar_t * const argv[] BDE_TEST_ATTRIBUTE_UNUSED )

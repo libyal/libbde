@@ -28,7 +28,6 @@
 #include "pybde_integer.h"
 #include "pybde_libbfio.h"
 #include "pybde_libcerror.h"
-#include "pybde_libcstring.h"
 #include "pybde_python.h"
 
 /* Creates a file object IO handle

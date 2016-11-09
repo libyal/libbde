@@ -21,7 +21,10 @@
 
 #include <common.h>
 #include <memory.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include <stdio.h>
 
@@ -67,7 +70,6 @@
 #include "bdetools_libcerror.h"
 #include "bdetools_libclocale.h"
 #include "bdetools_libcnotify.h"
-#include "bdetools_libcstring.h"
 #include "bdetools_libcsystem.h"
 #include "mount_handle.h"
 
@@ -197,11 +199,11 @@ int bdemount_fuse_open(
 
 		goto on_error;
 	}
-	path_length = libcstring_narrow_string_length(
+	path_length = narrow_string_length(
 	               path );
 
 	if( ( path_length != bdemount_fuse_path_length )
-	 || ( libcstring_narrow_string_compare(
+	 || ( narrow_string_compare(
 	       path,
 	       bdemount_fuse_path,
 	       bdemount_fuse_path_length ) != 0 ) )
@@ -298,11 +300,11 @@ int bdemount_fuse_read(
 
 		goto on_error;
 	}
-	path_length = libcstring_narrow_string_length(
+	path_length = narrow_string_length(
 	               path );
 
 	if( ( path_length != bdemount_fuse_path_length )
-	 || ( libcstring_narrow_string_compare(
+	 || ( narrow_string_compare(
 	       path,
 	       bdemount_fuse_path,
 	       bdemount_fuse_path_length ) != 0 ) )
@@ -643,7 +645,7 @@ int bdemount_fuse_readdir(
 
 		goto on_error;
 	}
-	path_length = libcstring_narrow_string_length(
+	path_length = narrow_string_length(
 	               path );
 
 	if( ( path_length != 1 )
@@ -818,7 +820,7 @@ int bdemount_fuse_getattr(
 
 		goto on_error;
 	}
-	path_length = libcstring_narrow_string_length(
+	path_length = narrow_string_length(
 	               path );
 
 	if( path_length == 1 )
@@ -832,7 +834,7 @@ int bdemount_fuse_getattr(
 	}
 	else if( path_length == bdemount_fuse_path_length )
 	{
-		if( libcstring_narrow_string_compare(
+		if( narrow_string_compare(
 		     path,
 		     bdemount_fuse_path,
 		     bdemount_fuse_path_length ) == 0 )
@@ -1033,7 +1035,7 @@ int __stdcall bdemount_dokan_CreateFile(
 
 		goto on_error;
 	}
-	path_length = libcstring_wide_string_length(
+	path_length = wide_string_length(
 	               path );
 
 	if( path_length == 1 )
@@ -1056,7 +1058,7 @@ int __stdcall bdemount_dokan_CreateFile(
 	else
 	{
 		if( ( path_length != bdemount_dokan_path_length )
-		 || ( libcstring_wide_string_compare(
+		 || ( wide_string_compare(
 		       path,
 		       bdemount_dokan_path,
 		       bdemount_dokan_path_length ) != 0 ) )
@@ -1114,7 +1116,7 @@ int __stdcall bdemount_dokan_OpenDirectory(
 
 		goto on_error;
 	}
-	path_length = libcstring_wide_string_length(
+	path_length = wide_string_length(
 	               path );
 
 	if( ( path_length != 1 )
@@ -1242,11 +1244,11 @@ int __stdcall bdemount_dokan_ReadFile(
 
 		goto on_error;
 	}
-	path_length = libcstring_wide_string_length(
+	path_length = wide_string_length(
 	               path );
 
 	if( ( path_length != bdemount_dokan_path_length )
-	 || ( libcstring_wide_string_compare(
+	 || ( wide_string_compare(
 	       path,
 	       bdemount_dokan_path,
 	       bdemount_dokan_path_length ) != 0 ) )
@@ -1492,7 +1494,7 @@ int bdemount_dokan_filldir(
 
 		return( -1 );
 	}
-	if( libcstring_wide_string_copy(
+	if( wide_string_copy(
 	     find_data->cFileName,
 	     name,
 	     name_size ) == NULL )
@@ -1508,7 +1510,7 @@ int bdemount_dokan_filldir(
 	}
 	if( name_size <= (size_t) 14 )
 	{
-		if( libcstring_wide_string_copy(
+		if( wide_string_copy(
 		     find_data->cAlternateFileName,
 		     name,
 		     name_size ) == NULL )
@@ -1586,7 +1588,7 @@ int __stdcall bdemount_dokan_FindFiles(
 
 		goto on_error;
 	}
-	path_length = libcstring_wide_string_length(
+	path_length = wide_string_length(
 	               path );
 
 	if( ( path_length != 1 )
@@ -1786,7 +1788,7 @@ int __stdcall bdemount_dokan_GetFileInformation(
 
 		goto on_error;
 	}
-	path_length = libcstring_wide_string_length(
+	path_length = wide_string_length(
 	               path );
 
 	if( path_length == 1 )
@@ -1811,7 +1813,7 @@ int __stdcall bdemount_dokan_GetFileInformation(
 	else
 	{
 		if( ( path_length != bdemount_dokan_path_length )
-		 || ( libcstring_wide_string_compare(
+		 || ( wide_string_compare(
 		       path,
 		       bdemount_dokan_path,
 		       bdemount_dokan_path_length ) != 0 ) )
@@ -2005,32 +2007,32 @@ int __stdcall bdemount_dokan_Unmount(
 
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain( int argc, wchar_t * const argv[] )
 #else
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_error_t *error                                      = NULL;
-	libcstring_system_character_t *mount_point                 = NULL;
-	libcstring_system_character_t *option_extended_options     = NULL;
-	libcstring_system_character_t *option_keys                 = NULL;
-	libcstring_system_character_t *option_password             = NULL;
-	libcstring_system_character_t *option_recovery_password    = NULL;
-	libcstring_system_character_t *option_startup_key_filename = NULL;
-	libcstring_system_character_t *option_volume_offset        = NULL;
-	libcstring_system_character_t *source                      = NULL;
-	char *program                                              = "bdemount";
-	libcstring_system_integer_t option                         = 0;
-	int result                                                 = 0;
-	int verbose                                                = 0;
+	libbde_error_t *error                           = NULL;
+	system_character_t *mount_point                 = NULL;
+	system_character_t *option_extended_options     = NULL;
+	system_character_t *option_keys                 = NULL;
+	system_character_t *option_password             = NULL;
+	system_character_t *option_recovery_password    = NULL;
+	system_character_t *option_startup_key_filename = NULL;
+	system_character_t *option_volume_offset        = NULL;
+	system_character_t *source                      = NULL;
+	char *program                                   = "bdemount";
+	system_integer_t option                         = 0;
+	int result                                      = 0;
+	int verbose                                     = 0;
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations bdemount_fuse_operations;
 
-	struct fuse_args bdemount_fuse_arguments                   = FUSE_ARGS_INIT(0, NULL);
-	struct fuse_chan *bdemount_fuse_channel                    = NULL;
-	struct fuse *bdemount_fuse_handle                          = NULL;
+	struct fuse_args bdemount_fuse_arguments        = FUSE_ARGS_INIT(0, NULL);
+	struct fuse_chan *bdemount_fuse_channel         = NULL;
+	struct fuse *bdemount_fuse_handle               = NULL;
 
 #elif defined( HAVE_LIBDOKAN )
 	DOKAN_OPERATIONS bdemount_dokan_operations;
@@ -2070,15 +2072,15 @@ int main( int argc, char * const argv[] )
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "hk:o:p:r:s:vVX:" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _SYSTEM_STRING( "hk:o:p:r:s:vVX:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
-			case (libcstring_system_integer_t) '?':
+			case (system_integer_t) '?':
 			default:
 				fprintf(
 				 stderr,
-				 "Invalid argument: %" PRIs_LIBCSTRING_SYSTEM "\n",
+				 "Invalid argument: %" PRIs_SYSTEM "\n",
 				 argv[ optind - 1 ] );
 
 				usage_fprint(
@@ -2086,49 +2088,49 @@ int main( int argc, char * const argv[] )
 
 				return( EXIT_FAILURE );
 
-			case (libcstring_system_integer_t) 'h':
+			case (system_integer_t) 'h':
 				usage_fprint(
 				 stdout );
 
 				return( EXIT_SUCCESS );
 
-			case (libcstring_system_integer_t) 'k':
+			case (system_integer_t) 'k':
 				option_keys = optarg;
 
 				break;
 
-			case (libcstring_system_integer_t) 'o':
+			case (system_integer_t) 'o':
 				option_volume_offset = optarg;
 
 				break;
 
-			case (libcstring_system_integer_t) 'p':
+			case (system_integer_t) 'p':
 				option_password = optarg;
 
 				break;
 
-			case (libcstring_system_integer_t) 'r':
+			case (system_integer_t) 'r':
 				option_recovery_password = optarg;
 
 				break;
 
-			case (libcstring_system_integer_t) 's':
+			case (system_integer_t) 's':
 				option_startup_key_filename = optarg;
 
 				break;
 
-			case (libcstring_system_integer_t) 'v':
+			case (system_integer_t) 'v':
 				verbose = 1;
 
 				break;
 
-			case (libcstring_system_integer_t) 'V':
+			case (system_integer_t) 'V':
 				bdeoutput_copyright_fprint(
 				 stdout );
 
 				return( EXIT_SUCCESS );
 
-			case (libcstring_system_integer_t) 'X':
+			case (system_integer_t) 'X':
 				option_extended_options = optarg;
 
 				break;
@@ -2257,7 +2259,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open: %" PRIs_LIBCSTRING_SYSTEM ".\n",
+		 "Unable to open: %" PRIs_SYSTEM ".\n",
 		 source );
 
 		goto on_error;
