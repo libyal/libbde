@@ -23,13 +23,15 @@
 #include <byte_stream.h>
 #include <file_stream.h>
 #include <memory.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
 #include "bdetools_libcerror.h"
 #include "bdetools_libcsplit.h"
-#include "bdetools_libcstring.h"
 #include "bdetools_libcsystem.h"
 #include "bdetools_libfdatetime.h"
 #include "bdetools_libfguid.h"
@@ -262,12 +264,12 @@ int info_handle_signal_abort(
  */
 int info_handle_set_keys(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *string,
+     const system_character_t *string,
      libcerror_error_t **error )
 {
 	uint8_t key_data[ 64 ];
 
-	libcstring_system_character_t *string_segment    = NULL;
+	system_character_t *string_segment               = NULL;
 	static char *function                            = "info_handle_set_keys";
 	size_t full_volume_encryption_key_size           = 0;
 	size_t string_length                             = 0;
@@ -276,7 +278,7 @@ int info_handle_set_keys(
 	uint32_t base16_variant                          = 0;
 	int number_of_segments                           = 0;
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	libcsplit_wide_split_string_t *string_elements   = NULL;
 #else
 	libcsplit_narrow_split_string_t *string_elements = NULL;
@@ -293,10 +295,10 @@ int info_handle_set_keys(
 
 		return( -1 );
 	}
-	string_length = libcstring_system_string_length(
+	string_length = system_string_length(
 	                 string );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libcsplit_wide_string_split(
 	     string,
 	     string_length + 1,
@@ -321,7 +323,7 @@ int info_handle_set_keys(
 
 		goto on_error;
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libcsplit_wide_split_string_get_number_of_segments(
 	     string_elements,
 	     &number_of_segments,
@@ -370,7 +372,7 @@ int info_handle_set_keys(
 	}
 	base16_variant = LIBUNA_BASE16_VARIANT_RFC4648;
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( _BYTE_STREAM_HOST_IS_ENDIAN_BIG )
 	{
 		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
@@ -380,7 +382,7 @@ int info_handle_set_keys(
 		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
 	}
 #endif
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libcsplit_wide_split_string_get_segment_by_index(
 	     string_elements,
 	     0,
@@ -497,7 +499,7 @@ int info_handle_set_keys(
 	}
 	if( number_of_segments > 1 )
 	{
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( libcsplit_wide_split_string_get_segment_by_index(
 		     string_elements,
 		     1,
@@ -603,7 +605,7 @@ int info_handle_set_keys(
 
 		goto on_error;
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libcsplit_wide_split_string_free(
 	     &string_elements,
 	     error ) != 1 )
@@ -627,7 +629,7 @@ int info_handle_set_keys(
 on_error:
 	if( string_elements != NULL )
 	{
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		libcsplit_wide_split_string_free(
 		 &string_elements,
 		 NULL );
@@ -650,7 +652,7 @@ on_error:
  */
 int info_handle_set_password(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *string,
+     const system_character_t *string,
      libcerror_error_t **error )
 {
 	static char *function = "info_handle_set_password";
@@ -667,10 +669,10 @@ int info_handle_set_password(
 
 		return( -1 );
 	}
-	string_length = libcstring_system_string_length(
+	string_length = system_string_length(
 	                 string );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libbde_volume_set_utf16_password(
 	     info_handle->input_volume,
 	     (uint16_t *) string,
@@ -701,7 +703,7 @@ int info_handle_set_password(
  */
 int info_handle_set_recovery_password(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *string,
+     const system_character_t *string,
      libcerror_error_t **error )
 {
 	static char *function = "info_handle_set_recovery_password";
@@ -718,10 +720,10 @@ int info_handle_set_recovery_password(
 
 		return( -1 );
 	}
-	string_length = libcstring_system_string_length(
+	string_length = system_string_length(
 	                 string );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libbde_volume_set_utf16_recovery_password(
 	     info_handle->input_volume,
 	     (uint16_t *) string,
@@ -752,7 +754,7 @@ int info_handle_set_recovery_password(
  */
 int info_handle_read_startup_key(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *filename,
+     const system_character_t *filename,
      libcerror_error_t **error )
 {
 	static char *function = "info_handle_read_startup_key";
@@ -768,7 +770,7 @@ int info_handle_read_startup_key(
 
 		return( -1 );
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libbde_volume_read_startup_key_wide(
 	     info_handle->input_volume,
 	     filename,
@@ -797,7 +799,7 @@ int info_handle_read_startup_key(
  */
 int info_handle_set_volume_offset(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *string,
+     const system_character_t *string,
      libcerror_error_t **error )
 {
 	static char *function = "info_handle_set_volume_offset";
@@ -815,7 +817,7 @@ int info_handle_set_volume_offset(
 
 		return( -1 );
 	}
-	string_length = libcstring_system_string_length(
+	string_length = system_string_length(
 	                 string );
 
 	if( libcsystem_string_decimal_copy_to_64_bit(
@@ -843,7 +845,7 @@ int info_handle_set_volume_offset(
  */
 int info_handle_open_input(
      info_handle_t *info_handle,
-     const libcstring_system_character_t *filename,
+     const system_character_t *filename,
      libcerror_error_t **error )
 {
 	static char *function  = "info_handle_open_input";
@@ -861,10 +863,10 @@ int info_handle_open_input(
 
 		return( -1 );
 	}
-	filename_length = libcstring_system_string_length(
+	filename_length = system_string_length(
 	                   filename );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libbfio_file_range_set_name_wide(
 	     info_handle->input_file_io_handle,
 	     filename,
@@ -1006,21 +1008,21 @@ int info_handle_volume_fprint(
 {
 	uint8_t guid_buffer[ 16 ];
 
-	libcstring_system_character_t filetime_string[ 32 ];
-	libcstring_system_character_t guid_string[ 48 ];
+	system_character_t filetime_string[ 32 ];
+	system_character_t guid_string[ 48 ];
 
-	libbde_key_protector_t *key_protector       = NULL;
-	libcstring_system_character_t *value_string = NULL;
-	libfdatetime_filetime_t *filetime           = NULL;
-	libfguid_identifier_t *guid                 = NULL;
-	static char *function                       = "bdeinfo_volume_info_fprint";
-	size_t value_string_size                    = 0;
-	uint64_t value_64bit                        = 0;
-	uint16_t encryption_method                  = 0;
-	uint16_t key_protector_type                 = 0;
-	int key_protector_index                     = 0;
-	int number_of_key_protectors                = 0;
-	int result                                  = 0;
+	libbde_key_protector_t *key_protector = NULL;
+	libfdatetime_filetime_t *filetime     = NULL;
+	libfguid_identifier_t *guid           = NULL;
+	system_character_t *value_string      = NULL;
+	static char *function                 = "bdeinfo_volume_info_fprint";
+	size_t value_string_size              = 0;
+	uint64_t value_64bit                  = 0;
+	uint16_t encryption_method            = 0;
+	uint16_t key_protector_type           = 0;
+	int key_protector_index               = 0;
+	int number_of_key_protectors          = 0;
+	int result                            = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1168,7 +1170,7 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libfguid_identifier_copy_to_utf16_string(
 		  guid,
 		  (uint16_t *) guid_string,
@@ -1196,7 +1198,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tVolume identifier\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+	 "\tVolume identifier\t\t: %" PRIs_SYSTEM "\n",
 	 guid_string );
 
 	if( libbde_volume_get_creation_time(
@@ -1227,7 +1229,7 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libfdatetime_filetime_copy_to_utf16_string(
 		  filetime,
 		  (uint16_t *) filetime_string,
@@ -1255,10 +1257,10 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tCreation time\t\t\t: %" PRIs_LIBCSTRING_SYSTEM " UTC\n",
+	 "\tCreation time\t\t\t: %" PRIs_SYSTEM " UTC\n",
 	 filetime_string );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libbde_volume_get_utf16_description_size(
 	          info_handle->input_volume,
 	          &value_string_size,
@@ -1283,7 +1285,7 @@ int info_handle_volume_fprint(
 	if( value_string_size > 0 )
 	{
 		if( ( value_string_size > (size_t) SSIZE_MAX )
-		 || ( ( sizeof( libcstring_system_character_t ) * value_string_size ) > (size_t) SSIZE_MAX ) )
+		 || ( ( sizeof( system_character_t ) * value_string_size ) > (size_t) SSIZE_MAX ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -1294,7 +1296,7 @@ int info_handle_volume_fprint(
 
 			goto on_error;
 		}
-		value_string = libcstring_system_string_allocate(
+		value_string = system_string_allocate(
 		                value_string_size );
 
 		if( value_string == NULL )
@@ -1308,7 +1310,7 @@ int info_handle_volume_fprint(
 
 			goto on_error;
 		}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libbde_volume_get_utf16_description(
 		          info_handle->input_volume,
 		          (uint16_t *) value_string,
@@ -1334,7 +1336,7 @@ int info_handle_volume_fprint(
 		}
 		fprintf(
 		 info_handle->notify_stream,
-		 "\tDescription\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+		 "\tDescription\t\t\t: %" PRIs_SYSTEM "\n",
 		 value_string );
 
 		memory_free(
@@ -1424,7 +1426,7 @@ int info_handle_volume_fprint(
 
 				goto on_error;
 			}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libfguid_identifier_copy_to_utf16_string(
 				  guid,
 				  (uint16_t *) guid_string,
@@ -1452,7 +1454,7 @@ int info_handle_volume_fprint(
 			}
 			fprintf(
 			 info_handle->notify_stream,
-			 "\tIdentifier\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "\tIdentifier\t\t\t: %" PRIs_SYSTEM "\n",
 			 guid_string );
 
 			if( libbde_key_protector_get_type(

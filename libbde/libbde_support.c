@@ -21,13 +21,14 @@
 
 #include <common.h>
 #include <memory.h>
+#include <narrow_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "libbde_definitions.h"
 #include "libbde_io_handle.h"
 #include "libbde_libcerror.h"
 #include "libbde_libclocale.h"
-#include "libbde_libcstring.h"
 #include "libbde_support.h"
 
 #if !defined( HAVE_LOCAL_LIBBDE )
@@ -125,7 +126,7 @@ int libbde_check_volume_signature(
 
 		return( -1 );
 	}
-	filename_length = libcstring_narrow_string_length(
+	filename_length = narrow_string_length(
 	                   filename );
 
 	if( filename_length == 0 )
@@ -232,7 +233,7 @@ int libbde_check_volume_signature_wide(
 
 		return( -1 );
 	}
-	filename_length = libcstring_wide_string_length(
+	filename_length = wide_string_length(
 	                   filename );
 
 	if( filename_length == 0 )

@@ -27,7 +27,6 @@
 
 #include "pybde_libbfio.h"
 #include "pybde_libcerror.h"
-#include "pybde_libcstring.h"
 #include "pybde_python.h"
 
 #if defined( __cplusplus )

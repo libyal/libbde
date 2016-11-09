@@ -20,6 +20,10 @@
  */
 
 #include <common.h>
+#include <narrow_string.h>
+#include <system_string.h>
+#include <types.h>
+#include <wide_string.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
@@ -29,7 +33,6 @@
 
 #include "bde_test_libbde.h"
 #include "bde_test_libcerror.h"
-#include "bde_test_libcstring.h"
 #include "bde_test_libcsystem.h"
 #include "bde_test_libcthreads.h"
 #include "bde_test_unused.h"
@@ -853,43 +856,43 @@ on_error:
 
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain( int argc, wchar_t * const argv[] )
 #else
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_volume_t *volume                                 = NULL;
-	libcerror_error_t *error                                = NULL;
-	libcstring_system_character_t *option_password          = NULL;
-	libcstring_system_character_t *option_recovery_password = NULL;
-	libcstring_system_character_t *source                   = NULL;
-	libcstring_system_integer_t option                      = 0;
-	size64_t volume_size                                    = 0;
-	size_t string_length                                    = 0;
+	libbde_volume_t *volume                      = NULL;
+	libcerror_error_t *error                     = NULL;
+	system_character_t *option_password          = NULL;
+	system_character_t *option_recovery_password = NULL;
+	system_character_t *source                   = NULL;
+	system_integer_t option                      = 0;
+	size64_t volume_size                         = 0;
+	size_t string_length                         = 0;
 
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _LIBCSTRING_SYSTEM_STRING( "p:r:" ) ) ) != (libcstring_system_integer_t) -1 )
+	                   _SYSTEM_STRING( "p:r:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
-			case (libcstring_system_integer_t) '?':
+			case (system_integer_t) '?':
 			default:
 				fprintf(
 				 stderr,
-				 "Invalid argument: %" PRIs_LIBCSTRING_SYSTEM ".\n",
+				 "Invalid argument: %" PRIs_SYSTEM ".\n",
 				 argv[ optind - 1 ] );
 
 				return( EXIT_FAILURE );
 
-			case (libcstring_system_integer_t) 'p':
+			case (system_integer_t) 'p':
 				option_password = optarg;
 
 				break;
 
-			case (libcstring_system_integer_t) 'r':
+			case (system_integer_t) 'r':
 				option_recovery_password = optarg;
 
 				break;
@@ -926,10 +929,10 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_password != NULL )
 	{
-		string_length = libcstring_system_string_length(
+		string_length = system_string_length(
 		                 option_password );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( libbde_volume_set_utf16_password(
 		     volume,
 		     (uint16_t *) option_password,
@@ -952,10 +955,10 @@ int main( int argc, char * const argv[] )
 	}
 	if( option_recovery_password != NULL )
 	{
-		string_length = libcstring_system_string_length(
+		string_length = system_string_length(
 		                 option_recovery_password );
 
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( libbde_volume_set_utf16_recovery_password(
 		     volume,
 		     (uint16_t *) option_recovery_password,
@@ -976,7 +979,7 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	if( libbde_volume_open_wide(
 	     volume,
 	     source,

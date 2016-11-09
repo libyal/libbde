@@ -30,7 +30,6 @@
 #include "bdetools_libcerror.h"
 #include "bdetools_libcnotify.h"
 #include "bdetools_libclocale.h"
-#include "bdetools_libcstring.h"
 #include "bdetools_libcsystem.h"
 #include "bdetools_libfdatetime.h"
 #include "bdetools_libuna.h"

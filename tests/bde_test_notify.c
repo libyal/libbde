@@ -20,13 +20,14 @@
  */
 
 #include <common.h>
+#include <file_stream.h>
+#include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
 #endif
 
 #include "bde_test_libbde.h"
-#include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 
@@ -90,7 +91,7 @@ int bde_test_notify_stream_close(
 
 /* The main program
  */
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 int wmain(
      int argc BDE_TEST_ATTRIBUTE_UNUSED,
      wchar_t * const argv[] BDE_TEST_ATTRIBUTE_UNUSED )

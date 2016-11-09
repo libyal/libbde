@@ -2,7 +2,6 @@ if HAVE_PYTHON
 AM_CFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
@@ -30,14 +29,12 @@ pybde_la_SOURCES = \
 	pybde_libbfio.h \
 	pybde_libcerror.h \
 	pybde_libclocale.h \
-	pybde_libcstring.h \
 	pybde_libfguid.h \
 	pybde_python.h \
 	pybde_unused.h \
 	pybde_volume.c pybde_volume.h
 
 pybde_la_LIBADD = \
-	@LIBCSTRING_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCDATA_LIBADD@ \

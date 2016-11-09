@@ -1,7 +1,6 @@
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
-	@LIBCSTRING_CPPFLAGS@ \
 	@LIBCERROR_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
@@ -33,7 +32,6 @@ bdeinfo_SOURCES = \
 	bdetools_libclocale.h \
 	bdetools_libcnotify.h \
 	bdetools_libcsplit.h \
-	bdetools_libcstring.h \
 	bdetools_libcsystem.h \
 	bdetools_libfdatetime.h \
 	bdetools_libfguid.h \
@@ -54,7 +52,6 @@ bdeinfo_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
 	@LIBINTL@
 
 bdemount_SOURCES = \
@@ -66,7 +63,6 @@ bdemount_SOURCES = \
 	bdetools_libclocale.h \
 	bdetools_libcnotify.h \
 	bdetools_libcsplit.h \
-	bdetools_libcstring.h \
 	bdetools_libcsystem.h \
 	mount_handle.c mount_handle.h
 
@@ -83,7 +79,6 @@ bdemount_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
-	@LIBCSTRING_LIBADD@ \
 	@LIBINTL@
 
 MAINTAINERCLEANFILES = \

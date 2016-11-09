@@ -22,6 +22,7 @@
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
+#include <system_string.h>
 #include <types.h>
 
 #include "libbde_definitions.h"
@@ -30,7 +31,6 @@
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
-#include "libbde_libcstring.h"
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_libfguid.h"
@@ -251,7 +251,7 @@ int libbde_io_handle_read_volume_header(
 	uint64_t total_number_of_sectors = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t guid_string[ 48 ];
+	system_character_t guid_string[ 48 ];
 
 	libfguid_identifier_t *guid      = NULL;
 	uint64_t value_64bit             = 0;
@@ -715,7 +715,7 @@ int libbde_io_handle_read_volume_header(
 
 				goto on_error;
 			}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libfguid_identifier_copy_to_utf16_string(
 				  guid,
 				  (uint16_t *) guid_string,
@@ -742,7 +742,7 @@ int libbde_io_handle_read_volume_header(
 				goto on_error;
 			}
 			libcnotify_printf(
-			 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "%s: identifier\t\t\t\t: %" PRIs_SYSTEM "\n",
 			 function,
 			 guid_string );
 
@@ -799,7 +799,7 @@ int libbde_io_handle_read_volume_header(
 
 				goto on_error;
 			}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libfguid_identifier_copy_to_utf16_string(
 				  guid,
 				  (uint16_t *) guid_string,
@@ -826,7 +826,7 @@ int libbde_io_handle_read_volume_header(
 				goto on_error;
 			}
 			libcnotify_printf(
-			 "%s: identifier\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "%s: identifier\t\t\t\t: %" PRIs_SYSTEM "\n",
 			 function,
 			 guid_string );
 

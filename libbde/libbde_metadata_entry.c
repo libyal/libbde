@@ -22,7 +22,10 @@
 #include <common.h>
 #include <byte_stream.h>
 #include <memory.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
@@ -332,12 +335,12 @@ int libbde_metadata_entry_read_string(
      libbde_metadata_entry_t *metadata_entry,
      libcerror_error_t **error )
 {
-	static char *function                       = "libbde_metadata_entry_read_string";
+	static char *function            = "libbde_metadata_entry_read_string";
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libcstring_system_character_t *value_string = NULL;
-	size_t value_string_size                    = 0;
-	int result                                  = 0;
+	system_character_t *value_string = NULL;
+	size_t value_string_size         = 0;
+	int result                       = 0;
 #endif
 
 	if( metadata_entry == NULL )
@@ -366,7 +369,7 @@ int libbde_metadata_entry_read_string(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libuna_utf16_string_size_from_utf16_stream(
 			  metadata_entry->value_data,
 			  (size_t) metadata_entry->value_data_size,
@@ -395,7 +398,7 @@ int libbde_metadata_entry_read_string(
 		if( value_string_size > 0 )
 		{
 			if( ( value_string_size > (size_t) SSIZE_MAX )
-			 || ( ( sizeof( libcstring_system_character_t ) * value_string_size )  > (size_t) SSIZE_MAX ) )
+			 || ( ( sizeof( system_character_t ) * value_string_size )  > (size_t) SSIZE_MAX ) )
 			{
 				libcerror_error_set(
 				 error,
@@ -406,7 +409,7 @@ int libbde_metadata_entry_read_string(
 
 				return( -1 );
 			}
-			value_string = libcstring_system_string_allocate(
+			value_string = system_string_allocate(
 					value_string_size );
 
 			if( value_string == NULL )
@@ -420,7 +423,7 @@ int libbde_metadata_entry_read_string(
 
 				return( -1 );
 			}
-#if defined( LIBCSTRING_HAVE_WIDE_SYSTEM_CHARACTER )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libuna_utf16_string_copy_from_utf16_stream(
 				  (libuna_utf16_character_t *) value_string,
 				  value_string_size,
@@ -452,7 +455,7 @@ int libbde_metadata_entry_read_string(
 				return( -1 );
 			}
 			libcnotify_printf(
-			 "%s: string\t\t\t\t: %" PRIs_LIBCSTRING_SYSTEM "\n",
+			 "%s: string\t\t\t\t: %" PRIs_SYSTEM "\n",
 			 function,
 			 value_string );
 
