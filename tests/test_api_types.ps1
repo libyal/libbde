@@ -10,7 +10,7 @@ $TestPrefix = Split-Path -path ${Pwd}.Path -parent
 $TestPrefix = Split-Path -path ${TestPrefix} -leaf
 $TestPrefix = ${TestPrefix}.Substring(3)
 
-$TestTypes = "aes_ccm_encrypted_key encryption_context io_handle key key_protector metadata metadata_entry password_key_data sector_data stretch_key volume_master_key"
+$TestTypes = "aes_ccm_encrypted_key io_handle key key_protector metadata metadata_entry sector_data stretch_key volume_master_key"
 $TestTypesWithInput = "volume"
 
 $TestToolDirectory = "..\msvscpp\Release"

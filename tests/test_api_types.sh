@@ -11,9 +11,9 @@ TEST_PREFIX=`dirname ${PWD}`;
 TEST_PREFIX=`basename ${TEST_PREFIX} | sed 's/^lib\([^-]*\).*$/\1/'`;
 
 TEST_PROFILE="lib${TEST_PREFIX}";
-TEST_TYPES="aes_ccm_encrypted_key encryption_context io_handle key key_protector metadata metadata_entry password_key_data sector_data stretch_key volume_master_key";
+TEST_TYPES="aes_ccm_encrypted_key io_handle key key_protector metadata metadata_entry sector_data stretch_key volume_master_key";
 TEST_TYPES_WITH_INPUT="volume";
-OPTION_SETS="";
+OPTION_SETS="password recovery_password";
 
 TEST_TOOL_DIRECTORY=".";
 INPUT_DIRECTORY="input";

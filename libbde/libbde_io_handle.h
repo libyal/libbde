@@ -35,6 +35,10 @@
 extern "C" {
 #endif
 
+extern const uint8_t bde_boot_entry_point_vista[ 3 ];
+extern const uint8_t bde_boot_entry_point_win7[ 3 ];
+extern const uint8_t bde_identifier[ 16 ];
+
 extern const char* bde_signature;
 
 typedef struct libbde_io_handle libbde_io_handle_t;

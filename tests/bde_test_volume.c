@@ -257,6 +257,7 @@ int bde_test_volume_get_wide_source(
 {
 	static char *function   = "bde_test_volume_get_wide_source";
 	size_t source_length    = 0;
+	size_t string_length    = 0;
 	size_t wide_source_size = 0;
 
 #if !defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -452,9 +453,12 @@ int bde_test_volume_get_wide_source(
 int bde_test_volume_open_source(
      libbde_volume_t **volume,
      const system_character_t *source,
+     const system_character_t *password,
+     const system_character_t *recovery_password,
      libcerror_error_t **error )
 {
 	static char *function = "bde_test_volume_open_source";
+	size_t string_length  = 0;
 	int result            = 0;
 
 	if( volume == NULL )
@@ -491,6 +495,66 @@ int bde_test_volume_open_source(
 		 function );
 
 		goto on_error;
+	}
+	if( password != NULL )
+	{
+		string_length = system_string_length(
+		                 password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_password(
+		          *volume,
+		          (uint16_t *) password,
+		          string_length,
+		          error );
+#else
+		result = libbde_volume_set_utf8_password(
+		          *volume,
+		          (uint8_t *) password,
+		          string_length,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set password.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( recovery_password != NULL )
+	{
+		string_length = system_string_length(
+		                 recovery_password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_recovery_password(
+		          *volume,
+		          (uint16_t *) recovery_password,
+		          string_length,
+		          error );
+#else
+		result = libbde_volume_set_utf8_recovery_password(
+		          *volume,
+		          (uint8_t *) recovery_password,
+		          string_length,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set recovery password.",
+			 function );
+
+			goto on_error;
+		}
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libbde_volume_open_wide(
@@ -815,12 +879,15 @@ on_error:
  * Returns 1 if successful or 0 if not
  */
 int bde_test_volume_open(
-     const system_character_t *source )
+     const system_character_t *source,
+     const system_character_t *password,
+     const system_character_t *recovery_password )
 {
 	char narrow_source[ 256 ];
 
 	libbde_volume_t *volume  = NULL;
 	libcerror_error_t *error = NULL;
+	size_t string_length     = 0;
 	int result               = 0;
 
 	/* Initialize test
@@ -857,6 +924,60 @@ int bde_test_volume_open(
          "error",
          error );
 
+	if( password != NULL )
+	{
+		string_length = system_string_length(
+		                 password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_password(
+		          volume,
+		          (uint16_t *) password,
+		          string_length,
+		          &error );
+#else
+		result = libbde_volume_set_utf8_password(
+		          volume,
+		          (uint8_t *) password,
+		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+        	 error );
+	}
+	if( recovery_password != NULL )
+	{
+		string_length = system_string_length(
+		                 recovery_password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_recovery_password(
+		          volume,
+		          (uint16_t *) recovery_password,
+		          string_length,
+		          &error );
+#else
+		result = libbde_volume_set_utf8_recovery_password(
+		          volume,
+		          (uint8_t *) recovery_password,
+		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+        	 error );
+	}
 	/* Test open
 	 */
 	result = libbde_volume_open(
@@ -936,12 +1057,15 @@ on_error:
  * Returns 1 if successful or 0 if not
  */
 int bde_test_volume_open_wide(
-     const system_character_t *source )
+     const system_character_t *source,
+     const system_character_t *password,
+     const system_character_t *recovery_password )
 {
 	wchar_t wide_source[ 256 ];
 
 	libbde_volume_t *volume  = NULL;
 	libcerror_error_t *error = NULL;
+	size_t string_length     = 0;
 	int result               = 0;
 
 	/* Initialize test
@@ -978,6 +1102,60 @@ int bde_test_volume_open_wide(
          "error",
          error );
 
+	if( password != NULL )
+	{
+		string_length = system_string_length(
+		                 password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_password(
+		          volume,
+		          (uint16_t *) password,
+		          string_length,
+		          &error );
+#else
+		result = libbde_volume_set_utf8_password(
+		          volume,
+		          (uint8_t *) password,
+		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+        	 error );
+	}
+	if( recovery_password != NULL )
+	{
+		string_length = system_string_length(
+		                 recovery_password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_recovery_password(
+		          volume,
+		          (uint16_t *) recovery_password,
+		          string_length,
+		          &error );
+#else
+		result = libbde_volume_set_utf8_recovery_password(
+		          volume,
+		          (uint8_t *) recovery_password,
+		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+        	 error );
+	}
 	/* Test open
 	 */
 	result = libbde_volume_open_wide(
@@ -1095,10 +1273,13 @@ on_error:
  * Returns 1 if successful or 0 if not
  */
 int bde_test_volume_open_close(
-     const system_character_t *source )
+     const system_character_t *source,
+     const system_character_t *password,
+     const system_character_t *recovery_password )
 {
 	libbde_volume_t *volume  = NULL;
 	libcerror_error_t *error = NULL;
+	size_t string_length     = 0;
 	int result               = 0;
 
 	/* Initialize test
@@ -1120,6 +1301,60 @@ int bde_test_volume_open_close(
          "error",
          error );
 
+	if( password != NULL )
+	{
+		string_length = system_string_length(
+		                 password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_password(
+		          volume,
+		          (uint16_t *) password,
+		          string_length,
+		          &error );
+#else
+		result = libbde_volume_set_utf8_password(
+		          volume,
+		          (uint8_t *) password,
+		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+        	 error );
+	}
+	if( recovery_password != NULL )
+	{
+		string_length = system_string_length(
+		                 recovery_password );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_set_utf16_recovery_password(
+		          volume,
+		          (uint16_t *) recovery_password,
+		          string_length,
+		          &error );
+#else
+		result = libbde_volume_set_utf8_recovery_password(
+		          volume,
+		          (uint8_t *) recovery_password,
+		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+        	 error );
+	}
 	/* Test open and close
 	 */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -2079,16 +2314,18 @@ int main(
      char * const argv[] )
 #endif
 {
-	libbde_volume_t *volume    = NULL;
-	libcerror_error_t *error   = NULL;
-	system_character_t *source = NULL;
-	system_integer_t option    = 0;
-	int result                 = 0;
+	libbde_volume_t *volume                      = NULL;
+	libcerror_error_t *error                     = NULL;
+	system_character_t *option_password          = NULL;
+	system_character_t *option_recovery_password = NULL;
+	system_character_t *source                   = NULL;
+	system_integer_t option                      = 0;
+	int result                                   = 0;
 
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "p:r:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -2100,6 +2337,16 @@ int main(
 				 argv[ optind - 1 ] );
 
 				return( EXIT_FAILURE );
+
+			case (system_integer_t) 'p':
+				option_password = optarg;
+
+				break;
+
+			case (system_integer_t) 'r':
+				option_recovery_password = optarg;
+
+				break;
 		}
 	}
 	if( optind < argc )
@@ -2128,14 +2375,18 @@ int main(
 		BDE_TEST_RUN_WITH_ARGS(
 		 "libbde_volume_open",
 		 bde_test_volume_open,
-		 source );
+		 source,
+		 option_password,
+		 option_recovery_password );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 		BDE_TEST_RUN_WITH_ARGS(
 		 "libbde_volume_open_wide",
 		 bde_test_volume_open_wide,
-		 source );
+		 source,
+		 option_password,
+		 option_recovery_password );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
@@ -2152,13 +2403,17 @@ int main(
 		BDE_TEST_RUN_WITH_ARGS(
 		 "libbde_volume_open_close",
 		 bde_test_volume_open_close,
-		 source );
+		 source,
+		 option_password,
+		 option_recovery_password );
 
 		/* Initialize test
 		 */
 		result = bde_test_volume_open_source(
 		          &volume,
 		          source,
+		          option_password,
+		          option_recovery_password,
 		          &error );
 
 		BDE_TEST_ASSERT_EQUAL_INT(
