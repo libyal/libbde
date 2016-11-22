@@ -1021,7 +1021,7 @@ int main(
 	while( ( option = libcsystem_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "p:r:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -1033,6 +1033,10 @@ int main(
 				 argv[ optind - 1 ] );
 
 				return( EXIT_FAILURE );
+
+			case (system_integer_t) 'p':
+			case (system_integer_t) 'r':
+				break;
 		}
 	}
 	if( optind < argc )

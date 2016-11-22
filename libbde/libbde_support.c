@@ -324,11 +324,13 @@ int libbde_check_volume_signature_file_io_handle(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	uint8_t signature[ 12 ];
+	uint8_t signature[ 512 ];
 
 	static char *function      = "libbde_check_volume_signature_file_io_handle";
 	ssize_t read_count         = 0;
 	int file_io_handle_is_open = 0;
+	int found_boot_entry_point = 0;
+	int result                 = 0;
 
 	if( file_io_handle == NULL )
 	{
@@ -391,10 +393,10 @@ int libbde_check_volume_signature_file_io_handle(
 	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
 	              signature,
-	              12,
+	              512,
 	              error );
 
-	if( read_count != 12 )
+	if( read_count != 512 )
 	{
 		libcerror_error_set(
 		 error,
@@ -422,13 +424,47 @@ int libbde_check_volume_signature_file_io_handle(
 		}
 	}
 	if( memory_compare(
-	     bde_signature,
-	     &( signature[ 3 ] ),
-	     8 ) == 0 )
+	     signature,
+	     bde_boot_entry_point_vista,
+	     3 ) == 0 )
 	{
-		return( 1 );
+		found_boot_entry_point = 1;
 	}
-	return( 0 );
+	else if( memory_compare(
+	          signature,
+	          bde_boot_entry_point_win7,
+	          3 ) == 0 )
+	{
+		if( memory_compare(
+		     &( signature[ 160 ] ),
+		     bde_identifier,
+		     16 ) == 0 )
+		{
+			found_boot_entry_point = 1;
+		}
+		else if( memory_compare(
+		          &( signature[ 424 ] ),
+		          bde_identifier,
+		          16 ) == 0 )
+		{
+			result = 1;
+		}
+	}
+	if( found_boot_entry_point == 1 )
+	{
+		if( memory_compare(
+		     bde_signature,
+		     &( signature[ 3 ] ),
+		     8 ) == 0 )
+		{
+			result = 1;
+		}
+		else
+		{
+			result = 0;
+		}
+	}
+	return( result );
 
 on_error:
 	if( file_io_handle_is_open == 0 )
