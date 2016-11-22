@@ -50,5 +50,5 @@ int libbde_utf16_recovery_password_calculate_hash(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_RECOVERY_H ) */
 

@@ -317,4 +317,4 @@ struct bde_metadata_entry_external_key_header
 }
 #endif
 
-#endif
+#endif /* !defined( _BDE_METADATA_H ) */

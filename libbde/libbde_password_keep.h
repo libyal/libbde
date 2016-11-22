@@ -64,5 +64,5 @@ int libbde_password_keep_free(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_PASSWORD_KEEP_H ) */
 

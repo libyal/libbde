@@ -352,5 +352,5 @@ int libbde_volume_read_startup_key_file_io_handle(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_INTERNAL_VOLUME_H ) */
 

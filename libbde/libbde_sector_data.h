@@ -73,5 +73,5 @@ int libbde_sector_data_read(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_SECTOR_DATA_H ) */
 

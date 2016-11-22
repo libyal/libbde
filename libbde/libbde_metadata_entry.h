@@ -76,5 +76,5 @@ int libbde_metadata_entry_read_string(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_METADATA_ENTRY_H ) */
 

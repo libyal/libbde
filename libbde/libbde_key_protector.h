@@ -69,5 +69,5 @@ int libbde_key_protector_get_type(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_INTERNAL_KEY_PROTECTOR_H ) */
 

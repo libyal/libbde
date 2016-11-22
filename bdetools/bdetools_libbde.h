@@ -33,5 +33,5 @@
 
 #include <libbde.h>
 
-#endif
+#endif /* !defined( _BDETOOLS_LIBBDE_H ) */
 

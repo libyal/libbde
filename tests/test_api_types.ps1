@@ -1,6 +1,6 @@
 # Library API type testing script
 #
-# Version: 20161107
+# Version: 20161110
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -10,8 +10,8 @@ $TestPrefix = Split-Path -path ${Pwd}.Path -parent
 $TestPrefix = Split-Path -path ${TestPrefix} -leaf
 $TestPrefix = ${TestPrefix}.Substring(3)
 
-$TestTypes = "key_protector volume"
-$TestTypes = ${TestTypes} -split " "
+$TestTypes = "aes_ccm_encrypted_key encryption_context io_handle key key_protector metadata metadata_entry password_key_data sector_data stretch_key volume_master_key"
+$TestTypesWithInput = "volume"
 
 $TestToolDirectory = "..\msvscpp\Release"
 
@@ -55,7 +55,17 @@ If (-Not (Test-Path ${TestToolDirectory}))
 
 $Result = ${ExitIgnore}
 
-Foreach (${TestType} in ${TestTypes})
+Foreach (${TestType} in ${TestTypes} -split " ")
+{
+	$Result = TestAPIType ${TestType}
+
+	If (${Result} -ne ${ExitSuccess})
+	{
+		Break
+	}
+}
+
+Foreach (${TestType} in ${TestTypesWithInput} -split " ")
 {
 	$Result = TestAPIType ${TestType}
 

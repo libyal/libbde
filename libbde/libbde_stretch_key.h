@@ -70,5 +70,5 @@ int libbde_stretch_key_read(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_STRETCH_KEY_H ) */
 

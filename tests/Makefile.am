@@ -11,6 +11,13 @@ AM_CPPFLAGS = \
 	@LIBCFILE_CPPFLAGS@ \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
+	@LIBFCACHE_CPPFLAGS@ \
+	@LIBFDATA_CPPFLAGS@ \
+	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBFGUID_CPPFLAGS@ \
+	@LIBFVALUE_CPPFLAGS@ \
+	@LIBHMAC_CPPFLAGS@ \
+	@LIBCAES_CPPFLAGS@ \
 	@LIBCSYSTEM_CPPFLAGS@ \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBBDE_DLL_IMPORT@
@@ -40,14 +47,33 @@ EXTRA_DIST = \
 	$(check_SCRIPTS)
 
 check_PROGRAMS = \
+	bde_test_aes_ccm_encrypted_key \
 	bde_test_error \
+	bde_test_io_handle \
+	bde_test_key \
 	bde_test_key_protector \
+	bde_test_metadata \
+	bde_test_metadata_entry \
 	bde_test_notify \
-	bde_test_open_close \
 	bde_test_read \
+	bde_test_sector_data \
 	bde_test_seek \
+	bde_test_stretch_key \
 	bde_test_support \
-	bde_test_volume
+	bde_test_volume \
+	bde_test_volume_master_key
+
+bde_test_aes_ccm_encrypted_key_SOURCES = \
+	bde_test_aes_ccm_encrypted_key.c \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_aes_ccm_encrypted_key_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
 
 bde_test_error_SOURCES = \
 	bde_test_error.c \
@@ -58,22 +84,65 @@ bde_test_error_SOURCES = \
 bde_test_error_LDADD = \
 	../libbde/libbde.la
 
+bde_test_io_handle_SOURCES = \
+	bde_test_io_handle.c \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_io_handle_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_key_SOURCES = \
+	bde_test_key.c \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_key_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
 bde_test_key_protector_SOURCES = \
 	bde_test_key_protector.c \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
-	bde_test_libclocale.h \
-	bde_test_libcsystem.h \
-	bde_test_libuna.h \
 	bde_test_macros.h \
 	bde_test_memory.c bde_test_memory.h \
 	bde_test_unused.h
 
 bde_test_key_protector_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
-	@PTHREAD_LIBADD@
+
+bde_test_metadata_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_metadata.c \
+	bde_test_unused.h
+
+bde_test_metadata_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_metadata_entry_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_metadata_entry.c \
+	bde_test_unused.h
+
+bde_test_metadata_entry_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
 
 bde_test_notify_SOURCES = \
 	bde_test_libbde.h \
@@ -83,19 +152,6 @@ bde_test_notify_SOURCES = \
 
 bde_test_notify_LDADD = \
 	../libbde/libbde.la
-
-bde_test_open_close_SOURCES = \
-	bde_test_libbde.h \
-	bde_test_libcerror.h \
-	bde_test_libcsystem.h \
-	bde_test_open_close.c \
-	bde_test_unused.h
-
-bde_test_open_close_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
-	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@
-	@PTHREAD_LIBADD@
 
 bde_test_read_SOURCES = \
 	bde_test_libcerror.h \
@@ -112,6 +168,18 @@ bde_test_read_LDADD = \
 	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
+bde_test_sector_data_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_sector_data.c \
+	bde_test_unused.h
+
+bde_test_sector_data_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
 bde_test_seek_SOURCES = \
 	bde_test_libcerror.h \
 	bde_test_libcsystem.h \
@@ -125,14 +193,37 @@ bde_test_seek_LDADD = \
 	@LIBCERROR_LIBADD@
 	@PTHREAD_LIBADD@
 
-bde_test_support_SOURCES = \
+bde_test_stretch_key_SOURCES = \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
 	bde_test_macros.h \
-	bde_test_support.c \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_stretch_key.c \
 	bde_test_unused.h
 
+bde_test_stretch_key_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_support_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_libclocale.h \
+	bde_test_libcsystem.h \
+	bde_test_libuna.h \
+	bde_test_macros.h \
+	bde_test_support.c
+
 bde_test_support_LDADD = \
+	@LIBCSYSTEM_LIBADD@ \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
@@ -144,14 +235,30 @@ bde_test_volume_SOURCES = \
 	bde_test_libuna.h \
 	bde_test_macros.h \
 	bde_test_memory.c bde_test_memory.h \
-	bde_test_volume.c \
-	bde_test_unused.h
+	bde_test_volume.c
 
 bde_test_volume_LDADD = \
 	@LIBCSYSTEM_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCTHREADS_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	@PTHREAD_LIBADD@
+
+bde_test_volume_master_key_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h \
+	bde_test_volume_master_key.c
+
+bde_test_volume_master_key_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
-	@PTHREAD_LIBADD@
 
 MAINTAINERCLEANFILES = \
 	Makefile.in

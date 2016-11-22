@@ -66,5 +66,5 @@ int libbde_key_read(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_KEY_H ) */
 

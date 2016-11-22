@@ -73,5 +73,5 @@ int libbde_external_key_read(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_EXTERNAL_KEY_H ) */
 
