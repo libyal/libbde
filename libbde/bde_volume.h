@@ -400,4 +400,4 @@ struct bde_volume_header_to_go
 }
 #endif
 
-#endif
+#endif /* !defined( _BDE_VOLUME_H ) */

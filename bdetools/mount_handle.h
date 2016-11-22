@@ -135,5 +135,5 @@ int mount_handle_get_creation_time(
 }
 #endif
 
-#endif
+#endif /* !defined( _MOUNT_HANDLE_H ) */
 

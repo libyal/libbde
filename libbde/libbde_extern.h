@@ -38,9 +38,9 @@
 #include <libbde/extern.h>
 
 #else
-#define LIBBDE_EXTERN	extern
+#define LIBBDE_EXTERN	/* extern */
 
-#endif
+#endif /* !defined( HAVE_LOCAL_LIBBDE ) */
 
 #endif /* !defined( _LIBBDE_INTERNAL_EXTERN_H ) */
 

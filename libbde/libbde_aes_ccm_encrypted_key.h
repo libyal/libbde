@@ -66,5 +66,5 @@ int libbde_aes_ccm_encrypted_key_read(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_AES_CCM_ENCRYPTED_KEY_H ) */
 

@@ -45,5 +45,5 @@ void bdeoutput_version_detailed_fprint(
 }
 #endif
 
-#endif
+#endif /* !defined( _BDEOUTPUT_H ) */
 

@@ -123,14 +123,21 @@ stamp-h[1-9]
 /pybde-python[23]/*.[ch]
 /bdetools/bdeinfo
 /bdetools/bdemount
+/tests/bde_test_aes_ccm_encrypted_key
 /tests/bde_test_error
+/tests/bde_test_io_handle
+/tests/bde_test_key
 /tests/bde_test_key_protector
+/tests/bde_test_metadata
+/tests/bde_test_metadata_entry
 /tests/bde_test_notify
-/tests/bde_test_open_close
 /tests/bde_test_read
+/tests/bde_test_sector_data
 /tests/bde_test_seek
+/tests/bde_test_stretch_key
 /tests/bde_test_support
 /tests/bde_test_volume
+/tests/bde_test_volume_master_key
 /tests/input
 /tests/tmp*
 

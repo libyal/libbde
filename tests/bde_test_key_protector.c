@@ -33,6 +33,8 @@
 #include "bde_test_memory.h"
 #include "bde_test_unused.h"
 
+#include "../libbde/libbde_key_protector.h"
+
 /* Tests the libbde_key_protector_free function
  * Returns 1 if successful or 0 if not
  */
@@ -71,6 +73,10 @@ on_error:
 	return( 0 );
 }
 
+#if defined( __GNUC__ )
+
+#endif /* defined( __GNUC__ ) */
+
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -86,9 +92,23 @@ int main(
 	BDE_TEST_UNREFERENCED_PARAMETER( argc )
 	BDE_TEST_UNREFERENCED_PARAMETER( argv )
 
+#if defined( __GNUC__ )
+
+	/* TODO: add tests for libbde_key_protector_initialize */
+
+#endif /* defined( __GNUC__ ) */
+
 	BDE_TEST_RUN(
 	 "libbde_key_protector_free",
 	 bde_test_key_protector_free );
+
+#if defined( __GNUC__ )
+
+	/* TODO: add tests for libbde_key_protector_get_identifier */
+
+	/* TODO: add tests for libbde_key_protector_get_type */
+
+#endif /* defined( __GNUC__ ) */
 
 	return( EXIT_SUCCESS );
 

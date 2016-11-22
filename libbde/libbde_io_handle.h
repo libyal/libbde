@@ -164,5 +164,5 @@ int libbde_io_handle_read_unencrypted_volume_header(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_IO_HANDLE_H ) */
 

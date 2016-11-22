@@ -1,12 +1,19 @@
 MSVSCPP_FILES = \
+	bde_test_aes_ccm_encrypted_key/bde_test_aes_ccm_encrypted_key.vcproj \
 	bde_test_error/bde_test_error.vcproj \
+	bde_test_io_handle/bde_test_io_handle.vcproj \
+	bde_test_key/bde_test_key.vcproj \
 	bde_test_key_protector/bde_test_key_protector.vcproj \
+	bde_test_metadata/bde_test_metadata.vcproj \
+	bde_test_metadata_entry/bde_test_metadata_entry.vcproj \
 	bde_test_notify/bde_test_notify.vcproj \
-	bde_test_open_close/bde_test_open_close.vcproj \
 	bde_test_read/bde_test_read.vcproj \
+	bde_test_sector_data/bde_test_sector_data.vcproj \
 	bde_test_seek/bde_test_seek.vcproj \
+	bde_test_stretch_key/bde_test_stretch_key.vcproj \
 	bde_test_support/bde_test_support.vcproj \
 	bde_test_volume/bde_test_volume.vcproj \
+	bde_test_volume_master_key/bde_test_volume_master_key.vcproj \
 	bdeinfo/bdeinfo.vcproj \
 	bdemount/bdemount.vcproj \
 	dokan/dokan.vcproj \

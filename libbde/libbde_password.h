@@ -82,5 +82,5 @@ int libbde_password_calculate_key(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_PASSWORD_H ) */
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Library API functions testing script
 #
-# Version: 20161105
+# Version: 20161110
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -11,8 +11,8 @@ TEST_PREFIX=`dirname ${PWD}`;
 TEST_PREFIX=`basename ${TEST_PREFIX} | sed 's/^lib\([^-]*\).*$/\1/'`;
 
 TEST_PROFILE="lib${TEST_PREFIX}";
-TEST_FUNCTIONS="error notify support";
-TEST_FUNCTIONS_WITH_INPUT="open_close seek read";
+TEST_FUNCTIONS="error notify";
+TEST_FUNCTIONS_WITH_INPUT="support seek read";
 OPTION_SETS="";
 
 TEST_TOOL_DIRECTORY=".";

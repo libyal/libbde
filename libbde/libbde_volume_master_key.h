@@ -98,5 +98,5 @@ int libbde_volume_master_key_get_protection_type(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_VOLUME_MASTER_KEY_H ) */
 

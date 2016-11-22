@@ -222,5 +222,5 @@ int libbde_metadata_get_volume_master_key_by_index(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_METADATA_H ) */
 

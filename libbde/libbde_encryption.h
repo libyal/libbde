@@ -96,5 +96,5 @@ int libbde_encryption_crypt(
 }
 #endif
 
-#endif
+#endif /* !defined( _LIBBDE_ENCRYPTION_H ) */
 
