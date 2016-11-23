@@ -162,7 +162,7 @@ PyObject *pybde_volume_get_number_of_key_protectors(
            PyObject *arguments );
 
 PyObject *pybde_volume_get_key_protector_by_index(
-           pybde_volume_t *pybde_volume,
+           PyObject *pybde_volume,
            int key_protector_index );
 
 PyObject *pybde_volume_get_key_protector(

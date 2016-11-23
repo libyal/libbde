@@ -146,8 +146,8 @@ int libbde_key_protector_free(
  */
 int libbde_key_protector_get_identifier(
      libbde_key_protector_t *key_protector,
-     uint8_t *identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error )
 {
 	libbde_internal_key_protector_t *internal_key_protector = NULL;
@@ -168,8 +168,8 @@ int libbde_key_protector_get_identifier(
 
 	if( libbde_volume_master_key_get_identifier(
 	     internal_key_protector->volume_master_key,
-	     identifier,
-	     size,
+	     guid_data,
+	     guid_data_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

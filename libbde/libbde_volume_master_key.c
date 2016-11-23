@@ -794,8 +794,8 @@ on_error:
  */
 int libbde_volume_master_key_get_identifier(
      libbde_volume_master_key_t *volume_master_key,
-     uint8_t *identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error )
 {
 	static char *function = "libbde_volume_master_key_get_identifier";
@@ -811,30 +811,30 @@ int libbde_volume_master_key_get_identifier(
 
 		return( -1 );
 	}
-	if( identifier == NULL )
+	if( guid_data == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid identifier.",
+		 "%s: invalid GUID data.",
 		 function );
 
 		return( -1 );
 	}
-	if( size < 16 )
+	if( guid_data_size < 16 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-		 "%s: identifier too small.",
+		 "%s: invalid GUID data size value too small.",
 		 function );
 
 		return( -1 );
 	}
 	if( memory_copy(
-	     identifier,
+	     guid_data,
 	     volume_master_key->identifier,
 	     16 ) == NULL )
 	{
@@ -842,7 +842,7 @@ int libbde_volume_master_key_get_identifier(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to set identifier.",
+		 "%s: unable to copy GUID data.",
 		 function );
 
 		return( -1 );

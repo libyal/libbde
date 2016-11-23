@@ -1,5 +1,5 @@
 /*
- * Python object definition of the libbde key protector
+ * Python object wrapper of libbde_key_protector_t
  *
  * Copyright (C) 2011-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -27,24 +27,28 @@
 #endif
 
 #include "pybde_error.h"
-#include "pybde_integer.h"
 #include "pybde_guid.h"
 #include "pybde_key_protector.h"
-#include "pybde_libcerror.h"
 #include "pybde_libbde.h"
+#include "pybde_libcerror.h"
 #include "pybde_python.h"
 #include "pybde_unused.h"
 
 PyMethodDef pybde_key_protector_object_methods[] = {
-
-	/* Functions to access the key protector values */
 
 	{ "get_identifier",
 	  (PyCFunction) pybde_key_protector_get_identifier,
 	  METH_NOARGS,
 	  "get_identifier() -> Unicode string or None\n"
 	  "\n"
-	  "Retrieves the identifier (GUID)." },
+	  "Retrieves the identifier." },
+
+	{ "get_type",
+	  (PyCFunction) pybde_key_protector_get_type,
+	  METH_NOARGS,
+	  "get_type() -> Integer or None\n"
+	  "\n"
+	  "Retrieves the type." },
 
 	/* Sentinel */
 	{ NULL, NULL, 0, NULL }
@@ -56,6 +60,12 @@ PyGetSetDef pybde_key_protector_object_get_set_definitions[] = {
 	  (getter) pybde_key_protector_get_identifier,
 	  (setter) 0,
 	  "The identifier.",
+	  NULL },
+
+	{ "type",
+	  (getter) pybde_key_protector_get_type,
+	  (setter) 0,
+	  "The type.",
 	  NULL },
 
 	/* Sentinel */
@@ -104,7 +114,7 @@ PyTypeObject pybde_key_protector_type_object = {
 	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
-	"pybde key_protector object (wraps libbde_key_protector_t)",
+	"pybde key protector object (wraps libbde_key_protector_t)",
 	/* tp_traverse */
 	0,
 	/* tp_clear */
@@ -161,8 +171,9 @@ PyTypeObject pybde_key_protector_type_object = {
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_key_protector_new(
+           PyTypeObject *type_object,
            libbde_key_protector_t *key_protector,
-           pybde_volume_t *volume_object )
+           PyObject *parent_object )
 {
 	pybde_key_protector_t *pybde_key_protector = NULL;
 	static char *function                      = "pybde_key_protector_new";
@@ -170,7 +181,7 @@ PyObject *pybde_key_protector_new(
 	if( key_protector == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid key protector.",
 		 function );
 
@@ -178,7 +189,7 @@ PyObject *pybde_key_protector_new(
 	}
 	pybde_key_protector = PyObject_New(
 	                       struct pybde_key_protector,
-	                       &pybde_key_protector_type_object );
+	                       type_object );
 
 	if( pybde_key_protector == NULL )
 	{
@@ -200,10 +211,10 @@ PyObject *pybde_key_protector_new(
 		goto on_error;
 	}
 	pybde_key_protector->key_protector = key_protector;
-	pybde_key_protector->volume_object = volume_object;
+	pybde_key_protector->parent_object = parent_object;
 
 	Py_IncRef(
-	 (PyObject *) pybde_key_protector->volume_object );
+	 (PyObject *) pybde_key_protector->parent_object );
 
 	return( (PyObject *) pybde_key_protector );
 
@@ -227,7 +238,7 @@ int pybde_key_protector_init(
 	if( pybde_key_protector == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid key protector.",
 		 function );
 
@@ -245,14 +256,15 @@ int pybde_key_protector_init(
 void pybde_key_protector_free(
       pybde_key_protector_t *pybde_key_protector )
 {
-	libcerror_error_t *error    = NULL;
 	struct _typeobject *ob_type = NULL;
+	libcerror_error_t *error    = NULL;
 	static char *function       = "pybde_key_protector_free";
+	int result                  = 0;
 
 	if( pybde_key_protector == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid key protector.",
 		 function );
 
@@ -261,7 +273,7 @@ void pybde_key_protector_free(
 	if( pybde_key_protector->key_protector == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid key protector - missing libbde key protector.",
 		 function );
 
@@ -288,9 +300,15 @@ void pybde_key_protector_free(
 
 		return;
 	}
-	if( libbde_key_protector_free(
-	     &( pybde_key_protector->key_protector ),
-	     &error ) != 1 )
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_key_protector_free(
+	          &( pybde_key_protector->key_protector ),
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -301,10 +319,10 @@ void pybde_key_protector_free(
 		libcerror_error_free(
 		 &error );
 	}
-	if( pybde_key_protector->volume_object != NULL )
+	if( pybde_key_protector->parent_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) pybde_key_protector->volume_object );
+		 (PyObject *) pybde_key_protector->parent_object );
 	}
 	ob_type->tp_free(
 	 (PyObject*) pybde_key_protector );
@@ -319,8 +337,8 @@ PyObject *pybde_key_protector_get_identifier(
 {
 	uint8_t guid_data[ 16 ];
 
-	libcerror_error_t *error = NULL;
 	PyObject *string_object  = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_key_protector_get_identifier";
 	int result               = 0;
 
@@ -329,7 +347,7 @@ PyObject *pybde_key_protector_get_identifier(
 	if( pybde_key_protector == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid key protector.",
 		 function );
 
@@ -345,7 +363,7 @@ PyObject *pybde_key_protector_get_identifier(
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -358,10 +376,80 @@ PyObject *pybde_key_protector_get_identifier(
 
 		return( NULL );
 	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
 	string_object = pybde_string_new_from_guid(
-			 guid_data,
-			 16 );
+	                 guid_data,
+	                 16 );
 
 	return( string_object );
+}
+
+/* Retrieves the type
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_key_protector_get_type(
+           pybde_key_protector_t *pybde_key_protector,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
+	static char *function    = "pybde_key_protector_get_type";
+	uint16_t type            = 0;
+	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_key_protector == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid key protector.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_key_protector_get_type(
+	          pybde_key_protector->key_protector,
+	          &type,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve type.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) type );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) type );
+#endif
+	return( integer_object );
 }
 

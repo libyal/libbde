@@ -85,8 +85,8 @@ int libbde_volume_master_key_read(
 
 int libbde_volume_master_key_get_identifier(
      libbde_volume_master_key_t *volume_master_key,
-     uint8_t *identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error );
 
 int libbde_volume_master_key_get_protection_type(

@@ -1,5 +1,5 @@
 /*
- * Python object definition of the libbde key protector
+ * Python object wrapper of libbde_key_protector_t
  *
  * Copyright (C) 2011-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -27,7 +27,6 @@
 
 #include "pybde_libbde.h"
 #include "pybde_python.h"
-#include "pybde_volume.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -45,17 +44,18 @@ struct pybde_key_protector
 	 */
 	libbde_key_protector_t *key_protector;
 
-	/* The volume object
+	/* The parent object
 	 */
-	pybde_volume_t *volume_object;
+	PyObject *parent_object;
 };
 
 extern PyMethodDef pybde_key_protector_object_methods[];
 extern PyTypeObject pybde_key_protector_type_object;
 
 PyObject *pybde_key_protector_new(
+           PyTypeObject *type_object,
            libbde_key_protector_t *key_protector,
-           pybde_volume_t *volume_object );
+           PyObject *parent_object );
 
 int pybde_key_protector_init(
      pybde_key_protector_t *pybde_key_protector );
@@ -63,11 +63,11 @@ int pybde_key_protector_init(
 void pybde_key_protector_free(
       pybde_key_protector_t *pybde_key_protector );
 
-PyObject *pybde_key_protector_get_offset(
+PyObject *pybde_key_protector_get_identifier(
            pybde_key_protector_t *pybde_key_protector,
            PyObject *arguments );
 
-PyObject *pybde_key_protector_get_identifier(
+PyObject *pybde_key_protector_get_type(
            pybde_key_protector_t *pybde_key_protector,
            PyObject *arguments );
 
@@ -75,5 +75,5 @@ PyObject *pybde_key_protector_get_identifier(
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_KEY_PROTECTOR_H ) */
 

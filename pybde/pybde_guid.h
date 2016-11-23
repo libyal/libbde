@@ -39,5 +39,5 @@ PyObject *pybde_string_new_from_guid(
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_GUID_H ) */
 

@@ -57,5 +57,5 @@ PyMODINIT_FUNC initpybde(
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_H ) */
 
