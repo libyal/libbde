@@ -50,14 +50,14 @@ PyObject *pybde_encryption_methods_new(
            void );
 
 int pybde_encryption_methods_init(
-     pybde_encryption_methods_t *pybde_encryption_methods );
+     pybde_encryption_methods_t *definitions_object );
 
 void pybde_encryption_methods_free(
-      pybde_encryption_methods_t *pybde_encryption_methods );
+      pybde_encryption_methods_t *definitions_object );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_ENCRYPTION_METHODS_H ) */
 

@@ -1,5 +1,5 @@
 /*
- * Python object definition of the key protectors sequence and iterator
+ * Python object definition of the sequence and iterator object of key protectors
  *
  * Copyright (C) 2011-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -28,10 +28,9 @@
 
 #include "pybde_key_protector.h"
 #include "pybde_key_protectors.h"
-#include "pybde_libcerror.h"
 #include "pybde_libbde.h"
+#include "pybde_libcerror.h"
 #include "pybde_python.h"
-#include "pybde_volume.h"
 
 PySequenceMethods pybde_key_protectors_sequence_methods = {
 	/* sq_length */
@@ -98,7 +97,7 @@ PyTypeObject pybde_key_protectors_type_object = {
 	/* tp_flags */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER,
 	/* tp_doc */
-	"internal pybde key protectors sequence and iterator object",
+	"pybde internal sequence and iterator object of key protectors",
 	/* tp_traverse */
 	0,
 	/* tp_clear */
@@ -155,72 +154,72 @@ PyTypeObject pybde_key_protectors_type_object = {
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_key_protectors_new(
-           pybde_volume_t *volume_object,
-           PyObject* (*get_key_protector_by_index)(
-                        pybde_volume_t *volume_object,
-                        int key_protector_index ),
-           int number_of_key_protectors )
+           PyObject *parent_object,
+           PyObject* (*get_item_by_index)(
+                        PyObject *parent_object,
+                        int index ),
+           int number_of_items )
 {
-	pybde_key_protectors_t *pybde_key_protectors = NULL;
-	static char *function                        = "pybde_key_protectors_new";
+	pybde_key_protectors_t *key_protectors_object = NULL;
+	static char *function                         = "pybde_key_protectors_new";
 
-	if( volume_object == NULL )
+	if( parent_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid volume object.",
+		 "%s: invalid parent object.",
 		 function );
 
 		return( NULL );
 	}
-	if( get_key_protector_by_index == NULL )
+	if( get_item_by_index == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid get key protector by index function.",
+		 "%s: invalid get item by index function.",
 		 function );
 
 		return( NULL );
 	}
 	/* Make sure the key protectors values are initialized
 	 */
-	pybde_key_protectors = PyObject_New(
-	                        struct pybde_key_protectors,
-	                        &pybde_key_protectors_type_object );
+	key_protectors_object = PyObject_New(
+	                         struct pybde_key_protectors,
+	                         &pybde_key_protectors_type_object );
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize key protectors.",
+		 "%s: unable to create key protectors object.",
 		 function );
 
 		goto on_error;
 	}
 	if( pybde_key_protectors_init(
-	     pybde_key_protectors ) != 0 )
+	     key_protectors_object ) != 0 )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize key protectors.",
+		 "%s: unable to initialize key protectors object.",
 		 function );
 
 		goto on_error;
 	}
-	pybde_key_protectors->volume_object              = volume_object;
-	pybde_key_protectors->get_key_protector_by_index = get_key_protector_by_index;
-	pybde_key_protectors->number_of_key_protectors   = number_of_key_protectors;
+	key_protectors_object->parent_object     = parent_object;
+	key_protectors_object->get_item_by_index = get_item_by_index;
+	key_protectors_object->number_of_items   = number_of_items;
 
 	Py_IncRef(
-	 (PyObject *) pybde_key_protectors->volume_object );
+	 (PyObject *) key_protectors_object->parent_object );
 
-	return( (PyObject *) pybde_key_protectors );
+	return( (PyObject *) key_protectors_object );
 
 on_error:
-	if( pybde_key_protectors != NULL )
+	if( key_protectors_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) pybde_key_protectors );
+		 (PyObject *) key_protectors_object );
 	}
 	return( NULL );
 }
@@ -229,25 +228,25 @@ on_error:
  * Returns 0 if successful or -1 on error
  */
 int pybde_key_protectors_init(
-     pybde_key_protectors_t *pybde_key_protectors )
+     pybde_key_protectors_t *key_protectors_object )
 {
 	static char *function = "pybde_key_protectors_init";
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors.",
+		 "%s: invalid key protectors object.",
 		 function );
 
 		return( -1 );
 	}
 	/* Make sure the key protectors values are initialized
 	 */
-	pybde_key_protectors->volume_object              = NULL;
-	pybde_key_protectors->get_key_protector_by_index = NULL;
-	pybde_key_protectors->key_protector_index        = 0;
-	pybde_key_protectors->number_of_key_protectors   = 0;
+	key_protectors_object->parent_object     = NULL;
+	key_protectors_object->get_item_by_index = NULL;
+	key_protectors_object->current_index     = 0;
+	key_protectors_object->number_of_items   = 0;
 
 	return( 0 );
 }
@@ -255,27 +254,22 @@ int pybde_key_protectors_init(
 /* Frees a key protectors object
  */
 void pybde_key_protectors_free(
-      pybde_key_protectors_t *pybde_key_protectors )
+      pybde_key_protectors_t *key_protectors_object )
 {
 	struct _typeobject *ob_type = NULL;
 	static char *function       = "pybde_key_protectors_free";
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors.",
+		 "%s: invalid key protectors object.",
 		 function );
 
 		return;
 	}
-	if( pybde_key_protectors->volume_object != NULL )
-	{
-		Py_DecRef(
-		 (PyObject *) pybde_key_protectors->volume_object );
-	}
 	ob_type = Py_TYPE(
-	           pybde_key_protectors );
+	           key_protectors_object );
 
 	if( ob_type == NULL )
 	{
@@ -295,67 +289,72 @@ void pybde_key_protectors_free(
 
 		return;
 	}
+	if( key_protectors_object->parent_object != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) key_protectors_object->parent_object );
+	}
 	ob_type->tp_free(
-	 (PyObject*) pybde_key_protectors );
+	 (PyObject*) key_protectors_object );
 }
 
 /* The key protectors len() function
  */
 Py_ssize_t pybde_key_protectors_len(
-            pybde_key_protectors_t *pybde_key_protectors )
+            pybde_key_protectors_t *key_protectors_object )
 {
 	static char *function = "pybde_key_protectors_len";
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors.",
+		 "%s: invalid key protectors object.",
 		 function );
 
 		return( -1 );
 	}
-	return( (Py_ssize_t) pybde_key_protectors->number_of_key_protectors );
+	return( (Py_ssize_t) key_protectors_object->number_of_items );
 }
 
 /* The key protectors getitem() function
  */
 PyObject *pybde_key_protectors_getitem(
-           pybde_key_protectors_t *pybde_key_protectors,
+           pybde_key_protectors_t *key_protectors_object,
            Py_ssize_t item_index )
 {
 	PyObject *key_protector_object = NULL;
 	static char *function          = "pybde_key_protectors_getitem";
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors.",
+		 "%s: invalid key protectors object.",
 		 function );
 
 		return( NULL );
 	}
-	if( pybde_key_protectors->get_key_protector_by_index == NULL )
+	if( key_protectors_object->get_item_by_index == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors - missing get key protector by index function.",
+		 "%s: invalid key protectors object - missing get item by index function.",
 		 function );
 
 		return( NULL );
 	}
-	if( pybde_key_protectors->number_of_key_protectors < 0 )
+	if( key_protectors_object->number_of_items < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors - invalid number of key protectors.",
+		 "%s: invalid key protectors object - invalid number of items.",
 		 function );
 
 		return( NULL );
 	}
 	if( ( item_index < 0 )
-	 || ( item_index >= (Py_ssize_t) pybde_key_protectors->number_of_key_protectors ) )
+	 || ( item_index >= (Py_ssize_t) key_protectors_object->number_of_items ) )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
@@ -364,8 +363,8 @@ PyObject *pybde_key_protectors_getitem(
 
 		return( NULL );
 	}
-	key_protector_object = pybde_key_protectors->get_key_protector_by_index(
-	                        pybde_key_protectors->volume_object,
+	key_protector_object = key_protectors_object->get_item_by_index(
+	                        key_protectors_object->parent_object,
 	                        (int) item_index );
 
 	return( key_protector_object );
@@ -374,83 +373,83 @@ PyObject *pybde_key_protectors_getitem(
 /* The key protectors iter() function
  */
 PyObject *pybde_key_protectors_iter(
-           pybde_key_protectors_t *pybde_key_protectors )
+           pybde_key_protectors_t *key_protectors_object )
 {
 	static char *function = "pybde_key_protectors_iter";
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors.",
+		 "%s: invalid key protectors object.",
 		 function );
 
 		return( NULL );
 	}
 	Py_IncRef(
-	 (PyObject *) pybde_key_protectors );
+	 (PyObject *) key_protectors_object );
 
-	return( (PyObject *) pybde_key_protectors );
+	return( (PyObject *) key_protectors_object );
 }
 
 /* The key protectors iternext() function
  */
 PyObject *pybde_key_protectors_iternext(
-           pybde_key_protectors_t *pybde_key_protectors )
+           pybde_key_protectors_t *key_protectors_object )
 {
 	PyObject *key_protector_object = NULL;
 	static char *function          = "pybde_key_protectors_iternext";
 
-	if( pybde_key_protectors == NULL )
+	if( key_protectors_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors.",
+		 "%s: invalid key protectors object.",
 		 function );
 
 		return( NULL );
 	}
-	if( pybde_key_protectors->get_key_protector_by_index == NULL )
+	if( key_protectors_object->get_item_by_index == NULL )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors - missing get key protector by index function.",
+		 "%s: invalid key protectors object - missing get item by index function.",
 		 function );
 
 		return( NULL );
 	}
-	if( pybde_key_protectors->key_protector_index < 0 )
+	if( key_protectors_object->current_index < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors - invalid key protector index.",
+		 "%s: invalid key protectors object - invalid current index.",
 		 function );
 
 		return( NULL );
 	}
-	if( pybde_key_protectors->number_of_key_protectors < 0 )
+	if( key_protectors_object->number_of_items < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid key protectors - invalid number of key protectors.",
+		 "%s: invalid key protectors object - invalid number of items.",
 		 function );
 
 		return( NULL );
 	}
-	if( pybde_key_protectors->key_protector_index >= pybde_key_protectors->number_of_key_protectors )
+	if( key_protectors_object->current_index >= key_protectors_object->number_of_items )
 	{
 		PyErr_SetNone(
 		 PyExc_StopIteration );
 
 		return( NULL );
 	}
-	key_protector_object = pybde_key_protectors->get_key_protector_by_index(
-	                        pybde_key_protectors->volume_object,
-	                        pybde_key_protectors->key_protector_index );
+	key_protector_object = key_protectors_object->get_item_by_index(
+	                        key_protectors_object->parent_object,
+	                        key_protectors_object->current_index );
 
 	if( key_protector_object != NULL )
 	{
-		pybde_key_protectors->key_protector_index++;
+		key_protectors_object->current_index++;
 	}
 	return( key_protector_object );
 }

@@ -1,5 +1,5 @@
 /*
- * Python object definition of the key protectors sequence and iterator
+ * Python object definition of the sequence and iterator object of key protectors
  *
  * Copyright (C) 2011-2016, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -27,7 +27,6 @@
 
 #include "pybde_libbde.h"
 #include "pybde_python.h"
-#include "pybde_volume.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -41,56 +40,56 @@ struct pybde_key_protectors
 	 */
 	PyObject_HEAD
 
-	/* The volume object
+	/* The parent object
 	 */
-	pybde_volume_t *volume_object;
+	PyObject *parent_object;
 
-	/* The get key protector by index callback function
+	/* The get item by index callback function
 	 */
-	PyObject* (*get_key_protector_by_index)(
-	             pybde_volume_t *volume_object,
-	             int key_protector_index );
+	PyObject* (*get_item_by_index)(
+	             PyObject *parent_object,
+	             int index );
 
-	/* The (current) key protector index
+	/* The current index
 	 */
-	int key_protector_index;
+	int current_index;
 
-	/* The number of key protectors
+	/* The number of items
 	 */
-	int number_of_key_protectors;
+	int number_of_items;
 };
 
 extern PyTypeObject pybde_key_protectors_type_object;
 
 PyObject *pybde_key_protectors_new(
-           pybde_volume_t *volume_object,
-           PyObject* (*get_key_protector_by_index)(
-                        pybde_volume_t *volume_object,
-                        int key_protector_index ),
-           int number_of_key_protectors );
+           PyObject *parent_object,
+           PyObject* (*get_item_by_index)(
+                        PyObject *parent_object,
+                        int index ),
+           int number_of_items );
 
 int pybde_key_protectors_init(
-     pybde_key_protectors_t *pybde_key_protectors );
+     pybde_key_protectors_t *key_protectors_object );
 
 void pybde_key_protectors_free(
-      pybde_key_protectors_t *pybde_key_protectors );
+      pybde_key_protectors_t *key_protectors_object );
 
 Py_ssize_t pybde_key_protectors_len(
-            pybde_key_protectors_t *pybde_key_protectors );
+            pybde_key_protectors_t *key_protectors_object );
 
 PyObject *pybde_key_protectors_getitem(
-           pybde_key_protectors_t *pybde_key_protectors,
+           pybde_key_protectors_t *key_protectors_object,
            Py_ssize_t item_index );
 
 PyObject *pybde_key_protectors_iter(
-           pybde_key_protectors_t *pybde_key_protectors );
+           pybde_key_protectors_t *key_protectors_object );
 
 PyObject *pybde_key_protectors_iternext(
-           pybde_key_protectors_t *pybde_key_protectors );
+           pybde_key_protectors_t *key_protectors_object );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_KEY_PROTECTORS_H ) */
 

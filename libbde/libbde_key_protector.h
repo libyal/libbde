@@ -55,8 +55,8 @@ int libbde_key_protector_free(
 LIBBDE_EXTERN \
 int libbde_key_protector_get_identifier(
      libbde_key_protector_t *key_protector,
-     uint8_t *identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \

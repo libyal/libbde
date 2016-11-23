@@ -50,14 +50,14 @@ PyObject *pybde_key_protection_types_new(
            void );
 
 int pybde_key_protection_types_init(
-     pybde_key_protection_types_t *pybde_key_protection_types );
+     pybde_key_protection_types_t *definitions_object );
 
 void pybde_key_protection_types_free(
-      pybde_key_protection_types_t *pybde_key_protection_types );
+      pybde_key_protection_types_t *definitions_object );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif
+#endif /* !defined( _PYBDE_KEY_PROTECTION_TYPES_H ) */
 

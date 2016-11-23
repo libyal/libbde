@@ -2652,7 +2652,7 @@ PyObject *pybde_volume_get_number_of_key_protectors(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_get_key_protector_by_index(
-           pybde_volume_t *pybde_volume,
+           PyObject *pybde_volume,
            int key_protector_index )
 {
 	libcerror_error_t *error              = NULL;
@@ -2673,7 +2673,7 @@ PyObject *pybde_volume_get_key_protector_by_index(
 	Py_BEGIN_ALLOW_THREADS
 
 	result = libbde_volume_get_key_protector(
-	          pybde_volume->volume,
+	          ( (pybde_volume_t *) pybde_volume )->volume,
 	          key_protector_index,
 	          &key_protector,
 	          &error );
@@ -2695,6 +2695,7 @@ PyObject *pybde_volume_get_key_protector_by_index(
 		goto on_error;
 	}
 	key_protector_object = pybde_key_protector_new(
+	                        &pybde_key_protector_type_object,
 	                        key_protector,
 	                        pybde_volume );
 
@@ -2741,7 +2742,7 @@ PyObject *pybde_volume_get_key_protector(
 		return( NULL );
 	}
 	key_protector_object = pybde_volume_get_key_protector_by_index(
-	                        pybde_volume,
+	                        (PyObject *) pybde_volume,
 	                        key_protector_index );
 
 	return( key_protector_object );
@@ -2794,7 +2795,7 @@ PyObject *pybde_volume_get_key_protectors(
 		return( NULL );
 	}
 	key_protectors_object = pybde_key_protectors_new(
-	                         pybde_volume,
+	                         (PyObject *) pybde_volume,
 	                         &pybde_volume_get_key_protector_by_index,
 	                         number_of_key_protectors );
 

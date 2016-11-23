@@ -247,56 +247,56 @@ on_error:
 PyObject *pybde_encryption_methods_new(
            void )
 {
-	pybde_encryption_methods_t *pybde_encryption_methods = NULL;
-	static char *function                                = "pybde_encryption_methods_new";
+	pybde_encryption_methods_t *definitions_object = NULL;
+	static char *function                          = "pybde_encryption_methods_new";
 
-	pybde_encryption_methods = PyObject_New(
-	                            struct pybde_encryption_methods,
-	                            &pybde_encryption_methods_type_object );
+	definitions_object = PyObject_New(
+	                      struct pybde_encryption_methods,
+	                      &pybde_encryption_methods_type_object );
 
-	if( pybde_encryption_methods == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize encryption methods.",
+		 "%s: unable to create definitions object.",
 		 function );
 
 		goto on_error;
 	}
 	if( pybde_encryption_methods_init(
-	     pybde_encryption_methods ) != 0 )
+	     definitions_object ) != 0 )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize encryption methods.",
+		 "%s: unable to initialize definitions object.",
 		 function );
 
 		goto on_error;
 	}
-	return( (PyObject *) pybde_encryption_methods );
+	return( (PyObject *) definitions_object );
 
 on_error:
-	if( pybde_encryption_methods != NULL )
+	if( definitions_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) pybde_encryption_methods );
+		 (PyObject *) definitions_object );
 	}
 	return( NULL );
 }
 
-/* Intializes a encryption methods object
+/* Intializes an encryption methods object
  * Returns 0 if successful or -1 on error
  */
 int pybde_encryption_methods_init(
-     pybde_encryption_methods_t *pybde_encryption_methods )
+     pybde_encryption_methods_t *definitions_object )
 {
 	static char *function = "pybde_encryption_methods_init";
 
-	if( pybde_encryption_methods == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
-		 "%s: invalid encryption methods.",
+		 "%s: invalid definitions object.",
 		 function );
 
 		return( -1 );
@@ -304,25 +304,25 @@ int pybde_encryption_methods_init(
 	return( 0 );
 }
 
-/* Frees a encryption methods object
+/* Frees an encryption methods object
  */
 void pybde_encryption_methods_free(
-      pybde_encryption_methods_t *pybde_encryption_methods )
+      pybde_encryption_methods_t *definitions_object )
 {
 	struct _typeobject *ob_type = NULL;
 	static char *function       = "pybde_encryption_methods_free";
 
-	if( pybde_encryption_methods == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
-		 "%s: invalid encryption methods.",
+		 "%s: invalid definitions object.",
 		 function );
 
 		return;
 	}
 	ob_type = Py_TYPE(
-	           pybde_encryption_methods );
+	           definitions_object );
 
 	if( ob_type == NULL )
 	{
@@ -343,6 +343,6 @@ void pybde_encryption_methods_free(
 		return;
 	}
 	ob_type->tp_free(
-	 (PyObject*) pybde_encryption_methods );
+	 (PyObject*) definitions_object );
 }
 

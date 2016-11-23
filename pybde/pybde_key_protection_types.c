@@ -73,7 +73,7 @@ PyTypeObject pybde_key_protection_types_type_object = {
 	/* tp_flags */
 	Py_TPFLAGS_DEFAULT,
 	/* tp_doc */
-	"pybde key_protection types object (wraps LIBBDE_KEY_PROTECTION_TYPES)",
+	"pybde key protection types object (wraps LIBBDE_KEY_PROTECTION_TYPES)",
 	/* tp_traverse */
 	0,
 	/* tp_clear */
@@ -233,39 +233,39 @@ on_error:
 PyObject *pybde_key_protection_types_new(
            void )
 {
-	pybde_key_protection_types_t *pybde_key_protection_types = NULL;
-	static char *function                                    = "pybde_key_protection_types_new";
+	pybde_key_protection_types_t *definitions_object = NULL;
+	static char *function                            = "pybde_key_protection_types_new";
 
-	pybde_key_protection_types = PyObject_New(
-	                              struct pybde_key_protection_types,
-	                              &pybde_key_protection_types_type_object );
+	definitions_object = PyObject_New(
+	                      struct pybde_key_protection_types,
+	                      &pybde_key_protection_types_type_object );
 
-	if( pybde_key_protection_types == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize key protection types.",
+		 "%s: unable to create definitions object.",
 		 function );
 
 		goto on_error;
 	}
 	if( pybde_key_protection_types_init(
-	     pybde_key_protection_types ) != 0 )
+	     definitions_object ) != 0 )
 	{
 		PyErr_Format(
 		 PyExc_MemoryError,
-		 "%s: unable to initialize key protection types.",
+		 "%s: unable to initialize definitions object.",
 		 function );
 
 		goto on_error;
 	}
-	return( (PyObject *) pybde_key_protection_types );
+	return( (PyObject *) definitions_object );
 
 on_error:
-	if( pybde_key_protection_types != NULL )
+	if( definitions_object != NULL )
 	{
 		Py_DecRef(
-		 (PyObject *) pybde_key_protection_types );
+		 (PyObject *) definitions_object );
 	}
 	return( NULL );
 }
@@ -274,15 +274,15 @@ on_error:
  * Returns 0 if successful or -1 on error
  */
 int pybde_key_protection_types_init(
-     pybde_key_protection_types_t *pybde_key_protection_types )
+     pybde_key_protection_types_t *definitions_object )
 {
 	static char *function = "pybde_key_protection_types_init";
 
-	if( pybde_key_protection_types == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
-		 "%s: invalid key protection types.",
+		 "%s: invalid definitions object.",
 		 function );
 
 		return( -1 );
@@ -293,22 +293,22 @@ int pybde_key_protection_types_init(
 /* Frees a key protection types object
  */
 void pybde_key_protection_types_free(
-      pybde_key_protection_types_t *pybde_key_protection_types )
+      pybde_key_protection_types_t *definitions_object )
 {
 	struct _typeobject *ob_type = NULL;
 	static char *function       = "pybde_key_protection_types_free";
 
-	if( pybde_key_protection_types == NULL )
+	if( definitions_object == NULL )
 	{
 		PyErr_Format(
 		 PyExc_TypeError,
-		 "%s: invalid key protection types.",
+		 "%s: invalid definitions object.",
 		 function );
 
 		return;
 	}
 	ob_type = Py_TYPE(
-	           pybde_key_protection_types );
+	           definitions_object );
 
 	if( ob_type == NULL )
 	{
@@ -329,6 +329,6 @@ void pybde_key_protection_types_free(
 		return;
 	}
 	ob_type->tp_free(
-	 (PyObject*) pybde_key_protection_types );
+	 (PyObject*) definitions_object );
 }
 
