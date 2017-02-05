@@ -1,5 +1,5 @@
 /*
- * The internal libbde header
+ * The unused definition
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,19 +19,32 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _BDETOOLS_LIBBDE_H )
-#define _BDETOOLS_LIBBDE_H
+#if !defined( _BDETOOLS_UNUSED_H )
+#define _BDETOOLS_UNUSED_H
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBBDE_DLL_IMPORT
- * before including libbde.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define LIBBDE_DLL_IMPORT
-#endif
+#if !defined( BDETOOLS_ATTRIBUTE_UNUSED )
 
-#include <libbde.h>
+#if defined( __GNUC__ ) && __GNUC__ >= 3
+#define BDETOOLS_ATTRIBUTE_UNUSED	__attribute__ ((__unused__))
 
-#endif /* !defined( _BDETOOLS_LIBBDE_H ) */
+#else
+#define BDETOOLS_ATTRIBUTE_UNUSED
+
+#endif /* defined( __GNUC__ ) && __GNUC__ >= 3 */
+
+#endif /* !defined( BDETOOLS_ATTRIBUTE_UNUSED ) */
+
+#if defined( _MSC_VER )
+#define BDETOOLS_UNREFERENCED_PARAMETER( parameter ) \
+	UNREFERENCED_PARAMETER( parameter );
+
+#else
+#define BDETOOLS_UNREFERENCED_PARAMETER( parameter ) \
+	/* parameter */
+
+#endif /* defined( _MSC_VER ) */
+
+#endif /* !defined( _BDETOOLS_UNUSED_H ) */
 

@@ -99,6 +99,13 @@
 		goto on_error; \
 	}
 
+#define BDE_TEST_ASSERT_NOT_EQUAL_INT64( name, value, expected_value ) \
+	if( value == expected_value ) \
+	{ \
+		fprintf( stdout, "%s:%d %s (%" PRIi64 ") == %" PRIi64 "\n", __FILE__, __LINE__, name, value, expected_value ); \
+		goto on_error; \
+	}
+
 #define BDE_TEST_ASSERT_EQUAL_UINT64( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \

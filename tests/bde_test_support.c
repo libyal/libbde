@@ -30,11 +30,11 @@
 #include <stdlib.h>
 #endif
 
+#include "bde_test_getopt.h"
 #include "bde_test_libbde.h"
 #include "bde_test_libbfio.h"
 #include "bde_test_libcerror.h"
 #include "bde_test_libclocale.h"
-#include "bde_test_libcsystem.h"
 #include "bde_test_libuna.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
@@ -1018,7 +1018,7 @@ int main(
 	system_character_t *source = NULL;
 	system_integer_t option    = 0;
 
-	while( ( option = libcsystem_getopt(
+	while( ( option = bde_test_getopt(
 	                   argc,
 	                   argv,
 	                   _SYSTEM_STRING( "p:r:" ) ) ) != (system_integer_t) -1 )

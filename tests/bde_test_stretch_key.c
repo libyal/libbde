@@ -1,5 +1,5 @@
 /*
- * Library stretch_key type testing program
+ * Library stretch_key type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

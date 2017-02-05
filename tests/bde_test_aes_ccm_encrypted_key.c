@@ -1,5 +1,5 @@
 /*
- * Library aes_ccm_encrypted_key type testing program
+ * Library aes_ccm_encrypted_key type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

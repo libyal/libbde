@@ -1,5 +1,5 @@
 /*
- * Library metadata_entry type testing program
+ * Library metadata_entry type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

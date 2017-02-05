@@ -1,5 +1,5 @@
 /*
- * The internal libbde header
+ * Common output functions for the bdetools
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,19 +19,35 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _BDETOOLS_LIBBDE_H )
-#define _BDETOOLS_LIBBDE_H
+#if !defined( _BDETOOLS_OUTPUT_H )
+#define _BDETOOLS_OUTPUT_H
 
 #include <common.h>
+#include <file_stream.h>
+#include <types.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBBDE_DLL_IMPORT
- * before including libbde.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define LIBBDE_DLL_IMPORT
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
-#include <libbde.h>
+int bdetools_output_initialize(
+     int stdio_mode,
+     libcerror_error_t **error );
 
-#endif /* !defined( _BDETOOLS_LIBBDE_H ) */
+void bdeoutput_copyright_fprint(
+      FILE *stream );
+
+void bdeoutput_version_fprint(
+      FILE *stream,
+      const char *program );
+
+void bdeoutput_version_detailed_fprint(
+      FILE *stream,
+      const char *program );
+
+#if defined( __cplusplus )
+}
+#endif
+
+#endif /* !defined( _BDETOOLS_OUTPUT_H ) */
 

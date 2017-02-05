@@ -1,5 +1,5 @@
 /*
- * The internal libbde header
+ * Internationalization (i18n) functions
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,19 +19,30 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _BDETOOLS_LIBBDE_H )
-#define _BDETOOLS_LIBBDE_H
+#if !defined( _BDETOOLS_I18N_H )
+#define _BDETOOLS_I18N_H
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBBDE_DLL_IMPORT
- * before including libbde.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define LIBBDE_DLL_IMPORT
+#if defined( HAVE_LIBINTL_H )
+#include <libintl.h>
 #endif
 
-#include <libbde.h>
+#if defined( __cplusplus )
+extern "C" {
+#endif
 
-#endif /* !defined( _BDETOOLS_LIBBDE_H ) */
+/* TODO for now do nothing i18n-like
+#define	_( string ) \
+	gettext( string )
+*/
+
+#define	_( string ) \
+	string
+
+#if defined( __cplusplus )
+}
+#endif
+
+#endif /* !defined( _BDETOOLS_I18N_H ) */
 

@@ -131,9 +131,7 @@ stamp-h[1-9]
 /tests/bde_test_metadata
 /tests/bde_test_metadata_entry
 /tests/bde_test_notify
-/tests/bde_test_read
 /tests/bde_test_sector_data
-/tests/bde_test_seek
 /tests/bde_test_stretch_key
 /tests/bde_test_support
 /tests/bde_test_volume
@@ -151,7 +149,6 @@ stamp-h[1-9]
 /libcnotify
 /libcpath
 /libcsplit
-/libcsystem
 /libcthreads
 /libfcache
 /libfdata

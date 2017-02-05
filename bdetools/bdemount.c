@@ -65,12 +65,15 @@
 #include <dokan.h>
 #endif
 
-#include "bdeoutput.h"
+#include "bdetools_getopt.h"
+#include "bdetools_i18n.h"
 #include "bdetools_libbde.h"
 #include "bdetools_libcerror.h"
 #include "bdetools_libclocale.h"
 #include "bdetools_libcnotify.h"
-#include "bdetools_libcsystem.h"
+#include "bdetools_output.h"
+#include "bdetools_signal.h"
+#include "bdetools_unused.h"
 #include "mount_handle.h"
 
 mount_handle_t *bdemount_mount_handle = NULL;
@@ -112,12 +115,12 @@ void usage_fprint(
 /* Signal handler for bdemount
  */
 void bdemount_signal_handler(
-      libcsystem_signal_t signal LIBCSYSTEM_ATTRIBUTE_UNUSED )
+      bdetools_signal_t signal BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_signal_handler";
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( signal )
+	BDETOOLS_UNREFERENCED_PARAMETER( signal )
 
 	bdemount_abort = 1;
 
@@ -139,8 +142,13 @@ void bdemount_signal_handler(
 	}
 	/* Force stdin to close otherwise any function reading it will remain blocked
 	 */
-	if( libcsystem_file_io_close(
+#if defined( WINAPI ) && !defined( __CYGWIN__ )
+	if( _close(
 	     0 ) != 0 )
+#else
+	if( close(
+	     0 ) != 0 )
+#endif
 	{
 		libcnotify_printf(
 		 "%s: unable to close stdin.\n",
@@ -620,8 +628,8 @@ int bdemount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
-     off_t offset LIBCSYSTEM_ATTRIBUTE_UNUSED,
-     struct fuse_file_info *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
+     off_t offset BDETOOLS_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	struct stat *stat_info   = NULL;
@@ -629,8 +637,8 @@ int bdemount_fuse_readdir(
 	size_t path_length       = 0;
 	int result               = 0;
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( offset )
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	BDETOOLS_UNREFERENCED_PARAMETER( offset )
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 
 	if( path == NULL )
 	{
@@ -914,12 +922,12 @@ on_error:
 /* Cleans up when fuse is done
  */
 void bdemount_fuse_destroy(
-      void *private_data LIBCSYSTEM_ATTRIBUTE_UNUSED )
+      void *private_data BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_fuse_destroy";
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( private_data )
+	BDETOOLS_UNREFERENCED_PARAMETER( private_data )
 
 	if( bdemount_mount_handle != NULL )
 	{
@@ -961,9 +969,9 @@ static size_t bdemount_dokan_path_length = 5;
 int __stdcall bdemount_dokan_CreateFile(
                const wchar_t *path,
                DWORD desired_access,
-               DWORD share_mode LIBCSYSTEM_ATTRIBUTE_UNUSED,
+               DWORD share_mode BDETOOLS_ATTRIBUTE_UNUSED,
                DWORD creation_disposition,
-               DWORD attribute_flags LIBCSYSTEM_ATTRIBUTE_UNUSED,
+               DWORD attribute_flags BDETOOLS_ATTRIBUTE_UNUSED,
                DOKAN_FILE_INFO *file_info )
 {
 	libcerror_error_t *error = NULL;
@@ -971,8 +979,8 @@ int __stdcall bdemount_dokan_CreateFile(
 	size_t path_length       = 0;
 	int result               = 0;
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( share_mode )
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( attribute_flags )
+	BDETOOLS_UNREFERENCED_PARAMETER( share_mode )
+	BDETOOLS_UNREFERENCED_PARAMETER( attribute_flags )
 
 	if( path == NULL )
 	{
@@ -1094,14 +1102,14 @@ on_error:
  */
 int __stdcall bdemount_dokan_OpenDirectory(
                const wchar_t *path,
-               DOKAN_FILE_INFO *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_dokan_OpenDirectory";
 	size_t path_length       = 0;
 	int result               = 0;
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 
 	if( path == NULL )
 	{
@@ -1152,13 +1160,13 @@ on_error:
  */
 int __stdcall bdemount_dokan_CloseFile(
                const wchar_t *path,
-               DOKAN_FILE_INFO *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_dokan_CloseFile";
 	int result               = 0;
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 
 	if( path == NULL )
 	{
@@ -1195,7 +1203,7 @@ int __stdcall bdemount_dokan_ReadFile(
                DWORD number_of_bytes_to_read,
                DWORD *number_of_bytes_read,
                LONGLONG offset,
-               DOKAN_FILE_INFO *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_dokan_ReadFile";
@@ -1203,7 +1211,7 @@ int __stdcall bdemount_dokan_ReadFile(
 	ssize_t read_count       = 0;
 	int result               = 0;
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 
 	if( path == NULL )
 	{
@@ -1908,13 +1916,13 @@ int __stdcall bdemount_dokan_GetVolumeInformation(
                DWORD *file_system_flags,
                wchar_t *file_system_name,
                DWORD file_system_name_size,
-               DOKAN_FILE_INFO *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function    = "bdemount_dokan_GetVolumeInformation";
 	int result               = 0;
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 
 	if( ( volume_name != NULL )
 	 && ( volume_name_size > (DWORD) ( sizeof( wchar_t ) * 4 ) ) )
@@ -1994,11 +2002,11 @@ on_error:
  * Returns 0 if successful or a negative error code otherwise
  */
 int __stdcall bdemount_dokan_Unmount(
-               DOKAN_FILE_INFO *file_info LIBCSYSTEM_ATTRIBUTE_UNUSED )
+               DOKAN_FILE_INFO *file_info BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	static char *function = "bdemount_dokan_Unmount";
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( file_info )
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 
 	return( 0 );
 }
@@ -2055,13 +2063,13 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( libcsystem_initialize(
+	if( bdetools_output_initialize(
              _IONBF,
              &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to initialize system values.\n" );
+		 "Unable to initialize output settings.\n" );
 
 		goto on_error;
 	}
@@ -2069,7 +2077,7 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-	while( ( option = libcsystem_getopt(
+	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
 	                   _SYSTEM_STRING( "hk:o:p:r:s:vVX:" ) ) ) != (system_integer_t) -1 )
