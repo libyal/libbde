@@ -1,5 +1,5 @@
 /*
- * Library volume_master_key type testing program
+ * Library volume_master_key type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -266,6 +266,164 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libbde_volume_master_key_get_identifier function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_volume_master_key_get_identifier(
+     void )
+{
+	uint8_t guid_data[ 16 ];
+
+	libbde_volume_master_key_t *volume_master_key = NULL;
+	libcerror_error_t *error                      = NULL;
+	int result                                    = 0;
+
+	/* Initialize test
+	 */
+	result = libbde_volume_master_key_initialize(
+	          &volume_master_key,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "volume_master_key",
+         volume_master_key );
+
+        BDE_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test regular cases
+	 */
+	result = libbde_volume_master_key_get_identifier(
+	          volume_master_key,
+	          guid_data,
+	          16,
+	          &error );
+
+	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	/* Test error cases
+	 */
+	result = libbde_volume_master_key_get_identifier(
+	          NULL,
+	          guid_data,
+	          16,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_master_key_get_identifier(
+	          volume_master_key,
+	          NULL,
+	          16,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_master_key_get_identifier(
+	          volume_master_key,
+	          guid_data,
+	          0,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_master_key_get_identifier(
+	          volume_master_key,
+	          guid_data,
+	          (size_t) SSIZE_MAX + 1,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+        BDE_TEST_ASSERT_IS_NOT_NULL(
+         "error",
+         error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Clean up
+	 */
+	result = libbde_volume_master_key_free(
+	          &volume_master_key,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+        BDE_TEST_ASSERT_IS_NULL(
+         "volume_master_key",
+         volume_master_key );
+
+        BDE_TEST_ASSERT_IS_NULL(
+         "error",
+         error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( volume_master_key != NULL )
+	{
+		libbde_volume_master_key_free(
+		 &volume_master_key,
+		 NULL );
 	}
 	return( 0 );
 }

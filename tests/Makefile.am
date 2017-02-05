@@ -18,29 +18,25 @@ AM_CPPFLAGS = \
 	@LIBFVALUE_CPPFLAGS@ \
 	@LIBHMAC_CPPFLAGS@ \
 	@LIBCAES_CPPFLAGS@ \
-	@LIBCSYSTEM_CPPFLAGS@ \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBBDE_DLL_IMPORT@
 
 if HAVE_PYTHON_TESTS
 TESTS_PYBDE = \
-	test_python_functions.sh
+	test_python_module.sh
 endif
 
 TESTS = \
-	test_api_functions.sh \
-	test_api_types.sh \
+	test_library.sh \
 	test_bdeinfo.sh \
 	$(TESTS_PYBDE)
 
 check_SCRIPTS = \
-	pybde_test_get_version.py \
-	pybde_test_open_close.py \
-	pybde_test_seek.py \
-	test_api_functions.sh \
-	test_api_types.sh \
+	pybde_test_support.py \
+	pybde_test_volume.py \
 	test_bdeinfo.sh \
-	test_python_functions.sh \
+	test_library.sh \
+	test_python_module.sh \
 	test_runner.sh
 
 EXTRA_DIST = \
@@ -55,9 +51,7 @@ check_PROGRAMS = \
 	bde_test_metadata \
 	bde_test_metadata_entry \
 	bde_test_notify \
-	bde_test_read \
 	bde_test_sector_data \
-	bde_test_seek \
 	bde_test_stretch_key \
 	bde_test_support \
 	bde_test_volume \
@@ -153,21 +147,6 @@ bde_test_notify_SOURCES = \
 bde_test_notify_LDADD = \
 	../libbde/libbde.la
 
-bde_test_read_SOURCES = \
-	bde_test_libcerror.h \
-	bde_test_libcsystem.h \
-	bde_test_libcthreads.h \
-	bde_test_libbde.h \
-	bde_test_read.c \
-	bde_test_unused.h
-
-bde_test_read_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
-	../libbde/libbde.la \
-	@LIBCTHREADS_LIBADD@ \
-	@LIBCERROR_LIBADD@
-	@PTHREAD_LIBADD@
-
 bde_test_sector_data_SOURCES = \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
@@ -179,19 +158,6 @@ bde_test_sector_data_SOURCES = \
 bde_test_sector_data_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
-
-bde_test_seek_SOURCES = \
-	bde_test_libcerror.h \
-	bde_test_libcsystem.h \
-	bde_test_libbde.h \
-	bde_test_seek.c \
-	bde_test_unused.h
-
-bde_test_seek_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
-	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@
-	@PTHREAD_LIBADD@
 
 bde_test_stretch_key_SOURCES = \
 	bde_test_libbde.h \
@@ -206,17 +172,17 @@ bde_test_stretch_key_LDADD = \
 	@LIBCERROR_LIBADD@
 
 bde_test_support_SOURCES = \
+	bde_test_getopt.c bde_test_getopt.h \
 	bde_test_libbde.h \
 	bde_test_libbfio.h \
 	bde_test_libcerror.h \
 	bde_test_libclocale.h \
-	bde_test_libcsystem.h \
+	bde_test_libcnotify.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
 	bde_test_support.c
 
 bde_test_support_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBCFILE_LIBADD@ \
@@ -228,17 +194,17 @@ bde_test_support_LDADD = \
 	@LIBCERROR_LIBADD@
 
 bde_test_volume_SOURCES = \
+	bde_test_getopt.c bde_test_getopt.h \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
 	bde_test_libclocale.h \
-	bde_test_libcsystem.h \
+	bde_test_libcnotify.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
 	bde_test_memory.c bde_test_memory.h \
 	bde_test_volume.c
 
 bde_test_volume_LDADD = \
-	@LIBCSYSTEM_LIBADD@ \
 	@LIBUNA_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \

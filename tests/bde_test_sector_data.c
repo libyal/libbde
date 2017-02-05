@@ -1,5 +1,5 @@
 /*
- * Library sector_data type testing program
+ * Library sector_data type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

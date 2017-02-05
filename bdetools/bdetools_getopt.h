@@ -1,5 +1,5 @@
 /*
- * Common output functions for the bdetools
+ * GetOpt functions
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,31 +19,50 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _BDEOUTPUT_H )
-#define _BDEOUTPUT_H
+#if !defined( _BDETOOLS_GETOPT_H )
+#define _BDETOOLS_GETOPT_H
 
 #include <common.h>
-#include <file_stream.h>
 #include <types.h>
+
+/* unistd.h is included here to export getopt, optarg, optind and optopt
+ */
+#if defined( HAVE_UNISTD_H )
+#include <unistd.h>
+#endif
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-void bdeoutput_copyright_fprint(
-      FILE *stream );
+#if defined( HAVE_GETOPT )
+#define bdetools_getopt( argument_count, argument_values, options_string ) \
+	getopt( argument_count, argument_values, options_string )
 
-void bdeoutput_version_fprint(
-      FILE *stream,
-      const char *program );
+#else
 
-void bdeoutput_version_detailed_fprint(
-      FILE *stream,
-      const char *program );
+#if !defined( __CYGWIN__ )
+extern int optind;
+extern system_character_t *optarg;
+extern system_integer_t optopt;
+
+#else
+int optind;
+system_character_t *optarg;
+system_integer_t optopt;
+
+#endif /* !defined( __CYGWIN__ ) */
+
+system_integer_t bdetools_getopt(
+                  int argument_count,
+                  system_character_t * const argument_values[],
+                  const system_character_t *options_string );
+
+#endif /* defined( HAVE_GETOPT ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _BDEOUTPUT_H ) */
+#endif /* !defined( _BDETOOLS_GETOPT_H ) */
 

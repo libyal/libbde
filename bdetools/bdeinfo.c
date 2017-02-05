@@ -34,12 +34,14 @@
 #include <stdlib.h>
 #endif
 
-#include "bdeoutput.h"
+#include "bdetools_getopt.h"
 #include "bdetools_libbde.h"
 #include "bdetools_libcerror.h"
 #include "bdetools_libclocale.h"
 #include "bdetools_libcnotify.h"
-#include "bdetools_libcsystem.h"
+#include "bdetools_output.h"
+#include "bdetools_signal.h"
+#include "bdetools_unused.h"
 #include "info_handle.h"
 
 info_handle_t *bdeinfo_info_handle = NULL;
@@ -78,12 +80,12 @@ void usage_fprint(
 /* Signal handler for bdeinfo
  */
 void bdeinfo_signal_handler(
-      libcsystem_signal_t signal LIBCSYSTEM_ATTRIBUTE_UNUSED )
+      bdetools_signal_t signal BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
 	static char *function   = "bdeinfo_signal_handler";
 
-	LIBCSYSTEM_UNREFERENCED_PARAMETER( signal )
+	BDETOOLS_UNREFERENCED_PARAMETER( signal )
 
 	bdeinfo_abort = 1;
 
@@ -105,8 +107,13 @@ void bdeinfo_signal_handler(
 	}
 	/* Force stdin to close otherwise any function reading it will remain blocked
 	 */
-	if( libcsystem_file_io_close(
+#if defined( WINAPI ) && !defined( __CYGWIN__ )
+	if( _close(
 	     0 ) != 0 )
+#else
+	if( close(
+	     0 ) != 0 )
+#endif
 	{
 		libcnotify_printf(
 		 "%s: unable to close stdin.\n",
@@ -150,13 +157,13 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( libcsystem_initialize(
+	if( bdetools_output_initialize(
              _IONBF,
              &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to initialize system values.\n" );
+		 "Unable to initialize output settings.\n" );
 
 		goto on_error;
 	}
@@ -164,7 +171,7 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-	while( ( option = libcsystem_getopt(
+	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
 	                   _SYSTEM_STRING( "hk:o:p:r:s:vV" ) ) ) != (system_integer_t) -1 )

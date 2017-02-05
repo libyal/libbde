@@ -1,5 +1,5 @@
 /*
- * Library io_handle type testing program
+ * Library io_handle type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

@@ -1,5 +1,5 @@
 /*
- * Python object definition of the libbde volume
+ * Python object wrapper of libbde_volume_t
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

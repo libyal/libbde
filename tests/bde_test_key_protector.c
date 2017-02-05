@@ -1,5 +1,5 @@
 /*
- * Library key_protector type testing program
+ * Library key_protector type test program
  *
  * Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>
  *

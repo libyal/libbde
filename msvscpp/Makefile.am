@@ -7,9 +7,7 @@ MSVSCPP_FILES = \
 	bde_test_metadata/bde_test_metadata.vcproj \
 	bde_test_metadata_entry/bde_test_metadata_entry.vcproj \
 	bde_test_notify/bde_test_notify.vcproj \
-	bde_test_read/bde_test_read.vcproj \
 	bde_test_sector_data/bde_test_sector_data.vcproj \
-	bde_test_seek/bde_test_seek.vcproj \
 	bde_test_stretch_key/bde_test_stretch_key.vcproj \
 	bde_test_support/bde_test_support.vcproj \
 	bde_test_volume/bde_test_volume.vcproj \
@@ -27,7 +25,6 @@ MSVSCPP_FILES = \
 	libcnotify/libcnotify.vcproj \
 	libcpath/libcpath.vcproj \
 	libcsplit/libcsplit.vcproj \
-	libcsystem/libcsystem.vcproj \
 	libcthreads/libcthreads.vcproj \
 	libfcache/libfcache.vcproj \
 	libfdata/libfdata.vcproj \

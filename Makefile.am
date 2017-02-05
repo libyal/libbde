@@ -21,7 +21,6 @@ SUBDIRS = \
 	libhmac \
 	libcaes \
 	libbde \
-	libcsystem \
 	bdetools \
 	pybde \
 	pybde-python2 \
@@ -133,7 +132,6 @@ splint:
 	(cd $(srcdir)/libhmac && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libcaes && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libbde && $(MAKE) splint $(AM_MAKEFLAGS))
-	(cd $(srcdir)/libcsystem && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/bdetools && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/pybde && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) splint $(AM_MAKEFLAGS))
