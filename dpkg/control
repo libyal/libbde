@@ -1,17 +1,17 @@
 Source: libbde
-Section: libs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
-Build-Depends: debhelper (>= 7), autotools-dev, libssl-dev, libfuse-dev, python-all-dev, python3-all-dev
+Build-Depends: debhelper (>= 9), dh-autoreconf, pkg-config, python-dev, python3-dev
 Standards-Version: 3.9.5
-Homepage: https://github.com/libyal/libbde/
+Section: libs
+Homepage: https://github.com/libyal/libbde
 
 Package: libbde
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: libbde-dbg
 Description: Library to access the BitLocker Drive Encryption (BDE) format
- libbde is a library to access the BitLocker Drive Encryption (BDE) format
+ libbde is a library to access the BitLocker Drive Encryption (BDE) format.
 
 Package: libbde-dbg
 Architecture: any
@@ -33,6 +33,13 @@ Architecture: any
 Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Several tools for reading BitLocker Drive Encryption volumes
  Several tools for reading BitLocker Drive Encryption volumes.
+
+Package: libbde-tools-dbg
+Section: debug
+Architecture: any
+Depends: libbde-tools (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libbde-tools
+ Debugging symbols for libbde-tools.
 
 Package: libbde-python
 Section: python

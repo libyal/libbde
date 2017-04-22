@@ -36,13 +36,12 @@ DPKG_FILES = \
 	dpkg/compat \
 	dpkg/control \
 	dpkg/copyright \
-	dpkg/copyright.in \
 	dpkg/rules \
-	dpkg/libbde.docs \
-	dpkg/libbde-dev.docs \
-	dpkg/libbde-python.docs \
-	dpkg/libbde-python3.docs \
-	dpkg/libbde-tools.docs \
+	dpkg/libbde.install \
+	dpkg/libbde-dev.install \
+	dpkg/libbde-python.install \
+	dpkg/libbde-python3.install \
+	dpkg/libbde-tools.install \
 	dpkg/source/format
 
 GETTEXT_FILES = \
