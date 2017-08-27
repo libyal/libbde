@@ -35,7 +35,7 @@
 
 #include "../libbde/libbde_metadata.h"
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 /* Tests the libbde_metadata_initialize function
  * Returns 1 if successful or 0 if not
@@ -1088,7 +1088,7 @@ on_error:
 	return( 0 );
 }
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 /* The main program
  */
@@ -1105,7 +1105,7 @@ int main(
 	BDE_TEST_UNREFERENCED_PARAMETER( argc )
 	BDE_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	BDE_TEST_RUN(
 	 "libbde_metadata_initialize",
@@ -1153,7 +1153,7 @@ int main(
 
 	/* TODO: add tests for libbde_metadata_get_volume_master_key_by_index */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
