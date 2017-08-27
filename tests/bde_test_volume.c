@@ -2434,13 +2434,13 @@ int main(
 		 bde_test_volume_signal_abort,
 		 volume );
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 		/* TODO: add tests for libbde_volume_open_read */
 
 		/* TODO: add tests for libbde_volume_open_read_keys_from_metadata */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 		/* TODO: add tests for libbde_volume_is_locked */
 

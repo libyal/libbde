@@ -73,9 +73,9 @@ on_error:
 	return( 0 );
 }
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 /* The main program
  */
@@ -92,23 +92,23 @@ int main(
 	BDE_TEST_UNREFERENCED_PARAMETER( argc )
 	BDE_TEST_UNREFERENCED_PARAMETER( argv )
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	/* TODO: add tests for libbde_key_protector_initialize */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 	BDE_TEST_RUN(
 	 "libbde_key_protector_free",
 	 bde_test_key_protector_free );
 
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	/* TODO: add tests for libbde_key_protector_get_identifier */
 
 	/* TODO: add tests for libbde_key_protector_get_type */
 
-#endif /* defined( __GNUC__ ) */
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
