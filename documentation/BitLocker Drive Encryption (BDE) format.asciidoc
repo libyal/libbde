@@ -28,7 +28,7 @@ forensic tooling to be able to process this volume type.
 [preface]
 == License
 ....
-Copyright (C) 2011-2015, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2011-2017, Joachim Metz <joachim.metz@gmail.com>.
 Permission is granted to copy, distribute and/or modify this document under the 
 terms of the GNU Free Documentation License, Version 1.3 or any later version 
 published by the Free Software Foundation; with no Invariant Sections, no 
@@ -54,6 +54,7 @@ September  2011 | Worked on initial version.
 | 0.0.6 | J.B. Metz | June 2014 | Additional information regarding encryption method MSB with thanks to J. Van Tubbergh.
 | 0.0.7 | J.B. Metz | October 2014 | Switched to asccidoc format.
 | 0.0.8 | J.B. Metz | December 2015 | Additional information regarding AES-XTS encryption method with thanks to github user anocs.
+| 0.0.9 | J.B. Metz | September 2017 | Additional information regarding AES-XTS encryption method.
 |===
 
 :numbered:
@@ -248,9 +249,9 @@ Both encryption and decryption use:
 
 * AES-CBC with FVEK decryption of sector data
 
-The initialization vector of the AES-CBC is determined by AES-ECB encrypting 
-the sector offset with the FVEK. The sector offset is a 16-byte little-endian 
-version of the offset of the sector relative from the start of the volume.
+The initialization vector of the AES-CBC s the sector offset AES-ECB encrypted
+with the FVEK stored as a 16-byte little-endian value. The sector offset is
+the offset of the sector relative from the start of the volume.
 
 === AES-CBC with Elephant Diffuser
 Encryption:
@@ -267,9 +268,9 @@ Decryption:
 * Elephant Elephant Diffuser A
 * XOR with sector key
 
-The initialization vector of the AES-CBC is determined by AES-ECB encrypting 
-the sector offset with the FVEK. The sector offset is a 16-byte little-endian 
-version of the offset of the sector relative from the start of the volume.
+The initialization vector of the AES-CBC s the sector offset AES-ECB encrypted
+with the FVEK stored as a 16-byte little-endian value. The sector offset is
+the offset of the sector relative from the start of the volume.
 
 The sector key 32-byte of size and contains:
 
@@ -280,9 +281,15 @@ The sector key 32-byte of size and contains:
 The key data is encrypted using AES-CCM with an initialization vector of 0.
 
 === AES-XTS
-[yellow-background]*TODO: complete this section*
-
 The FKEV contains both XTS keys.
+
+Both encryption and decryption use:
+
+* AES-XTS with FVEK decryption of sector data
+
+The initialization vector of the AES-XTS is the sector number stored as a
+16-byte little-endian value. The sector number is the offset of the sector
+relative from the start of the volume divided by the sector size.
 
 === Elephant Diffuser
 The Elephant Diffuser A and B variants are described in `[FERGUSON06]`.

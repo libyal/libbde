@@ -787,8 +787,6 @@ int libbde_encryption_crypt(
 		byte_stream_copy_from_uint64_little_endian(
 		 initialization_vector,
 		 block_key );
-
-/* TODO: implement */
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -868,7 +866,7 @@ int libbde_encryption_crypt(
 		      || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
 		{
 			if( libcaes_crypt_xts(
-			     context->fvek_decryption_tweaked_context,
+			     context->fvek_encryption_tweaked_context,
 			     LIBCAES_CRYPT_MODE_ENCRYPT,
 			     initialization_vector,
 			     16,
