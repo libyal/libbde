@@ -11,8 +11,14 @@ Supported BDE formats:
 
 * BitLocker Windows Vista
 * BitLocker Windows 7 
-* BitLocker Windows 8 (Consumer Preview)
+* BitLocker Windows 8
+* BitLocker Windows 10
 * BitLocker To Go
+
+Supported encryption methods:
+
+* AES-CBC
+* AES-XTS
 
 Supported protection methods:
 
@@ -31,7 +37,6 @@ Work in progress:
 
 * Dokan library support
 * Thread-safety in volume API functions
-* BitLocker Windows 10 AES-XTS support
 
 For more information see:
 
