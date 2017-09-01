@@ -669,13 +669,13 @@ int bde_test_volume_initialize(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_free(
 	          &volume,
@@ -686,13 +686,13 @@ int bde_test_volume_initialize(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -705,9 +705,9 @@ int bde_test_volume_initialize(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -723,9 +723,9 @@ int bde_test_volume_initialize(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -857,9 +857,9 @@ int bde_test_volume_free(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -903,9 +903,9 @@ int bde_test_volume_open(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_initialize(
 	          &volume,
@@ -916,13 +916,13 @@ int bde_test_volume_open(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	if( password != NULL )
 	{
@@ -949,7 +949,7 @@ int bde_test_volume_open(
 
 	        BDE_TEST_ASSERT_IS_NULL(
 	         "error",
-        	 error );
+		 error );
 	}
 	if( recovery_password != NULL )
 	{
@@ -976,7 +976,7 @@ int bde_test_volume_open(
 
 	        BDE_TEST_ASSERT_IS_NULL(
 	         "error",
-        	 error );
+		 error );
 	}
 	/* Test open
 	 */
@@ -991,9 +991,9 @@ int bde_test_volume_open(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -1008,9 +1008,9 @@ int bde_test_volume_open(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -1026,13 +1026,13 @@ int bde_test_volume_open(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 
@@ -1081,9 +1081,9 @@ int bde_test_volume_open_wide(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_initialize(
 	          &volume,
@@ -1094,13 +1094,13 @@ int bde_test_volume_open_wide(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	if( password != NULL )
 	{
@@ -1127,7 +1127,7 @@ int bde_test_volume_open_wide(
 
 	        BDE_TEST_ASSERT_IS_NULL(
 	         "error",
-        	 error );
+		 error );
 	}
 	if( recovery_password != NULL )
 	{
@@ -1154,7 +1154,7 @@ int bde_test_volume_open_wide(
 
 	        BDE_TEST_ASSERT_IS_NULL(
 	         "error",
-        	 error );
+		 error );
 	}
 	/* Test open
 	 */
@@ -1169,9 +1169,9 @@ int bde_test_volume_open_wide(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -1186,9 +1186,9 @@ int bde_test_volume_open_wide(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -1204,13 +1204,13 @@ int bde_test_volume_open_wide(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 
@@ -1251,9 +1251,9 @@ int bde_test_volume_close(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -1293,13 +1293,13 @@ int bde_test_volume_open_close(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	if( password != NULL )
 	{
@@ -1326,7 +1326,7 @@ int bde_test_volume_open_close(
 
 	        BDE_TEST_ASSERT_IS_NULL(
 	         "error",
-        	 error );
+		 error );
 	}
 	if( recovery_password != NULL )
 	{
@@ -1353,7 +1353,7 @@ int bde_test_volume_open_close(
 
 	        BDE_TEST_ASSERT_IS_NULL(
 	         "error",
-        	 error );
+		 error );
 	}
 	/* Test open and close
 	 */
@@ -1376,9 +1376,9 @@ int bde_test_volume_open_close(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_close(
 	          volume,
@@ -1389,9 +1389,9 @@ int bde_test_volume_open_close(
 	 result,
 	 0 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test open and close a second time to validate clean up on close
 	 */
@@ -1414,9 +1414,9 @@ int bde_test_volume_open_close(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_close(
 	          volume,
@@ -1427,9 +1427,9 @@ int bde_test_volume_open_close(
 	 result,
 	 0 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Clean up
 	 */
@@ -1442,13 +1442,13 @@ int bde_test_volume_open_close(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "volume",
-         volume );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "volume",
+	 volume );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 
@@ -1487,9 +1487,9 @@ int bde_test_volume_signal_abort(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -1502,9 +1502,9 @@ int bde_test_volume_signal_abort(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );

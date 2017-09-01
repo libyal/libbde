@@ -64,13 +64,13 @@ int bde_test_volume_master_key_initialize(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "volume_master_key",
-         volume_master_key );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_master_key",
+	 volume_master_key );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_master_key_free(
 	          &volume_master_key,
@@ -81,13 +81,13 @@ int bde_test_volume_master_key_initialize(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "volume_master_key",
-         volume_master_key );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "volume_master_key",
+	 volume_master_key );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -100,9 +100,9 @@ int bde_test_volume_master_key_initialize(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -118,9 +118,9 @@ int bde_test_volume_master_key_initialize(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -252,9 +252,9 @@ int bde_test_volume_master_key_free(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -293,13 +293,13 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "volume_master_key",
-         volume_master_key );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "volume_master_key",
+	 volume_master_key );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test regular cases
 	 */
@@ -314,9 +314,9 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -331,9 +331,9 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -349,9 +349,9 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -367,9 +367,9 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -385,9 +385,9 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -403,13 +403,13 @@ int bde_test_volume_master_key_get_identifier(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "volume_master_key",
-         volume_master_key );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "volume_master_key",
+	 volume_master_key );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 
