@@ -105,7 +105,12 @@ int libbde_metadata_initialize(
 		 "%s: unable to clear metadata.",
 		 function );
 
-		goto on_error;
+		memory_free(
+		 *metadata );
+
+		*metadata = NULL;
+
+		return( -1 );
 	}
 	if( libcdata_array_initialize(
 	     &( ( *metadata )->entries_array ),
