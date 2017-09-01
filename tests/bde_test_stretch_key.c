@@ -64,13 +64,13 @@ int bde_test_stretch_key_initialize(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "stretch_key",
-         stretch_key );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "stretch_key",
+	 stretch_key );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_stretch_key_free(
 	          &stretch_key,
@@ -81,13 +81,13 @@ int bde_test_stretch_key_initialize(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "stretch_key",
-         stretch_key );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "stretch_key",
+	 stretch_key );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */
@@ -100,9 +100,9 @@ int bde_test_stretch_key_initialize(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -118,9 +118,9 @@ int bde_test_stretch_key_initialize(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
@@ -252,9 +252,9 @@ int bde_test_stretch_key_free(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );

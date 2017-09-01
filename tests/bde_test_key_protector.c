@@ -55,9 +55,9 @@ int bde_test_key_protector_free(
 	 result,
 	 -1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
 	libcerror_error_free(
 	 &error );
