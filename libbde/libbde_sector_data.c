@@ -226,6 +226,7 @@ int libbde_sector_data_read(
 {
 	static char *function = "libbde_sector_data_read";
 	ssize_t read_count    = 0;
+	uint64_t block_key    = 0;
 
 	if( sector_data == NULL )
 	{
@@ -267,6 +268,28 @@ int libbde_sector_data_read(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle->bytes_per_sector == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid IO handle - missing bytes per sector.",
+		 function );
+
+		return( -1 );
+	}
+	if( encryption_context == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid encryption context.",
 		 function );
 
 		return( -1 );
@@ -466,6 +489,13 @@ int libbde_sector_data_read(
 	}
 	else
 	{
+		block_key = (uint64_t) sector_data_offset;
+
+		if( ( encryption_context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+		 || ( encryption_context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+		{
+			block_key /= io_handle->bytes_per_sector;
+		}
 		if( libbde_encryption_crypt(
 		     encryption_context,
 		     LIBBDE_ENCRYPTION_CRYPT_MODE_DECRYPT,
@@ -473,7 +503,7 @@ int libbde_sector_data_read(
 		     sector_data->data_size,
 		     sector_data->data,
 		     sector_data->data_size,
-		     (uint64_t) sector_data_offset,
+		     block_key,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
