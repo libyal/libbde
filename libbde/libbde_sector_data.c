@@ -272,7 +272,7 @@ int libbde_sector_data_read(
 
 		return( -1 );
 	}
-	if( io_handle->bytes_per_sector == NULL )
+	if( io_handle->bytes_per_sector == 0 )
 	{
 		libcerror_error_set(
 		 error,
