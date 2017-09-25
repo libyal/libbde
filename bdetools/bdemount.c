@@ -100,7 +100,7 @@ void usage_fprint(
 	fprintf( stream, "\t-h:          shows this help\n" );
 	fprintf( stream, "\t-k:          the full volume encryption key and tweak key\n"
 	                 "\t             formatted in base16 and separated by a : character\n"
-	                 "\t             e.g. FKEV:TWEAK\n" );
+	                 "\t             e.g. FVEK:TWEAK\n" );
 	fprintf( stream, "\t-o:          specify the volume offset in bytes\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password\n" );
