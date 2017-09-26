@@ -28,6 +28,11 @@ Supported protection methods:
 * start-up key
 * FKEV and/or TWEAK key data
 
+Unsupported protection methods:
+
+* Trusted Platform Module (TPM)
+* SID-based protector
+
 Additional features:
 
 * support for partial encrypted volumes
