@@ -28,6 +28,8 @@
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
+#include "libbde_libfdatetime.h"
+#include "libbde_libfguid.h"
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
@@ -162,6 +164,192 @@ const char *libbde_debug_print_key_protection_type(
 			return( "password protected" );
 	}
 	return( "_UNKNOWN_" );
+}
+
+/* Prints a FILETIME value
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_debug_print_filetime_value(
+     const char *function_name,
+     const char *value_name,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     int byte_order,
+     uint32_t string_format_flags,
+     libcerror_error_t **error )
+{
+	char date_time_string[ 32 ];
+
+	libfdatetime_filetime_t *filetime = NULL;
+	static char *function             = "libbde_debug_print_filetime_value";
+
+	if( libfdatetime_filetime_initialize(
+	     &filetime,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create filetime.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdatetime_filetime_copy_from_byte_stream(
+	     filetime,
+	     byte_stream,
+	     byte_stream_size,
+	     byte_order,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy byte stream to filetime.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdatetime_filetime_copy_to_utf8_string(
+	     filetime,
+	     (uint8_t *) date_time_string,
+	     32,
+	     string_format_flags,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy filetime to string.",
+		 function );
+
+		goto on_error;
+	}
+	libcnotify_printf(
+	 "%s: %s: %s UTC\n",
+	 function_name,
+	 value_name,
+	 date_time_string );
+
+	if( libfdatetime_filetime_free(
+	     &filetime,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free filetime.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( filetime != NULL )
+	{
+		libfdatetime_filetime_free(
+		 &filetime,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Prints a GUID/UUID value
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_debug_print_guid_value(
+     const char *function_name,
+     const char *value_name,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     int byte_order,
+     uint32_t string_format_flags,
+     libcerror_error_t **error )
+{
+        system_character_t guid_string[ 48 ];
+
+        libfguid_identifier_t *guid = NULL;
+	static char *function       = "libbde_debug_print_guid_value";
+
+	if( libfguid_identifier_initialize(
+	     &guid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create GUID.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfguid_identifier_copy_from_byte_stream(
+	     guid,
+	     byte_stream,
+	     byte_stream_size,
+	     byte_order,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy byte stream to GUID.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfguid_identifier_copy_to_utf8_string(
+	     guid,
+	     (uint8_t *) guid_string,
+	     48,
+	     string_format_flags,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy GUID to string.",
+		 function );
+
+		goto on_error;
+	}
+	libcnotify_printf(
+	 "%s: %s: %s\n",
+	 function_name,
+	 value_name,
+	 guid_string );
+
+	if( libfguid_identifier_free(
+	     &guid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free GUID.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( guid != NULL )
+	{
+		libfguid_identifier_free(
+		 &guid,
+		 NULL );
+	}
+	return( -1 );
 }
 
 /* Prints the read offsets

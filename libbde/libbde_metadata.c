@@ -672,20 +672,14 @@ ssize_t libbde_metadata_read_header(
          uint32_t *metadata_size,
          libcerror_error_t **error )
 {
-	static char *function             = "libbde_metadata_read_header";
-	uint32_t metadata_header_size     = 0;
-	uint32_t metadata_size_copy       = 0;
-	uint32_t version                  = 0;
-	uint16_t encryption_method_copy   = 0;
+	static char *function           = "libbde_metadata_read_header";
+	uint32_t metadata_header_size   = 0;
+	uint32_t metadata_size_copy     = 0;
+	uint32_t version                = 0;
+	uint16_t encryption_method_copy = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	system_character_t filetime_string[ 32 ];
-	system_character_t guid_string[ 48 ];
-
-	libfdatetime_filetime_t *filetime = NULL;
-	libfguid_identifier_t *guid       = NULL;
-	uint32_t value_32bit              = 0;
-	int result                        = 0;
+	uint32_t value_32bit            = 0;
 #endif
 
 	if( metadata == NULL )
@@ -783,7 +777,7 @@ ssize_t libbde_metadata_read_header(
 		 "%s: unable to copy volume identifier.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (bde_metadata_header_v1_t *) header_data )->encryption_method,
@@ -806,7 +800,7 @@ ssize_t libbde_metadata_read_header(
 		 "%s: unsupported metadata header version.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -831,78 +825,23 @@ ssize_t libbde_metadata_read_header(
 		 function,
 		 metadata_size_copy );
 
-		if( libfguid_identifier_initialize(
-		     &guid,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create GUID.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfguid_identifier_copy_from_byte_stream(
-		     guid,
+		if( libbde_debug_print_guid_value(
+		     function,
+		     "volume identifier\t\t\t\t",
 		     metadata->volume_identifier,
 		     16,
 		     LIBFGUID_ENDIAN_LITTLE,
+		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-			 "%s: unable to copy byte stream to GUID.",
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print GUID value.",
 			 function );
 
-			goto on_error;
-		}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libfguid_identifier_copy_to_utf16_string(
-			  guid,
-			  (uint16_t *) guid_string,
-			  48,
-			  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-			  error );
-#else
-		result = libfguid_identifier_copy_to_utf8_string(
-			  guid,
-			  (uint8_t *) guid_string,
-			  48,
-			  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-			  error );
-#endif
-		if( result != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-			 "%s: unable to copy GUID to string.",
-			 function );
-
-			goto on_error;
-		}
-		libcnotify_printf(
-		 "%s: volume identifier\t\t\t\t: %" PRIs_SYSTEM "\n",
-		 function,
-		 guid_string );
-
-		if( libfguid_identifier_free(
-		     &guid,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free GUID.",
-			 function );
-
-			goto on_error;
+			return( -1 );
 		}
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (bde_metadata_header_v1_t *) header_data )->next_nonce_counter,
@@ -926,78 +865,23 @@ ssize_t libbde_metadata_read_header(
 		 libbde_debug_print_encryption_method(
 		  encryption_method_copy ) );
 
-		if( libfdatetime_filetime_initialize(
-		     &filetime,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create filetime.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfdatetime_filetime_copy_from_byte_stream(
-		     filetime,
+		if( libbde_debug_print_filetime_value(
+		     function,
+		     "creation time\t\t\t\t",
 		     ( (bde_metadata_header_v1_t *) header_data )->creation_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to copy filetime from byte stream.",
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
 			 function );
 
-			goto on_error;
-		}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libfdatetime_filetime_copy_to_utf16_string(
-			  filetime,
-			  (uint16_t *) filetime_string,
-			  32,
-			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			  error );
-#else
-		result = libfdatetime_filetime_copy_to_utf8_string(
-			  filetime,
-			  (uint8_t *) filetime_string,
-			  32,
-			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			  error );
-#endif
-		if( result != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to copy filetime to string.",
-			 function );
-
-			goto on_error;
-		}
-		libcnotify_printf(
-		 "%s: creation time\t\t\t\t: %" PRIs_SYSTEM " UTC\n",
-		 function,
-		 filetime_string );
-
-		if( libfdatetime_filetime_free(
-		     &filetime,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free filetime.",
-			 function );
-
-			goto on_error;
+			return( -1 );
 		}
 		libcnotify_printf(
 		 "\n" );
@@ -1012,7 +896,7 @@ ssize_t libbde_metadata_read_header(
 		 "%s: value mismatch for metadata header size.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
 	if( *metadata_size != metadata_size_copy )
 	{
@@ -1023,7 +907,7 @@ ssize_t libbde_metadata_read_header(
 		 "%s: value mismatch for metadata size and copy.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
 	if( *metadata_size < sizeof( bde_metadata_header_v1_t ) )
 	{
@@ -1034,26 +918,9 @@ ssize_t libbde_metadata_read_header(
 		 "%s: metadata size value out of bounds.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
 	return( sizeof( bde_metadata_header_v1_t ) );
-
-on_error:
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( guid != NULL )
-	{
-		libfguid_identifier_free(
-		 &guid,
-		 NULL );
-	}
-	if( filetime != NULL )
-	{
-		libfdatetime_filetime_free(
-		 &filetime,
-		 NULL );
-	}
-#endif
-	return( -1 );
 }
 
 /* Reads a metadata entries
