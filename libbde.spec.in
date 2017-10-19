@@ -5,13 +5,13 @@ Summary: Library to access the BitLocker Drive Encryption (BDE) format
 Group: System Environment/Libraries
 License: LGPL
 Source: %{name}-%{version}.tar.gz
-URL: https://github.com/libyal/libbde/
+URL: https://github.com/libyal/libbde
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-@libbde_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcdata_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libcsplit_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_libfguid_spec_requires@ @ax_libfvalue_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@
-@libbde_spec_build_requires@ @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfvalue_spec_build_requires@ @ax_libhmac_spec_build_requires@ @ax_libuna_spec_build_requires@
+@libbde_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcdata_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libcsplit_spec_requires@ @ax_libcthreads_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_libfguid_spec_requires@ @ax_libfvalue_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@
+@libbde_spec_build_requires@ @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcthreads_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libfvalue_spec_build_requires@ @ax_libhmac_spec_build_requires@ @ax_libuna_spec_build_requires@
 
 %description
-libbde is a library to access the BitLocker Drive Encryption (BDE) format
+Library to access the BitLocker Drive Encryption (BDE) format
 
 %package devel
 Summary: Header files and libraries for developing applications for libbde
@@ -20,15 +20,6 @@ Requires: libbde = %{version}-%{release}
 
 %description devel
 Header files and libraries for developing applications for libbde.
-
-%package tools
-Summary: Several tools for accessing BitLocker Drive Encryption volumes
-Group: Applications/System
-Requires: libbde = %{version}-%{release} @ax_libfuse_spec_requires@
-@libbde_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
-
-%description tools
-Several tools for accessing the BitLocker Drive Encryption volumes
 
 %package python
 Summary: Python 2 bindings for libbde
@@ -47,6 +38,15 @@ BuildRequires: python3-devel
 
 %description python3
 Python 3 bindings for libbde
+
+%package tools
+Summary: Several tools for reading BitLocker Drive Encryption volumes
+Group: Applications/System
+Requires: libbde = %{version}-%{release} @ax_libfuse_spec_requires@
+@libbde_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
+
+%description tools
+Several tools for reading BitLocker Drive Encryption volumes
 
 %prep
 %setup -q
@@ -68,12 +68,14 @@ rm -rf %{buildroot}
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README
+%license COPYING
+%doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
 %files devel
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README ChangeLog
+%license COPYING
+%doc AUTHORS README ChangeLog
 %{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so
@@ -81,26 +83,28 @@ rm -rf %{buildroot}
 %{_includedir}/*
 %{_mandir}/man3/*
 
-%files tools
-%defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README
-%attr(755,root,root) %{_bindir}/bdeinfo
-%attr(755,root,root) %{_bindir}/bdemount
-%{_mandir}/man1/*
-
 %files python
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README
+%license COPYING
+%doc AUTHORS README
 %{_libdir}/python2*/site-packages/*.a
 %{_libdir}/python2*/site-packages/*.la
 %{_libdir}/python2*/site-packages/*.so
 
 %files python3
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING NEWS README
+%license COPYING
+%doc AUTHORS README
 %{_libdir}/python3*/site-packages/*.a
 %{_libdir}/python3*/site-packages/*.la
 %{_libdir}/python3*/site-packages/*.so
+
+%files tools
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%attr(755,root,root) %{_bindir}/*
+%{_mandir}/man1/*
 
 %changelog
 * @SPEC_DATE@ Joachim Metz <joachim.metz@gmail.com> @VERSION@-1
