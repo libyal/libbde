@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
+#include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
@@ -150,16 +151,12 @@ int libbde_aes_ccm_encrypted_key_read(
      libbde_metadata_entry_t *metadata_entry,
      libcerror_error_t **error )
 {
-	uint8_t *value_data               = NULL;
-	static char *function             = "libbde_aes_ccm_encrypted_key_read";
-	size_t value_data_size            = 0;
+	uint8_t *value_data    = NULL;
+	static char *function  = "libbde_aes_ccm_encrypted_key_read";
+	size_t value_data_size = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	system_character_t filetime_string[ 32 ];
-
-	libfdatetime_filetime_t *filetime = NULL;
-	uint32_t value_32bit              = 0;
-	int result                        = 0;
+	uint32_t value_32bit   = 0;
 #endif
 
 	if( aes_ccm_encrypted_key == NULL )
@@ -224,75 +221,20 @@ int libbde_aes_ccm_encrypted_key_read(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		if( libfdatetime_filetime_initialize(
-		     &filetime,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create filetime.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfdatetime_filetime_copy_from_byte_stream(
-		     filetime,
+		if( libbde_debug_print_filetime_value(
+		     function,
+		     "nonce time\t\t\t\t",
 		     ( (bde_metadata_entry_aes_ccm_encrypted_key_header_t *) value_data )->nonce_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to copy filetime from byte stream.",
-			 function );
-
-			goto on_error;
-		}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libfdatetime_filetime_copy_to_utf16_string(
-			  filetime,
-			  (uint16_t *) filetime_string,
-			  32,
-			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			  error );
-#else
-		result = libfdatetime_filetime_copy_to_utf8_string(
-			  filetime,
-			  (uint8_t *) filetime_string,
-			  32,
-			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-			  error );
-#endif
-		if( result != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to copy filetime to string.",
-			 function );
-
-			goto on_error;
-		}
-		libcnotify_printf(
-		 "%s: nonce time\t\t\t\t: %" PRIs_SYSTEM " UTC\n",
-		 function,
-		 filetime_string );
-
-		if( libfdatetime_filetime_free(
-		     &filetime,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free filetime.",
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print FILETIME value.",
 			 function );
 
 			goto on_error;
@@ -368,14 +310,6 @@ int libbde_aes_ccm_encrypted_key_read(
 	return( 1 );
 
 on_error:
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( filetime != NULL )
-	{
-		libfdatetime_filetime_free(
-		 &filetime,
-		 NULL );
-	}
-#endif
 	if( aes_ccm_encrypted_key->data != NULL )
 	{
 		memory_free(

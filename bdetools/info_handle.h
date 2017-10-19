@@ -115,6 +115,18 @@ int info_handle_input_is_locked(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
+int info_handle_filetime_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     uint64_t value_64bit,
+     libcerror_error_t **error );
+
+int info_handle_guid_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     const uint8_t *guid_data,
+     libcerror_error_t **error );
+
 int info_handle_volume_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );

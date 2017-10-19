@@ -1108,6 +1108,238 @@ int info_handle_input_is_locked(
 	return( result );
 }
 
+/* Prints a FILETIME value
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_filetime_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     uint64_t value_64bit,
+     libcerror_error_t **error )
+{
+	system_character_t date_time_string[ 48 ];
+
+	libfdatetime_filetime_t *filetime = NULL;
+	static char *function             = "info_handle_filetime_value_fprint";
+	int result                        = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( value_64bit == 0 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "%s: Not set (0)\n",
+		 value_name );
+	}
+	else
+	{
+		if( libfdatetime_filetime_initialize(
+		     &filetime,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create FILETIME.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfdatetime_filetime_copy_from_64bit(
+		     filetime,
+		     value_64bit,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+			 "%s: unable to copy 64-bit value to FILETIME.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfdatetime_filetime_copy_to_utf16_string(
+			  filetime,
+			  (uint16_t *) date_time_string,
+			  48,
+			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+			  error );
+#else
+		result = libfdatetime_filetime_copy_to_utf8_string(
+			  filetime,
+			  (uint8_t *) date_time_string,
+			  48,
+			  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+			  error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+			 "%s: unable to copy FILETIME to string.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "%s: %" PRIs_SYSTEM " UTC\n",
+		 value_name,
+		 date_time_string );
+
+		if( libfdatetime_filetime_free(
+		     &filetime,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free FILETIME.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	return( 1 );
+
+on_error:
+	if( filetime != NULL )
+	{
+		libfdatetime_filetime_free(
+		 &filetime,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Prints a GUI value
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_guid_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     const uint8_t *guid_data,
+     libcerror_error_t **error )
+{
+	system_character_t guid_string[ 48 ];
+
+	libfguid_identifier_t *guid = NULL;
+	static char *function       = "info_handle_guid_value_fprint";
+	int result                  = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfguid_identifier_initialize(
+	     &guid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create GUID.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfguid_identifier_copy_from_byte_stream(
+	     guid,
+	     guid_data,
+	     16,
+	     LIBFGUID_ENDIAN_LITTLE,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy byte stream to GUID.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfguid_identifier_copy_to_utf16_string(
+		  guid,
+		  (uint16_t *) guid_string,
+		  48,
+		  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		  error );
+#else
+	result = libfguid_identifier_copy_to_utf8_string(
+		  guid,
+		  (uint8_t *) guid_string,
+		  48,
+		  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		  error );
+#endif
+	if( result != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy GUID to string.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "%s: %" PRIs_SYSTEM "\n",
+	 value_name,
+	 guid_string );
+
+	if( libfguid_identifier_free(
+	     &guid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free GUID.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( guid != NULL )
+	{
+		libfguid_identifier_free(
+		 &guid,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Prints the volume information to a stream
  * Returns 1 if successful or -1 on error
  */
@@ -1115,14 +1347,9 @@ int info_handle_volume_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error )
 {
-	uint8_t guid_buffer[ 16 ];
-
-	system_character_t filetime_string[ 32 ];
-	system_character_t guid_string[ 48 ];
+	uint8_t guid_data[ 16 ];
 
 	libbde_key_protector_t *key_protector = NULL;
-	libfdatetime_filetime_t *filetime     = NULL;
-	libfguid_identifier_t *guid           = NULL;
 	system_character_t *value_string      = NULL;
 	static char *function                 = "bdeinfo_volume_info_fprint";
 	size_t value_string_size              = 0;
@@ -1143,32 +1370,6 @@ int info_handle_volume_fprint(
 		 function );
 
 		return( -1 );
-	}
-	if( libfdatetime_filetime_initialize(
-	     &filetime,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create filetime.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfguid_identifier_initialize(
-	     &guid,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create GUID.",
-		 function );
-
-		goto on_error;
 	}
 	fprintf(
 	 info_handle->notify_stream,
@@ -1250,7 +1451,7 @@ int info_handle_volume_fprint(
 
 	if( libbde_volume_get_volume_identifier(
 	     info_handle->input_volume,
-	     guid_buffer,
+	     guid_data,
 	     16,
 	     error ) != 1 )
 	{
@@ -1263,53 +1464,21 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
-	if( libfguid_identifier_copy_from_byte_stream(
-	     guid,
-	     guid_buffer,
-	     16,
-	     LIBFGUID_ENDIAN_LITTLE,
+	if( info_handle_guid_value_fprint(
+	     info_handle,
+	     "\tVolume identifier\t\t",
+	     guid_data,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy byte stream to GUID.",
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print GUID value.",
 		 function );
 
 		goto on_error;
 	}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libfguid_identifier_copy_to_utf16_string(
-		  guid,
-		  (uint16_t *) guid_string,
-		  48,
-		  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-		  error );
-#else
-	result = libfguid_identifier_copy_to_utf8_string(
-		  guid,
-		  (uint8_t *) guid_string,
-		  48,
-		  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-		  error );
-#endif
-	if( result != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy GUID to string.",
-		 function );
-
-		goto on_error;
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tVolume identifier\t\t: %" PRIs_SYSTEM "\n",
-	 guid_string );
-
 	if( libbde_volume_get_creation_time(
 	     info_handle->input_volume,
 	     &value_64bit,
@@ -1324,51 +1493,21 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
-	if( libfdatetime_filetime_copy_from_64bit(
-	     filetime,
+	if( info_handle_filetime_value_fprint(
+	     info_handle,
+	     "\tCreation time\t\t\t",
 	     value_64bit,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_CONVERSION,
-		 LIBCERROR_CONVERSION_ERROR_GENERIC,
-		 "%s: unable to create filetime.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libfdatetime_filetime_copy_to_utf16_string(
-		  filetime,
-		  (uint16_t *) filetime_string,
-		  32,
-		  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		  error );
-#else
-	result = libfdatetime_filetime_copy_to_utf8_string(
-		  filetime,
-		  (uint8_t *) filetime_string,
-		  32,
-		  LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		  error );
-#endif
-	if( result != 1 )
-	{
-		libcerror_error_set(
-		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy filetime to string.",
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print FILETIME value.",
 		 function );
 
 		goto on_error;
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tCreation time\t\t\t: %" PRIs_SYSTEM " UTC\n",
-	 filetime_string );
-
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libbde_volume_get_utf16_description_size(
 	          info_handle->input_volume,
@@ -1505,7 +1644,7 @@ int info_handle_volume_fprint(
 			}
 			if( libbde_key_protector_get_identifier(
 			     key_protector,
-			     guid_buffer,
+			     guid_data,
 			     16,
 			     error ) != 1 )
 			{
@@ -1519,53 +1658,21 @@ int info_handle_volume_fprint(
 
 				goto on_error;
 			}
-			if( libfguid_identifier_copy_from_byte_stream(
-			     guid,
-			     guid_buffer,
-			     16,
-			     LIBFGUID_ENDIAN_LITTLE,
+			if( info_handle_guid_value_fprint(
+			     info_handle,
+			     "\tIdentifier\t\t\t",
+			     guid_data,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-				 "%s: unable to copy byte stream to GUID.",
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 "%s: unable to print GUID value.",
 				 function );
 
 				goto on_error;
 			}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			result = libfguid_identifier_copy_to_utf16_string(
-				  guid,
-				  (uint16_t *) guid_string,
-				  48,
-				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-				  error );
-#else
-			result = libfguid_identifier_copy_to_utf8_string(
-				  guid,
-				  (uint8_t *) guid_string,
-				  48,
-				  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-				  error );
-#endif
-			if( result != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-				 "%s: unable to copy GUID to string.",
-				 function );
-
-				goto on_error;
-			}
-			fprintf(
-			 info_handle->notify_stream,
-			 "\tIdentifier\t\t\t: %" PRIs_SYSTEM "\n",
-			 guid_string );
-
 			if( libbde_key_protector_get_type(
 			     key_protector,
 			     &key_protector_type,
@@ -1653,32 +1760,6 @@ int info_handle_volume_fprint(
 			 "\n" );
 		}
 	}
-	if( libfguid_identifier_free(
-	     &guid,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free GUID.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfdatetime_filetime_free(
-	     &filetime,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free filetime.",
-		 function );
-
-		goto on_error;
-	}
 	return( 1 );
 
 on_error:
@@ -1692,18 +1773,6 @@ on_error:
 	{
 		memory_free(
 		 value_string );
-	}
-	if( guid != NULL )
-	{
-		libfguid_identifier_free(
-		 &guid,
-		 NULL );
-	}
-	if( filetime != NULL )
-	{
-		libfdatetime_filetime_free(
-		 &filetime,
-		 NULL );
 	}
 	return( -1 );
 }

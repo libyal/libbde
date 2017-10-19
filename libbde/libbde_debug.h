@@ -46,6 +46,24 @@ const char *libbde_debug_print_value_type(
 const char *libbde_debug_print_key_protection_type(
              uint16_t key_protection_type );
 
+int libbde_debug_print_filetime_value(
+     const char *function_name,
+     const char *value_name,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     int byte_order,
+     uint32_t string_format_flags,
+     libcerror_error_t **error );
+
+int libbde_debug_print_guid_value(
+     const char *function_name,
+     const char *value_name,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     int byte_order,
+     uint32_t string_format_flags,
+     libcerror_error_t **error );
+
 int libbde_debug_print_read_offsets(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
