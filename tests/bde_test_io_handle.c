@@ -270,6 +270,104 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libbde_io_handle_clear function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_io_handle_clear(
+     void )
+{
+	libbde_io_handle_t *io_handle = NULL;
+	libcerror_error_t *error      = NULL;
+	int result                    = 0;
+
+	/* Initialize test
+	 */
+	result = libbde_io_handle_initialize(
+	          &io_handle,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "io_handle",
+	 io_handle );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libbde_io_handle_clear(
+	          io_handle,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libbde_io_handle_clear(
+	          NULL,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Clean up
+	 */
+	result = libbde_io_handle_free(
+	          &io_handle,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "io_handle",
+	 io_handle );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( io_handle != NULL )
+	{
+		libbde_io_handle_free(
+		 &io_handle,
+		 NULL );
+	}
+	return( 0 );
+}
+
 #endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 /* The main program
@@ -297,7 +395,9 @@ int main(
 	 "libbde_io_handle_free",
 	 bde_test_io_handle_free );
 
-	/* TODO: add tests for libbde_io_handle_clear */
+	BDE_TEST_RUN(
+	 "libbde_io_handle_clear",
+	 bde_test_io_handle_clear );
 
 	/* TODO: add tests for libbde_io_handle_read_volume_header */
 

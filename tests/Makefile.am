@@ -172,6 +172,7 @@ bde_test_stretch_key_LDADD = \
 	@LIBCERROR_LIBADD@
 
 bde_test_support_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
 	bde_test_getopt.c bde_test_getopt.h \
 	bde_test_libbde.h \
 	bde_test_libbfio.h \
@@ -180,7 +181,8 @@ bde_test_support_SOURCES = \
 	bde_test_libcnotify.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
-	bde_test_support.c
+	bde_test_support.c \
+	bde_test_unused.h
 
 bde_test_support_LDADD = \
 	@LIBBFIO_LIBADD@ \
@@ -195,18 +197,25 @@ bde_test_support_LDADD = \
 	@LIBCERROR_LIBADD@
 
 bde_test_volume_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
 	bde_test_getopt.c bde_test_getopt.h \
 	bde_test_libbde.h \
+	bde_test_libbfio.h \
 	bde_test_libcerror.h \
 	bde_test_libclocale.h \
 	bde_test_libcnotify.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
 	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h \
 	bde_test_volume.c
 
 bde_test_volume_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
 	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \

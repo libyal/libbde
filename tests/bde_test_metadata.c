@@ -600,9 +600,9 @@ int bde_test_metadata_get_utf8_description(
 		 result,
 		 -1 );
 
-	        BDE_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
@@ -618,9 +618,9 @@ int bde_test_metadata_get_utf8_description(
 		 result,
 		 -1 );
 
-	        BDE_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
@@ -636,9 +636,9 @@ int bde_test_metadata_get_utf8_description(
 		 result,
 		 -1 );
 
-	        BDE_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
@@ -886,9 +886,9 @@ int bde_test_metadata_get_utf16_description(
 		 result,
 		 -1 );
 
-	        BDE_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
@@ -904,9 +904,9 @@ int bde_test_metadata_get_utf16_description(
 		 result,
 		 -1 );
 
-	        BDE_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
@@ -922,9 +922,9 @@ int bde_test_metadata_get_utf16_description(
 		 result,
 		 -1 );
 
-	        BDE_TEST_ASSERT_IS_NOT_NULL(
-	         "error",
-	         error );
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
 
 		libcerror_error_free(
 		 &error );
