@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20171019],
+ [20171020],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -104,9 +104,6 @@ AX_LIBHMAC_CHECK_ENABLE
 
 dnl Check if libcaes or required headers and functions are available
 AX_LIBCAES_CHECK_ENABLE
-
-dnl Check if libcrypto or required headers and functions are available
-AX_LIBCRYPTO_CHECK_ENABLE
 
 dnl Check if libbde required headers and functions are available
 AX_LIBBDE_CHECK_LOCAL

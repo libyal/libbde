@@ -1228,7 +1228,7 @@ on_error:
 	return( -1 );
 }
 
-/* Prints a GUI value
+/* Prints a GUID value
  * Returns 1 if successful or -1 on error
  */
 int info_handle_guid_value_fprint(
