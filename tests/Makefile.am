@@ -140,12 +140,14 @@ bde_test_metadata_entry_LDADD = \
 
 bde_test_notify_SOURCES = \
 	bde_test_libbde.h \
+	bde_test_libcnotify.h \
 	bde_test_macros.h \
 	bde_test_notify.c \
 	bde_test_unused.h
 
 bde_test_notify_LDADD = \
-	../libbde/libbde.la
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
 
 bde_test_sector_data_SOURCES = \
 	bde_test_libbde.h \
@@ -181,6 +183,7 @@ bde_test_support_SOURCES = \
 	bde_test_libcnotify.h \
 	bde_test_libuna.h \
 	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
 	bde_test_support.c \
 	bde_test_unused.h
 

@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libbde],
- [20180119],
+ [20180324],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -47,6 +47,12 @@ AX_COMMON_CHECK_ENABLE_WINAPI
 
 dnl Check if wide character type should be enabled
 AX_COMMON_CHECK_ENABLE_WIDE_CHARACTER_TYPE
+
+dnl Check if verbose output should be enabled
+AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT
+
+dnl Check if debug output should be enabled
+AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT
 
 dnl Check for type definitions
 AX_TYPES_CHECK_LOCAL
@@ -136,12 +142,6 @@ AX_LIBFUSE_CHECK_ENABLE
 
 dnl Check if bdetools required headers and functions are available
 AX_BDETOOLS_CHECK_LOCAL
-
-dnl Check if libbde should be build with verbose output
-AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT
-
-dnl Check if libbde should be build with debug output
-AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT
 
 dnl Check if tests required headers and functions are available
 AX_TESTS_CHECK_LOCAL
