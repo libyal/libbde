@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libbde_definitions.h"
+#include "libbde_debug.h"
 #include "libbde_encryption.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
