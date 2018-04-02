@@ -45,12 +45,14 @@ EXTRA_DIST = \
 check_PROGRAMS = \
 	bde_test_aes_ccm_encrypted_key \
 	bde_test_error \
+	bde_test_external_key \
 	bde_test_io_handle \
 	bde_test_key \
 	bde_test_key_protector \
 	bde_test_metadata \
 	bde_test_metadata_entry \
 	bde_test_notify \
+	bde_test_password_keep \
 	bde_test_sector_data \
 	bde_test_stretch_key \
 	bde_test_support \
@@ -77,6 +79,18 @@ bde_test_error_SOURCES = \
 
 bde_test_error_LDADD = \
 	../libbde/libbde.la
+
+bde_test_external_key_SOURCES = \
+	bde_test_external_key.c \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_external_key_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
 
 bde_test_io_handle_SOURCES = \
 	bde_test_io_handle.c \
@@ -146,6 +160,18 @@ bde_test_notify_SOURCES = \
 	bde_test_unused.h
 
 bde_test_notify_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_password_keep_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_password_keep.c \
+	bde_test_unused.h
+
+bde_test_password_keep_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
