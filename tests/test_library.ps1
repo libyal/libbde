@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "aes_ccm_encrypted_key error io_handle key key_protector metadata metadata_entry notify sector_data stretch_key volume_master_key"
+$LibraryTests = "aes_ccm_encrypted_key error external_key io_handle key key_protector metadata metadata_entry notify password_keep sector_data stretch_key volume_master_key"
 $LibraryTestsWithInput = "support volume"
 
 Function GetTestToolDirectory
