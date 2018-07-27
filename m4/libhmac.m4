@@ -1,6 +1,6 @@
-dnl Functions for libhmac
+dnl Checks for libhmac required headers and functions
 dnl
-dnl Version: 20170909
+dnl Version: 20180728
 
 dnl Function to detect if libhmac is available
 dnl ac_libhmac_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -215,7 +215,7 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LOCAL],
     ac_cv_libhmac_sha1=$ac_cv_wincrypt_sha1
     ac_cv_libhmac_sha224=$ac_cv_wincrypt_sha224
     ac_cv_libhmac_sha256=$ac_cv_wincrypt_sha256
-    ac_cv_libhmac_sha521=$ac_cv_wincrypt_sha521
+    ac_cv_libhmac_sha512=$ac_cv_wincrypt_sha512
   ])
 
   dnl Check for libcrypto (openssl) support
@@ -240,11 +240,6 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LOCAL],
   ])
 
   dnl Fallback to local versions if necessary
-  ac_cv_libhmac_CPPFLAGS="-I../libhmac";
-  ac_cv_libhmac_LIBADD="../libhmac/libhmac.la";
-
-  ac_cv_libhmac=local
-
   AS_IF(
     [test "x$ac_cv_libhmac_md5" = xno],
     [ac_cv_libhmac_md5=local])
@@ -264,6 +259,11 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LOCAL],
   AS_IF(
     [test "x$ac_cv_libhmac_sha512" = xno],
     [ac_cv_libhmac_sha512=local])
+
+  ac_cv_libhmac_CPPFLAGS="-I../libhmac";
+  ac_cv_libhmac_LIBADD="../libhmac/libhmac.la";
+
+  ac_cv_libhmac=local
   ])
 
 dnl Function to detect how to enable libhmac

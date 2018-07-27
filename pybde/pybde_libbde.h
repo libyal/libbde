@@ -24,14 +24,7 @@
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBBDE_DLL_IMPORT
- * before including libbde.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define LIBBDE_DLL_IMPORT
-#endif
-
 #include <libbde.h>
 
-#endif
+#endif /* !defined( _PYBDE_LIBBDE_H ) */
 

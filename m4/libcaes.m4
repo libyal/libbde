@@ -1,6 +1,6 @@
-dnl Functions for libcaes
+dnl Checks for libcaes required headers and functions
 dnl
-dnl Version: 20170904
+dnl Version: 20180728
 
 dnl Function to detect if libcaes is available
 dnl ac_libcaes_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
