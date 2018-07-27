@@ -28,17 +28,13 @@
  */
 #if !defined( HAVE_LOCAL_LIBBDE )
 
-/* If libtool DLL support is enabled set LIBBDE_DLL_EXPORT
- * before including libbde/extern.h
- */
-#if defined( _WIN32 ) && defined( DLL_EXPORT )
-#define LIBBDE_DLL_EXPORT
-#endif
-
 #include <libbde/extern.h>
 
+#define LIBBDE_EXTERN_VARIABLE	LIBBDE_EXTERN
+
 #else
-#define LIBBDE_EXTERN	/* extern */
+#define LIBBDE_EXTERN		/* extern */
+#define LIBBDE_EXTERN_VARIABLE	extern
 
 #endif /* !defined( HAVE_LOCAL_LIBBDE ) */
 

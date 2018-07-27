@@ -1,6 +1,6 @@
-dnl Checks for libcrypto or required headers and functions
+dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20171008
+dnl Version: 20180727
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -43,14 +43,38 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD],
 
   AC_CHECK_LIB(
     crypto,
-    EVP_MD_CTX_init,
+    EVP_MD_CTX_new,
     [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_md=no])
-  AC_CHECK_LIB(
-    crypto,
-    EVP_MD_CTX_cleanup,
-    [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_md=no])
+    [ac_cv_libcrypto_dummy=no])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_MD_CTX_new" = xyes],
+    [dnl Check for the new EVP API functions
+    AC_CHECK_LIB(
+      crypto,
+      EVP_MD_CTX_free,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_md=no])
+    ],
+    [dnl Check for the old EVP API functions
+    AC_CHECK_LIB(
+      crypto,
+      EVP_MD_CTX_init,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_md=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_MD_CTX_cleanup,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_md=no])
+
+    AC_CHECK_LIB(
+      crypto,
+      ERR_remove_thread_state,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_md=no])
+    ])
+
   AC_CHECK_LIB(
     crypto,
     EVP_DigestInit_ex,
@@ -66,11 +90,29 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD],
     EVP_DigestFinal_ex,
     [ac_cv_libcrypto_dummy=yes],
     [ac_cv_libcrypto_evp_md=no])
-  AC_CHECK_LIB(
-    crypto,
-    ERR_remove_thread_state,
-    [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_md=no])
+
+  AS_IF(
+    [test "x$ac_cv_enable_openssl_evp_md" = xyes && "x$ac_cv_libcrypto_evp_md" = xno],
+    [AC_MSG_FAILURE(
+      [Missing OpenSSL EVP MD support],
+      [1])
+    ])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_MD_CTX_init" = xyes],
+    [AC_DEFINE(
+      [HAVE_EVP_MD_CTX_INIT],
+      [1],
+      [Define to 1 if you have the `EVP_MD_CTX_init' function".])
+    ])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_MD_CTX_cleanup" = xyes],
+    [AC_DEFINE(
+      [HAVE_EVP_MD_CTX_CLEANUP],
+      [1],
+      [Define to 1 if you have the `EVP_MD_CTX_cleanup' function".])
+    ])
   ])
 
 dnl Function to detect if openssl EVP MD5 functions are available
@@ -320,14 +362,38 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
   dnl Check if all required libcrypto (openssl) EVP CIPHER functions are available
   AC_CHECK_LIB(
     crypto,
-    EVP_CIPHER_CTX_init,
+    EVP_CIPHER_CTX_new,
     [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_cipher=no])
-  AC_CHECK_LIB(
-    crypto,
-    EVP_CIPHER_CTX_cleanup,
-    [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_cipher=no])
+    [ac_cv_libcrypto_dummy=no])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_CIPHER_CTX_new" = xyes],
+    [dnl Check for the new EVP API functions
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_CTX_free,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    ],
+    [dnl Check for the old EVP API functions
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_CTX_init,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_CTX_cleanup,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+
+    AC_CHECK_LIB(
+      crypto,
+      ERR_remove_thread_state,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    ])
+
   AC_CHECK_LIB(
     crypto,
     EVP_CIPHER_CTX_set_padding,
@@ -349,11 +415,29 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
     EVP_CipherFinal_ex,
     [ac_cv_libcrypto_dummy=yes],
     [ac_cv_libcrypto_evp_cipher=no])
-  AC_CHECK_LIB(
-    crypto,
-    ERR_remove_thread_state,
-    [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_cipher=no])
+
+  AS_IF(
+    [test "x$ac_cv_enable_openssl_evp_cipher" = xyes && "x$ac_cv_libcrypto_evp_cipher" = xno],
+    [AC_MSG_FAILURE(
+      [Missing OpenSSL EVP CIPHER support],
+      [1])
+    ])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_CIPHER_CTX_init" = xyes],
+    [AC_DEFINE(
+      [HAVE_EVP_CIPHER_CTX_INIT],
+      [1],
+      [Define to 1 if you have the `EVP_CIPHER_CTX_init' function".])
+    ])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_CIPHER_CTX_cleanup" = xyes],
+    [AC_DEFINE(
+      [HAVE_EVP_CIPHER_CTX_CLEANUP],
+      [1],
+      [Define to 1 if you have the `EVP_CIPHER_CTX_cleanup' function".])
+    ])
   ])
 
 dnl Function to detect if openssl AES functions are available
@@ -589,20 +673,20 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_ENABLE],
   [AX_COMMON_ARG_WITH(
     [openssl],
     [openssl],
-    [search for openssl in includedir and libdir or in the specified DIR, or no if not to use openssl],
+    [search for OpenSSL in includedir and libdir or in the specified DIR, or no if not to use OpenSSL],
     [auto-detect],
     [DIR])
 
   AX_COMMON_ARG_ENABLE(
     [openssl-evp-cipher],
     [openssl_evp_cipher],
-    [enable openssl EVP CIPHER support if available],
+    [enable OpenSSL EVP CIPHER support, or no to disable],
     [auto-detect])
 
   AX_COMMON_ARG_ENABLE(
     [openssl-evp-md],
     [openssl_evp_md],
-    [enable openssl EVP MD support if available],
+    [enable OpenSSL EVP MD support, or no to disable],
     [auto-detect])
 
   dnl Check for a shared library version

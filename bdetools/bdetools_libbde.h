@@ -24,13 +24,6 @@
 
 #include <common.h>
 
-/* If Cygwin libtool DLL support is enabled set LIBBDE_DLL_IMPORT
- * before including libbde.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
-#define LIBBDE_DLL_IMPORT
-#endif
-
 #include <libbde.h>
 
 #endif /* !defined( _BDETOOLS_LIBBDE_H ) */
