@@ -1745,6 +1745,18 @@ int libbde_volume_open_read_keys_from_metadata(
 	}
 	if( result != 0 )
 	{
+		if( ( volume_header_offset != 0 )
+		 && ( volume_header_size == 0 ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid volume header size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		internal_volume->io_handle->encrypted_volume_size = encrypted_volume_size;
 		internal_volume->io_handle->volume_header_offset  = volume_header_offset;
 		internal_volume->io_handle->volume_header_size    = volume_header_size;

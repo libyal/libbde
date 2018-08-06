@@ -528,7 +528,8 @@ int libbde_metadata_read_block(
 		libcnotify_printf(
 		 "\n" );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
 		if( io_handle->second_metadata_offset == 0 )
@@ -645,6 +646,20 @@ int libbde_metadata_read_block(
 		 function );
 
 		goto on_error;
+	}
+	if( metadata->volume_header_size == 0 )
+	{
+		metadata->volume_header_size = number_of_volume_header_sectors * io_handle->bytes_per_sector;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: calculated volume header size\t\t: %" PRIu64 "\n",
+			 function,
+			 metadata->volume_header_size );
+		}
+#endif
 	}
 	memory_free(
 	 fve_metadata_block );
