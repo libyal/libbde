@@ -261,6 +261,7 @@ int libbde_metadata_read_block(
 	uint64_t first_metadata_offset           = 0;
 	uint64_t second_metadata_offset          = 0;
 	uint64_t third_metadata_offset           = 0;
+	uint64_t volume_header_size              = 0;
 	uint32_t metadata_size                   = 0;
 	uint32_t number_of_volume_header_sectors = 0;
 
@@ -647,20 +648,35 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	if( metadata->volume_header_size == 0 )
-	{
-		metadata->volume_header_size = number_of_volume_header_sectors * io_handle->bytes_per_sector;
+	volume_header_size = number_of_volume_header_sectors * io_handle->bytes_per_sector;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: calculated volume header size\t\t: %" PRIu64 "\n",
+		 function,
+		 volume_header_size );
+	}
+#endif
+	if( metadata->volume_header_size == 0 )
+	{
+		metadata->volume_header_size = volume_header_size;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	else if( libcnotify_verbose != 0 )
+	{
+		if( metadata->volume_header_size != volume_header_size )
 		{
 			libcnotify_printf(
-			 "%s: calculated volume header size\t\t: %" PRIu64 "\n",
-			 function,
-			 metadata->volume_header_size );
+			 "%s: volume header size in FVE Volume header block does not match number of volume header sectors.\n",
+			 function );
+
+			return( -1 );
 		}
-#endif
 	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	memory_free(
 	 fve_metadata_block );
 
