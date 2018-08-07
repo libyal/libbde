@@ -793,6 +793,26 @@ The password protected VMK consists of:
 | 0x2000 | | VMK protected with password
 |===
 
+===== Notes
+
+It has been suggested that 0x0500 represents VMK protected with TPM and PIN
+
+....
+Key protector types defined by the GetKeyProtectorType function documenation
+
+0 Unknown or other protector type
+1 Trusted Platform Module (TPM)
+2 External key
+3 Numerical password
+4 TPM And PIN
+5 TPM And Startup Key
+6 TPM And PIN And Startup Key
+7 Public Key
+8 Passphrase
+9 TPM Certificate
+10 CryptoAPI Next Generation (CNG) Protector
+....
+
 === FVE External Key
 The FVE External Key has value type 0x0009. It is variable in size and consists
 of:
@@ -927,6 +947,18 @@ The identifier of the VMK should match the identifier in the BEK file header.
 |===
 | Title: | BitLocker Drive Encryption Overview
 | URL: | http://technet.microsoft.com/en-us/library/cc732774.aspx
+|===
+
+[cols="1,5",options="header"]
+|===
+| Title: | Win32_EncryptableVolume class
+| URL: | https://docs.microsoft.com/en-us/windows/desktop/SecProv/win32-encryptablevolume
+|===
+
+[cols="1,5",options="header"]
+|===
+| Title: | GetKeyProtectorType method of the Win32_EncryptableVolume class
+| URL: | https://docs.microsoft.com/en-us/windows/desktop/SecProv/getkeyprotectortype-win32-encryptablevolume
 |===
 
 [appendix]
