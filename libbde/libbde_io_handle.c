@@ -900,7 +900,7 @@ int libbde_io_handle_read_sector(
 		 "%s: unable to set sector data as element value.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	return( 1 );
 

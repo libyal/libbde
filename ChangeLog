@@ -1,4 +1,5 @@
 TODO
+* sector data create encrypted_data on demand
 * tread safety
   - libbde_key_protector functions ?
 * add unlock function?

@@ -16,7 +16,6 @@ MSVSCPP_FILES = \
 	bde_test_volume_master_key/bde_test_volume_master_key.vcproj \
 	bdeinfo/bdeinfo.vcproj \
 	bdemount/bdemount.vcproj \
-	dokan/dokan.vcproj \
 	libbde/libbde.vcproj \
 	libbfio/libbfio.vcproj \
 	libcaes/libcaes.vcproj \

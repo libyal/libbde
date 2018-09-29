@@ -76,8 +76,8 @@ int libbde_encryption_free(
 
 int libbde_encryption_set_keys(
      libbde_encryption_context_t *context,
-     const uint8_t *full_volume_encryption_key,
-     size_t full_volume_encryption_key_size,
+     const uint8_t *key,
+     size_t key_size,
      const uint8_t *tweak_key,
      size_t tweak_key_size,
      libcerror_error_t **error );
