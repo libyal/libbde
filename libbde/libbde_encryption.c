@@ -388,8 +388,8 @@ int libbde_encryption_free(
  */
 int libbde_encryption_set_keys(
      libbde_encryption_context_t *context,
-     const uint8_t *full_volume_encryption_key,
-     size_t full_volume_encryption_key_size,
+     const uint8_t *key,
+     size_t key_size,
      const uint8_t *tweak_key,
      size_t tweak_key_size,
      libcerror_error_t **error )
@@ -409,24 +409,24 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( full_volume_encryption_key == NULL )
+	if( key == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid full volume encryption key.",
+		 "%s: invalid key.",
 		 function );
 
 		return( -1 );
 	}
-	if( full_volume_encryption_key_size > (size_t) SSIZE_MAX )
+	if( key_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid full volume encryption key size value exceeds maximum.",
+		 "%s: invalid key size value exceeds maximum.",
 		 function );
 
 		return( -1 );
@@ -471,13 +471,13 @@ int libbde_encryption_set_keys(
 	{
 		key_byte_size = 64;
 	}
-	if( full_volume_encryption_key_size < key_byte_size )
+	if( key_size < key_byte_size )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-		 "%s: invalid full volume encryption key value too small.",
+		 "%s: invalid key value too small.",
 		 function );
 
 		return( -1 );
@@ -503,7 +503,7 @@ int libbde_encryption_set_keys(
 		if( libcaes_context_set_key(
 		     context->fvek_decryption_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
-		     full_volume_encryption_key,
+		     key,
 		     key_bit_size,
 		     error ) != 1 )
 		{
@@ -511,7 +511,7 @@ int libbde_encryption_set_keys(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set full volume encryption key in decryption context.",
+			 "%s: unable to set key in decryption context.",
 			 function );
 
 			return( -1 );
@@ -519,7 +519,7 @@ int libbde_encryption_set_keys(
 		if( libcaes_context_set_key(
 		     context->fvek_encryption_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
-		     full_volume_encryption_key,
+		     key,
 		     key_bit_size,
 		     error ) != 1 )
 		{
@@ -527,7 +527,7 @@ int libbde_encryption_set_keys(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set full volume encryption key in encryption context.",
+			 "%s: unable to set key in encryption context.",
 			 function );
 
 			return( -1 );
@@ -580,9 +580,9 @@ int libbde_encryption_set_keys(
 		if( libcaes_tweaked_context_set_keys(
 		     context->fvek_decryption_tweaked_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
-		     full_volume_encryption_key,
+		     key,
 		     key_bit_size,
-		     &( full_volume_encryption_key[ key_byte_size ] ),
+		     &( key[ key_byte_size ] ),
 		     key_bit_size,
 		     error ) != 1 )
 		{
@@ -590,7 +590,7 @@ int libbde_encryption_set_keys(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set full volume encryption key in decryption tweaked context.",
+			 "%s: unable to set keys in decryption tweaked context.",
 			 function );
 
 			return( -1 );
@@ -598,9 +598,9 @@ int libbde_encryption_set_keys(
 		if( libcaes_tweaked_context_set_keys(
 		     context->fvek_encryption_tweaked_context,
 		     LIBCAES_CRYPT_MODE_ENCRYPT,
-		     full_volume_encryption_key,
+		     key,
 		     key_bit_size,
-		     &( full_volume_encryption_key[ key_byte_size ] ),
+		     &( key[ key_byte_size ] ),
 		     key_bit_size,
 		     error ) != 1 )
 		{
@@ -608,7 +608,7 @@ int libbde_encryption_set_keys(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set full volume encryption key in encryption tweaked context.",
+			 "%s: unable to set keys in encryption tweaked context.",
 			 function );
 
 			return( -1 );
@@ -731,7 +731,7 @@ int libbde_encryption_crypt(
 			 "%s: unable to encrypt initialization vector.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
 		 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
@@ -755,7 +755,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to encrypt sector key data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			/* Set the last byte to contain 0x80 (128)
 			 */
@@ -777,7 +777,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to encrypt sector key data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 		}
 	}
@@ -833,7 +833,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to encrypt data using Diffuser.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 		}
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
@@ -859,7 +859,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to AES-CBC encrypt output data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 		}
 		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
@@ -883,7 +883,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to AES-XTS decrypt output data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 		}
 	}
@@ -912,7 +912,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to AES-CBC decrypt output data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 		}
 		else if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
@@ -936,7 +936,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to AES-XTS decrypt output data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 		}
 		if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
@@ -954,7 +954,7 @@ int libbde_encryption_crypt(
 				 "%s: unable to decrypt data using Diffuser.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			sector_key_data_index = 0;
 
@@ -974,5 +974,23 @@ int libbde_encryption_crypt(
 		}
 	}
 	return( 1 );
+
+on_error:
+	memory_set(
+	 sector_key_data,
+	 0,
+	 32 );
+
+	memory_set(
+	 block_key_data,
+	 0,
+	 16 );
+
+	memory_set(
+	 initialization_vector,
+	 0,
+	 16 );
+
+	return( -1 );
 }
 

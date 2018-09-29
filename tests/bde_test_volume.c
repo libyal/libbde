@@ -2159,7 +2159,6 @@ int bde_test_volume_get_size(
 	libcerror_error_t *error = NULL;
 	size64_t size            = 0;
 	int result               = 0;
-	int size_is_set          = 0;
 
 	/* Test regular cases
 	 */
@@ -2176,8 +2175,6 @@ int bde_test_volume_get_size(
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
-
-	size_is_set = result;
 
 	/* Test error cases
 	 */
@@ -2198,25 +2195,23 @@ int bde_test_volume_get_size(
 	libcerror_error_free(
 	 &error );
 
-	if( size_is_set != 0 )
-	{
-		result = libbde_volume_get_size(
-		          volume,
-		          NULL,
-		          &error );
+	result = libbde_volume_get_size(
+	          volume,
+	          NULL,
+	          &error );
 
-		BDE_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
 
-		BDE_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
-		libcerror_error_free(
-		 &error );
-	}
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:
@@ -2782,10 +2777,9 @@ on_error:
 int bde_test_volume_get_number_of_key_protectors(
      libbde_volume_t *volume )
 {
-	libcerror_error_t *error            = NULL;
-	int number_of_key_protectors        = 0;
-	int number_of_key_protectors_is_set = 0;
-	int result                          = 0;
+	libcerror_error_t *error     = NULL;
+	int number_of_key_protectors = 0;
+	int result                   = 0;
 
 	/* Test regular cases
 	 */
@@ -2802,8 +2796,6 @@ int bde_test_volume_get_number_of_key_protectors(
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
-
-	number_of_key_protectors_is_set = result;
 
 	/* Test error cases
 	 */
@@ -2824,25 +2816,23 @@ int bde_test_volume_get_number_of_key_protectors(
 	libcerror_error_free(
 	 &error );
 
-	if( number_of_key_protectors_is_set != 0 )
-	{
-		result = libbde_volume_get_number_of_key_protectors(
-		          volume,
-		          NULL,
-		          &error );
+	result = libbde_volume_get_number_of_key_protectors(
+	          volume,
+	          NULL,
+	          &error );
 
-		BDE_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
 
-		BDE_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
-		libcerror_error_free(
-		 &error );
-	}
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:

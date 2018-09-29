@@ -1532,8 +1532,7 @@ int info_handle_volume_fprint(
 	}
 	if( value_string_size > 0 )
 	{
-		if( ( value_string_size > (size_t) SSIZE_MAX )
-		 || ( ( sizeof( system_character_t ) * value_string_size ) > (size_t) SSIZE_MAX ) )
+		if( value_string_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
 		{
 			libcerror_error_set(
 			 error,
