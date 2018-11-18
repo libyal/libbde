@@ -2,10 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="bdemount"
-	ProjectGUID="{91A40238-86E3-44BA-8CFE-8410F4EE492C}"
-	RootNamespace="bdemount"
-	Keyword="Win32Proj"
+	Name="dokan"
+	ProjectGUID="{52A9B3D2-0702-429E-8BAA-DC071A823370}"
+	RootNamespace="dokan"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -20,9 +19,8 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
-			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\..\dokan\dokan"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LIBDOKAN;LIBBDE_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\..\dokan\sys\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;DOKAN_DLL"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -58,14 +56,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="1"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="2"
 				DataExecutionPrevention="2"
 				TargetMachine="1"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -93,7 +89,7 @@
 			Name="VSDebug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -114,8 +110,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\..\dokan\dokan"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LIBDOKAN;LIBBDE_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\..\dokan\sys\"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;DOKAN_DLL"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -134,15 +130,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="1"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
 				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="1"
 				TargetMachine="1"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -176,23 +170,75 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\bdetools\bdemount.c"
+				RelativePath="..\..\..\dokan\dokan\access.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_getopt.c"
+				RelativePath="..\..\..\dokan\dokan\cleanup.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_output.c"
+				RelativePath="..\..\..\dokan\dokan\close.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_signal.c"
+				RelativePath="..\..\..\dokan\dokan\create.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\mount_handle.c"
+				RelativePath="..\..\..\dokan\dokan\directory.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\dokan.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\fileinfo.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\flush.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\lock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\mount.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\read.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\security.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\setfile.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\status.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\timeout.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\version.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\volume.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\dokan\dokan\write.c"
 				>
 			</File>
 		</Filter>
@@ -202,51 +248,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\bdetools\bdetools_getopt.h"
+				RelativePath="..\..\..\dokan\dokan\dokan.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_i18n.h"
+				RelativePath="..\..\..\dokan\dokan\dokanc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_libbde.h"
+				RelativePath="..\..\..\dokan\dokan\dokani.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_libbfio.h"
+				RelativePath="..\..\..\dokan\dokan\fileinfo.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\bdetools_libcerror.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\bdetools_libclocale.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\bdetools_libcnotify.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\bdetools_libcsplit.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\bdetools_output.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\bdetools_signal.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\bdetools_unused.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\bdetools\mount_handle.h"
+				RelativePath="..\..\..\dokan\dokan\list.h"
 				>
 			</File>
 		</Filter>
