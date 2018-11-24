@@ -1485,7 +1485,7 @@ int libbde_volume_open_read(
 		     (intptr_t *) internal_volume->io_handle,
 		     NULL,
 		     NULL,
-		     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libbde_io_handle_read_sector,
+		     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libbde_io_handle_read_sector,
 		     NULL,
 		     LIBFDATA_DATA_HANDLE_FLAG_NON_MANAGED,
 		     error ) != 1 )
@@ -2067,7 +2067,7 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 		if( libfdata_vector_get_element_value_at_offset(
 		     internal_volume->sectors_vector,
 		     (intptr_t *) file_io_handle,
-		     internal_volume->sectors_cache,
+		     (libfdata_cache_t *) internal_volume->sectors_cache,
 		     internal_volume->current_offset,
 		     &element_data_offset,
 		     (intptr_t **) &sector_data,

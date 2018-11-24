@@ -42,7 +42,8 @@
 
 const uint8_t bde_boot_entry_point_vista[ 3 ] = { 0xeb, 0x52, 0x90 };
 const uint8_t bde_boot_entry_point_win7[ 3 ]  = { 0xeb, 0x58, 0x90 };
-const uint8_t bde_identifier[ 16 ]            = { 0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
+const uint8_t bde_identifier[ 16 ]            = {
+	0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
 
 const char *bde_signature                         = "-FVE-FS-";
 const char *bde_ntfs_volume_file_system_signature = "NTFS    ";
@@ -886,7 +887,7 @@ int libbde_io_handle_read_sector(
 	if( libfdata_vector_set_element_value_by_index(
 	     vector,
 	     (intptr_t *) file_io_handle,
-	     cache,
+	     (libfdata_cache_t *) cache,
 	     element_index,
 	     (intptr_t *) sector_data,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libbde_sector_data_free,
