@@ -52,6 +52,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.9 | J.B. Metz | September 2017 | Additional information regarding AES-XTS encryption method.
 | 0.0.10 | J.B. Metz | August 2018 | Additional information regarding volume header size. +
 Additional information regarding BitLocker To Go Application files with thanks to K. Sung.
+| 0.0.11 | J.B. Metz | December 2018 | Corrected typos
 |===
 
 :numbered:
@@ -256,7 +257,7 @@ Both encryption and decryption use:
 
 * AES-CBC with FVEK decryption of sector data
 
-The initialization vector of the AES-CBC s the sector offset AES-ECB encrypted
+The initialization vector of the AES-CBC is the sector offset AES-ECB encrypted
 with the FVEK stored as a 16-byte little-endian value. The sector offset is
 the offset of the sector relative from the start of the volume.
 
@@ -275,7 +276,7 @@ Decryption:
 * Elephant Elephant Diffuser A
 * XOR with sector key
 
-The initialization vector of the AES-CBC s the sector offset AES-ECB encrypted
+The initialization vector of the AES-CBC is the sector offset AES-ECB encrypted
 with the FVEK stored as a 16-byte little-endian value. The sector offset is
 the offset of the sector relative from the start of the volume.
 
