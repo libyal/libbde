@@ -94,7 +94,7 @@ int bdetools_output_initialize(
 
 /* Prints the copyright information
  */
-void bdeoutput_copyright_fprint(
+void bdetools_output_copyright_fprint(
       FILE *stream )
 {
 	if( stream == NULL )
@@ -126,7 +126,7 @@ void bdeoutput_copyright_fprint(
 
 /* Prints the version information
  */
-void bdeoutput_version_fprint(
+void bdetools_output_version_fprint(
       FILE *stream,
       const char *program )
 {
@@ -147,7 +147,7 @@ void bdeoutput_version_fprint(
 
 /* Prints the detailed version information
  */
-void bdeoutput_version_detailed_fprint(
+void bdetools_output_version_detailed_fprint(
       FILE *stream,
       const char *program )
 {

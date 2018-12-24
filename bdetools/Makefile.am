@@ -61,13 +61,19 @@ bdemount_SOURCES = \
 	bdetools_i18n.h \
 	bdetools_libbfio.h \
 	bdetools_libbde.h \
+	bdetools_libcdata.h \
 	bdetools_libcerror.h \
 	bdetools_libclocale.h \
 	bdetools_libcnotify.h \
+	bdetools_libcpath.h \
 	bdetools_libcsplit.h \
 	bdetools_output.c bdetools_output.h \
 	bdetools_signal.c bdetools_signal.h \
 	bdetools_unused.h \
+	mount_dokan.c mount_dokan.h \
+	mount_file_entry.c mount_file_entry.h \
+	mount_file_system.c mount_file_system.h \
+	mount_fuse.c mount_file_fuse.h \
 	mount_handle.c mount_handle.h
 
 bdemount_LDADD = \

@@ -1,5 +1,5 @@
 /*
- * Common output functions for the bdetools
+ * The libcpath header wrapper
  *
  * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,35 +19,30 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _BDETOOLS_OUTPUT_H )
-#define _BDETOOLS_OUTPUT_H
+#if !defined( _BDETOOLS_LIBCPATH_H )
+#define _BDETOOLS_LIBCPATH_H
 
 #include <common.h>
-#include <file_stream.h>
-#include <types.h>
 
-#if defined( __cplusplus )
-extern "C" {
+/* Define HAVE_LOCAL_LIBCPATH for local use of libcpath
+ */
+#if defined( HAVE_LOCAL_LIBCPATH )
+
+#include <libcpath_definitions.h>
+#include <libcpath_path.h>
+
+#else
+
+/* If libtool DLL support is enabled set LIBCPATH_DLL_IMPORT
+ * before including libcpath.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT ) && !defined( HAVE_STATIC_EXECUTABLES )
+#define LIBCPATH_DLL_IMPORT
 #endif
 
-int bdetools_output_initialize(
-     int stdio_mode,
-     libcerror_error_t **error );
+#include <libcpath.h>
 
-void bdetools_output_copyright_fprint(
-      FILE *stream );
+#endif /* defined( HAVE_LOCAL_LIBCPATH ) */
 
-void bdetools_output_version_fprint(
-      FILE *stream,
-      const char *program );
-
-void bdetools_output_version_detailed_fprint(
-      FILE *stream,
-      const char *program );
-
-#if defined( __cplusplus )
-}
-#endif
-
-#endif /* !defined( _BDETOOLS_OUTPUT_H ) */
+#endif /* !defined( _BDETOOLS_LIBCPATH_H ) */
 
