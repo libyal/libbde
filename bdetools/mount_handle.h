@@ -40,14 +40,6 @@ typedef struct mount_handle mount_handle_t;
 
 struct mount_handle
 {
-	/* The basename
-	 */
-	system_character_t *basename;
-
-	/* The basename size
-	 */
-	size_t basename_size;
-
 	/* The file system
 	 */
 	mount_file_system_t *file_system;
@@ -117,12 +109,6 @@ int mount_handle_free(
 
 int mount_handle_signal_abort(
      mount_handle_t *mount_handle,
-     libcerror_error_t **error );
-
-int mount_handle_set_basename(
-     mount_handle_t *mount_handle,
-     const system_character_t *basename,
-     size_t basename_size,
      libcerror_error_t **error );
 
 int mount_handle_set_keys(

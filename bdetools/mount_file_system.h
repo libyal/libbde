@@ -61,10 +61,6 @@ int mount_file_system_free(
      mount_file_system_t **file_system,
      libcerror_error_t **error );
 
-int mount_file_system_signal_abort(
-     mount_file_system_t *file_system,
-     libcerror_error_t **error );
-
 int mount_file_system_set_path_prefix(
      mount_file_system_t *file_system,
      const system_character_t *path_prefix,
