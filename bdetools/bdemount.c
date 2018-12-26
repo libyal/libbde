@@ -405,8 +405,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open: %" PRIs_SYSTEM "\n",
-		 source );
+		 "Unable to open source volume\n" );
 
 		goto on_error;
 	}
@@ -416,8 +415,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to unlock: %" PRIs_SYSTEM "\n",
-		 source );
+		 "Unable to unlock source volume\n" );
 
 		goto on_error;
 	}

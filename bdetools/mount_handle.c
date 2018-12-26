@@ -29,7 +29,6 @@
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
 #include "bdetools_libcerror.h"
-#include "bdetools_libcpath.h"
 #include "bdetools_libcsplit.h"
 #include "bdetools_libuna.h"
 #include "mount_file_entry.h"
@@ -157,7 +156,6 @@ int mount_handle_system_string_copy_from_64_bit_in_decimal(
 	return( 1 );
 }
 
-
 /* Creates a mount handle
  * Make sure the value mount_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
@@ -267,11 +265,6 @@ int mount_handle_free(
 	}
 	if( *mount_handle != NULL )
 	{
-		if( ( *mount_handle )->basename != NULL )
-		{
-			memory_free(
-			 ( *mount_handle )->basename );
-		}
 		if( mount_file_system_free(
 		     &( ( *mount_handle )->file_system ),
 		     error ) != 1 )
@@ -281,19 +274,6 @@ int mount_handle_free(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free file system.",
-			 function );
-
-			result = -1;
-		}
-		if( libbfio_handle_free(
-		     &( ( *mount_handle )->file_io_handle ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file IO handle.",
 			 function );
 
 			result = -1;
@@ -327,7 +307,10 @@ int mount_handle_signal_abort(
      mount_handle_t *mount_handle,
      libcerror_error_t **error )
 {
-	static char *function = "mount_handle_signal_abort";
+	libbde_volume_t *volume = NULL;
+	static char *function   = "mount_handle_signal_abort";
+	int number_of_volumes   = 0;
+	int volume_index        = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -340,133 +323,56 @@ int mount_handle_signal_abort(
 
 		return( -1 );
 	}
-	if( mount_file_system_signal_abort(
+	if( mount_file_system_get_number_of_volumes(
 	     mount_handle->file_system,
+	     &number_of_volumes,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to signal file system abort.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
 		 function );
 
 		return( -1 );
+	}
+	for( volume_index = number_of_volumes - 1;
+	     volume_index > 0;
+	     volume_index-- )
+	{
+		if( mount_file_system_get_volume_by_index(
+		     mount_handle->file_system,
+		     volume_index,
+		     &volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume: %d.",
+			 function,
+			 volume_index );
+
+			return( -1 );
+		}
+		if( libbde_volume_signal_abort(
+		     volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to signal volume: %d to abort.",
+			 function,
+			 volume_index );
+
+			return( -1 );
+		}
 	}
 	return( 1 );
-}
-
-/* Sets the basename
- * Returns 1 if successful or -1 on error
- */
-int mount_handle_set_basename(
-     mount_handle_t *mount_handle,
-     const system_character_t *basename,
-     size_t basename_size,
-     libcerror_error_t **error )
-{
-	static char *function = "mount_handle_set_basename";
-
-	if( mount_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid mount handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( mount_handle->basename != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid mount handle - basename value already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( basename == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid basename.",
-		 function );
-
-		return( -1 );
-	}
-	if( basename_size == 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: missing basename.",
-		 function );
-
-		goto on_error;
-	}
-	if( basename_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid basename size value exceeds maximum.",
-		 function );
-
-		goto on_error;
-	}
-	mount_handle->basename = system_string_allocate(
-	                          basename_size );
-
-	if( mount_handle->basename == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create basename string.",
-		 function );
-
-		goto on_error;
-	}
-	if( system_string_copy(
-	     mount_handle->basename,
-	     basename,
-	     basename_size ) == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy basename.",
-		 function );
-
-		goto on_error;
-	}
-	mount_handle->basename[ basename_size - 1 ] = 0;
-
-	mount_handle->basename_size = basename_size;
-
-	return( 1 );
-
-on_error:
-	if( mount_handle->basename != NULL )
-	{
-		memory_free(
-		 mount_handle->basename );
-
-		mount_handle->basename = NULL;
-	}
-	mount_handle->basename_size = 0;
-
-	return( -1 );
 }
 
 /* Sets the keys
@@ -1042,9 +948,7 @@ int mount_handle_open(
 {
 	libbde_volume_t *volume          = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
-	system_character_t *basename_end = NULL;
 	static char *function            = "mount_handle_open";
-	size_t basename_length           = 0;
 	size_t filename_length           = 0;
 	int result                       = 0;
 
@@ -1073,33 +977,6 @@ int mount_handle_open(
 	filename_length = system_string_length(
 	                   filename );
 
-	basename_end = system_string_search_character_reverse(
-	                filename,
-	                (system_character_t) LIBCPATH_SEPARATOR,
-	                filename_length + 1 );
-
-	if( basename_end != NULL )
-	{
-		basename_length = (size_t) ( basename_end - filename ) + 1;
-	}
-	if( basename_length > 0 )
-	{
-		if( mount_handle_set_basename(
-		     mount_handle,
-		     filename,
-		     basename_length,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set basename.",
-			 function );
-
-			goto on_error;
-		}
-	}
 	if( libbfio_file_range_initialize(
 	     &file_io_handle,
 	     error ) != 1 )
@@ -1131,7 +1008,7 @@ int mount_handle_open(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to set name.",
+		 "%s: unable to set file range name.",
 		 function );
 
 		goto on_error;
@@ -1146,7 +1023,7 @@ int mount_handle_open(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to set volume offset.",
+		 "%s: unable to set file range offset.",
 		 function );
 
 		goto on_error;
@@ -1399,6 +1276,20 @@ int mount_handle_close(
 
 			return( -1 );
 		}
+		if( libbde_volume_free(
+		     &volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free volume: %d.",
+			 function,
+			 volume_index );
+
+			return( -1 );
+		}
 	}
 	if( libbfio_handle_close(
 	     mount_handle->file_io_handle,
@@ -1409,6 +1300,19 @@ int mount_handle_close(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 		 "%s: unable to close file IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbfio_handle_free(
+	     &( mount_handle->file_io_handle ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file IO handle.",
 		 function );
 
 		return( -1 );

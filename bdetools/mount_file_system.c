@@ -249,7 +249,7 @@ int mount_file_system_free(
 		}
 		if( libcdata_array_free(
 		     &( ( *file_system )->volumes_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libbde_volume_free,
+		     NULL,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -267,81 +267,6 @@ int mount_file_system_free(
 		*file_system = NULL;
 	}
 	return( result );
-}
-
-/* Signals the file system to abort
- * Returns 1 if successful or -1 on error
- */
-int mount_file_system_signal_abort(
-     mount_file_system_t *file_system,
-     libcerror_error_t **error )
-{
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_file_system_signal_abort";
-	int number_of_volumes   = 0;
-	int volume_index        = 0;
-
-	if( file_system == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file system.",
-		 function );
-
-		return( -1 );
-	}
-	if( libcdata_array_get_number_of_entries(
-	     file_system->volumes_array,
-	     &number_of_volumes,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of volumes.",
-		 function );
-
-		return( -1 );
-	}
-	for( volume_index = number_of_volumes - 1;
-	     volume_index > 0;
-	     volume_index-- )
-	{
-		if( libcdata_array_get_entry_by_index(
-		     file_system->volumes_array,
-		     volume_index,
-		     (intptr_t **) &volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume: %d.",
-			 function,
-			 volume_index );
-
-			return( -1 );
-		}
-		if( libbde_volume_signal_abort(
-		     volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to signal volume: %d to abort.",
-			 function,
-			 volume_index );
-
-			return( -1 );
-		}
-	}
-	return( 1 );
 }
 
 /* Sets the path prefix
