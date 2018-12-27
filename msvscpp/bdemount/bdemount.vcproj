@@ -280,11 +280,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\mount_file_fuse.h"
+				RelativePath="..\..\bdetools\mount_file_system.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\bdetools\mount_file_system.h"
+				RelativePath="..\..\bdetools\mount_fuse.h"
 				>
 			</File>
 			<File
