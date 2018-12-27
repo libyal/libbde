@@ -9,6 +9,8 @@ Homepage: https://github.com/libyal/libbde
 Package: libbde
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libbde1
+Replaces: libbde1
 Suggests: libbde-dbg
 Description: Library to access the BitLocker Drive Encryption (BDE) format
  libbde is a library to access the BitLocker Drive Encryption (BDE) format.
@@ -31,6 +33,8 @@ Package: libbde-tools
 Section: utils
 Architecture: any
 Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libbde-utils
+Replaces: libbde-utils
 Description: Several tools for reading BitLocker Drive Encryption volumes
  Several tools for reading BitLocker Drive Encryption volumes.
 
@@ -45,6 +49,8 @@ Package: libbde-python
 Section: python
 Architecture: any
 Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: python-libbde
+Replaces: python-libbde
 Suggests: libbde-python-dbg
 Description: Python 2 bindings for libbde
  Python 2 bindings for libbde.
@@ -60,6 +66,8 @@ Package: libbde-python3
 Section: python
 Architecture: any
 Depends: libbde (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: python3-libbde
+Replaces: python3-libbde
 Suggests: libbde-python3-dbg
 Description: Python 3 bindings for libbde
  Python 3 bindings for libbde.
