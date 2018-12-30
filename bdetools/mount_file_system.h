@@ -61,6 +61,10 @@ int mount_file_system_free(
      mount_file_system_t **file_system,
      libcerror_error_t **error );
 
+int mount_file_system_signal_abort(
+     mount_file_system_t *file_system,
+     libcerror_error_t **error );
+
 int mount_file_system_set_path_prefix(
      mount_file_system_t *file_system,
      const system_character_t *path_prefix,
@@ -83,16 +87,16 @@ int mount_file_system_get_volume_by_index(
      libbde_volume_t **volume,
      libcerror_error_t **error );
 
-int mount_file_system_append_volume(
-     mount_file_system_t *file_system,
-     libbde_volume_t *volume,
-     libcerror_error_t **error );
-
-int mount_file_system_get_volume_index_from_path(
+int mount_file_system_get_volume_by_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     int *volume_index,
+     libbde_volume_t **volume,
+     libcerror_error_t **error );
+
+int mount_file_system_append_volume(
+     mount_file_system_t *file_system,
+     libbde_volume_t *volume,
      libcerror_error_t **error );
 
 int mount_file_system_get_path_from_volume_index(

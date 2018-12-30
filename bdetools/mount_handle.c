@@ -307,10 +307,7 @@ int mount_handle_signal_abort(
      mount_handle_t *mount_handle,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_handle_signal_abort";
-	int number_of_volumes   = 0;
-	int volume_index        = 0;
+	static char *function = "mount_handle_signal_abort";
 
 	if( mount_handle == NULL )
 	{
@@ -323,54 +320,18 @@ int mount_handle_signal_abort(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_number_of_volumes(
+	if( mount_file_system_signal_abort(
 	     mount_handle->file_system,
-	     &number_of_volumes,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of volumes.",
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to signal file system to abort.",
 		 function );
 
 		return( -1 );
-	}
-	for( volume_index = number_of_volumes - 1;
-	     volume_index > 0;
-	     volume_index-- )
-	{
-		if( mount_file_system_get_volume_by_index(
-		     mount_handle->file_system,
-		     volume_index,
-		     &volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume: %d.",
-			 function,
-			 volume_index );
-
-			return( -1 );
-		}
-		if( libbde_volume_signal_abort(
-		     volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to signal volume: %d to abort.",
-			 function,
-			 volume_index );
-
-			return( -1 );
-		}
 	}
 	return( 1 );
 }
@@ -389,6 +350,7 @@ int mount_handle_set_keys(
 	size_t string_segment_size                       = 0;
 	uint32_t base16_variant                          = 0;
 	int number_of_segments                           = 0;
+	int result                                       = 0;
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	libcsplit_wide_split_string_t *string_elements   = NULL;
@@ -411,20 +373,21 @@ int mount_handle_set_keys(
 	                 string );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libcsplit_wide_string_split(
-	     string,
-	     string_length + 1,
-	     (wchar_t) ':',
-	     &string_elements,
-	     error ) != 1 )
+	result = libcsplit_wide_string_split(
+	          string,
+	          string_length + 1,
+	          (wchar_t) ':',
+	          &string_elements,
+	          error );
 #else
-	if( libcsplit_narrow_string_split(
-	     string,
-	     string_length + 1,
-	     (char) ':',
-	     &string_elements,
-	     error ) != 1 )
+	result = libcsplit_narrow_string_split(
+	          string,
+	          string_length + 1,
+	          (char) ':',
+	          &string_elements,
+	          error );
 #endif
+	if( result != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -436,16 +399,17 @@ int mount_handle_set_keys(
 		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libcsplit_wide_split_string_get_number_of_segments(
-	     string_elements,
-	     &number_of_segments,
-	     error ) != 1 )
+	result = libcsplit_wide_split_string_get_number_of_segments(
+	          string_elements,
+	          &number_of_segments,
+	          error );
 #else
-	if( libcsplit_narrow_split_string_get_number_of_segments(
-	     string_elements,
-	     &number_of_segments,
-	     error ) != 1 )
+	result = libcsplit_narrow_split_string_get_number_of_segments(
+	          string_elements,
+	          &number_of_segments,
+	          error );
 #endif
+	if( result != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -493,22 +457,21 @@ int mount_handle_set_keys(
 	{
 		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
 	}
-#endif
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libcsplit_wide_split_string_get_segment_by_index(
-	     string_elements,
-	     0,
-	     &string_segment,
-	     &string_segment_size,
-	     error ) != 1 )
+	result = libcsplit_wide_split_string_get_segment_by_index(
+	          string_elements,
+	          0,
+	          &string_segment,
+	          &string_segment_size,
+	          error );
 #else
-	if( libcsplit_narrow_split_string_get_segment_by_index(
-	     string_elements,
-	     0,
-	     &string_segment,
-	     &string_segment_size,
-	     error ) != 1 )
+	result = libcsplit_narrow_split_string_get_segment_by_index(
+	          string_elements,
+	          0,
+	          &string_segment,
+	          &string_segment_size,
+	          error );
 #endif
+	if( result != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -612,20 +575,21 @@ int mount_handle_set_keys(
 	if( number_of_segments > 1 )
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		if( libcsplit_wide_split_string_get_segment_by_index(
-		     string_elements,
-		     1,
-		     &string_segment,
-		     &string_segment_size,
-		     error ) != 1 )
+		result = libcsplit_wide_split_string_get_segment_by_index(
+		          string_elements,
+		          1,
+		          &string_segment,
+		          &string_segment_size,
+		          error );
 #else
-		if( libcsplit_narrow_split_string_get_segment_by_index(
-		     string_elements,
-		     1,
-		     &string_segment,
-		     &string_segment_size,
-		     error ) != 1 )
+		result = libcsplit_narrow_split_string_get_segment_by_index(
+		          string_elements,
+		          1,
+		          &string_segment,
+		          &string_segment_size,
+		          error );
 #endif
+		if( result != 1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -687,14 +651,15 @@ int mount_handle_set_keys(
 		}
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( libcsplit_wide_split_string_free(
-	     &string_elements,
-	     error ) != 1 )
+	result = libcsplit_wide_split_string_free(
+	          &string_elements,
+	          error );
 #else
-	if( libcsplit_narrow_split_string_free(
-	     &string_elements,
-	     error ) != 1 )
+	result = libcsplit_narrow_split_string_free(
+	          &string_elements,
+	          error );
 #endif
+	if( result != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1357,7 +1322,6 @@ int mount_handle_get_file_entry_by_path(
 	static char *function              = "mount_handle_get_file_entry_by_path";
 	size_t path_length                 = 0;
 	int result                         = 0;
-	int volume_index                   = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -1395,11 +1359,11 @@ int mount_handle_get_file_entry_by_path(
 
 		return( -1 );
 	}
-	result = mount_file_system_get_volume_index_from_path(
+	result = mount_file_system_get_volume_by_path(
 	          mount_handle->file_system,
 	          path,
 	          path_length,
-	          &volume_index,
+	          &volume,
 	          error );
 
 	if( result == -1 )
@@ -1408,64 +1372,38 @@ int mount_handle_get_file_entry_by_path(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume index.",
+		 "%s: unable to retrieve volume.",
 		 function );
 
 		return( -1 );
 	}
-	else if( result == 0 )
+	else if( result != 0 )
 	{
-		return( 0 );
-	}
-	if( volume_index != -1 )
-	{
-		if( mount_file_system_get_volume_by_index(
+		if( volume == NULL )
+		{
+			filename = "";
+		}
+		else
+		{
+			filename = &( path[ 0 ] );
+		}
+		if( mount_file_entry_initialize(
+		     file_entry,
 		     mount_handle->file_system,
-		     volume_index,
-		     &volume,
+		     filename,
+		     volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume: %d.",
-			 function,
-			 volume_index );
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize file entry for volume.",
+			 function );
 
 			return( -1 );
 		}
-		if( volume == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing volume: %d.",
-			 function,
-			 volume_index );
-
-			return( -1 );
-		}
-		filename = &( path[ 0 ] );
 	}
-	if( mount_file_entry_initialize(
-	     file_entry,
-	     mount_handle->file_system,
-	     volume_index,
-	     filename,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize file entry for volume: %d.",
-		 function,
-		 volume_index );
-
-		return( -1 );
-	}
-	return( 1 );
+	return( result );
 }
 
