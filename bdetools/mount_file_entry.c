@@ -50,8 +50,8 @@
 int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
-     int volume_index,
      const system_character_t *name,
+     libbde_volume_t *volume,
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_entry_initialize";
@@ -123,12 +123,9 @@ int mount_file_entry_initialize(
 
 		return( -1 );
 	}
-	if( name == NULL )
-	{
-		( *file_entry )->name      = NULL;
-		( *file_entry )->name_size = 0;
-	}
-	else
+	( *file_entry )->file_system = file_system;
+
+	if( name != NULL )
 	{
 		name_length = system_string_length(
 		               name );
@@ -165,9 +162,7 @@ int mount_file_entry_initialize(
 
 		( *file_entry )->name_size = name_length + 1;
 	}
-	( *file_entry )->file_system = file_system;
-
-	( *file_entry )->volume_index = volume_index;
+	( *file_entry )->volume = volume;
 
 	return( 1 );
 
@@ -265,13 +260,13 @@ int mount_file_entry_get_parent_file_entry(
 
 		return( -1 );
 	}
-	if( file_entry->volume_index != -1 )
+	if( file_entry->volume != NULL )
 	{
 		if( mount_file_entry_initialize(
 		     parent_file_entry,
 		     file_entry->file_system,
-		     -1,
 		     "",
+		     NULL,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -298,12 +293,11 @@ int mount_file_entry_get_creation_time(
      uint64_t *creation_time,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_file_entry_get_creation_time";
-	uint64_t filetime       = 0;
+	static char *function = "mount_file_entry_get_creation_time";
+	uint64_t filetime     = 0;
 
 #if !defined( WINAPI )
-	int64_t posix_time      = 0;
+	int64_t posix_time    = 0;
 #endif
 
 	if( file_entry == NULL )
@@ -317,7 +311,7 @@ int mount_file_entry_get_creation_time(
 
 		return( -1 );
 	}
-	if( file_entry->volume_index == -1 )
+	if( file_entry->volume == NULL )
 	{
 		if( mount_file_system_get_mounted_timestamp(
 		     file_entry->file_system,
@@ -347,24 +341,8 @@ int mount_file_entry_get_creation_time(
 
 			return( -1 );
 		}
-		if( mount_file_system_get_volume_by_index(
-		     file_entry->file_system,
-		     file_entry->volume_index,
-		     &volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume: %d from file system.",
-			 function,
-			 file_entry->volume_index );
-
-			return( -1 );
-		}
 		if( libbde_volume_get_creation_time(
-		     volume,
+		     file_entry->volume,
 		     &filetime,
 		     error ) != 1 )
 		{
@@ -372,9 +350,8 @@ int mount_file_entry_get_creation_time(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve creation time from volume: %d.",
-			 function,
-			 file_entry->volume_index );
+			 "%s: unable to retrieve creation time from volume.",
+			 function );
 
 			return( -1 );
 		}
@@ -545,7 +522,7 @@ int mount_file_entry_get_file_mode(
 
 		return( -1 );
 	}
-	if( file_entry->volume_index == -1 )
+	if( file_entry->volume == NULL )
 	{
 		*file_mode = S_IFDIR | 0555;
 	}
@@ -713,7 +690,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 
 		return( -1 );
 	}
-	if( file_entry->volume_index == -1 )
+	if( file_entry->volume == NULL )
 	{
 		if( mount_file_system_get_number_of_volumes(
 		     file_entry->file_system,
@@ -758,6 +735,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 {
 	system_character_t path[ 32 ];
 
+	libbde_volume_t *volume        = NULL;
 	static char *function          = "mount_file_entry_get_sub_file_entry_by_index";
 	int number_of_sub_file_entries = 0;
 
@@ -837,11 +815,39 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
+	if( mount_file_system_get_volume_by_index(
+	     file_entry->file_system,
+	     sub_file_entry_index,
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d from file system.",
+		 function,
+		 sub_file_entry_index );
+
+		return( -1 );
+	}
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing volume: %d.",
+		 function,
+		 sub_file_entry_index );
+
+		return( -1 );
+	}
 	if( mount_file_entry_initialize(
 	     sub_file_entry,
 	     file_entry->file_system,
-	     sub_file_entry_index,
 	     &( path[ 1 ] ),
+	     volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -867,9 +873,8 @@ ssize_t mount_file_entry_read_buffer_at_offset(
          off64_t offset,
          libcerror_error_t **error )
 {
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_file_entry_read_buffer_at_offset";
-	ssize_t read_count      = 0;
+	static char *function = "mount_file_entry_read_buffer_at_offset";
+	ssize_t read_count    = 0;
 
 	if( file_entry == NULL )
 	{
@@ -882,24 +887,19 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 
 		return( -1 );
 	}
-	if( mount_file_system_get_volume_by_index(
-	     file_entry->file_system,
-	     file_entry->volume_index,
-	     &volume,
-	     error ) != 1 )
+	if( file_entry->volume == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume: %d from file system.",
-		 function,
-		 file_entry->volume_index );
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file entry - missing volume.",
+		 function );
 
 		return( -1 );
 	}
 	read_count = libbde_volume_read_buffer_at_offset(
-	              volume,
+	              file_entry->volume,
 	              buffer,
 	              buffer_size,
 	              offset,
@@ -911,11 +911,10 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read buffer at offset: %" PRIi64 " (0x%08" PRIx64 ") from volume: %d.",
+		 "%s: unable to read buffer at offset: %" PRIi64 " (0x%08" PRIx64 ") from volume.",
 		 function,
 		 offset,
-		 offset,
-		 file_entry->volume_index );
+		 offset );
 
 		return( -1 );
 	}
@@ -930,8 +929,7 @@ int mount_file_entry_get_size(
      size64_t *size,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_file_entry_get_size";
+	static char *function = "mount_file_entry_get_size";
 
 	if( file_entry == NULL )
 	{
@@ -944,7 +942,7 @@ int mount_file_entry_get_size(
 
 		return( -1 );
 	}
-	if( file_entry->volume_index == -1 )
+	if( file_entry->volume == NULL )
 	{
 		if( size == NULL )
 		{
@@ -961,24 +959,8 @@ int mount_file_entry_get_size(
 	}
 	else
 	{
-		if( mount_file_system_get_volume_by_index(
-		     file_entry->file_system,
-		     file_entry->volume_index,
-		     &volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume: %d from file system.",
-			 function,
-			 file_entry->volume_index );
-
-			return( -1 );
-		}
 		if( libbde_volume_get_size(
-		     volume,
+		     file_entry->volume,
 		     size,
 		     error ) != 1 )
 		{
@@ -986,9 +968,8 @@ int mount_file_entry_get_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve size from volume: %d.",
-			 function,
-			 file_entry->volume_index );
+			 "%s: unable to retrieve size from volume.",
+			 function );
 
 			return( -1 );
 		}

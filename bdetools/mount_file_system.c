@@ -53,7 +53,9 @@ int mount_file_system_initialize(
      libcerror_error_t **error )
 {
 #if defined( WINAPI )
+	FILETIME filetime;
 	SYSTEMTIME systemtime;
+
 #elif defined( HAVE_CLOCK_GETTIME )
 	struct timespec time_structure;
 #endif
@@ -62,7 +64,6 @@ int mount_file_system_initialize(
 
 #if defined( WINAPI )
 	DWORD error_code      = 0;
-	uint64_t timestamp    = 0;
 #else
 	int64_t timestamp     = 0;
 #endif
@@ -156,7 +157,7 @@ int mount_file_system_initialize(
 
 	if( SystemTimeToFileTime(
 	     &systemtime,
-	     &timestamp ) == 0 )
+	     &filetime ) == 0 )
 	{
 		error_code = GetLastError();
 
@@ -170,6 +171,8 @@ int mount_file_system_initialize(
 
 		goto on_error;
 	}
+	( *file_system )->mounted_timestamp = ( (uint64_t) filetime.dwHighDateTime << 32 ) | filetime.dwLowDateTime;
+
 #elif defined( HAVE_CLOCK_GETTIME )
 	if( clock_gettime(
 	     CLOCK_REALTIME,
@@ -185,6 +188,8 @@ int mount_file_system_initialize(
 		goto on_error;
 	}
 	timestamp = ( (int64_t) time_structure.tv_sec * 1000000000 ) + time_structure.tv_nsec;
+
+	( *file_system )->mounted_timestamp = (uint64_t) timestamp;
 
 #else
 	timestamp = (int64_t) time( NULL );
@@ -202,9 +207,9 @@ int mount_file_system_initialize(
 	}
 	timestamp *= 1000000000;
 
-#endif /* defined( HAVE_CLOCK_GETTIME ) */
-
 	( *file_system )->mounted_timestamp = (uint64_t) timestamp;
+
+#endif /* defined( HAVE_CLOCK_GETTIME ) */
 
 	return( 1 );
 
@@ -267,6 +272,81 @@ int mount_file_system_free(
 		*file_system = NULL;
 	}
 	return( result );
+}
+
+/* Signals the file system to abort
+ * Returns 1 if successful or -1 on error
+ */
+int mount_file_system_signal_abort(
+     mount_file_system_t *file_system,
+     libcerror_error_t **error )
+{
+	libbde_volume_t *volume = NULL;
+	static char *function   = "mount_file_system_signal_abort";
+	int number_of_volumes   = 0;
+	int volume_index        = 0;
+
+	if( file_system == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system.",
+		 function );
+
+		return( -1 );
+	}
+	if( libcdata_array_get_number_of_entries(
+	     file_system->volumes_array,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		return( -1 );
+	}
+	for( volume_index = number_of_volumes - 1;
+	     volume_index > 0;
+	     volume_index-- )
+	{
+		if( libcdata_array_get_entry_by_index(
+		     file_system->volumes_array,
+		     volume_index,
+		     (intptr_t **) &volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume: %d.",
+			 function,
+			 volume_index );
+
+			return( -1 );
+		}
+		if( libbde_volume_signal_abort(
+		     volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to signal volume: %d to abort.",
+			 function,
+			 volume_index );
+
+			return( -1 );
+		}
+	}
+	return( 1 );
 }
 
 /* Sets the path prefix
@@ -382,44 +462,6 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the number of volumes
- * Returns 1 if successful or -1 on error
- */
-int mount_file_system_get_number_of_volumes(
-     mount_file_system_t *file_system,
-     int *number_of_volumes,
-     libcerror_error_t **error )
-{
-	static char *function = "mount_file_system_get_number_of_volumes";
-
-	if( file_system == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file system.",
-		 function );
-
-		return( -1 );
-	}
-	if( libcdata_array_get_number_of_entries(
-	     file_system->volumes_array,
-	     number_of_volumes,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of volumes.",
-		 function );
-
-		return( -1 );
-	}
-	return( 1 );
-}
-
 /* Retrieves the mounted timestamp
  * On Windows the timestamp is an unsigned 64-bit FILETIME timestamp
  * otherwise the timestamp is a signed 64-bit POSIX date and time value in number of nanoseconds
@@ -459,6 +501,44 @@ int mount_file_system_get_mounted_timestamp(
 	return( 1 );
 }
 
+/* Retrieves the number of volumes
+ * Returns 1 if successful or -1 on error
+ */
+int mount_file_system_get_number_of_volumes(
+     mount_file_system_t *file_system,
+     int *number_of_volumes,
+     libcerror_error_t **error )
+{
+	static char *function = "mount_file_system_get_number_of_volumes";
+
+	if( file_system == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system.",
+		 function );
+
+		return( -1 );
+	}
+	if( libcdata_array_get_number_of_entries(
+	     file_system->volumes_array,
+	     number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Retrieves a specific volume
  * Returns 1 if successful or -1 on error
  */
@@ -481,6 +561,144 @@ int mount_file_system_get_volume_by_index(
 
 		return( -1 );
 	}
+	if( libcdata_array_get_entry_by_index(
+	     file_system->volumes_array,
+	     volume_index,
+	     (intptr_t **) volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d.",
+		 function,
+		 volume_index );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the volume for a specific path
+ * Returns 1 if successful, 0 if no such file index or -1 on error
+ */
+int mount_file_system_get_volume_by_path(
+     mount_file_system_t *file_system,
+     const system_character_t *path,
+     size_t path_length,
+     libbde_volume_t **volume,
+     libcerror_error_t **error )
+{
+	static char *function        = "mount_file_system_get_volume_by_path";
+	system_character_t character = 0;
+	size_t path_index            = 0;
+	int result                   = 0;
+	int volume_index             = 0;
+
+	if( file_system == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system.",
+		 function );
+
+		return( -1 );
+	}
+	if( file_system->path_prefix == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file system - missing path prefix.",
+		 function );
+
+		return( -1 );
+	}
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		return( -1 );
+	}
+	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid path length value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	path_length = system_string_length(
+	               path );
+
+	if( ( path_length == 1 )
+	 && ( path[ 0 ] == file_system->path_prefix[ 0 ] ) )
+	{
+		*volume = NULL;
+
+		return( 1 );
+	}
+	if( ( path_length < file_system->path_prefix_size )
+	 || ( path_length > ( file_system->path_prefix_size + 3 ) ) )
+	{
+		return( 0 );
+	}
+#if defined( WINAPI )
+	result = system_string_compare_no_case(
+	          path,
+	          file_system->path_prefix,
+	          file_system->path_prefix_size - 1 );
+#else
+	result = system_string_compare(
+	          path,
+	          file_system->path_prefix,
+	          file_system->path_prefix_size - 1 );
+#endif
+	if( result != 0 )
+	{
+		return( 0 );
+	}
+	volume_index = 0;
+
+	path_index = file_system->path_prefix_size - 1;
+
+	while( path_index < path_length )
+	{
+		character = path[ path_index++ ];
+
+		if( ( character < (system_character_t) '0' )
+		 || ( character > (system_character_t) '9' ) )
+		{
+			return( 0 );
+		}
+		volume_index *= 10;
+		volume_index += character - (system_character_t) '0';
+	}
+	volume_index -= 1;
+
 	if( libcdata_array_get_entry_by_index(
 	     file_system->volumes_array,
 	     volume_index,
@@ -537,128 +755,6 @@ int mount_file_system_append_volume(
 
 		return( -1 );
 	}
-	return( 1 );
-}
-
-/* Retrieves the volume index from a path
- * Returns 1 if successful, 0 if no such volume index or -1 on error
- */
-int mount_file_system_get_volume_index_from_path(
-     mount_file_system_t *file_system,
-     const system_character_t *path,
-     size_t path_length,
-     int *volume_index,
-     libcerror_error_t **error )
-{
-	static char *function        = "mount_file_system_get_volume_index_from_path";
-	system_character_t character = 0;
-	size_t path_index            = 0;
-	int result                   = 0;
-	int volume_number            = 0;
-
-	if( file_system == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file system.",
-		 function );
-
-		return( -1 );
-	}
-	if( file_system->path_prefix == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file system - missing path prefix.",
-		 function );
-
-		return( -1 );
-	}
-	if( path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		return( -1 );
-	}
-	if( path_length > (size_t) ( SSIZE_MAX - 1 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid path length value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_index == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume index.",
-		 function );
-
-		return( -1 );
-	}
-	path_length = system_string_length(
-	               path );
-
-	if( ( path_length == 1 )
-	 && ( path[ 0 ] == file_system->path_prefix[ 0 ] ) )
-	{
-		*volume_index = -1;
-
-		return( 1 );
-	}
-	if( ( path_length < file_system->path_prefix_size )
-	 || ( path_length > ( file_system->path_prefix_size + 3 ) ) )
-	{
-		return( 0 );
-	}
-#if defined( WINAPI )
-	result = system_string_compare_no_case(
-	          path,
-	          file_system->path_prefix,
-	          file_system->path_prefix_size - 1 );
-#else
-	result = system_string_compare(
-	          path,
-	          file_system->path_prefix,
-	          file_system->path_prefix_size - 1 );
-#endif
-	if( result != 0 )
-	{
-		return( 0 );
-	}
-	volume_number = 0;
-
-	path_index = file_system->path_prefix_size - 1;
-
-	while( path_index < path_length )
-	{
-		character = path[ path_index++ ];
-
-		if( ( character < (system_character_t) '0' )
-		 || ( character > (system_character_t) '9' ) )
-		{
-			return( 0 );
-		}
-		volume_number *= 10;
-		volume_number += character - (system_character_t) '0';
-	}
-	*volume_index = volume_number - 1;
-
 	return( 1 );
 }
 
