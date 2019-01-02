@@ -1,7 +1,7 @@
 /*
  * Mount file system
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -36,6 +36,10 @@ typedef struct mount_file_system mount_file_system_t;
 
 struct mount_file_system
 {
+	/* The mounted timestamp
+	 */
+	uint64_t mounted_timestamp;
+
 	/* The path prefix
 	 */
 	system_character_t *path_prefix;
@@ -43,10 +47,6 @@ struct mount_file_system
 	/* The path prefix size
 	 */
 	size_t path_prefix_size;
-
-	/* The mounted timestamp
-	 */
-	uint64_t mounted_timestamp;
 
 	/* The volumes array
 	 */

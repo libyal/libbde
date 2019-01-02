@@ -1,7 +1,7 @@
 /*
  * Mount tool dokan functions
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -24,13 +24,13 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "bdetools_libbde.h"
+#include "bdetools_libcerror.h"
+#include "bdetools_libcnotify.h"
+#include "bdetools_unused.h"
 #include "mount_dokan.h"
 #include "mount_file_entry.h"
 #include "mount_handle.h"
-#include "bdetools_libcerror.h"
-#include "bdetools_libcnotify.h"
-#include "bdetools_libbde.h"
-#include "bdetools_unused.h"
 
 extern mount_handle_t *bdemount_mount_handle;
 

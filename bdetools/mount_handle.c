@@ -1,7 +1,7 @@
 /*
  * Mount handle
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -29,6 +29,7 @@
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
 #include "bdetools_libcerror.h"
+#include "bdetools_libcpath.h"
 #include "bdetools_libcsplit.h"
 #include "bdetools_libuna.h"
 #include "mount_file_entry.h"
@@ -903,7 +904,7 @@ int mount_handle_set_path_prefix(
 	return( 1 );
 }
 
-/* Opens a mount handle
+/* Opens the mount handle
  * Returns 1 if successful, 0 if not or -1 on error
  */
 int mount_handle_open(
@@ -1205,7 +1206,7 @@ int mount_handle_close(
 		 "%s: unable to retrieve number of volumes.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	for( volume_index = number_of_volumes - 1;
 	     volume_index > 0;
@@ -1225,8 +1226,10 @@ int mount_handle_close(
 			 function,
 			 volume_index );
 
-			return( -1 );
+			goto on_error;
 		}
+/* TODO remove volume from file system */
+
 		if( libbde_volume_close(
 		     volume,
 		     error ) != 0 )
@@ -1239,7 +1242,7 @@ int mount_handle_close(
 			 function,
 			 volume_index );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( libbde_volume_free(
 		     &volume,
@@ -1253,7 +1256,7 @@ int mount_handle_close(
 			 function,
 			 volume_index );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	if( libbfio_handle_close(
@@ -1267,7 +1270,7 @@ int mount_handle_close(
 		 "%s: unable to close file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbfio_handle_free(
 	     &( mount_handle->file_io_handle ),
@@ -1280,9 +1283,18 @@ int mount_handle_close(
 		 "%s: unable to free file IO handle.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	return( 0 );
+
+on_error:
+	if( volume != NULL )
+	{
+		libbde_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( -1 );
 }
 
 /* Determine if the mount handle is locked
@@ -1320,6 +1332,8 @@ int mount_handle_get_file_entry_by_path(
 	libbde_volume_t *volume            = NULL;
 	const system_character_t *filename = NULL;
 	static char *function              = "mount_handle_get_file_entry_by_path";
+	size_t filename_length             = 0;
+	size_t path_index                  = 0;
 	size_t path_length                 = 0;
 	int result                         = 0;
 
@@ -1357,7 +1371,34 @@ int mount_handle_get_file_entry_by_path(
 		 "%s: invalid path length value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
+	}
+	if( ( path_length >= 2 )
+	 && ( path[ path_length - 1 ] == LIBCPATH_SEPARATOR ) )
+	{
+		path_length--;
+	}
+	path_index = path_length;
+
+	while( path_index > 0 )
+	{
+		if( path[ path_index ] == LIBCPATH_SEPARATOR )
+		{
+			break;
+		}
+		path_index--;
+	}
+	/* Ignore the name of the root item
+	 */
+	if( path_length == 0 )
+	{
+		filename        = _SYSTEM_STRING( "" );
+		filename_length = 0;
+	}
+	else
+	{
+		filename        = &( path[ path_index + 1 ] );
+		filename_length = path_length - ( path_index + 1 );
 	}
 	result = mount_file_system_get_volume_by_path(
 	          mount_handle->file_system,
@@ -1375,22 +1416,15 @@ int mount_handle_get_file_entry_by_path(
 		 "%s: unable to retrieve volume.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	else if( result != 0 )
 	{
-		if( volume == NULL )
-		{
-			filename = "";
-		}
-		else
-		{
-			filename = &( path[ 0 ] );
-		}
 		if( mount_file_entry_initialize(
 		     file_entry,
 		     mount_handle->file_system,
 		     filename,
+		     filename_length,
 		     volume,
 		     error ) != 1 )
 		{
@@ -1398,12 +1432,15 @@ int mount_handle_get_file_entry_by_path(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize file entry for volume.",
+			 "%s: unable to initialize file entry.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 	return( result );
+
+on_error:
+	return( -1 );
 }
 

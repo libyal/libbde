@@ -1,7 +1,7 @@
 /*
  * Mounts a BitLocker Drive Encrypted (BDE) volume
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -174,7 +174,7 @@ int main( int argc, char * const argv[] )
 	 1 );
 
 	if( libclocale_initialize(
-             "bdetools",
+	     "bdetools",
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -184,8 +184,8 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
 	if( bdetools_output_initialize(
-             _IONBF,
-             &error ) != 1 )
+	     _IONBF,
+	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,

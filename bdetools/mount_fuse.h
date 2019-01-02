@@ -1,7 +1,7 @@
 /*
  * Mount tool fuse functions
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -37,10 +37,10 @@
 
 #endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
 
+#include "bdetools_libbde.h"
+#include "bdetools_libcerror.h"
 #include "mount_file_entry.h"
 #include "mount_handle.h"
-#include "bdetools_libcerror.h"
-#include "bdetools_libbde.h"
 
 #if defined( __cplusplus )
 extern "C" {
