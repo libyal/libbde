@@ -1,7 +1,7 @@
 /*
  * Mount file entry
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -30,10 +30,10 @@
 #include <sys/stat.h>
 #endif
 
+#include "bdetools_libbde.h"
+#include "bdetools_libcerror.h"
 #include "mount_file_entry.h"
 #include "mount_file_system.h"
-#include "bdetools_libcerror.h"
-#include "bdetools_libbde.h"
 
 #if !defined( S_IFDIR )
 #define S_IFDIR 0x4000
@@ -51,11 +51,11 @@ int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
      const system_character_t *name,
+     size_t name_length,
      libbde_volume_t *volume,
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_entry_initialize";
-	size_t name_length    = 0;
 
 	if( file_entry == NULL )
 	{
@@ -86,6 +86,17 @@ int mount_file_entry_initialize(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file system.",
+		 function );
+
+		return( -1 );
+	}
+	if( name_length > (size_t) ( SSIZE_MAX - 1 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid name length value exceeds maximum.",
 		 function );
 
 		return( -1 );
@@ -127,9 +138,6 @@ int mount_file_entry_initialize(
 
 	if( name != NULL )
 	{
-		name_length = system_string_length(
-		               name );
-
 		( *file_entry )->name = system_string_allocate(
 		                         name_length + 1 );
 
@@ -144,19 +152,22 @@ int mount_file_entry_initialize(
 
 			goto on_error;
 		}
-		if( system_string_copy(
-		     ( *file_entry )->name,
-		     name,
-		     name_length ) == NULL )
+		if( name_length > 0 )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-			 "%s: unable to copy name.",
-			 function );
+			if( system_string_copy(
+			     ( *file_entry )->name,
+			     name,
+			     name_length ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+				 "%s: unable to copy name.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
 		}
 		( *file_entry )->name[ name_length ] = 0;
 
@@ -265,7 +276,8 @@ int mount_file_entry_get_parent_file_entry(
 		if( mount_file_entry_initialize(
 		     parent_file_entry,
 		     file_entry->file_system,
-		     "",
+		     _SYSTEM_STRING( "" ),
+		     0,
 		     NULL,
 		     error ) != 1 )
 		{
@@ -737,6 +749,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 	libbde_volume_t *volume        = NULL;
 	static char *function          = "mount_file_entry_get_sub_file_entry_by_index";
+	size_t path_length             = 0;
 	int number_of_sub_file_entries = 0;
 
 	if( file_entry == NULL )
@@ -843,10 +856,14 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
+	path_length = system_string_length(
+	               path );
+
 	if( mount_file_entry_initialize(
 	     sub_file_entry,
 	     file_entry->file_system,
 	     &( path[ 1 ] ),
+	     path_length - 1,
 	     volume,
 	     error ) != 1 )
 	{
@@ -883,17 +900,6 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( file_entry->volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file entry - missing volume.",
 		 function );
 
 		return( -1 );

@@ -1,7 +1,7 @@
 /*
  * Mount file entry
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -25,9 +25,9 @@
 #include <common.h>
 #include <types.h>
 
-#include "mount_file_system.h"
-#include "bdetools_libcerror.h"
 #include "bdetools_libbde.h"
+#include "bdetools_libcerror.h"
+#include "mount_file_system.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -58,6 +58,7 @@ int mount_file_entry_initialize(
      mount_file_entry_t **file_entry,
      mount_file_system_t *file_system,
      const system_character_t *name,
+     size_t name_length,
      libbde_volume_t *volume,
      libcerror_error_t **error );
 

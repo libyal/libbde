@@ -1,7 +1,7 @@
 /*
  * Mount file system
  *
- * Copyright (C) 2011-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -39,10 +39,10 @@
 #include <time.h>
 #endif
 
-#include "mount_file_system.h"
+#include "bdetools_libbde.h"
 #include "bdetools_libcdata.h"
 #include "bdetools_libcerror.h"
-#include "bdetools_libbde.h"
+#include "mount_file_system.h"
 
 /* Creates a file system
  * Make sure the value file_system is referencing, is set to NULL
@@ -581,7 +581,7 @@ int mount_file_system_get_volume_by_index(
 }
 
 /* Retrieves the volume for a specific path
- * Returns 1 if successful, 0 if no such file index or -1 on error
+ * Returns 1 if successful, 0 if no such volume or -1 on error
  */
 int mount_file_system_get_volume_by_path(
      mount_file_system_t *file_system,
