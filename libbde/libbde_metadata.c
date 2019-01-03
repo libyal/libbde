@@ -256,7 +256,7 @@ int libbde_metadata_read_block(
 	void *reallocation                       = NULL;
 	static char *function                    = "libbde_metadata_read_block";
 	size_t fve_metadata_block_offset         = 0;
-	size_t read_size                         = 8192;
+	size_t read_size                         = 16384;
 	ssize_t read_count                       = 0;
 	uint64_t first_metadata_offset           = 0;
 	uint64_t second_metadata_offset          = 0;
