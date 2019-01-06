@@ -52,7 +52,7 @@ int mount_file_entry_initialize(
      mount_file_system_t *file_system,
      const system_character_t *name,
      size_t name_length,
-     libbde_volume_t *volume,
+     libbde_volume_t *bde_volume,
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_entry_initialize";
@@ -173,7 +173,7 @@ int mount_file_entry_initialize(
 
 		( *file_entry )->name_size = name_length + 1;
 	}
-	( *file_entry )->volume = volume;
+	( *file_entry )->bde_volume = bde_volume;
 
 	return( 1 );
 
@@ -271,7 +271,7 @@ int mount_file_entry_get_parent_file_entry(
 
 		return( -1 );
 	}
-	if( file_entry->volume != NULL )
+	if( file_entry->bde_volume != NULL )
 	{
 		if( mount_file_entry_initialize(
 		     parent_file_entry,
@@ -323,7 +323,7 @@ int mount_file_entry_get_creation_time(
 
 		return( -1 );
 	}
-	if( file_entry->volume == NULL )
+	if( file_entry->bde_volume == NULL )
 	{
 		if( mount_file_system_get_mounted_timestamp(
 		     file_entry->file_system,
@@ -354,7 +354,7 @@ int mount_file_entry_get_creation_time(
 			return( -1 );
 		}
 		if( libbde_volume_get_creation_time(
-		     file_entry->volume,
+		     file_entry->bde_volume,
 		     &filetime,
 		     error ) != 1 )
 		{
@@ -534,7 +534,7 @@ int mount_file_entry_get_file_mode(
 
 		return( -1 );
 	}
-	if( file_entry->volume == NULL )
+	if( file_entry->bde_volume == NULL )
 	{
 		*file_mode = S_IFDIR | 0555;
 	}
@@ -702,7 +702,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 
 		return( -1 );
 	}
-	if( file_entry->volume == NULL )
+	if( file_entry->bde_volume == NULL )
 	{
 		if( mount_file_system_get_number_of_volumes(
 		     file_entry->file_system,
@@ -747,7 +747,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 {
 	system_character_t path[ 32 ];
 
-	libbde_volume_t *volume        = NULL;
+	libbde_volume_t *bde_volume    = NULL;
 	static char *function          = "mount_file_entry_get_sub_file_entry_by_index";
 	size_t path_length             = 0;
 	int number_of_sub_file_entries = 0;
@@ -831,7 +831,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	if( mount_file_system_get_volume_by_index(
 	     file_entry->file_system,
 	     sub_file_entry_index,
-	     &volume,
+	     &bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -844,7 +844,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 
 		return( -1 );
 	}
-	if( volume == NULL )
+	if( bde_volume == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -864,7 +864,7 @@ int mount_file_entry_get_sub_file_entry_by_index(
 	     file_entry->file_system,
 	     &( path[ 1 ] ),
 	     path_length - 1,
-	     volume,
+	     bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -905,7 +905,7 @@ ssize_t mount_file_entry_read_buffer_at_offset(
 		return( -1 );
 	}
 	read_count = libbde_volume_read_buffer_at_offset(
-	              file_entry->volume,
+	              file_entry->bde_volume,
 	              buffer,
 	              buffer_size,
 	              offset,
@@ -948,7 +948,7 @@ int mount_file_entry_get_size(
 
 		return( -1 );
 	}
-	if( file_entry->volume == NULL )
+	if( file_entry->bde_volume == NULL )
 	{
 		if( size == NULL )
 		{
@@ -966,7 +966,7 @@ int mount_file_entry_get_size(
 	else
 	{
 		if( libbde_volume_get_size(
-		     file_entry->volume,
+		     file_entry->bde_volume,
 		     size,
 		     error ) != 1 )
 		{

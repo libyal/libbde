@@ -13,6 +13,14 @@ BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requi
 %description -n libbde
 Library to access the BitLocker Drive Encryption (BDE) format
 
+%package -n libbde-static
+Summary: Library to access the BitLocker Drive Encryption (BDE) format
+Group: Development/Libraries
+Requires: libbde = %{version}-%{release}
+
+%description -n libbde-static
+Static library version of libbde.
+
 %package -n libbde-devel
 Summary: Header files and libraries for developing applications for libbde
 Group: Development/Libraries
@@ -74,11 +82,16 @@ rm -rf %{buildroot}
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
+%files -n libbde-static
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%attr(755,root,root) %{_libdir}/*.a
+
 %files -n libbde-devel
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
-%{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/libbde.pc

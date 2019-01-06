@@ -281,10 +281,10 @@ int mount_file_system_signal_abort(
      mount_file_system_t *file_system,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_file_system_signal_abort";
-	int number_of_volumes   = 0;
-	int volume_index        = 0;
+	libbde_volume_t *bde_volume = NULL;
+	static char *function       = "mount_file_system_signal_abort";
+	int number_of_volumes       = 0;
+	int volume_index            = 0;
 
 	if( file_system == NULL )
 	{
@@ -318,7 +318,7 @@ int mount_file_system_signal_abort(
 		if( libcdata_array_get_entry_by_index(
 		     file_system->volumes_array,
 		     volume_index,
-		     (intptr_t **) &volume,
+		     (intptr_t **) &bde_volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -332,7 +332,7 @@ int mount_file_system_signal_abort(
 			return( -1 );
 		}
 		if( libbde_volume_signal_abort(
-		     volume,
+		     bde_volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -545,7 +545,7 @@ int mount_file_system_get_number_of_volumes(
 int mount_file_system_get_volume_by_index(
      mount_file_system_t *file_system,
      int volume_index,
-     libbde_volume_t **volume,
+     libbde_volume_t **bde_volume,
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_system_get_volume_by_index";
@@ -564,7 +564,7 @@ int mount_file_system_get_volume_by_index(
 	if( libcdata_array_get_entry_by_index(
 	     file_system->volumes_array,
 	     volume_index,
-	     (intptr_t **) volume,
+	     (intptr_t **) bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -587,7 +587,7 @@ int mount_file_system_get_volume_by_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     libbde_volume_t **volume,
+     libbde_volume_t **bde_volume,
      libcerror_error_t **error )
 {
 	static char *function        = "mount_file_system_get_volume_by_path";
@@ -640,7 +640,7 @@ int mount_file_system_get_volume_by_path(
 
 		return( -1 );
 	}
-	if( volume == NULL )
+	if( bde_volume == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -657,7 +657,7 @@ int mount_file_system_get_volume_by_path(
 	if( ( path_length == 1 )
 	 && ( path[ 0 ] == file_system->path_prefix[ 0 ] ) )
 	{
-		*volume = NULL;
+		*bde_volume = NULL;
 
 		return( 1 );
 	}
@@ -702,7 +702,7 @@ int mount_file_system_get_volume_by_path(
 	if( libcdata_array_get_entry_by_index(
 	     file_system->volumes_array,
 	     volume_index,
-	     (intptr_t **) volume,
+	     (intptr_t **) bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -723,7 +723,7 @@ int mount_file_system_get_volume_by_path(
  */
 int mount_file_system_append_volume(
      mount_file_system_t *file_system,
-     libbde_volume_t *volume,
+     libbde_volume_t *bde_volume,
      libcerror_error_t **error )
 {
 	static char *function = "mount_file_system_append_volume";
@@ -743,7 +743,7 @@ int mount_file_system_append_volume(
 	if( libcdata_array_append_entry(
 	     file_system->volumes_array,
 	     &entry_index,
-	     (intptr_t *) volume,
+	     (intptr_t *) bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
