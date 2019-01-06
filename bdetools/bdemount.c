@@ -74,8 +74,8 @@ void usage_fprint(
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
 	fprintf( stream, "\t-h:          shows this help\n" );
-	fprintf( stream, "\t-k:          the full volume encryption key and tweak key formatted in base16 and\n"
-	                 "\t             separated by a : character e.g. FVEK:TWEAK\n" );
+	fprintf( stream, "\t-k:          specify the full volume encryption key and tweak key formatted in\n"
+	                 "\t             base16 and separated by a : character e.g. FVEK:TWEAK\n" );
 	fprintf( stream, "\t-o:          specify the volume offset in bytes\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password/passphrase\n" );
@@ -689,7 +689,8 @@ int main( int argc, char * const argv[] )
 	 "No sub system to mount BDE format.\n" );
 
 	return( EXIT_FAILURE );
-#endif
+
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
 
 on_error:
 	if( error != NULL )

@@ -827,7 +827,7 @@ int mount_handle_set_recovery_password(
 	return( 1 );
 }
 
-/* Sets the startup key (.BEK) filename
+/* Sets the startup key (.BEK) file path
  * Returns 1 if successful or -1 on error
  */
 int mount_handle_set_startup_key(
@@ -912,7 +912,7 @@ int mount_handle_open(
      const system_character_t *filename,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume          = NULL;
+	libbde_volume_t *bde_volume      = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
 	static char *function            = "mount_handle_open";
 	size_t filename_length           = 0;
@@ -995,7 +995,7 @@ int mount_handle_open(
 		goto on_error;
 	}
 	if( libbde_volume_initialize(
-	     &volume,
+	     &bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1010,7 +1010,7 @@ int mount_handle_open(
 	if( mount_handle->full_volume_encryption_key_size > 0 )
 	{
 		if( libbde_volume_set_keys(
-		     volume,
+		     bde_volume,
 		     mount_handle->key_data,
 		     mount_handle->full_volume_encryption_key_size,
 		     &( mount_handle->key_data[ 32 ] ),
@@ -1031,13 +1031,13 @@ int mount_handle_open(
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( libbde_volume_set_utf16_password(
-		     volume,
+		     bde_volume,
 		     (uint16_t *) mount_handle->password,
 		     mount_handle->password_length,
 		     error ) != 1 )
 #else
 		if( libbde_volume_set_utf8_password(
-		     volume,
+		     bde_volume,
 		     (uint8_t *) mount_handle->password,
 		     mount_handle->password_length,
 		     error ) != 1 )
@@ -1057,13 +1057,13 @@ int mount_handle_open(
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( libbde_volume_set_utf16_recovery_password(
-		     volume,
+		     bde_volume,
 		     (uint16_t *) mount_handle->recovery_password,
 		     mount_handle->recovery_password_length,
 		     error ) != 1 )
 #else
 		if( libbde_volume_set_utf8_recovery_password(
-		     volume,
+		     bde_volume,
 		     (uint8_t *) mount_handle->recovery_password,
 		     mount_handle->recovery_password_length,
 		     error ) != 1 )
@@ -1083,12 +1083,12 @@ int mount_handle_open(
 	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		if( libbde_volume_read_startup_key_wide(
-		     volume,
+		     bde_volume,
 		     mount_handle->startup_key_path,
 		     error ) != 1 )
 #else
 		if( libbde_volume_read_startup_key(
-		     volume,
+		     bde_volume,
 		     mount_handle->startup_key_path,
 		     error ) != 1 )
 #endif
@@ -1104,7 +1104,7 @@ int mount_handle_open(
 		}
 	}
 	result = libbde_volume_open_file_io_handle(
-	          volume,
+	          bde_volume,
 	          file_io_handle,
 	          LIBBDE_OPEN_READ,
 	          error );
@@ -1121,7 +1121,7 @@ int mount_handle_open(
 		goto on_error;
 	}
 	result = libbde_volume_is_locked(
-	          volume,
+	          bde_volume,
 	          error );
 
 	if( result == -1 )
@@ -1139,7 +1139,7 @@ int mount_handle_open(
 
 	if( mount_file_system_append_volume(
 	     mount_handle->file_system,
-	     volume,
+	     bde_volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1156,10 +1156,10 @@ int mount_handle_open(
 	return( 1 );
 
 on_error:
-	if( volume != NULL )
+	if( bde_volume != NULL )
 	{
 		libbde_volume_free(
-		 &volume,
+		 &bde_volume,
 		 NULL );
 	}
 	if( file_io_handle != NULL )
@@ -1178,10 +1178,10 @@ int mount_handle_close(
      mount_handle_t *mount_handle,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume = NULL;
-	static char *function   = "mount_handle_close";
-	int number_of_volumes   = 0;
-	int volume_index        = 0;
+	libbde_volume_t *bde_volume = NULL;
+	static char *function       = "mount_handle_close";
+	int number_of_volumes       = 0;
+	int volume_index            = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -1215,7 +1215,7 @@ int mount_handle_close(
 		if( mount_file_system_get_volume_by_index(
 		     mount_handle->file_system,
 		     volume_index,
-		     &volume,
+		     &bde_volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1228,10 +1228,10 @@ int mount_handle_close(
 
 			goto on_error;
 		}
-/* TODO remove volume from file system */
+/* TODO remove bde_volume from file system */
 
 		if( libbde_volume_close(
-		     volume,
+		     bde_volume,
 		     error ) != 0 )
 		{
 			libcerror_error_set(
@@ -1245,7 +1245,7 @@ int mount_handle_close(
 			goto on_error;
 		}
 		if( libbde_volume_free(
-		     &volume,
+		     &bde_volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1288,10 +1288,10 @@ int mount_handle_close(
 	return( 0 );
 
 on_error:
-	if( volume != NULL )
+	if( bde_volume != NULL )
 	{
 		libbde_volume_free(
-		 &volume,
+		 &bde_volume,
 		 NULL );
 	}
 	return( -1 );
@@ -1329,7 +1329,7 @@ int mount_handle_get_file_entry_by_path(
      mount_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libbde_volume_t *volume            = NULL;
+	libbde_volume_t *bde_volume        = NULL;
 	const system_character_t *filename = NULL;
 	static char *function              = "mount_handle_get_file_entry_by_path";
 	size_t filename_length             = 0;
@@ -1404,7 +1404,7 @@ int mount_handle_get_file_entry_by_path(
 	          mount_handle->file_system,
 	          path,
 	          path_length,
-	          &volume,
+	          &bde_volume,
 	          error );
 
 	if( result == -1 )
@@ -1425,7 +1425,7 @@ int mount_handle_get_file_entry_by_path(
 		     mount_handle->file_system,
 		     filename,
 		     filename_length,
-		     volume,
+		     bde_volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

@@ -51,7 +51,7 @@ struct mount_file_entry
 
 	/* The volume
 	 */
-	libbde_volume_t *volume;
+	libbde_volume_t *bde_volume;
 };
 
 int mount_file_entry_initialize(
@@ -59,7 +59,7 @@ int mount_file_entry_initialize(
      mount_file_system_t *file_system,
      const system_character_t *name,
      size_t name_length,
-     libbde_volume_t *volume,
+     libbde_volume_t *bde_volume,
      libcerror_error_t **error );
 
 int mount_file_entry_free(

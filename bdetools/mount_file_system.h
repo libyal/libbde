@@ -84,19 +84,19 @@ int mount_file_system_get_number_of_volumes(
 int mount_file_system_get_volume_by_index(
      mount_file_system_t *file_system,
      int volume_index,
-     libbde_volume_t **volume,
+     libbde_volume_t **bde_volume,
      libcerror_error_t **error );
 
 int mount_file_system_get_volume_by_path(
      mount_file_system_t *file_system,
      const system_character_t *path,
      size_t path_length,
-     libbde_volume_t **volume,
+     libbde_volume_t **bde_volume,
      libcerror_error_t **error );
 
 int mount_file_system_append_volume(
      mount_file_system_t *file_system,
-     libbde_volume_t *volume,
+     libbde_volume_t *bde_volume,
      libcerror_error_t **error );
 
 int mount_file_system_get_path_from_volume_index(
