@@ -162,6 +162,9 @@ const char *libbde_debug_print_key_protection_type(
 
 		case LIBBDE_KEY_PROTECTION_TYPE_PASSWORD:
 			return( "password protected" );
+
+		case LIBBDE_KEY_PROTECTION_TYPE_TPM_AND_PIN:
+			return("TPM and PIN protected");
 	}
 	return( "_UNKNOWN_" );
 }

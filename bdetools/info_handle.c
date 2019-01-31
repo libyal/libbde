@@ -1728,6 +1728,13 @@ int info_handle_volume_fprint(
 
 					break;
 
+				case LIBBDE_KEY_PROTECTION_TYPE_TPM_AND_PIN:
+					fprintf(
+					 info_handle->notify_stream,
+					 "TPM and PIN" );
+
+					break;
+
 				default:
 					fprintf(
 					 info_handle->notify_stream,
