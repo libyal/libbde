@@ -157,6 +157,9 @@ const char *libbde_debug_print_key_protection_type(
 		case LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY:
 			return( "startup key protected" );
 
+		case LIBBDE_KEY_PROTECTION_TYPE_TPM_AND_PIN:
+			return( "TPM and PIN protected" );
+
 		case LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD:
 			return( "recovery password protected" );
 

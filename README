@@ -28,6 +28,10 @@ Supported protection methods:
 * start-up key
 * FKEV and/or TWEAK key data
 
+Unsupported BDE formats:
+
+* Bitlocker Used Disk Space Only encryption
+
 Unsupported protection methods:
 
 * Trusted Platform Module (TPM)
