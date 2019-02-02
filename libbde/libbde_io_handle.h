@@ -36,8 +36,10 @@ extern "C" {
 #endif
 
 extern const uint8_t bde_boot_entry_point_vista[ 3 ];
-extern const uint8_t bde_boot_entry_point_win7[ 3 ];
+extern const uint8_t bde_boot_entry_point_windows7[ 3 ];
+
 extern const uint8_t bde_identifier[ 16 ];
+extern const uint8_t bde_identifier_used_disk_space_only[ 16 ];
 
 extern const char* bde_signature;
 

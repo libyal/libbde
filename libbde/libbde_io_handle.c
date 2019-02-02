@@ -40,10 +40,17 @@
 
 #include "bde_volume.h"
 
-const uint8_t bde_boot_entry_point_vista[ 3 ] = { 0xeb, 0x52, 0x90 };
-const uint8_t bde_boot_entry_point_win7[ 3 ]  = { 0xeb, 0x58, 0x90 };
-const uint8_t bde_identifier[ 16 ]            = {
+const uint8_t bde_boot_entry_point_vista[ 3 ] = {
+	0xeb, 0x52, 0x90 };
+
+const uint8_t bde_boot_entry_point_windows7[ 3 ] = {
+	0xeb, 0x58, 0x90 };
+
+const uint8_t bde_identifier[ 16 ] = {
 	0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
+
+const uint8_t bde_identifier_used_disk_space_only[ 16 ] = {
+	0x3b, 0x4d, 0xa8, 0x92, 0x80, 0xdd, 0x0e, 0x4d, 0x9e, 0x4e, 0xb1, 0xe3, 0x28, 0x4e, 0xae, 0xd8 };
 
 const char *bde_signature                         = "-FVE-FS-";
 const char *bde_ntfs_volume_file_system_signature = "NTFS    ";
@@ -347,13 +354,20 @@ int libbde_io_handle_read_volume_header(
 	}
 	else if( memory_compare(
 	          volume_header_data,
-	          bde_boot_entry_point_win7,
+	          bde_boot_entry_point_windows7,
 	          3 ) == 0 )
 	{
 		if( memory_compare(
 		     ( (bde_volume_header_windows_7_t *) volume_header_data )->identifier,
 		     bde_identifier,
 		     16 ) == 0 )
+		{
+			io_handle->version = LIBBDE_VERSION_WINDOWS_7;
+		}
+		else if( memory_compare(
+		          ( (bde_volume_header_windows_7_t *) volume_header_data )->identifier,
+		          bde_identifier_used_disk_space_only,
+		          16 ) == 0 )
 		{
 			io_handle->version = LIBBDE_VERSION_WINDOWS_7;
 		}

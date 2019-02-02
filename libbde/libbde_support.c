@@ -432,13 +432,20 @@ int libbde_check_volume_signature_file_io_handle(
 	}
 	else if( memory_compare(
 	          signature,
-	          bde_boot_entry_point_win7,
+	          bde_boot_entry_point_windows7,
 	          3 ) == 0 )
 	{
 		if( memory_compare(
 		     &( signature[ 160 ] ),
 		     bde_identifier,
 		     16 ) == 0 )
+		{
+			found_boot_entry_point = 1;
+		}
+		else if( memory_compare(
+		          &( signature[ 160 ] ),
+		          bde_identifier_used_disk_space_only,
+		          16 ) == 0 )
 		{
 			found_boot_entry_point = 1;
 		}

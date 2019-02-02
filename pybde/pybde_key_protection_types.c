@@ -188,6 +188,20 @@ int pybde_key_protection_types_init_type(
 	}
 #if PY_MAJOR_VERSION >= 3
 	value_object = PyLong_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_TPM_AND_PIN );
+#else
+	value_object = PyInt_FromLong(
+	                LIBBDE_KEY_PROTECTION_TYPE_TPM_AND_PIN );
+#endif
+	if( PyDict_SetItemString(
+	     type_object->tp_dict,
+	     "TPM_AND_PIN",
+	     value_object ) != 0 )
+	{
+		goto on_error;
+	}
+#if PY_MAJOR_VERSION >= 3
+	value_object = PyLong_FromLong(
 	                LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD );
 #else
 	value_object = PyInt_FromLong(
