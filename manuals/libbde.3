@@ -1,11 +1,9 @@
-.Dd February  4, 2017
+.Dd February 26, 2019
 .Dt libbde 3
 .Os libbde
 .Sh NAME
 .Nm libbde.h
 .Nd Library to access the BitLocker Drive Encryption (BDE) format
-.Sh LIBRARY
-.Lb libbde
 .Sh SYNOPSIS
 .In libbde.h
 .Pp
@@ -15,27 +13,27 @@ Support functions
 .Ft int
 .Fn libbde_get_access_flags_read "void"
 .Ft int
-.Fn libbde_get_codepage "int *codepage, libbde_error_t **error"
+.Fn libbde_get_codepage "int *codepage" "libbde_error_t **error"
 .Ft int
-.Fn libbde_set_codepage "int codepage, libbde_error_t **error"
+.Fn libbde_set_codepage "int codepage" "libbde_error_t **error"
 .Ft int
-.Fn libbde_check_volume_signature "const char *filename, libbde_error_t **error"
+.Fn libbde_check_volume_signature "const char *filename" "libbde_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libbde_check_volume_signature_wide "const wchar_t *filename, libbde_error_t **error"
+.Fn libbde_check_volume_signature_wide "const wchar_t *filename" "libbde_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libbde_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle, libbde_error_t **error"
+.Fn libbde_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle" "libbde_error_t **error"
 .Pp
 Notify functions
 .Ft void
 .Fn libbde_notify_set_verbose "int verbose"
 .Ft int
-.Fn libbde_notify_set_stream "FILE *stream, libbde_error_t **error"
+.Fn libbde_notify_set_stream "FILE *stream" "libbde_error_t **error"
 .Ft int
-.Fn libbde_notify_stream_open "const char *filename, libbde_error_t **error"
+.Fn libbde_notify_stream_open "const char *filename" "libbde_error_t **error"
 .Ft int
 .Fn libbde_notify_stream_close "libbde_error_t **error"
 .Pp
@@ -43,91 +41,91 @@ Error functions
 .Ft void
 .Fn libbde_error_free "libbde_error_t **error"
 .Ft int
-.Fn libbde_error_fprint "libbde_error_t *error, FILE *stream"
+.Fn libbde_error_fprint "libbde_error_t *error" "FILE *stream"
 .Ft int
-.Fn libbde_error_sprint "libbde_error_t *error, char *string, size_t size"
+.Fn libbde_error_sprint "libbde_error_t *error" "char *string" "size_t size"
 .Ft int
-.Fn libbde_error_backtrace_fprint "libbde_error_t *error, FILE *stream"
+.Fn libbde_error_backtrace_fprint "libbde_error_t *error" "FILE *stream"
 .Ft int
-.Fn libbde_error_backtrace_sprint "libbde_error_t *error, char *string, size_t size"
+.Fn libbde_error_backtrace_sprint "libbde_error_t *error" "char *string" "size_t size"
 .Pp
 Volume functions
 .Ft int
-.Fn libbde_volume_initialize "libbde_volume_t **volume, libbde_error_t **error"
+.Fn libbde_volume_initialize "libbde_volume_t **volume" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_free "libbde_volume_t **volume, libbde_error_t **error"
+.Fn libbde_volume_free "libbde_volume_t **volume" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_signal_abort "libbde_volume_t *volume, libbde_error_t **error"
+.Fn libbde_volume_signal_abort "libbde_volume_t *volume" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_open "libbde_volume_t *volume, const char *filename, int access_flags, libbde_error_t **error"
+.Fn libbde_volume_open "libbde_volume_t *volume" "const char *filename" "int access_flags" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_close "libbde_volume_t *volume, libbde_error_t **error"
+.Fn libbde_volume_close "libbde_volume_t *volume" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_is_locked "libbde_volume_t *volume, libbde_error_t **error"
+.Fn libbde_volume_is_locked "libbde_volume_t *volume" "libbde_error_t **error"
 .Ft ssize_t
-.Fn libbde_volume_read_buffer "libbde_volume_t *volume, void *buffer, size_t buffer_size, libbde_error_t **error"
+.Fn libbde_volume_read_buffer "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "libbde_error_t **error"
 .Ft ssize_t
-.Fn libbde_volume_read_buffer_at_offset "libbde_volume_t *volume, void *buffer, size_t buffer_size, off64_t offset, libbde_error_t **error"
+.Fn libbde_volume_read_buffer_at_offset "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "off64_t offset" "libbde_error_t **error"
 .Ft ssize_t
-.Fn libbde_volume_write_buffer "libbde_volume_t *volume, void *buffer, size_t buffer_size, libbde_error_t **error"
+.Fn libbde_volume_write_buffer "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "libbde_error_t **error"
 .Ft ssize_t
-.Fn libbde_volume_write_buffer_at_offset "libbde_volume_t *volume, const void *buffer, size_t buffer_size, off64_t offset, libbde_error_t **error"
+.Fn libbde_volume_write_buffer_at_offset "libbde_volume_t *volume" "const void *buffer" "size_t buffer_size" "off64_t offset" "libbde_error_t **error"
 .Ft off64_t
-.Fn libbde_volume_seek_offset "libbde_volume_t *volume, off64_t offset, int whence, libbde_error_t **error"
+.Fn libbde_volume_seek_offset "libbde_volume_t *volume" "off64_t offset" "int whence" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_offset "libbde_volume_t *volume, off64_t *offset, libbde_error_t **error"
+.Fn libbde_volume_get_offset "libbde_volume_t *volume" "off64_t *offset" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_size "libbde_volume_t *volume, size64_t *size, libbde_error_t **error"
+.Fn libbde_volume_get_size "libbde_volume_t *volume" "size64_t *size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_encryption_method "libbde_volume_t *volume, uint16_t *encryption_method, libbde_error_t **error"
+.Fn libbde_volume_get_encryption_method "libbde_volume_t *volume" "uint16_t *encryption_method" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_volume_identifier "libbde_volume_t *volume, uint8_t *volume_identifier, size_t size, libbde_error_t **error"
+.Fn libbde_volume_get_volume_identifier "libbde_volume_t *volume" "uint8_t *volume_identifier" "size_t size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_creation_time "libbde_volume_t *volume, uint64_t *filetime, libbde_error_t **error"
+.Fn libbde_volume_get_creation_time "libbde_volume_t *volume" "uint64_t *filetime" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_utf8_description_size "libbde_volume_t *volume, size_t *utf8_string_size, libbde_error_t **error"
+.Fn libbde_volume_get_utf8_description_size "libbde_volume_t *volume" "size_t *utf8_string_size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_utf8_description "libbde_volume_t *volume, uint8_t *utf8_string, size_t utf8_string_size, libbde_error_t **error"
+.Fn libbde_volume_get_utf8_description "libbde_volume_t *volume" "uint8_t *utf8_string" "size_t utf8_string_size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_utf16_description_size "libbde_volume_t *volume, size_t *utf16_string_size, libbde_error_t **error"
+.Fn libbde_volume_get_utf16_description_size "libbde_volume_t *volume" "size_t *utf16_string_size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_utf16_description "libbde_volume_t *volume, uint16_t *utf16_string, size_t utf16_string_size, libbde_error_t **error"
+.Fn libbde_volume_get_utf16_description "libbde_volume_t *volume" "uint16_t *utf16_string" "size_t utf16_string_size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_number_of_key_protectors "libbde_volume_t *volume, int *number_of_key_protectors, libbde_error_t **error"
+.Fn libbde_volume_get_number_of_key_protectors "libbde_volume_t *volume" "int *number_of_key_protectors" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_key_protector "libbde_volume_t *volume, int key_protector_index, libbde_key_protector_t **key_protector, libbde_error_t **error"
+.Fn libbde_volume_get_key_protector "libbde_volume_t *volume" "int key_protector_index" "libbde_key_protector_t **key_protector" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_set_keys "libbde_volume_t *volume, const uint8_t *full_volume_encryption_key, size_t full_volume_encryption_key_size, const uint8_t *tweak_key, size_t tweak_key_size, libbde_error_t **error"
+.Fn libbde_volume_set_keys "libbde_volume_t *volume" "const uint8_t *full_volume_encryption_key" "size_t full_volume_encryption_key_size" "const uint8_t *tweak_key" "size_t tweak_key_size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_set_utf8_password "libbde_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libbde_error_t **error"
+.Fn libbde_volume_set_utf8_password "libbde_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_set_utf16_password "libbde_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libbde_error_t **error"
+.Fn libbde_volume_set_utf16_password "libbde_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_set_utf8_recovery_password "libbde_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libbde_error_t **error"
+.Fn libbde_volume_set_utf8_recovery_password "libbde_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_set_utf16_recovery_password "libbde_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libbde_error_t **error"
+.Fn libbde_volume_set_utf16_recovery_password "libbde_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_read_startup_key "libbde_volume_t *volume, const char *filename, libbde_error_t **error"
+.Fn libbde_volume_read_startup_key "libbde_volume_t *volume" "const char *filename" "libbde_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libbde_volume_open_wide "libbde_volume_t *volume, const wchar_t *filename, int access_flags, libbde_error_t **error"
+.Fn libbde_volume_open_wide "libbde_volume_t *volume" "const wchar_t *filename" "int access_flags" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_read_startup_key_wide "libbde_volume_t *volume, const wchar_t *filename, libbde_error_t **error"
+.Fn libbde_volume_read_startup_key_wide "libbde_volume_t *volume" "const wchar_t *filename" "libbde_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libbde_volume_open_file_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, int access_flags, libbde_error_t **error"
+.Fn libbde_volume_open_file_io_handle "libbde_volume_t *volume" "libbfio_handle_t *file_io_handle" "int access_flags" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_read_startup_key_file_io_handle "libbde_volume_t *volume, libbfio_handle_t *file_io_handle, libbde_error_t **error"
+.Fn libbde_volume_read_startup_key_file_io_handle "libbde_volume_t *volume" "libbfio_handle_t *file_io_handle" "libbde_error_t **error"
 .Pp
 Key protector functions
 .Ft int
-.Fn libbde_key_protector_free "libbde_key_protector_t **key_protector, libbde_error_t **error"
+.Fn libbde_key_protector_free "libbde_key_protector_t **key_protector" "libbde_error_t **error"
 .Ft int
-.Fn libbde_key_protector_get_identifier "libbde_key_protector_t *key_protector, uint8_t *guid_data, size_t guid_data_size, libbde_error_t **error"
+.Fn libbde_key_protector_get_identifier "libbde_key_protector_t *key_protector" "uint8_t *guid_data" "size_t guid_data_size" "libbde_error_t **error"
 .Ft int
-.Fn libbde_key_protector_get_type "libbde_key_protector_t *key_protector, uint16_t *type, libbde_error_t **error"
+.Fn libbde_key_protector_get_type "libbde_key_protector_t *key_protector" "uint16_t *type" "libbde_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libbde_get_version
@@ -140,8 +138,8 @@ None
 .Sh FILES
 None
 .Sh NOTES
-libbde allows to be compiled with wide character support (wchar_t).
-
+libbde can be compiled with wide character support (wchar_t).
+.sp
 To compile libbde with wide character support use:
 .Ar ./configure --enable-wide-character-type=yes
  or define:
@@ -149,7 +147,7 @@ To compile libbde with wide character support use:
  or
 .Ar UNICODE
  during compilation.
-
+.sp
 .Ar LIBBDE_WIDE_CHARACTER_TYPE
  in libbde/features.h can be used to determine if libbde was compiled with wide character support.
 .Sh BUGS
@@ -158,7 +156,7 @@ Please report bugs of any kind on the project issue tracker: https://github.com/
 These man pages are generated from "libbde.h".
 .Sh COPYRIGHT
 Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>.
-
+.sp
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 .Sh SEE ALSO
