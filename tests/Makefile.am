@@ -28,6 +28,7 @@ endif
 
 TESTS = \
 	test_library.sh \
+	test_manpage.sh \
 	test_bdeinfo.sh \
 	$(TESTS_PYBDE)
 
@@ -36,6 +37,7 @@ check_SCRIPTS = \
 	pybde_test_volume.py \
 	test_bdeinfo.sh \
 	test_library.sh \
+	test_manpage.sh \
 	test_python_module.sh \
 	test_runner.sh
 
