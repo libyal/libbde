@@ -28,8 +28,8 @@ endif
 
 TESTS = \
 	test_library.sh \
-	test_manpage.sh \
 	test_bdeinfo.sh \
+	test_manpage.sh \
 	$(TESTS_PYBDE)
 
 check_SCRIPTS = \
