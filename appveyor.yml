@@ -199,9 +199,9 @@ install:
       .\builddokan.ps1 -UseLegacyVersion }
     }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P openssl-devel -P python2-devel -P python3-devel )
+    C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P zlib-devel -P openssl-devel -P python2-devel -P python3-devel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P openssl-devel -P python2-devel -P python3-devel )
+    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P zlib-devel -P openssl-devel -P python2-devel -P python3-devel )
 
 build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or $env:BUILD_ENVIRONMENT -eq "python") {
