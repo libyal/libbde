@@ -52,7 +52,9 @@ libbde_la_SOURCES = \
 	libbde_libhmac.h \
 	libbde_libuna.h \
 	libbde_metadata.c libbde_metadata.h \
+	libbde_metadata_block_header.c libbde_metadata_block_header.h \
 	libbde_metadata_entry.c libbde_metadata_entry.h \
+	libbde_metadata_header.c libbde_metadata_header.h \
 	libbde_notify.c libbde_notify.h \
 	libbde_password.c libbde_password.h \
 	libbde_password_keep.c libbde_password_keep.h \

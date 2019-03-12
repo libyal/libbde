@@ -364,6 +364,7 @@ int libbde_io_handle_read_volume_header(
 		{
 			io_handle->version = LIBBDE_VERSION_WINDOWS_7;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
 		else if( memory_compare(
 		          ( (bde_volume_header_windows_7_t *) volume_header_data )->identifier,
 		          bde_identifier_used_disk_space_only,
@@ -371,6 +372,7 @@ int libbde_io_handle_read_volume_header(
 		{
 			io_handle->version = LIBBDE_VERSION_WINDOWS_7;
 		}
+#endif
 		else if( memory_compare(
 		          ( (bde_volume_header_to_go_t *) volume_header_data )->identifier,
 		          bde_identifier,

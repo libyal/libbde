@@ -442,6 +442,7 @@ int libbde_check_volume_signature_file_io_handle(
 		{
 			found_boot_entry_point = 1;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
 		else if( memory_compare(
 		          &( signature[ 160 ] ),
 		          bde_identifier_used_disk_space_only,
@@ -449,6 +450,7 @@ int libbde_check_volume_signature_file_io_handle(
 		{
 			found_boot_entry_point = 1;
 		}
+#endif
 		else if( memory_compare(
 		          &( signature[ 424 ] ),
 		          bde_identifier,

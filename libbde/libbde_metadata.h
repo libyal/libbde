@@ -45,10 +45,6 @@ struct libbde_metadata
 	 */
 	uint16_t version;
 
-	/* The encryption method
-	 */
-	uint16_t encryption_method;
-
 	/* The encrypted volume size
 	 */
 	size64_t encrypted_volume_size;
@@ -75,6 +71,10 @@ struct libbde_metadata
 	 * Contains a GUID
 	 */
 	uint8_t volume_identifier[ 16 ];
+
+	/* The encryption method
+	 */
+	uint16_t encryption_method;
 
 	/* The creation date and time
 	 */
@@ -138,20 +138,21 @@ int libbde_metadata_read_block(
      size_t startup_key_identifier_size,
      libcerror_error_t **error );
 
-ssize_t libbde_metadata_read_header(
-         libbde_metadata_t *metadata,
-         uint8_t *header_data,
-         size_t header_data_size,
-         uint32_t *metadata_size,
-         libcerror_error_t **error );
+int libbde_metadata_read_entries_file_io_handle(
+     libbde_metadata_t *metadata,
+     libbfio_handle_t *file_io_handle,
+     size_t entries_data_size,
+     const uint8_t *startup_key_identifier,
+     size_t startup_key_identifier_size,
+     libcerror_error_t **error );
 
-ssize_t libbde_metadata_read_entries(
-         libbde_metadata_t *metadata,
-         uint8_t *entries_data,
-         size_t entries_data_size,
-         const uint8_t *startup_key_identifier,
-         size_t startup_key_identifier_size,
-         libcerror_error_t **error );
+int libbde_metadata_read_entries_data(
+     libbde_metadata_t *metadata,
+     uint8_t *entries_data,
+     size_t entries_data_size,
+     const uint8_t *startup_key_identifier,
+     size_t startup_key_identifier_size,
+     libcerror_error_t **error );
 
 int libbde_metadata_read_volume_master_key(
      libbde_metadata_t *metadata,
