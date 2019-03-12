@@ -35,6 +35,7 @@
 #include "libbde_libfcache.h"
 #include "libbde_libfdata.h"
 #include "libbde_metadata.h"
+#include "libbde_metadata_header.h"
 #include "libbde_key_protector.h"
 #include "libbde_password.h"
 #include "libbde_recovery.h"
@@ -4408,10 +4409,10 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 	libbde_internal_volume_t *internal_volume = NULL;
 	libbde_metadata_t *external_key_metadata  = NULL;
-	uint8_t *metadata_entries_data            = NULL;
+	libbde_metadata_header_t *header          = NULL;
 	static char *function                     = "libbde_volume_read_startup_key_wide";
 	ssize_t read_count                        = 0;
-	uint32_t metadata_size                    = 0;
+	uint32_t entries_data_size                = 0;
 	int file_io_handle_is_open                = 0;
 
 	if( volume == NULL )
@@ -4555,25 +4556,53 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 		goto on_error;
 	}
-	read_count = libbde_metadata_read_header(
-	              external_key_metadata,
-	              (uint8_t *) &file_header,
-	              sizeof( bde_metadata_header_v1_t ),
-	              &metadata_size,
-	              error );
+	if( libbde_metadata_header_initialize(
+	     &header,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create metadata header.",
+		 function );
 
-	if( read_count == -1 )
+		goto on_error;
+	}
+	if( libbde_metadata_header_read_file_io_handle(
+	     header,
+	     file_io_handle,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read external key metadata header.",
+		 "%s: unable to read metadata header.",
 		 function );
 
 		goto on_error;
 	}
-	if( metadata_size < sizeof( bde_metadata_header_v1_t ) )
+	if( memory_copy(
+	     external_key_metadata->volume_identifier,
+	     header->volume_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy volume identifier.",
+		 function );
+
+		goto on_error;
+	}
+	external_key_metadata->encryption_method = header->encryption_method;
+	external_key_metadata->creation_time     = header->creation_time;
+
+	entries_data_size = header->metadata_size;
+
+	if( entries_data_size < sizeof( bde_metadata_header_v1_t ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -4582,50 +4611,17 @@ int libbde_volume_read_startup_key_file_io_handle(
 		 "%s: metadata size value out of bounds.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
-	metadata_size -= sizeof( bde_metadata_header_v1_t );
+	entries_data_size -= sizeof( bde_metadata_header_v1_t );
 
-	metadata_entries_data = (uint8_t *) memory_allocate(
-	                                     sizeof( uint8_t ) * metadata_size );
-
-	if( metadata_entries_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to metadata entries data.",
-		 function );
-
-		goto on_error;
-	}
-	read_count = libbfio_handle_read_buffer(
-	              file_io_handle,
-	              metadata_entries_data,
-	              (size_t) metadata_size,
-	              error );
-
-	if( read_count != (ssize_t) metadata_size )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata entries data.",
-		 function );
-
-		goto on_error;
-	}
-	read_count = libbde_metadata_read_entries(
-	              external_key_metadata,
-	              metadata_entries_data,
-	              (size_t) metadata_size,
-	              NULL,
-	              0,
-	              error );
-
-	if( read_count == -1 )
+	if( libbde_metadata_read_entries_file_io_handle(
+	     external_key_metadata,
+	     file_io_handle,
+	     (size_t) entries_data_size,
+	     NULL,
+	     0,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -4636,11 +4632,6 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 		goto on_error;
 	}
-	memory_free(
-	 metadata_entries_data );
-
-	metadata_entries_data = NULL;
-
 	if( file_io_handle_is_open == 0 )
 	{
 		if( libbfio_handle_close(
@@ -4692,10 +4683,11 @@ int libbde_volume_read_startup_key_file_io_handle(
 	return( 1 );
 
 on_error:
-	if( metadata_entries_data != NULL )
+	if( header != NULL )
 	{
-		memory_free(
-		 metadata_entries_data );
+		libbde_metadata_header_free(
+		 &header,
+		 NULL );
 	}
 	if( external_key_metadata != NULL )
 	{

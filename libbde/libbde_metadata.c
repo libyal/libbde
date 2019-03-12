@@ -26,7 +26,6 @@
 #include <types.h>
 
 #include "libbde_aes_ccm_encrypted_key.h"
-#include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_external_key.h"
 #include "libbde_io_handle.h"
@@ -36,11 +35,11 @@
 #include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
-#include "libbde_libfdatetime.h"
-#include "libbde_libfguid.h"
 #include "libbde_libuna.h"
 #include "libbde_metadata.h"
+#include "libbde_metadata_block_header.h"
 #include "libbde_metadata_entry.h"
+#include "libbde_metadata_header.h"
 #include "libbde_password.h"
 #include "libbde_password_keep.h"
 #include "libbde_volume_master_key.h"
@@ -252,23 +251,11 @@ int libbde_metadata_read_block(
      size_t startup_key_identifier_size,
      libcerror_error_t **error )
 {
-	uint8_t *fve_metadata_block              = NULL;
-	void *reallocation                       = NULL;
-	static char *function                    = "libbde_metadata_read_block";
-	size_t fve_metadata_block_offset         = 0;
-	size_t read_size                         = 8192;
-	ssize_t read_count                       = 0;
-	uint64_t first_metadata_offset           = 0;
-	uint64_t second_metadata_offset          = 0;
-	uint64_t third_metadata_offset           = 0;
-	uint64_t volume_header_size              = 0;
-	uint32_t metadata_size                   = 0;
-	uint32_t number_of_volume_header_sectors = 0;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit                     = 0;
-	uint16_t value_16bit                     = 0;
-#endif
+	libbde_metadata_block_header_t *block_header = NULL;
+	libbde_metadata_header_t *header             = NULL;
+	static char *function                        = "libbde_metadata_read_block";
+	uint64_t volume_header_size                  = 0;
+	uint32_t entries_data_size                   = 0;
 
 	if( metadata == NULL )
 	{
@@ -312,237 +299,58 @@ int libbde_metadata_read_block(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek metadata offset: %" PRIi64 ".",
+		 "%s: unable to seek metadata block header offset: %" PRIi64 " (0x%08" PRIx64 ").",
 		 function,
+		 file_offset,
 		 file_offset );
 
-		goto on_error;
+		return( -1 );
 	}
-	fve_metadata_block = (uint8_t *) memory_allocate(
-	                                  sizeof( uint8_t ) * read_size );
-
-	if( fve_metadata_block == NULL )
+	if( libbde_metadata_block_header_initialize(
+	     &block_header,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create FVE metadata block.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create metadata block header.",
 		 function );
 
 		goto on_error;
 	}
-	read_count = libbfio_handle_read_buffer(
-	              file_io_handle,
-	              fve_metadata_block,
-	              read_size,
-	              error );
-
-	if( read_count != (ssize_t) read_size )
+	if( libbde_metadata_block_header_read_file_io_handle(
+	     block_header,
+	     file_io_handle,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read FVE metadata block.",
+		 "%s: unable to read metadata block header.",
 		 function );
 
 		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: FVE metadata block header:\n",
-		 function );
-		libcnotify_print_data(
-		 fve_metadata_block,
-		 sizeof( bde_metadata_block_header_v1_t ),
-		 0 );
-	}
-#endif
-	if( memory_compare(
-	     fve_metadata_block,
-	     bde_signature,
-	     8 ) != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid metadata block signature.",
-		 function );
+	metadata->version               = block_header->version;
+	metadata->encrypted_volume_size = block_header->encrypted_volume_size;
+	metadata->volume_header_offset  = block_header->volume_header_offset;
 
-		goto on_error;
-	}
-	byte_stream_copy_to_uint16_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->version,
-	 metadata->version );
-
-	if( ( metadata->version != 1 )
-	 && ( metadata->version != 2 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported metadata block version.",
-		 function );
-
-		goto on_error;
-	}
-	if( metadata->version == 1 )
-	{
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->mft_mirror_cluster_block,
-		 metadata->mft_mirror_cluster_block_number );
-	}
-	else if( metadata->version == 2 )
-	{
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->encrypted_volume_size,
-		 metadata->encrypted_volume_size );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->volume_header_offset,
-		 metadata->volume_header_offset );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->number_of_volume_header_sectors,
-		 number_of_volume_header_sectors );
-	}
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->first_metadata_offset,
-	 first_metadata_offset );
-
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->second_metadata_offset,
-	 second_metadata_offset );
-
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->third_metadata_offset,
-	 third_metadata_offset );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: signature\t\t\t\t\t: %c%c%c%c%c%c%c%c\n",
-		 function,
-		 fve_metadata_block[ 0 ],
-		 fve_metadata_block[ 1 ],
-		 fve_metadata_block[ 2 ],
-		 fve_metadata_block[ 3 ],
-		 fve_metadata_block[ 4 ],
-		 fve_metadata_block[ 5 ],
-		 fve_metadata_block[ 6 ],
-		 fve_metadata_block[ 7 ] );
-
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->size,
-		 value_16bit );
-		libcnotify_printf(
-		 "%s: size\t\t\t\t\t: %" PRIu16 "\n",
-		 function,
-		 value_16bit );
-
-		libcnotify_printf(
-		 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
-		 function,
-		 metadata->version );
-
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown1,
-		 value_16bit );
-		libcnotify_printf(
-		 "%s: unknown1\t\t\t\t\t: %" PRIu16 "\n",
-		 function,
-		 value_16bit );
-
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown2,
-		 value_16bit );
-		libcnotify_printf(
-		 "%s: unknown2\t\t\t\t\t: %" PRIu16 "\n",
-		 function,
-		 value_16bit );
-
-		if( metadata->version == 1 )
-		{
-			libcnotify_printf(
-			 "%s: unknown3:\n",
-			 function );
-			libcnotify_print_data(
-			 ( (bde_metadata_block_header_v1_t *) fve_metadata_block )->unknown3,
-			 16,
-			 0 );
-		}
-		else if( metadata->version == 2 )
-		{
-			libcnotify_printf(
-			 "%s: encrypted volume size\t\t\t: %" PRIu64 "\n",
-			 function,
-			 metadata->encrypted_volume_size );
-
-			byte_stream_copy_to_uint32_little_endian(
-			 ( (bde_metadata_block_header_v2_t *) fve_metadata_block )->unknown3,
-			 value_32bit );
-			libcnotify_printf(
-			 "%s: unknown3\t\t\t\t\t: %" PRIu32 "\n",
-			 function,
-			 value_32bit );
-
-			libcnotify_printf(
-			 "%s: number of volume header sectors\t\t: %" PRIu32 "\n",
-			 function,
-			 number_of_volume_header_sectors );
-		}
-		libcnotify_printf(
-		 "%s: first metadata offset\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 first_metadata_offset );
-
-		libcnotify_printf(
-		 "%s: second metadata offset\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 second_metadata_offset );
-
-		libcnotify_printf(
-		 "%s: third metadata offset\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 third_metadata_offset );
-
-		if( metadata->version == 1 )
-		{
-			libcnotify_printf(
-			 "%s: MFT mirror cluster block\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 metadata->mft_mirror_cluster_block_number );
-		}
-		else if( metadata->version == 2 )
-		{
-			libcnotify_printf(
-			 "%s: volume header offset\t\t\t: 0x%08" PRIx64 "\n",
-			 function,
-			 metadata->volume_header_offset );
-		}
-		libcnotify_printf(
-		 "\n" );
-	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+	volume_header_size = block_header->number_of_volume_header_sectors * io_handle->bytes_per_sector;
 
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
 		if( io_handle->second_metadata_offset == 0 )
 		{
-			io_handle->second_metadata_offset = second_metadata_offset;
+			io_handle->second_metadata_offset = block_header->second_metadata_offset;
 		}
 		if( io_handle->third_metadata_offset == 0 )
 		{
-			io_handle->third_metadata_offset = third_metadata_offset;
+			io_handle->third_metadata_offset = block_header->third_metadata_offset;
 		}
 	}
-	if( (uint64_t) io_handle->first_metadata_offset != first_metadata_offset )
+	if( (uint64_t) io_handle->first_metadata_offset != block_header->first_metadata_offset )
 	{
 		libcerror_error_set(
 		 error,
@@ -553,7 +361,7 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	if( (uint64_t) io_handle->second_metadata_offset != second_metadata_offset )
+	if( (uint64_t) io_handle->second_metadata_offset != block_header->second_metadata_offset )
 	{
 		libcerror_error_set(
 		 error,
@@ -564,7 +372,7 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	if( (uint64_t) io_handle->third_metadata_offset != third_metadata_offset )
+	if( (uint64_t) io_handle->third_metadata_offset != block_header->third_metadata_offset )
 	{
 		libcerror_error_set(
 		 error,
@@ -575,17 +383,23 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	fve_metadata_block_offset += sizeof( bde_metadata_block_header_v1_t );
-	read_size                 -= sizeof( bde_metadata_block_header_v1_t );
+	if( libbde_metadata_header_initialize(
+	     &header,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create metadata header.",
+		 function );
 
-	read_count = libbde_metadata_read_header(
-	              metadata,
-	              &( fve_metadata_block[ fve_metadata_block_offset ] ),
-	              read_size,
-	              &metadata_size,
-	              error );
-
-	if( read_count == -1 )
+		goto on_error;
+	}
+	if( libbde_metadata_header_read_file_io_handle(
+	     header,
+	     file_io_handle,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -596,10 +410,26 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	fve_metadata_block_offset += read_count;
-	read_size                 -= read_count;
+	if( memory_copy(
+	     metadata->volume_identifier,
+	     header->volume_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy volume identifier.",
+		 function );
 
-	if( metadata_size < ( sizeof( bde_metadata_header_v1_t ) + read_count ) )
+		goto on_error;
+	}
+	metadata->encryption_method = header->encryption_method;
+	metadata->creation_time     = header->creation_time;
+
+	entries_data_size = header->metadata_size;
+
+	if( entries_data_size < sizeof( bde_metadata_header_v1_t ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -608,48 +438,27 @@ int libbde_metadata_read_block(
 		 "%s: metadata size value out of bounds.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
-	if( metadata_size > read_size )
-	{
-		reallocation = memory_reallocate(
-		                fve_metadata_block,
-		                metadata_size );
+	entries_data_size -= sizeof( bde_metadata_header_v1_t );
 
-		if( reallocation == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to resize metadata.",
-			 function );
-
-			goto on_error;
-		}
-		fve_metadata_block = (uint8_t *) reallocation;
-	}
-	read_count = libbde_metadata_read_entries(
-	              metadata,
-	              &( fve_metadata_block[ fve_metadata_block_offset ] ),
-	              (size_t) metadata_size - sizeof( bde_metadata_header_v1_t ),
-	              startup_key_identifier,
-	              startup_key_identifier_size,
-	              error );
-
-	if( read_count == -1 )
+	if( libbde_metadata_read_entries_file_io_handle(
+	     metadata,
+	     file_io_handle,
+	     (size_t) entries_data_size,
+	     startup_key_identifier,
+	     startup_key_identifier_size,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata header.",
+		 "%s: unable to read metadata entries.",
 		 function );
 
 		goto on_error;
 	}
-	volume_header_size = number_of_volume_header_sectors * io_handle->bytes_per_sector;
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -677,41 +486,64 @@ int libbde_metadata_read_block(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	memory_free(
-	 fve_metadata_block );
+	if( libbde_metadata_header_free(
+	     &header,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free metadata header.",
+		 function );
 
-	fve_metadata_block = NULL;
+		goto on_error;
+	}
+	if( libbde_metadata_block_header_free(
+	     &block_header,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free metadata block header.",
+		 function );
 
+		goto on_error;
+	}
 	return( 1 );
 
 on_error:
-	if( fve_metadata_block != NULL )
+	if( header != NULL )
 	{
-		memory_free(
-		 fve_metadata_block );
+		libbde_metadata_header_free(
+		 &header,
+		 NULL );
+	}
+	if( block_header != NULL )
+	{
+		libbde_metadata_block_header_free(
+		 &block_header,
+		 NULL );
 	}
 	return( -1 );
 }
 
-/* Reads a metadata header
- * Returns the number of byte read if successful or -1 on error
+/* Reads metadata entries
+ * Returns 1 if successful or -1 on error
  */
-ssize_t libbde_metadata_read_header(
-         libbde_metadata_t *metadata,
-         uint8_t *header_data,
-         size_t header_data_size,
-         uint32_t *metadata_size,
-         libcerror_error_t **error )
+int libbde_metadata_read_entries_file_io_handle(
+     libbde_metadata_t *metadata,
+     libbfio_handle_t *file_io_handle,
+     size_t entries_data_size,
+     const uint8_t *startup_key_identifier,
+     size_t startup_key_identifier_size,
+     libcerror_error_t **error )
 {
-	static char *function           = "libbde_metadata_read_header";
-	uint32_t metadata_header_size   = 0;
-	uint32_t metadata_size_copy     = 0;
-	uint32_t version                = 0;
-	uint16_t encryption_method_copy = 0;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit            = 0;
-#endif
+	uint8_t *entries_data = NULL;
+	static char *function = "libbde_metadata_read_entries_file_io_handle";
+	ssize_t read_count    = 0;
 
 	if( metadata == NULL )
 	{
@@ -724,252 +556,97 @@ ssize_t libbde_metadata_read_header(
 
 		return( -1 );
 	}
-	if( header_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid header data.",
-		 function );
-
-		return( -1 );
-	}
-	if( header_data_size > (size_t) SSIZE_MAX )
+	if( entries_data_size > (size_t) LIBBDE_MAXIMUM_FVE_METADATA_SIZE )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid header data size value exceeds maximum.",
+		 "%s: invalid entries data size value exceeds maximum.",
 		 function );
 
 		return( -1 );
 	}
-	if( header_data_size < sizeof( bde_metadata_header_v1_t ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: header data size value out of bounds.",
-		 function );
+	entries_data = (uint8_t *) memory_allocate(
+	                            sizeof( uint8_t ) * entries_data_size );
 
-		return( -1 );
-	}
-	if( metadata_size == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid metadata size.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: FVE metadata header:\n",
-		 function );
-		libcnotify_print_data(
-		 header_data,
-		 sizeof( bde_metadata_header_v1_t ),
-		 0 );
-	}
-#endif
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->metadata_size,
-	 *metadata_size );
-
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->version,
-	 version );
-
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->metadata_header_size,
-	 metadata_header_size );
-
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->metadata_size_copy,
-	 metadata_size_copy );
-
-	if( memory_copy(
-	     metadata->volume_identifier,
-	     ( (bde_metadata_header_v1_t *) header_data )->volume_identifier,
-	     16 ) == NULL )
+	if( entries_data == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy volume identifier.",
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create metadata entries data.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	byte_stream_copy_to_uint16_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->encryption_method,
-	 metadata->encryption_method );
+	read_count = libbfio_handle_read_buffer(
+	              file_io_handle,
+	              entries_data,
+	              (size_t) entries_data_size,
+	              error );
 
-	byte_stream_copy_to_uint16_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->encryption_method_copy,
-	 encryption_method_copy );
-
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (bde_metadata_header_v1_t *) header_data )->creation_time,
-	 metadata->creation_time );
-
-	if( version != 1 )
+	if( read_count != (ssize_t) entries_data_size )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported metadata header version.",
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read metadata entries data.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: metadata size\t\t\t\t: %" PRIu32 "\n",
-		 function,
-		 *metadata_size );
-
-		libcnotify_printf(
-		 "%s: version\t\t\t\t\t: %" PRIu32 "\n",
-		 function,
-		 version );
-
-		libcnotify_printf(
-		 "%s: metadata header size\t\t\t: %" PRIu32 "\n",
-		 function,
-		 metadata_header_size );
-
-		libcnotify_printf(
-		 "%s: metadata size copy\t\t\t\t: %" PRIu32 "\n",
-		 function,
-		 metadata_size_copy );
-
-		if( libbde_debug_print_guid_value(
-		     function,
-		     "volume identifier\t\t\t\t",
-		     metadata->volume_identifier,
-		     16,
-		     LIBFGUID_ENDIAN_LITTLE,
-		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print GUID value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (bde_metadata_header_v1_t *) header_data )->next_nonce_counter,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: next nonce counter\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		libcnotify_printf(
-		 "%s: encryption method\t\t\t\t: 0x%08" PRIx32 " (%s)\n",
-		 function,
-		 metadata->encryption_method,
-		 libbde_debug_print_encryption_method(
-		  metadata->encryption_method ) );
-
-		libcnotify_printf(
-		 "%s: encryption method copy\t\t\t: 0x%08" PRIx32 " (%s)\n",
-		 function,
-		 encryption_method_copy,
-		 libbde_debug_print_encryption_method(
-		  encryption_method_copy ) );
-
-		if( libbde_debug_print_filetime_value(
-		     function,
-		     "creation time\t\t\t\t",
-		     ( (bde_metadata_header_v1_t *) header_data )->creation_time,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_CTIME | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print FILETIME value.",
-			 function );
-
-			return( -1 );
-		}
-		libcnotify_printf(
-		 "\n" );
-	}
-#endif
-	if( metadata_header_size != sizeof( bde_metadata_header_v1_t ) )
+	if( libbde_metadata_read_entries_data(
+	     metadata,
+	     entries_data,
+	     entries_data_size,
+	     startup_key_identifier,
+	     startup_key_identifier_size,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_INPUT,
-		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
-		 "%s: value mismatch for metadata header size.",
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read metadata entries.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( *metadata_size != metadata_size_copy )
+	memory_free(
+	 entries_data );
+
+	entries_data = NULL;
+
+	return( 1 );
+
+on_error:
+	if( entries_data != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_INPUT,
-		 LIBCERROR_INPUT_ERROR_VALUE_MISMATCH,
-		 "%s: value mismatch for metadata size and copy.",
-		 function );
-
-		return( -1 );
+		memory_free(
+		 entries_data );
 	}
-	if( *metadata_size < sizeof( bde_metadata_header_v1_t ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: metadata size value out of bounds.",
-		 function );
-
-		return( -1 );
-	}
-	return( sizeof( bde_metadata_header_v1_t ) );
+	return( -1 );
 }
 
-/* Reads a metadata entries
- * Returns the number of byte read if successful or -1 on error
+/* Reads metadata entries
+ * Returns 1 if successful or -1 on error
  */
-ssize_t libbde_metadata_read_entries(
-         libbde_metadata_t *metadata,
-         uint8_t *entries_data,
-         size_t entries_data_size,
-         const uint8_t *startup_key_identifier,
-         size_t startup_key_identifier_size,
-         libcerror_error_t **error )
+int libbde_metadata_read_entries_data(
+     libbde_metadata_t *metadata,
+     uint8_t *entries_data,
+     size_t entries_data_size,
+     const uint8_t *startup_key_identifier,
+     size_t startup_key_identifier_size,
+     libcerror_error_t **error )
 {
 	libbde_aes_ccm_encrypted_key_t *aes_ccm_encrypted_key = NULL;
 	libbde_external_key_t *external_key                   = NULL;
 	libbde_metadata_entry_t *metadata_entry               = NULL;
 	libbde_volume_master_key_t *volume_master_key         = NULL;
-	static char *function                                 = "libbde_metadata_read_entries";
+	static char *function                                 = "libbde_metadata_read_entries_data";
 	size_t entries_data_offset                            = 0;
 	ssize_t read_count                                    = 0;
 	uint64_t volume_header_offset                         = 0;
@@ -1439,7 +1116,7 @@ ssize_t libbde_metadata_read_entries(
 		}
 	}
 #endif
-	return( (ssize_t) entries_data_offset );
+	return( 1 );
 
 on_error:
 	if( aes_ccm_encrypted_key != NULL )

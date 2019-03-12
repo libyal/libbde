@@ -214,7 +214,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_metadata_block_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_metadata_entry.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_metadata_header.c"
 				>
 			</File>
 			<File
@@ -376,7 +384,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_metadata_block_header.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_metadata_entry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_metadata_header.h"
 				>
 			</File>
 			<File

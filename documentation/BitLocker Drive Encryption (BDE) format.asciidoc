@@ -550,7 +550,7 @@ The FVE metadata block header version 1 is 64 bytes of size and consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | "-FVE-FS-" | Signature
-| 8 | 2 | | Size
+| 8 | 2 | | [yellow-background]*Unknown (Size)*
 | 10 | 2 | 1 | Version
 | 12 | 2 | | [yellow-background]*Unknown* +
 0x04 commonly
@@ -574,7 +574,7 @@ The FVE metadata block header version 2 is 64 bytes of size and consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | "-FVE-FS-" | Signature
-| 8 | 2 | | Size
+| 8 | 2 | | [yellow-background]*Unknown (Size)*
 | 10 | 2 | 2 | Version
 | 12 | 2 | | [yellow-background]*Unknown* +
 0x04 commonly +
