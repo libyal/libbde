@@ -52,7 +52,9 @@ check_PROGRAMS = \
 	bde_test_key \
 	bde_test_key_protector \
 	bde_test_metadata \
+	bde_test_metadata_block_header \
 	bde_test_metadata_entry \
+	bde_test_metadata_header \
 	bde_test_notify \
 	bde_test_password_keep \
 	bde_test_sector_data \
@@ -142,6 +144,28 @@ bde_test_metadata_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
+bde_test_metadata_block_header_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_metadata_block_header.c \
+	bde_test_unused.h
+
+bde_test_metadata_block_header_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
 bde_test_metadata_entry_SOURCES = \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
@@ -151,6 +175,28 @@ bde_test_metadata_entry_SOURCES = \
 	bde_test_unused.h
 
 bde_test_metadata_entry_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_metadata_header_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_metadata_header.c \
+	bde_test_unused.h
+
+bde_test_metadata_header_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
