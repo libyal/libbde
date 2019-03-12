@@ -6,7 +6,9 @@ MSVSCPP_FILES = \
 	bde_test_key/bde_test_key.vcproj \
 	bde_test_key_protector/bde_test_key_protector.vcproj \
 	bde_test_metadata/bde_test_metadata.vcproj \
+	bde_test_metadata_block_header/bde_test_metadata_block_header.vcproj \
 	bde_test_metadata_entry/bde_test_metadata_entry.vcproj \
+	bde_test_metadata_header/bde_test_metadata_header.vcproj \
 	bde_test_notify/bde_test_notify.vcproj \
 	bde_test_password_keep/bde_test_password_keep.vcproj \
 	bde_test_sector_data/bde_test_sector_data.vcproj \
