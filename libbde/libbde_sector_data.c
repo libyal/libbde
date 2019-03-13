@@ -65,13 +65,14 @@ int libbde_sector_data_initialize(
 
 		return( -1 );
 	}
-	if( data_size > (size_t) SSIZE_MAX )
+	if( ( data_size == 0 )
+	 || ( data_size > (size_t) SSIZE_MAX ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid data size value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data size value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -109,38 +110,36 @@ int libbde_sector_data_initialize(
 
 		return( -1 );
 	}
-	if( data_size > 0 )
+	( *sector_data )->encrypted_data = (uint8_t *) memory_allocate(
+	                                                sizeof( uint8_t ) * data_size );
+
+	if( ( *sector_data )->encrypted_data == NULL )
 	{
-		( *sector_data )->encrypted_data = (uint8_t *) memory_allocate(
-		                                                sizeof( uint8_t ) * data_size );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create encrypted data.",
+		 function );
 
-		if( ( *sector_data )->encrypted_data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create encrypted data.",
-			 function );
-
-			goto on_error;
-		}
-		( *sector_data )->data = (uint8_t *) memory_allocate(
-		                                      sizeof( uint8_t ) * data_size );
-
-		if( ( *sector_data )->data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create data.",
-			 function );
-
-			goto on_error;
-		}
-		( *sector_data )->data_size = data_size;
+		goto on_error;
 	}
+	( *sector_data )->data = (uint8_t *) memory_allocate(
+	                                      sizeof( uint8_t ) * data_size );
+
+	if( ( *sector_data )->data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create data.",
+		 function );
+
+		goto on_error;
+	}
+	( *sector_data )->data_size = data_size;
+
 	return( 1 );
 
 on_error:
@@ -215,7 +214,7 @@ int libbde_sector_data_free(
 /* Reads sector data
  * Returns 1 if successful or -1 on error
  */
-int libbde_sector_data_read(
+int libbde_sector_data_read_file_io_handle(
      libbde_sector_data_t *sector_data,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
@@ -224,7 +223,7 @@ int libbde_sector_data_read(
      uint8_t zero_metadata,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_sector_data_read";
+	static char *function = "libbde_sector_data_read_file_io_handle";
 	ssize_t read_count    = 0;
 	uint64_t block_key    = 0;
 
