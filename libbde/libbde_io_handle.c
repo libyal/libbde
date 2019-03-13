@@ -882,7 +882,7 @@ int libbde_io_handle_read_sector(
 
 		goto on_error;
 	}
-	if( libbde_sector_data_read(
+	if( libbde_sector_data_read_file_io_handle(
 	     sector_data,
 	     io_handle,
 	     file_io_handle,
@@ -985,7 +985,7 @@ int libbde_io_handle_read_unencrypted_volume_header(
 
 		goto on_error;
 	}
-	if( libbde_sector_data_read(
+	if( libbde_sector_data_read_file_io_handle(
 	     sector_data,
 	     io_handle,
 	     file_io_handle,

@@ -56,6 +56,7 @@ check_PROGRAMS = \
 	bde_test_metadata_entry \
 	bde_test_metadata_header \
 	bde_test_notify \
+	bde_test_password \
 	bde_test_password_keep \
 	bde_test_sector_data \
 	bde_test_stretch_key \
@@ -211,6 +212,17 @@ bde_test_notify_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
+bde_test_password_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_password.c \
+	bde_test_unused.h
+
+bde_test_password_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
 bde_test_password_keep_SOURCES = \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
@@ -224,6 +236,7 @@ bde_test_password_keep_LDADD = \
 	@LIBCERROR_LIBADD@
 
 bde_test_sector_data_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
 	bde_test_libbde.h \
 	bde_test_libcerror.h \
 	bde_test_macros.h \
@@ -232,6 +245,14 @@ bde_test_sector_data_SOURCES = \
 	bde_test_unused.h
 
 bde_test_sector_data_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 

@@ -136,6 +136,7 @@ stamp-h[1-9]
 /tests/bde_test_metadata_entry
 /tests/bde_test_metadata_header
 /tests/bde_test_notify
+/tests/bde_test_password
 /tests/bde_test_password_keep
 /tests/bde_test_sector_data
 /tests/bde_test_stretch_key

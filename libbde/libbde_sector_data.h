@@ -60,7 +60,7 @@ int libbde_sector_data_free(
      libbde_sector_data_t **sector_data,
      libcerror_error_t **error );
 
-int libbde_sector_data_read(
+int libbde_sector_data_read_file_io_handle(
      libbde_sector_data_t *sector_data,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
