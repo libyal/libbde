@@ -203,7 +203,7 @@ matrix:
     osx_image: xcode8.3
   - name: "Mac OS with gcc and Python module"
     env:
-    - CONFIGURE_OPTIONS="--enable-python"
+    - CONFIGURE_OPTIONS="--enable-python --with-pyprefix"
     - TARGET="macos-gcc-python"
     compiler: gcc
     os: osx
@@ -222,7 +222,7 @@ matrix:
     compiler: gcc
     os: osx
     osx_image: xcode8.3
-  - name: "Mac OS gcc and pkgbuild"
+  - name: "Mac OS gcc and Python module and pkgbuild"
     env:
     - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
     - TARGET="macos-gcc-pkgbuild"
@@ -259,8 +259,8 @@ script:
     elif test ${TARGET} != "coverity"; then
       ./configure ${CONFIGURE_OPTIONS} && make > /dev/null; RESULT=$?;
       if test ${RESULT} -eq 0; then
-        if test ${TARGET} = "macos-gcc" || test ${TARGET} = "macos-gcc-pkgbuild"; then
-          install_name_tool -change /usr/local/lib/libbde.1.dylib ${PWD}/libbde./libs/libbde.1.dylib ./pybde/.libs/pybde.so;
+        if test ${TARGET} = "macos-gcc-python" || test ${TARGET} = "macos-gcc-pkgbuild"; then
+          install_name_tool -change /usr/local/lib/libbde.1.dylib ${PWD}/libbde/.libs/libbde.1.dylib ./pybde/.libs/pybde.so;
         fi;
         make check CHECK_WITH_STDERR=1; RESULT=$?;
       fi;
