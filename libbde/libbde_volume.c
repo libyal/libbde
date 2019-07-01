@@ -1724,6 +1724,7 @@ int libbde_volume_open_read_keys_from_metadata(
 		result = libbde_metadata_read_full_volume_encryption_key(
 		          metadata,
 		          internal_volume->io_handle,
+		          encryption_method,
 		          volume_master_key,
 		          32,
 		          full_volume_encryption_key,

@@ -431,27 +431,31 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( tweak_key == NULL )
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid tweak key.",
-		 function );
+		if( tweak_key == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+			 "%s: invalid tweak key.",
+			 function );
 
-		return( -1 );
-	}
-	if( tweak_key_size > (size_t) SSIZE_MAX )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid tweak key size value exceeds maximum.",
-		 function );
+			return( -1 );
+		}
+		if( tweak_key_size > (size_t) SSIZE_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid tweak key size value exceeds maximum.",
+			 function );
 
-		return( -1 );
+			return( -1 );
+		}
 	}
 	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
 	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER ) )
@@ -482,16 +486,20 @@ int libbde_encryption_set_keys(
 
 		return( -1 );
 	}
-	if( tweak_key_size < key_byte_size )
+	if( ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 || ( context->method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-		 "%s: invalid tweak key value too small.",
-		 function );
+		if( tweak_key_size < key_byte_size )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+			 "%s: invalid tweak key value too small.",
+			 function );
 
-		return( -1 );
+			return( -1 );
+		}
 	}
 	key_bit_size = key_byte_size * 8;
 

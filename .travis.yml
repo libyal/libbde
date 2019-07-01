@@ -203,7 +203,7 @@ matrix:
     osx_image: xcode8.3
   - name: "Mac OS with gcc and Python module"
     env:
-    - CONFIGURE_OPTIONS="--enable-python --with-pyprefix"
+    - CONFIGURE_OPTIONS="--enable-python"
     - TARGET="macos-gcc-python"
     compiler: gcc
     os: osx
