@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20190304
+dnl Version: 20190607
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -550,6 +550,20 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_libcrypto_evp" != xyes && test "$ac_cv_header_openssl_opensslv" = xyes],
         [ac_cv_libcrypto=yes])
+      ])
+
+    AS_IF(
+      [test "x$ac_cv_libcrypto" != xno],
+      [AC_CHECK_LIB(
+        crypto,
+        ERR_get_error,
+        [ac_cv_libcrypto_dummy=yes],
+        [ac_cv_libcrypto=no])
+      AC_CHECK_LIB(
+        crypto,
+        ERR_error_string_n,
+        [ac_cv_libcrypto_dummy=yes],
+        [ac_cv_libcrypto=no])
       ])
 
     dnl Setup libcrypto (openssl) parameters

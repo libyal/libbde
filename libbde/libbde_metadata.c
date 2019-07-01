@@ -2222,6 +2222,7 @@ on_error:
 int libbde_metadata_read_full_volume_encryption_key(
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
+     uint16_t encryption_method,
      const uint8_t *volume_master_key,
      size_t volume_master_key_size,
      uint8_t *full_volume_encryption_key,
@@ -2278,6 +2279,22 @@ int libbde_metadata_read_full_volume_encryption_key(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( encryption_method != LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
+	 && ( encryption_method != LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+	 && ( encryption_method != LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+	 && ( encryption_method != LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER )
+	 && ( encryption_method != LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
+	 && ( encryption_method != LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported encryption method.",
 		 function );
 
 		return( -1 );
@@ -2450,8 +2467,19 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 	if( version == 1 )
 	{
-		if( data_size == 0x1c )
+		if( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC )
 		{
+			if( data_size != 0x1c )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+				 "%s: unsupported data size.",
+				 function );
+
+				return( -1 );
+			}
 			if( memory_copy(
 			     full_volume_encryption_key,
 			     &( unencrypted_data[ 28 ] ),
@@ -2468,8 +2496,20 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			result = 1;
 		}
-		else if( data_size == 0x2c )
+		else if( ( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
+		      || ( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_128_XTS ) )
 		{
+			if( data_size != 0x2c )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+				 "%s: unsupported data size.",
+				 function );
+
+				return( -1 );
+			}
 			if( memory_copy(
 			     full_volume_encryption_key,
 			     &( unencrypted_data[ 28 ] ),
@@ -2486,8 +2526,20 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			result = 1;
 		}
-		else if( data_size == 0x4c )
+		else if( ( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER )
+		      || ( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER ) )
 		{
+			if( data_size != 0x4c )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+				 "%s: unsupported data size.",
+				 function );
+
+				return( -1 );
+			}
 			if( memory_copy(
 			     full_volume_encryption_key,
 			     &( unencrypted_data[ 28 ] ),
@@ -2512,6 +2564,35 @@ int libbde_metadata_read_full_volume_encryption_key(
 				 LIBCERROR_ERROR_DOMAIN_MEMORY,
 				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy unencrypted TWEAK key.",
+				 function );
+
+				goto on_error;
+			}
+			result = 1;
+		}
+		else if( encryption_method == LIBBDE_ENCRYPTION_METHOD_AES_256_XTS )
+		{
+			if( data_size != 0x4c )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+				 "%s: unsupported data size.",
+				 function );
+
+				return( -1 );
+			}
+			if( memory_copy(
+			     full_volume_encryption_key,
+			     &( unencrypted_data[ 28 ] ),
+			     64 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy unencrypted full volume encryption key.",
 				 function );
 
 				goto on_error;
