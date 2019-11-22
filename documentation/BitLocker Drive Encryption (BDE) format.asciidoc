@@ -162,7 +162,7 @@ used:
 * For AES 128-bit the key is 128-bit of size
 * For AES 256-bit the key is 256-bit of size
 
-When Elephant Diffuser is used the key data of the structure that hold the FKEV
+When Elephant Diffuser is used the key data of the structure that hold the FVEK
 is always 512-bit of size. The First 256-bit are reserved for the FVEK and the
 other 256-bit for the TWEAK key. Only 128-bit of the 256-bits are used when the
 encryption method is AES 128-bit.
@@ -315,7 +315,7 @@ The key data is encrypted using AES-CCM with an initialization vector of 0.
 
 === AES-XTS
 
-The FKEV contains both XTS keys.
+The FVEK contains both XTS keys.
 
 Both encryption and decryption use:
 
@@ -671,7 +671,7 @@ Size of the data in the FVE metadata entry including this size value itself
 | 0x0000 | | None, entry is a property
 | | |
 | 0x0002 | | Volume Master Key (VMK)
-| 0x0003 | | Full Volume Encryption Key (FKEV)
+| 0x0003 | | Full Volume Encryption Key (FVEK)
 | 0x0004 | | [yellow-background]*Validation*
 | | |
 | 0x0006 | | Startup key
@@ -680,7 +680,7 @@ Contains computer name, volume name and date +
 [yellow-background]*Is the date format dependent on the locale MM/DD/YYYY?*
 | | |
 | 0x000b | | [yellow-background]*Unknown* +
-[yellow-background]*Backup of the Full Volume Encryption Key (FKEV)?*
+[yellow-background]*Backup of the Full Volume Encryption Key (FVEK)?*
 | | |
 | 0x000f | | Volume header block
 |===
