@@ -37,7 +37,7 @@ then
 
 		make install DESTDIR=${PWD}/osx-pkg;
 		mkdir -p ${PWD}/osx-pkg/usr/share/doc/libbde;
-		cp AUTHORS COPYING NEWS README ${PWD}/osx-pkg/usr/share/doc/libbde;
+		cp AUTHORS COPYING COPYING.LESSER NEWS README ${PWD}/osx-pkg/usr/share/doc/libbde;
 
 		pkgbuild --root osx-pkg --identifier com.github.libyal.libbde --version ${VERSION} --ownership recommended ../libbde-${VERSION}.pkg;
 	fi
