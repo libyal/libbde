@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-#if !defined( HAVE_LOCAL_LIBBDE )
-
-#include <libbde/codepage.h>
-
 /* Define HAVE_LOCAL_LIBBDE for local use of libbde
  * The definitions in <libbde/codepage.h> are copied here
  * for local use of libbde
  */
+#if !defined( HAVE_LOCAL_LIBBDE )
+
+#include <libbde/codepage.h>
+
 #else
 
 /* The codepage definitions
