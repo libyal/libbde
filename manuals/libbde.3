@@ -1,4 +1,4 @@
-.Dd February 26, 2019
+.Dd December 31, 2019
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -79,7 +79,7 @@ Volume functions
 .Ft int
 .Fn libbde_volume_get_encryption_method "libbde_volume_t *volume" "uint16_t *encryption_method" "libbde_error_t **error"
 .Ft int
-.Fn libbde_volume_get_volume_identifier "libbde_volume_t *volume" "uint8_t *volume_identifier" "size_t size" "libbde_error_t **error"
+.Fn libbde_volume_get_volume_identifier "libbde_volume_t *volume" "uint8_t *guid_data" "size_t guid_data_size" "libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_get_creation_time "libbde_volume_t *volume" "uint64_t *filetime" "libbde_error_t **error"
 .Ft int
@@ -155,7 +155,7 @@ Please report bugs of any kind on the project issue tracker: https://github.com/
 .Sh AUTHOR
 These man pages are generated from "libbde.h".
 .Sh COPYRIGHT
-Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>.
 .sp
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

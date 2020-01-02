@@ -1,7 +1,7 @@
 /*
  * Metadata functions
  *
- * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -178,8 +178,8 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 int libbde_metadata_get_volume_identifier(
      libbde_metadata_t *metadata,
-     uint8_t *volume_identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error );
 
 int libbde_metadata_get_creation_time(

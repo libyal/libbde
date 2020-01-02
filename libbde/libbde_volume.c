@@ -1,7 +1,7 @@
 /*
  * Volume functions
  *
- * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -932,13 +932,13 @@ int libbde_volume_close(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
+	if( internal_volume->file_io_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
+		 "%s: invalid volume - missing file IO handle.",
 		 function );
 
 		return( -1 );
@@ -2499,17 +2499,6 @@ off64_t libbde_volume_seek_offset(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -2584,17 +2573,6 @@ int libbde_volume_get_offset(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
 	if( offset == NULL )
 	{
 		libcerror_error_set(
@@ -2798,14 +2776,14 @@ int libbde_volume_get_encryption_method(
  */
 int libbde_volume_get_volume_identifier(
      libbde_volume_t *volume,
-     uint8_t *volume_identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error )
 {
 	libbde_internal_volume_t *internal_volume = NULL;
 	libbde_metadata_t *metadata               = NULL;
 	static char *function                     = "libbde_volume_get_volume_identifier";
-	int result                                = 1;
+	int result                                = 0;
 
 	if( volume == NULL )
 	{
@@ -2845,24 +2823,25 @@ int libbde_volume_get_volume_identifier(
 	{
 		metadata = internal_volume->tertiary_metadata;
 	}
-	if( metadata == NULL )
+	if( metadata != NULL )
 	{
-		result = 0;
-	}
-	else if( libbde_metadata_get_volume_identifier(
-	          metadata,
-	          volume_identifier,
-	          size,
-	          error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume identifier from primary metadata.",
-		 function );
+		result = libbde_metadata_get_volume_identifier(
+		          metadata,
+		          guid_data,
+		          guid_data_size,
+		          error );
 
-		result = -1;
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume identifier.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -2946,7 +2925,7 @@ int libbde_volume_get_creation_time(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve creation time from primary metadata.",
+		 "%s: unable to retrieve creation time",
 		 function );
 
 		result = -1;
@@ -3034,7 +3013,7 @@ int libbde_volume_get_utf8_description_size(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 description size from primary metadata.",
+		 "%s: unable to retrieve UTF-8 description size.",
 		 function );
 
 		result = -1;
@@ -3125,7 +3104,7 @@ int libbde_volume_get_utf8_description(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 description from primary metadata.",
+		 "%s: unable to retrieve UTF-8 description.",
 		 function );
 
 		result = -1;
@@ -3213,7 +3192,7 @@ int libbde_volume_get_utf16_description_size(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 description size from primary metadata.",
+		 "%s: unable to retrieve UTF-16 description size.",
 		 function );
 
 		result = -1;
@@ -3304,7 +3283,7 @@ int libbde_volume_get_utf16_description(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 description from primary metadata.",
+		 "%s: unable to retrieve UTF-16 description.",
 		 function );
 
 		result = -1;
@@ -3391,7 +3370,7 @@ int libbde_volume_get_number_of_key_protectors(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of volume master key from primary metadata.",
+		 "%s: unable to retrieve number of volume master key.",
 		 function );
 
 		result = -1;
@@ -3481,7 +3460,7 @@ int libbde_volume_get_key_protector(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume master key: %d from primary metadata.",
+		 "%s: unable to retrieve volume master key: %d.",
 		 function,
 		 key_protector_index );
 
@@ -4429,17 +4408,6 @@ int libbde_volume_read_startup_key_file_io_handle(
 	}
 	internal_volume = (libbde_internal_volume_t *) volume;
 
-	if( internal_volume->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
 	if( internal_volume->file_io_handle != NULL )
 	{
 		libcerror_error_set(

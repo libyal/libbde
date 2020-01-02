@@ -1,7 +1,7 @@
 /*
  * Metadata functions
  *
- * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -2699,8 +2699,8 @@ on_error:
  */
 int libbde_metadata_get_volume_identifier(
      libbde_metadata_t *metadata,
-     uint8_t *volume_identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error )
 {
 	static char *function = "libbde_metadata_get_volume_identifier";
@@ -2716,30 +2716,30 @@ int libbde_metadata_get_volume_identifier(
 
 		return( -1 );
 	}
-	if( volume_identifier == NULL )
+	if( guid_data == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume identifier.",
+		 "%s: invalid GUID data.",
 		 function );
 
 		return( -1 );
 	}
-	if( size < 16 )
+	if( guid_data_size < 16 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
-		 "%s: volume identifier too small.",
+		 "%s: invalid GUID data value too small.",
 		 function );
 
 		return( -1 );
 	}
 	if( memory_copy(
-	     volume_identifier,
+	     guid_data,
 	     metadata->volume_identifier,
 	     16 ) == NULL )
 	{

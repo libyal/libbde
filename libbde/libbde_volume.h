@@ -1,7 +1,7 @@
 /*
  * Volume functions
  *
- * Copyright (C) 2011-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -242,8 +242,8 @@ int libbde_volume_get_encryption_method(
 LIBBDE_EXTERN \
 int libbde_volume_get_volume_identifier(
      libbde_volume_t *volume,
-     uint8_t *volume_identifier,
-     size_t size,
+     uint8_t *guid_data,
+     size_t guid_data_size,
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
