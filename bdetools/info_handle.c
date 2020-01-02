@@ -1625,7 +1625,7 @@ int info_handle_volume_fprint(
 			 "Key protector %d:\n",
 			 key_protector_index );
 
-			if( libbde_volume_get_key_protector(
+			if( libbde_volume_get_key_protector_by_index(
 			     info_handle->input_volume,
 			     key_protector_index,
 			     &key_protector,

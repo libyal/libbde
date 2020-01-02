@@ -53,7 +53,6 @@ extern PyMethodDef pybde_key_protector_object_methods[];
 extern PyTypeObject pybde_key_protector_type_object;
 
 PyObject *pybde_key_protector_new(
-           PyTypeObject *type_object,
            libbde_key_protector_t *key_protector,
            PyObject *parent_object );
 

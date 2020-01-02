@@ -444,22 +444,6 @@ int libbde_volume_open(
 
 		goto on_error;
 	}
-	else if( result == 0 )
-	{
-		if( libbfio_handle_free(
-		     &file_io_handle,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file IO handle.",
-			 function );
-
-			goto on_error;
-		}
-	}
 	else
 	{
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
@@ -647,22 +631,6 @@ int libbde_volume_open_wide(
 
 		goto on_error;
 	}
-	else if( result == 0 )
-	{
-		if( libbfio_handle_free(
-		     &file_io_handle,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file IO handle.",
-			 function );
-
-			goto on_error;
-		}
-	}
 	else
 	{
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
@@ -838,27 +806,6 @@ int libbde_volume_open_file_io_handle(
 		 function );
 
 		goto on_error;
-	}
-	else if( result == 0 )
-	{
-		if( file_io_handle_opened_in_library != 0 )
-		{
-			file_io_handle_opened_in_library = 0;
-
-			if( libbfio_handle_close(
-			     file_io_handle,
-			     error ) != 0 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_CLOSE_FAILED,
-				 "%s: unable to close file IO handle.",
-				 function );
-
-				goto on_error;
-			}
-		}
 	}
 	else
 	{
@@ -3374,6 +3321,114 @@ int libbde_volume_get_number_of_key_protectors(
 		 function );
 
 		result = -1;
+	}
+#if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves a specific volume master key protector
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_get_key_protector_by_index(
+     libbde_volume_t *volume,
+     int key_protector_index,
+     libbde_key_protector_t **key_protector,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume     = NULL;
+	libbde_metadata_t *metadata                   = NULL;
+	libbde_volume_master_key_t *volume_master_key = NULL;
+	static char *function                         = "libbde_volume_get_key_protector_by_index";
+	int result                                    = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	metadata = internal_volume->primary_metadata;
+
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->secondary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		metadata = internal_volume->tertiary_metadata;
+	}
+	if( metadata == NULL )
+	{
+		result = 0;
+	}
+	else if( libbde_metadata_get_volume_master_key_by_index(
+	          metadata,
+	          key_protector_index,
+	          &volume_master_key,
+	          error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume master key: %d.",
+		 function,
+		 key_protector_index );
+
+		result = -1;
+	}
+	if( result == 1 )
+	{
+		if( libbde_key_protector_initialize(
+		     key_protector,
+		     volume_master_key,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create key protector.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(

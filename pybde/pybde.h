@@ -1,5 +1,5 @@
 /*
- * Python bindings for libbde (pybde)
+ * Python bindings module for libbde (pybde)
  *
  * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -41,6 +41,16 @@ PyObject *pybde_check_volume_signature(
            PyObject *keywords );
 
 PyObject *pybde_check_volume_signature_file_object(
+           PyObject *self,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pybde_open_new_volume(
+           PyObject *self,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pybde_open_new_volume_with_file_object(
            PyObject *self,
            PyObject *arguments,
            PyObject *keywords );

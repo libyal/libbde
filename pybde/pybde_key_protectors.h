@@ -69,23 +69,23 @@ PyObject *pybde_key_protectors_new(
            int number_of_items );
 
 int pybde_key_protectors_init(
-     pybde_key_protectors_t *key_protectors_object );
+     pybde_key_protectors_t *sequence_object );
 
 void pybde_key_protectors_free(
-      pybde_key_protectors_t *key_protectors_object );
+      pybde_key_protectors_t *sequence_object );
 
 Py_ssize_t pybde_key_protectors_len(
-            pybde_key_protectors_t *key_protectors_object );
+            pybde_key_protectors_t *sequence_object );
 
 PyObject *pybde_key_protectors_getitem(
-           pybde_key_protectors_t *key_protectors_object,
+           pybde_key_protectors_t *sequence_object,
            Py_ssize_t item_index );
 
 PyObject *pybde_key_protectors_iter(
-           pybde_key_protectors_t *key_protectors_object );
+           pybde_key_protectors_t *sequence_object );
 
 PyObject *pybde_key_protectors_iternext(
-           pybde_key_protectors_t *key_protectors_object );
+           pybde_key_protectors_t *sequence_object );
 
 #if defined( __cplusplus )
 }

@@ -31,14 +31,13 @@
 #include "pybde_datetime.h"
 #include "pybde_error.h"
 #include "pybde_file_object_io_handle.h"
-#include "pybde_integer.h"
 #include "pybde_guid.h"
+#include "pybde_integer.h"
 #include "pybde_key_protector.h"
 #include "pybde_key_protectors.h"
+#include "pybde_libbde.h"
 #include "pybde_libbfio.h"
 #include "pybde_libcerror.h"
-#include "pybde_libclocale.h"
-#include "pybde_libbde.h"
 #include "pybde_python.h"
 #include "pybde_unused.h"
 #include "pybde_volume.h"
@@ -62,8 +61,6 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "signal_abort() -> None\n"
 	  "\n"
 	  "Signals the volume to abort the current activity." },
-
-	/* Functions to access the volume */
 
 	{ "open",
 	  (PyCFunction) pybde_volume_open,
@@ -89,21 +86,21 @@ PyMethodDef pybde_volume_object_methods[] = {
 	{ "is_locked",
 	  (PyCFunction) pybde_volume_is_locked,
 	  METH_NOARGS,
-	  "is_locked() -> Boolean\n"
+	  "is_locked() -> Boolean or None\n"
 	  "\n"
-	  "Indicates if the volume is locked." },
+	  "Determines if the volume is locked." },
 
 	{ "read_buffer",
 	  (PyCFunction) pybde_volume_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read_buffer(size) -> String\n"
+	  "read_buffer(size) -> Binary string\n"
 	  "\n"
 	  "Reads a buffer of volume data." },
 
 	{ "read_buffer_at_offset",
 	  (PyCFunction) pybde_volume_read_buffer_at_offset,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read_buffer_at_offset(size, offset) -> String\n"
+	  "read_buffer_at_offset(size, offset) -> Binary string\n"
 	  "\n"
 	  "Reads a buffer of volume data at a specific offset." },
 
@@ -119,14 +116,12 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_NOARGS,
 	  "get_offset() -> Integer\n"
 	  "\n"
-	  "Retrieved the current offset within the volume data." },
-
-	/* Some Pythonesque aliases */
+	  "Retrieves the current offset within the volume data." },
 
 	{ "read",
 	  (PyCFunction) pybde_volume_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read(size) -> String\n"
+	  "read(size) -> Binary string\n"
 	  "\n"
 	  "Reads a buffer of volume data." },
 
@@ -143,8 +138,6 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "tell() -> Integer\n"
 	  "\n"
 	  "Retrieves the current offset within the volume data." },
-
-	/* Functions to access the volume values */
 
 	{ "get_size",
 	  (PyCFunction) pybde_volume_get_size,
@@ -165,21 +158,21 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_NOARGS,
 	  "get_volume_identifier() -> Unicode string or None\n"
 	  "\n"
-	  "Retrieves the volume identifier (GUID)." },
+	  "Retrieves the volume identifier." },
 
 	{ "get_creation_time",
 	  (PyCFunction) pybde_volume_get_creation_time,
 	  METH_NOARGS,
 	  "get_creation_time() -> Datetime\n"
 	  "\n"
-	  "Returns the creation date and time." },
+	  "Retrieves the creation date and time." },
 
 	{ "get_creation_time_as_integer",
 	  (PyCFunction) pybde_volume_get_creation_time_as_integer,
 	  METH_NOARGS,
-	  "get_creation_time_as_integer() -> Integer\n"
+	  "get_creation_time_as_integer() -> Integer or None\n"
 	  "\n"
-	  "Returns the creation date and time as a 64-bit integer containing a FILETIME value." },
+	  "Retrieves the creation date and time as a 64-bit integer containing a FILETIME value." },
 
 	{ "get_description",
 	  (PyCFunction) pybde_volume_get_description,
@@ -187,6 +180,20 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "get_description() -> Unicode string or None\n"
 	  "\n"
 	  "Retrieves the description." },
+
+	{ "get_number_of_key_protectors",
+	  (PyCFunction) pybde_volume_get_number_of_key_protectors,
+	  METH_NOARGS,
+	  "get_number_of_key_protectors() -> Integer\n"
+	  "\n"
+	  "Retrieves the number of volume master key protectors." },
+
+	{ "get_key_protector",
+	  (PyCFunction) pybde_volume_get_key_protector,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "get_key_protector(key_protector_index) -> Object\n"
+	  "\n"
+	  "Retrieves the volume master key protector specified by the index." },
 
 	{ "set_keys",
 	  (PyCFunction) pybde_volume_set_keys,
@@ -256,6 +263,18 @@ PyGetSetDef pybde_volume_object_get_set_definitions[] = {
 	  (getter) pybde_volume_get_description,
 	  (setter) 0,
 	  "The description.",
+	  NULL },
+
+	{ "number_of_key_protectors",
+	  (getter) pybde_volume_get_number_of_key_protectors,
+	  (setter) 0,
+	  "The number of volume master key protectors.",
+	  NULL },
+
+	{ "key_protectors",
+	  (getter) pybde_volume_get_key_protectors,
+	  (setter) 0,
+	  "The volume master key protectors.",
 	  NULL },
 
 	/* Sentinel */
@@ -357,101 +376,14 @@ PyTypeObject pybde_volume_type_object = {
 	0
 };
 
-/* Creates a new volume object
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_new(
-           void )
-{
-	pybde_volume_t *pybde_volume = NULL;
-	static char *function        = "pybde_volume_new";
-
-	pybde_volume = PyObject_New(
-	                struct pybde_volume,
-	                &pybde_volume_type_object );
-
-	if( pybde_volume == NULL )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to initialize volume.",
-		 function );
-
-		goto on_error;
-	}
-	if( pybde_volume_init(
-	     pybde_volume ) != 0 )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to initialize volume.",
-		 function );
-
-		goto on_error;
-	}
-	return( (PyObject *) pybde_volume );
-
-on_error:
-	if( pybde_volume != NULL )
-	{
-		Py_DecRef(
-		 (PyObject *) pybde_volume );
-	}
-	return( NULL );
-}
-
-/* Creates a new volume object and opens it
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_new_open(
-           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
-           PyObject *arguments,
-           PyObject *keywords )
-{
-	PyObject *pybde_volume = NULL;
-
-	PYBDE_UNREFERENCED_PARAMETER( self )
-
-	pybde_volume = pybde_volume_new();
-
-	pybde_volume_open(
-	 (pybde_volume_t *) pybde_volume,
-	 arguments,
-	 keywords );
-
-	return( pybde_volume );
-}
-
-/* Creates a new volume object and opens it
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_new_open_file_object(
-           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
-           PyObject *arguments,
-           PyObject *keywords )
-{
-	PyObject *pybde_volume = NULL;
-
-	PYBDE_UNREFERENCED_PARAMETER( self )
-
-	pybde_volume = pybde_volume_new();
-
-	pybde_volume_open_file_object(
-	 (pybde_volume_t *) pybde_volume,
-	 arguments,
-	 keywords );
-
-	return( pybde_volume );
-}
-
 /* Intializes a volume object
  * Returns 0 if successful or -1 on error
  */
 int pybde_volume_init(
      pybde_volume_t *pybde_volume )
 {
-	static char *function    = "pybde_volume_init";
 	libcerror_error_t *error = NULL;
+	static char *function    = "pybde_volume_init";
 
 	if( pybde_volume == NULL )
 	{
@@ -462,6 +394,8 @@ int pybde_volume_init(
 
 		return( -1 );
 	}
+	/* Make sure libbde volume is set to NULL
+	 */
 	pybde_volume->volume         = NULL;
 	pybde_volume->file_io_handle = NULL;
 
@@ -488,8 +422,8 @@ int pybde_volume_init(
 void pybde_volume_free(
       pybde_volume_t *pybde_volume )
 {
-	libcerror_error_t *error    = NULL;
 	struct _typeobject *ob_type = NULL;
+	libcerror_error_t *error    = NULL;
 	static char *function       = "pybde_volume_free";
 	int result                  = 0;
 
@@ -498,15 +432,6 @@ void pybde_volume_free(
 		PyErr_Format(
 		 PyExc_ValueError,
 		 "%s: invalid volume.",
-		 function );
-
-		return;
-	}
-	if( pybde_volume->volume == NULL )
-	{
-		PyErr_Format(
-		 PyExc_ValueError,
-		 "%s: invalid volume - missing libbde volume.",
 		 function );
 
 		return;
@@ -532,24 +457,27 @@ void pybde_volume_free(
 
 		return;
 	}
-	Py_BEGIN_ALLOW_THREADS
-
-	result = libbde_volume_free(
-	          &( pybde_volume->volume ),
-	          &error );
-
-	Py_END_ALLOW_THREADS
-
-	if( result != 1 )
+	if( pybde_volume->volume != NULL )
 	{
-		pybde_error_raise(
-		 error,
-		 PyExc_MemoryError,
-		 "%s: unable to free libbde volume.",
-		 function );
+		Py_BEGIN_ALLOW_THREADS
 
-		libcerror_error_free(
-		 &error );
+		result = libbde_volume_free(
+		          &( pybde_volume->volume ),
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result != 1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_MemoryError,
+			 "%s: unable to free libbde volume.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+		}
 	}
 	ob_type->tp_free(
 	 (PyObject*) pybde_volume );
@@ -614,9 +542,9 @@ PyObject *pybde_volume_open(
 {
 	PyObject *string_object      = NULL;
 	libcerror_error_t *error     = NULL;
+	const char *filename_narrow  = NULL;
 	static char *function        = "pybde_volume_open";
 	static char *keyword_list[]  = { "filename", "mode", NULL };
-	const char *filename_narrow  = NULL;
 	char *mode                   = NULL;
 	int result                   = 0;
 
@@ -670,8 +598,8 @@ PyObject *pybde_volume_open(
 	if( result == -1 )
 	{
 		pybde_error_fetch_and_raise(
-	         PyExc_RuntimeError,
-		 "%s: unable to determine if string object is of type unicode.",
+		 PyExc_RuntimeError,
+		 "%s: unable to determine if string object is of type Unicode.",
 		 function );
 
 		return( NULL );
@@ -687,7 +615,7 @@ PyObject *pybde_volume_open(
 
 		result = libbde_volume_open_wide(
 		          pybde_volume->volume,
-	                  filename_wide,
+		          filename_wide,
 		          LIBBDE_OPEN_READ,
 		          &error );
 
@@ -700,23 +628,23 @@ PyObject *pybde_volume_open(
 		{
 			pybde_error_fetch_and_raise(
 			 PyExc_RuntimeError,
-			 "%s: unable to convert unicode string to UTF-8.",
+			 "%s: unable to convert Unicode string to UTF-8.",
 			 function );
 
 			return( NULL );
 		}
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = libbde_volume_open(
 		          pybde_volume->volume,
-	                  filename_narrow,
+		          filename_narrow,
 		          LIBBDE_OPEN_READ,
 		          &error );
 
@@ -725,7 +653,7 @@ PyObject *pybde_volume_open(
 		Py_DecRef(
 		 utf8_string_object );
 #endif
-		if( result != 1 )
+		if( result == -1 )
 		{
 			pybde_error_raise(
 			 error,
@@ -747,17 +675,17 @@ PyObject *pybde_volume_open(
 
 #if PY_MAJOR_VERSION >= 3
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyBytes_Type );
+	          string_object,
+	          (PyObject *) &PyBytes_Type );
 #else
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyString_Type );
+	          string_object,
+	          (PyObject *) &PyString_Type );
 #endif
 	if( result == -1 )
 	{
 		pybde_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type string.",
 		 function );
 
@@ -769,22 +697,22 @@ PyObject *pybde_volume_open(
 
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   string_object );
+		                   string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   string_object );
+		                   string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = libbde_volume_open(
 		          pybde_volume->volume,
-	                  filename_narrow,
+		          filename_narrow,
 		          LIBBDE_OPEN_READ,
 		          &error );
 
 		Py_END_ALLOW_THREADS
 
-		if( result != 1 )
+		if( result == -1 )
 		{
 			pybde_error_raise(
 			 error,
@@ -820,9 +748,9 @@ PyObject *pybde_volume_open_file_object(
 {
 	PyObject *file_object       = NULL;
 	libcerror_error_t *error    = NULL;
-	char *mode                  = NULL;
-	static char *keyword_list[] = { "file_object", "mode", NULL };
 	static char *function       = "pybde_volume_open_file_object";
+	static char *keyword_list[] = { "file_object", "mode", NULL };
+	char *mode                  = NULL;
 	int result                  = 0;
 
 	if( pybde_volume == NULL )
@@ -854,6 +782,16 @@ PyObject *pybde_volume_open_file_object(
 		 mode );
 
 		return( NULL );
+	}
+	if( pybde_volume->file_io_handle != NULL )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		goto on_error;
 	}
 	if( pybde_file_object_initialize(
 	     &( pybde_volume->file_io_handle ),
@@ -966,7 +904,7 @@ PyObject *pybde_volume_close(
 		{
 			pybde_error_raise(
 			 error,
-			 PyExc_IOError,
+			 PyExc_MemoryError,
 			 "%s: unable to free libbfio file IO handle.",
 			 function );
 
@@ -1038,7 +976,7 @@ PyObject *pybde_volume_is_locked(
 	return( Py_False );
 }
 
-/* Reads (volume) data at the current offset into a buffer
+/* Reads data at the current offset into a buffer
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_read_buffer(
@@ -1046,19 +984,21 @@ PyObject *pybde_volume_read_buffer(
            PyObject *arguments,
            PyObject *keywords )
 {
-	libcerror_error_t *error    = NULL;
+	PyObject *integer_object    = NULL;
 	PyObject *string_object     = NULL;
+	libcerror_error_t *error    = NULL;
+	char *buffer                = NULL;
 	static char *function       = "pybde_volume_read_buffer";
 	static char *keyword_list[] = { "size", NULL };
-	char *buffer                = NULL;
 	ssize_t read_count          = 0;
-	int read_size               = -1;
+	int64_t read_size           = 0;
+	int result                  = 0;
 
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid pybde volume.",
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
 		 function );
 
 		return( NULL );
@@ -1066,24 +1006,130 @@ PyObject *pybde_volume_read_buffer(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "|i",
+	     "|O",
 	     keyword_list,
-	     &read_size ) == 0 )
+	     &integer_object ) == 0 )
 	{
 		return( NULL );
+	}
+	if( integer_object == NULL )
+	{
+		result = 0;
+	}
+	else
+	{
+		result = PyObject_IsInstance(
+		          integer_object,
+		          (PyObject *) &PyLong_Type );
+
+		if( result == -1 )
+		{
+			pybde_error_fetch_and_raise(
+			 PyExc_RuntimeError,
+			 "%s: unable to determine if integer object is of type long.",
+			 function );
+
+			return( NULL );
+		}
+#if PY_MAJOR_VERSION < 3
+		else if( result == 0 )
+		{
+			PyErr_Clear();
+
+			result = PyObject_IsInstance(
+			          integer_object,
+			          (PyObject *) &PyInt_Type );
+
+			if( result == -1 )
+			{
+				pybde_error_fetch_and_raise(
+				 PyExc_RuntimeError,
+				 "%s: unable to determine if integer object is of type int.",
+				 function );
+
+				return( NULL );
+			}
+		}
+#endif
+	}
+	if( result != 0 )
+	{
+		if( pybde_integer_signed_copy_to_64bit(
+		     integer_object,
+		     &read_size,
+		     &error ) != 1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to convert integer object into read size.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+	}
+	else if( ( integer_object == NULL )
+	      || ( integer_object == Py_None ) )
+	{
+		Py_BEGIN_ALLOW_THREADS
+
+		result = libbde_volume_get_size(
+		          pybde_volume->volume,
+		          (size64_t *) &read_size,
+		          &error );
+
+		Py_END_ALLOW_THREADS
+
+		if( result != 1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to retrieve size.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+	}
+	else
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: unsupported integer object type.",
+		 function );
+
+		return( NULL );
+	}
+	if( read_size == 0 )
+	{
+#if PY_MAJOR_VERSION >= 3
+		string_object = PyBytes_FromString(
+		                 "" );
+#else
+		string_object = PyString_FromString(
+		                 "" );
+#endif
+		return( string_object );
 	}
 	if( read_size < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid argument read size value less than zero.",
+		 "%s: invalid read size value less than zero.",
 		 function );
 
 		return( NULL );
 	}
-	/* Make sure the data fits into the memory buffer
+	/* Make sure the data fits into a memory buffer
 	 */
-	if( read_size > INT_MAX )
+	if( ( read_size > (int64_t) INT_MAX )
+	 || ( read_size > (int64_t) SSIZE_MAX ) )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
@@ -1095,14 +1141,16 @@ PyObject *pybde_volume_read_buffer(
 #if PY_MAJOR_VERSION >= 3
 	string_object = PyBytes_FromStringAndSize(
 	                 NULL,
-	                 read_size );
+	                 (Py_ssize_t) read_size );
 
 	buffer = PyBytes_AsString(
 	          string_object );
 #else
+	/* Note that a size of 0 is not supported
+	 */
 	string_object = PyString_FromStringAndSize(
 	                 NULL,
-	                 read_size );
+	                 (Py_ssize_t) read_size );
 
 	buffer = PyString_AsString(
 	          string_object );
@@ -1117,7 +1165,7 @@ PyObject *pybde_volume_read_buffer(
 
 	Py_END_ALLOW_THREADS
 
-	if( read_count <= -1 )
+	if( read_count == -1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -1153,7 +1201,7 @@ PyObject *pybde_volume_read_buffer(
 	return( string_object );
 }
 
-/* Reads (volume) data at a specific offset
+/* Reads data at a specific offset into a buffer
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_read_buffer_at_offset(
@@ -1161,20 +1209,22 @@ PyObject *pybde_volume_read_buffer_at_offset(
            PyObject *arguments,
            PyObject *keywords )
 {
-	libcerror_error_t *error    = NULL;
+	PyObject *integer_object    = NULL;
 	PyObject *string_object     = NULL;
+	libcerror_error_t *error    = NULL;
+	char *buffer                = NULL;
 	static char *function       = "pybde_volume_read_buffer_at_offset";
 	static char *keyword_list[] = { "size", "offset", NULL };
-	char *buffer                = NULL;
-	off64_t read_offset         = 0;
 	ssize_t read_count          = 0;
-	int read_size               = 0;
+	off64_t read_offset         = 0;
+	int64_t read_size           = 0;
+	int result                  = 0;
 
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid pybde volume.",
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
 		 function );
 
 		return( NULL );
@@ -1182,25 +1232,98 @@ PyObject *pybde_volume_read_buffer_at_offset(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "i|L",
+	     "OL",
 	     keyword_list,
-	     &read_size,
+	     &integer_object,
 	     &read_offset ) == 0 )
 	{
 		return( NULL );
+	}
+	result = PyObject_IsInstance(
+	          integer_object,
+	          (PyObject *) &PyLong_Type );
+
+	if( result == -1 )
+	{
+		pybde_error_fetch_and_raise(
+		 PyExc_RuntimeError,
+		 "%s: unable to determine if integer object is of type long.",
+		 function );
+
+		return( NULL );
+	}
+#if PY_MAJOR_VERSION < 3
+	else if( result == 0 )
+	{
+		PyErr_Clear();
+
+		result = PyObject_IsInstance(
+		          integer_object,
+		          (PyObject *) &PyInt_Type );
+
+		if( result == -1 )
+		{
+			pybde_error_fetch_and_raise(
+			 PyExc_RuntimeError,
+			 "%s: unable to determine if integer object is of type int.",
+			 function );
+
+			return( NULL );
+		}
+	}
+#endif
+	if( result != 0 )
+	{
+		if( pybde_integer_signed_copy_to_64bit(
+		     integer_object,
+		     &read_size,
+		     &error ) != 1 )
+		{
+			pybde_error_raise(
+			 error,
+			 PyExc_IOError,
+			 "%s: unable to convert integer object into read size.",
+			 function );
+
+			libcerror_error_free(
+			 &error );
+
+			return( NULL );
+		}
+	}
+	else
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: unsupported integer object type.",
+		 function );
+
+		return( NULL );
+	}
+	if( read_size == 0 )
+	{
+#if PY_MAJOR_VERSION >= 3
+		string_object = PyBytes_FromString(
+		                 "" );
+#else
+		string_object = PyString_FromString(
+		                 "" );
+#endif
+		return( string_object );
 	}
 	if( read_size < 0 )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid argument read size value less than zero.",
+		 "%s: invalid read size value less than zero.",
 		 function );
 
 		return( NULL );
 	}
-	/* Make sure the data fits into the memory buffer
+	/* Make sure the data fits into a memory buffer
 	 */
-	if( read_size > INT_MAX )
+	if( ( read_size > (int64_t) INT_MAX )
+	 || ( read_size > (int64_t) SSIZE_MAX ) )
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
@@ -1213,24 +1336,24 @@ PyObject *pybde_volume_read_buffer_at_offset(
 	{
 		PyErr_Format(
 		 PyExc_ValueError,
-		 "%s: invalid argument read offset value less than zero.",
+		 "%s: invalid read offset value less than zero.",
 		 function );
 
 		return( NULL );
 	}
-	/* Make sure the data fits into the memory buffer
-	 */
 #if PY_MAJOR_VERSION >= 3
 	string_object = PyBytes_FromStringAndSize(
 	                 NULL,
-	                 read_size );
+	                 (Py_ssize_t) read_size );
 
 	buffer = PyBytes_AsString(
 	          string_object );
 #else
+	/* Note that a size of 0 is not supported
+	 */
 	string_object = PyString_FromStringAndSize(
 	                 NULL,
-	                 read_size );
+	                 (Py_ssize_t) read_size );
 
 	buffer = PyString_AsString(
 	          string_object );
@@ -1246,7 +1369,7 @@ PyObject *pybde_volume_read_buffer_at_offset(
 
 	Py_END_ALLOW_THREADS
 
-	if( read_count <= -1 )
+	if( read_count == -1 )
 	{
 		pybde_error_raise(
 		 error,
@@ -1282,7 +1405,7 @@ PyObject *pybde_volume_read_buffer_at_offset(
 	return( string_object );
 }
 
-/* Seeks a certain offset in the (volume) data
+/* Seeks a certain offset
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_volume_seek_offset(
@@ -1299,8 +1422,8 @@ PyObject *pybde_volume_seek_offset(
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid pybde volume.",
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
 		 function );
 
 		return( NULL );
@@ -1351,10 +1474,10 @@ PyObject *pybde_volume_get_offset(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error = NULL;
 	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_get_offset";
-	off64_t current_offset   = 0;
+	off64_t offset           = 0;
 	int result               = 0;
 
 	PYBDE_UNREFERENCED_PARAMETER( arguments )
@@ -1362,7 +1485,7 @@ PyObject *pybde_volume_get_offset(
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1372,7 +1495,7 @@ PyObject *pybde_volume_get_offset(
 
 	result = libbde_volume_get_offset(
 	          pybde_volume->volume,
-	          &current_offset,
+	          &offset,
 	          &error );
 
 	Py_END_ALLOW_THREADS
@@ -1391,7 +1514,7 @@ PyObject *pybde_volume_get_offset(
 		return( NULL );
 	}
 	integer_object = pybde_integer_signed_new_from_64bit(
-	                  (int64_t) current_offset );
+	                  (int64_t) offset );
 
 	return( integer_object );
 }
@@ -1403,8 +1526,8 @@ PyObject *pybde_volume_get_size(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error = NULL;
 	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_get_size";
 	size64_t size            = 0;
 	int result               = 0;
@@ -1414,7 +1537,7 @@ PyObject *pybde_volume_get_size(
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1455,8 +1578,8 @@ PyObject *pybde_volume_get_encryption_method(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
 	PyObject *integer_object   = NULL;
+	libcerror_error_t *error   = NULL;
 	static char *function      = "pybde_volume_get_encryption_method";
 	uint16_t encryption_method = 0;
 	int result                 = 0;
@@ -1466,7 +1589,7 @@ PyObject *pybde_volume_get_encryption_method(
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1486,7 +1609,7 @@ PyObject *pybde_volume_get_encryption_method(
 		pybde_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: failed to retrieve encryption method.",
+		 "%s: unable to retrieve encryption method.",
 		 function );
 
 		libcerror_error_free(
@@ -1494,9 +1617,13 @@ PyObject *pybde_volume_get_encryption_method(
 
 		return( NULL );
 	}
-	integer_object = pybde_integer_unsigned_new_from_64bit(
-	                  (uint64_t) encryption_method );
-
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) encryption_method );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) encryption_method );
+#endif
 	return( integer_object );
 }
 
@@ -1509,8 +1636,8 @@ PyObject *pybde_volume_get_volume_identifier(
 {
 	uint8_t guid_data[ 16 ];
 
-	libcerror_error_t *error = NULL;
 	PyObject *string_object  = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_get_volume_identifier";
 	int result               = 0;
 
@@ -1519,7 +1646,7 @@ PyObject *pybde_volume_get_volume_identifier(
 	if( pybde_volume == NULL )
 	{
 		PyErr_Format(
-		 PyExc_TypeError,
+		 PyExc_ValueError,
 		 "%s: invalid volume.",
 		 function );
 
@@ -1556,9 +1683,18 @@ PyObject *pybde_volume_get_volume_identifier(
 		return( Py_None );
 	}
 	string_object = pybde_string_new_from_guid(
-			 guid_data,
-			 16 );
+	                 guid_data,
+	                 16 );
 
+	if( string_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to convert GUID into Unicode object.",
+		 function );
+
+		return( NULL );
+	}
 	return( string_object );
 }
 
@@ -1569,11 +1705,11 @@ PyObject *pybde_volume_get_creation_time(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
-	PyObject *date_time_object = NULL;
-	static char *function      = "pybde_volume_get_creation_time";
-	uint64_t filetime          = 0;
-	int result                 = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "pybde_volume_get_creation_time";
+	uint64_t filetime         = 0;
+	int result                = 0;
 
 	PYBDE_UNREFERENCED_PARAMETER( arguments )
 
@@ -1600,7 +1736,7 @@ PyObject *pybde_volume_get_creation_time(
 		pybde_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve creation time.",
+		 "%s: unable to retrieve creation date and time.",
 		 function );
 
 		libcerror_error_free(
@@ -1615,10 +1751,10 @@ PyObject *pybde_volume_get_creation_time(
 
 		return( Py_None );
 	}
-	date_time_object = pybde_datetime_new_from_filetime(
-	                    filetime );
+	datetime_object = pybde_datetime_new_from_filetime(
+	                   filetime );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Retrieves the creation date and time as an integer
@@ -1628,8 +1764,8 @@ PyObject *pybde_volume_get_creation_time_as_integer(
            pybde_volume_t *pybde_volume,
            PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error = NULL;
 	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
 	static char *function    = "pybde_volume_get_creation_time_as_integer";
 	uint64_t filetime        = 0;
 	int result               = 0;
@@ -1654,12 +1790,12 @@ PyObject *pybde_volume_get_creation_time_as_integer(
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pybde_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve creation time.",
+		 "%s: unable to retrieve creation date and time.",
 		 function );
 
 		libcerror_error_free(
@@ -1667,8 +1803,15 @@ PyObject *pybde_volume_get_creation_time_as_integer(
 
 		return( NULL );
 	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
 	integer_object = pybde_integer_unsigned_new_from_64bit(
-	                  filetime );
+	                  (uint64_t) filetime );
 
 	return( integer_object );
 }
@@ -1785,6 +1928,225 @@ on_error:
 		 description );
 	}
 	return( NULL );
+}
+
+/* Retrieves the number of volume master key protectors
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_number_of_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object     = NULL;
+	libcerror_error_t *error     = NULL;
+	static char *function        = "pybde_volume_get_number_of_key_protectors";
+	int number_of_key_protectors = 0;
+	int result                   = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_number_of_key_protectors(
+	          pybde_volume->volume,
+	          &number_of_key_protectors,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of volume master key protectors.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) number_of_key_protectors );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) number_of_key_protectors );
+#endif
+	return( integer_object );
+}
+
+/* Retrieves a specific volume master key protector by index
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_key_protector_by_index(
+           PyObject *pybde_volume,
+           int key_protector_index )
+{
+	PyObject *key_protector_object        = NULL;
+	libbde_key_protector_t *key_protector = NULL;
+	libcerror_error_t *error              = NULL;
+	static char *function                 = "pybde_volume_get_key_protector_by_index";
+	int result                            = 0;
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_key_protector_by_index(
+	          ( (pybde_volume_t *) pybde_volume )->volume,
+	          key_protector_index,
+	          &key_protector,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve volume master key protector: %d.",
+		 function,
+		 key_protector_index );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	key_protector_object = pybde_key_protector_new(
+	                        key_protector,
+	                        pybde_volume );
+
+	if( key_protector_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create key protector object.",
+		 function );
+
+		goto on_error;
+	}
+	return( key_protector_object );
+
+on_error:
+	if( key_protector != NULL )
+	{
+		libbde_key_protector_free(
+		 &key_protector,
+		 NULL );
+	}
+	return( NULL );
+}
+
+/* Retrieves a specific volume master key protector
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_key_protector(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *key_protector_object = NULL;
+	static char *keyword_list[]    = { "key_protector_index", NULL };
+	int key_protector_index        = 0;
+
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "i",
+	     keyword_list,
+	     &key_protector_index ) == 0 )
+	{
+		return( NULL );
+	}
+	key_protector_object = pybde_volume_get_key_protector_by_index(
+	                        (PyObject *) pybde_volume,
+	                        key_protector_index );
+
+	return( key_protector_object );
+}
+
+/* Retrieves a sequence and iterator object for the key protectors
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_get_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	PyObject *sequence_object    = NULL;
+	libcerror_error_t *error     = NULL;
+	static char *function        = "pybde_volume_get_key_protectors";
+	int number_of_key_protectors = 0;
+	int result                   = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_get_number_of_key_protectors(
+	          pybde_volume->volume,
+	          &number_of_key_protectors,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of key protectors.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	sequence_object = pybde_key_protectors_new(
+	                   (PyObject *) pybde_volume,
+	                   &pybde_volume_get_key_protector_by_index,
+	                   number_of_key_protectors );
+
+	if( sequence_object == NULL )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to create sequence object.",
+		 function );
+
+		return( NULL );
+	}
+	return( sequence_object );
 }
 
 /* Sets the keys
@@ -2593,223 +2955,3 @@ PyObject *pybde_volume_read_startup_key(
 }
 
 #endif /* defined( HAVE_WIDE_SYSTEM_CHARACTER ) */
-
-/* Retrieves the number of key protectors
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_get_number_of_key_protectors(
-           pybde_volume_t *pybde_volume,
-           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
-{
-	libcerror_error_t *error     = NULL;
-	PyObject *integer_object     = NULL;
-	static char *function        = "pybde_volume_get_number_of_key_protectors";
-	int number_of_key_protectors = 0;
-	int result                   = 0;
-
-	PYBDE_UNREFERENCED_PARAMETER( arguments )
-
-	if( pybde_volume == NULL )
-	{
-		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid volume.",
-		 function );
-
-		return( NULL );
-	}
-	Py_BEGIN_ALLOW_THREADS
-
-	result = libbde_volume_get_number_of_key_protectors(
-	          pybde_volume->volume,
-	          &number_of_key_protectors,
-	          &error );
-
-	Py_END_ALLOW_THREADS
-
-	if( result != 1 )
-	{
-		pybde_error_raise(
-		 error,
-		 PyExc_IOError,
-		 "%s: unable to retrieve number of key protectors.",
-		 function );
-
-		libcerror_error_free(
-		 &error );
-
-		return( NULL );
-	}
-#if PY_MAJOR_VERSION >= 3
-	integer_object = PyLong_FromLong(
-	                  (long) number_of_key_protectors );
-#else
-	integer_object = PyInt_FromLong(
-	                  (long) number_of_key_protectors );
-#endif
-	return( integer_object );
-}
-
-/* Retrieves a specific key protector by index
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_get_key_protector_by_index(
-           PyObject *pybde_volume,
-           int key_protector_index )
-{
-	libcerror_error_t *error              = NULL;
-	libbde_key_protector_t *key_protector = NULL;
-	PyObject *key_protector_object        = NULL;
-	static char *function                 = "pybde_volume_get_key_protector_by_index";
-	int result                            = 0;
-
-	if( pybde_volume == NULL )
-	{
-		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid volume.",
-		 function );
-
-		return( NULL );
-	}
-	Py_BEGIN_ALLOW_THREADS
-
-	result = libbde_volume_get_key_protector(
-	          ( (pybde_volume_t *) pybde_volume )->volume,
-	          key_protector_index,
-	          &key_protector,
-	          &error );
-
-	Py_END_ALLOW_THREADS
-
-	if( result != 1 )
-	{
-		pybde_error_raise(
-		 error,
-		 PyExc_IOError,
-		 "%s: unable to retrieve key protector: %d.",
-		 function,
-		 key_protector_index );
-
-		libcerror_error_free(
-		 &error );
-
-		goto on_error;
-	}
-	key_protector_object = pybde_key_protector_new(
-	                        &pybde_key_protector_type_object,
-	                        key_protector,
-	                        pybde_volume );
-
-	if( key_protector_object == NULL )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to create key protector object.",
-		 function );
-
-		goto on_error;
-	}
-	return( key_protector_object );
-
-on_error:
-	if( key_protector != NULL )
-	{
-		libbde_key_protector_free(
-		 &key_protector,
-		 NULL );
-	}
-	return( NULL );
-}
-
-/* Retrieves a specific key protector
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_get_key_protector(
-           pybde_volume_t *pybde_volume,
-           PyObject *arguments,
-           PyObject *keywords )
-{
-	PyObject *key_protector_object = NULL;
-	static char *keyword_list[]    = { "key_protector_index", NULL };
-	int key_protector_index        = 0;
-
-	if( PyArg_ParseTupleAndKeywords(
-	     arguments,
-	     keywords,
-	     "i",
-	     keyword_list,
-	     &key_protector_index ) == 0 )
-	{
-		return( NULL );
-	}
-	key_protector_object = pybde_volume_get_key_protector_by_index(
-	                        (PyObject *) pybde_volume,
-	                        key_protector_index );
-
-	return( key_protector_object );
-}
-
-/* Retrieves a key protectors sequence and iterator object for the key protectors
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pybde_volume_get_key_protectors(
-           pybde_volume_t *pybde_volume,
-           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
-{
-	libcerror_error_t *error        = NULL;
-	PyObject *key_protectors_object = NULL;
-	static char *function           = "pybde_volume_get_key_protectors";
-	int number_of_key_protectors    = 0;
-	int result                      = 0;
-
-	PYBDE_UNREFERENCED_PARAMETER( arguments )
-
-	if( pybde_volume == NULL )
-	{
-		PyErr_Format(
-		 PyExc_TypeError,
-		 "%s: invalid volume.",
-		 function );
-
-		return( NULL );
-	}
-	Py_BEGIN_ALLOW_THREADS
-
-	result = libbde_volume_get_number_of_key_protectors(
-	          pybde_volume->volume,
-	          &number_of_key_protectors,
-	          &error );
-
-	Py_END_ALLOW_THREADS
-
-	if( result != 1 )
-	{
-		pybde_error_raise(
-		 error,
-		 PyExc_IOError,
-		 "%s: unable to retrieve number of key protectors.",
-		 function );
-
-		libcerror_error_free(
-		 &error );
-
-		return( NULL );
-	}
-	key_protectors_object = pybde_key_protectors_new(
-	                         (PyObject *) pybde_volume,
-	                         &pybde_volume_get_key_protector_by_index,
-	                         number_of_key_protectors );
-
-	if( key_protectors_object == NULL )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to create key protectors object.",
-		 function );
-
-		return( NULL );
-	}
-	return( key_protectors_object );
-}
-

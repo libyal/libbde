@@ -53,19 +53,6 @@ struct pybde_volume
 extern PyMethodDef pybde_volume_object_methods[];
 extern PyTypeObject pybde_volume_type_object;
 
-PyObject *pybde_volume_new(
-           void );
-
-PyObject *pybde_volume_new_open(
-           PyObject *self,
-           PyObject *arguments,
-           PyObject *keywords );
-
-PyObject *pybde_volume_new_open_file_object(
-           PyObject *self,
-           PyObject *arguments,
-           PyObject *keywords );
-
 int pybde_volume_init(
      pybde_volume_t *pybde_volume );
 
@@ -137,6 +124,23 @@ PyObject *pybde_volume_get_description(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
 
+PyObject *pybde_volume_get_number_of_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
+PyObject *pybde_volume_get_key_protector_by_index(
+           PyObject *pybde_volume,
+           int key_protector_index );
+
+PyObject *pybde_volume_get_key_protector(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pybde_volume_get_key_protectors(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
 PyObject *pybde_volume_set_keys(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
@@ -156,23 +160,6 @@ PyObject *pybde_volume_read_startup_key(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,
            PyObject *keywords );
-
-PyObject *pybde_volume_get_number_of_key_protectors(
-           pybde_volume_t *pybde_volume,
-           PyObject *arguments );
-
-PyObject *pybde_volume_get_key_protector_by_index(
-           PyObject *pybde_volume,
-           int key_protector_index );
-
-PyObject *pybde_volume_get_key_protector(
-           pybde_volume_t *pybde_volume,
-           PyObject *arguments,
-           PyObject *keywords );
-
-PyObject *pybde_volume_get_key_protectors(
-           pybde_volume_t *pybde_volume,
-           PyObject *arguments );
 
 #if defined( __cplusplus )
 }

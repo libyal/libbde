@@ -30,22 +30,25 @@
 #include "pybde.h"
 #include "pybde_encryption_methods.h"
 #include "pybde_error.h"
+#include "pybde_file_object_io_handle.h"
 #include "pybde_key_protection_types.h"
 #include "pybde_key_protector.h"
 #include "pybde_key_protectors.h"
-#include "pybde_libcerror.h"
 #include "pybde_libbde.h"
-#include "pybde_file_object_io_handle.h"
+#include "pybde_libbfio.h"
+#include "pybde_libcerror.h"
 #include "pybde_python.h"
 #include "pybde_unused.h"
 #include "pybde_volume.h"
 
 #if !defined( LIBBDE_HAVE_BFIO )
+
 LIBBDE_EXTERN \
 int libbde_check_volume_signature_file_io_handle(
      libbfio_handle_t *file_io_handle,
      libbde_error_t **error );
-#endif
+
+#endif /* !defined( LIBBDE_HAVE_BFIO ) */
 
 /* The pybde module methods
  */
@@ -67,19 +70,19 @@ PyMethodDef pybde_module_methods[] = {
 	{ "check_volume_signature_file_object",
 	  (PyCFunction) pybde_check_volume_signature_file_object,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "check_volume_signature(file_object) -> Boolean\n"
+	  "check_volume_signature_file_object(file_object) -> Boolean\n"
 	  "\n"
 	  "Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object." },
 
 	{ "open",
-	  (PyCFunction) pybde_volume_new_open,
+	  (PyCFunction) pybde_open_new_volume,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open(filename, mode='r') -> Object\n"
 	  "\n"
 	  "Opens a volume." },
 
 	{ "open_file_object",
-	  (PyCFunction) pybde_volume_new_open_file_object,
+	  (PyCFunction) pybde_open_new_volume_with_file_object,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "open_file_object(file_object, mode='r') -> Object\n"
 	  "\n"
@@ -122,7 +125,7 @@ PyObject *pybde_get_version(
 	         errors ) );
 }
 
-/* Checks if the volume has a BitLocker Drive Encryption (BDE) volume signature
+/* Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_check_volume_signature(
@@ -153,7 +156,7 @@ PyObject *pybde_check_volume_signature(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "|O",
+	     "O|",
 	     keyword_list,
 	     &string_object ) == 0 )
 	{
@@ -169,7 +172,7 @@ PyObject *pybde_check_volume_signature(
 	{
 		pybde_error_fetch_and_raise(
 	         PyExc_RuntimeError,
-		 "%s: unable to determine if string object is of type unicode.",
+		 "%s: unable to determine if string object is of type Unicode.",
 		 function );
 
 		return( NULL );
@@ -196,7 +199,7 @@ PyObject *pybde_check_volume_signature(
 		{
 			pybde_error_fetch_and_raise(
 			 PyExc_RuntimeError,
-			 "%s: unable to convert unicode string to UTF-8.",
+			 "%s: unable to convert Unicode string to UTF-8.",
 			 function );
 
 			return( NULL );
@@ -218,7 +221,9 @@ PyObject *pybde_check_volume_signature(
 
 		Py_DecRef(
 		 utf8_string_object );
-#endif
+
+#endif /* defined( HAVE_WIDE_SYSTEM_CHARACTER ) */
+
 		if( result == -1 )
 		{
 			pybde_error_raise(
@@ -316,7 +321,7 @@ PyObject *pybde_check_volume_signature(
 	return( NULL );
 }
 
-/* Checks if the volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object
+/* Checks if a volume has a BitLocker Drive Encryption (BDE) volume signature using a file-like object
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pybde_check_volume_signature_file_object(
@@ -416,6 +421,52 @@ on_error:
 	return( NULL );
 }
 
+/* Creates a new volume object and opens it
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_open_new_volume(
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *pybde_volume = NULL;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
+
+	pybde_volume_init(
+	 (pybde_volume_t *) pybde_volume );
+
+	pybde_volume_open(
+	 (pybde_volume_t *) pybde_volume,
+	 arguments,
+	 keywords );
+
+	return( pybde_volume );
+}
+
+/* Creates a new volume object and opens it using a file-like object
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_open_new_volume_with_file_object(
+           PyObject *self PYBDE_ATTRIBUTE_UNUSED,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *pybde_volume = NULL;
+
+	PYBDE_UNREFERENCED_PARAMETER( self )
+
+	pybde_volume_init(
+	 (pybde_volume_t *) pybde_volume );
+
+	pybde_volume_open_file_object(
+	 (pybde_volume_t *) pybde_volume,
+	 arguments,
+	 keywords );
+
+	return( pybde_volume );
+}
+
 #if PY_MAJOR_VERSION >= 3
 
 /* The pybde module definition
@@ -453,13 +504,8 @@ PyMODINIT_FUNC initpybde(
                 void )
 #endif
 {
-	PyObject *module                               = NULL;
-	PyTypeObject *encryption_methods_type_object   = NULL;
-	PyTypeObject *key_protection_types_type_object = NULL;
-	PyTypeObject *key_protector_type_object        = NULL;
-	PyTypeObject *key_protectors_type_object       = NULL;
-	PyTypeObject *volume_type_object               = NULL;
-	PyGILState_STATE gil_state                     = 0;
+	PyObject *module           = NULL;
+	PyGILState_STATE gil_state = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libbde_notify_set_stream(
@@ -494,64 +540,7 @@ PyMODINIT_FUNC initpybde(
 
 	gil_state = PyGILState_Ensure();
 
-	/* Setup the volume type object
-	 */
-	pybde_volume_type_object.tp_new = PyType_GenericNew;
-
-	if( PyType_Ready(
-	     &pybde_volume_type_object ) < 0 )
-	{
-		goto on_error;
-	}
-	Py_IncRef(
-	 (PyObject *) &pybde_volume_type_object );
-
-	volume_type_object = &pybde_volume_type_object;
-
-	PyModule_AddObject(
-	 module,
-	 "volume",
-	 (PyObject *) volume_type_object );
-
-	/* Setup the key protectors type object
-	 */
-	pybde_key_protectors_type_object.tp_new = PyType_GenericNew;
-
-	if( PyType_Ready(
-	     &pybde_key_protectors_type_object ) < 0 )
-	{
-		goto on_error;
-	}
-	Py_IncRef(
-	 (PyObject *) &pybde_key_protectors_type_object );
-
-	key_protectors_type_object = &pybde_key_protectors_type_object;
-
-	PyModule_AddObject(
-	 module,
-	 "_key_protectors",
-	 (PyObject *) key_protectors_type_object );
-
-	/* Setup the key protector type object
-	 */
-	pybde_key_protector_type_object.tp_new = PyType_GenericNew;
-
-	if( PyType_Ready(
-	     &pybde_key_protector_type_object ) < 0 )
-	{
-		goto on_error;
-	}
-	Py_IncRef(
-	 (PyObject *) &pybde_key_protector_type_object );
-
-	key_protector_type_object = &pybde_key_protector_type_object;
-
-	PyModule_AddObject(
-	 module,
-	 "key_protector",
-	 (PyObject *) key_protector_type_object );
-
-	/* Setup the encryption methods type object
+	/* Setup the encryption_methods type object
 	 */
 	pybde_encryption_methods_type_object.tp_new = PyType_GenericNew;
 
@@ -568,14 +557,12 @@ PyMODINIT_FUNC initpybde(
 	Py_IncRef(
 	 (PyObject *) &pybde_encryption_methods_type_object );
 
-	encryption_methods_type_object = &pybde_encryption_methods_type_object;
-
 	PyModule_AddObject(
 	 module,
 	 "encryption_methods",
-	 (PyObject *) encryption_methods_type_object );
+	 (PyObject *) &pybde_encryption_methods_type_object );
 
-	/* Setup the key protection types type object
+	/* Setup the key_protection_types type object
 	 */
 	pybde_key_protection_types_type_object.tp_new = PyType_GenericNew;
 
@@ -592,12 +579,61 @@ PyMODINIT_FUNC initpybde(
 	Py_IncRef(
 	 (PyObject *) &pybde_key_protection_types_type_object );
 
-	key_protection_types_type_object = &pybde_key_protection_types_type_object;
-
 	PyModule_AddObject(
 	 module,
 	 "key_protection_types",
-	 (PyObject *) key_protection_types_type_object );
+	 (PyObject *) &pybde_key_protection_types_type_object );
+
+	/* Setup the key_protector type object
+	 */
+	pybde_key_protector_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pybde_key_protector_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pybde_key_protector_type_object );
+
+	PyModule_AddObject(
+	 module,
+	 "key_protector",
+	 (PyObject *) &pybde_key_protector_type_object );
+
+	/* Setup the key_protectors type object
+	 */
+	pybde_key_protectors_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pybde_key_protectors_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pybde_key_protectors_type_object );
+
+	PyModule_AddObject(
+	 module,
+	 "key_protectors",
+	 (PyObject *) &pybde_key_protectors_type_object );
+
+	/* Setup the volume type object
+	 */
+	pybde_volume_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pybde_volume_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pybde_volume_type_object );
+
+	PyModule_AddObject(
+	 module,
+	 "volume",
+	 (PyObject *) &pybde_volume_type_object );
 
 	PyGILState_Release(
 	 gil_state );

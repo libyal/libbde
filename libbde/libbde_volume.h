@@ -285,6 +285,13 @@ int libbde_volume_get_number_of_key_protectors(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_get_key_protector_by_index(
+     libbde_volume_t *volume,
+     int key_protector_index,
+     libbde_key_protector_t **key_protector,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_get_key_protector(
      libbde_volume_t *volume,
      int key_protector_index,

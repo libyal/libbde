@@ -428,6 +428,20 @@ int libbde_volume_get_number_of_key_protectors(
  * Returns 1 if successful or -1 on error
  */
 LIBBDE_EXTERN \
+int libbde_volume_get_key_protector_by_index(
+     libbde_volume_t *volume,
+     int key_protector_index,
+     libbde_key_protector_t **key_protector,
+     libbde_error_t **error );
+
+/* Retrieves a specific volume master key protector
+ *
+ * This function deprecated use libbde_volume_get_key_protector_by_index instead
+ *
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_DEPRECATED \
+LIBBDE_EXTERN \
 int libbde_volume_get_key_protector(
      libbde_volume_t *volume,
      int key_protector_index,

@@ -3157,6 +3157,8 @@ int main(
 		 bde_test_volume_get_number_of_key_protectors,
 		 volume );
 
+		/* TODO: add tests for libbde_volume_get_key_protector_by_index */
+
 		/* TODO: add tests for libbde_volume_get_key_protector */
 
 		/* TODO: add tests for libbde_volume_set_keys */
