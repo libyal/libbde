@@ -95,56 +95,56 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  METH_VARARGS | METH_KEYWORDS,
 	  "read_buffer(size) -> Binary string\n"
 	  "\n"
-	  "Reads a buffer of volume data." },
+	  "Reads a buffer of unencrypted data." },
 
 	{ "read_buffer_at_offset",
 	  (PyCFunction) pybde_volume_read_buffer_at_offset,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "read_buffer_at_offset(size, offset) -> Binary string\n"
 	  "\n"
-	  "Reads a buffer of volume data at a specific offset." },
+	  "Reads a buffer of unencrypted data at a specific offset." },
 
 	{ "seek_offset",
 	  (PyCFunction) pybde_volume_seek_offset,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "seek_offset(offset, whence) -> None\n"
 	  "\n"
-	  "Seeks an offset within the volume data." },
+	  "Seeks an offset within the unencrypted data." },
 
 	{ "get_offset",
 	  (PyCFunction) pybde_volume_get_offset,
 	  METH_NOARGS,
 	  "get_offset() -> Integer\n"
 	  "\n"
-	  "Retrieves the current offset within the volume data." },
+	  "Retrieves the current offset within the unencrypted data." },
 
 	{ "read",
 	  (PyCFunction) pybde_volume_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "read(size) -> Binary string\n"
 	  "\n"
-	  "Reads a buffer of volume data." },
+	  "Reads a buffer of unencrypted data." },
 
 	{ "seek",
 	  (PyCFunction) pybde_volume_seek_offset,
 	  METH_VARARGS | METH_KEYWORDS,
 	  "seek(offset, whence) -> None\n"
 	  "\n"
-	  "Seeks an offset within the volume data." },
+	  "Seeks an offset within the unencrypted data." },
 
 	{ "tell",
 	  (PyCFunction) pybde_volume_get_offset,
 	  METH_NOARGS,
 	  "tell() -> Integer\n"
 	  "\n"
-	  "Retrieves the current offset within the volume data." },
+	  "Retrieves the current offset within the unencrypted data." },
 
 	{ "get_size",
 	  (PyCFunction) pybde_volume_get_size,
 	  METH_NOARGS,
 	  "get_size() -> Integer\n"
 	  "\n"
-	  "Retrieves the size of the volume data." },
+	  "Retrieves the size of the unencrypted data." },
 
 	{ "get_encryption_method",
 	  (PyCFunction) pybde_volume_get_encryption_method,

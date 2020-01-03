@@ -1894,7 +1894,7 @@ int libbde_volume_is_locked(
 	return( is_locked );
 }
 
-/* Reads (volume) data from the last current into a buffer using a Basic File IO (bfio) handle
+/* Reads unencrypted data from the last current into a buffer using a Basic File IO (bfio) handle
  * This function is not multi-thread safe acquire write lock before call
  * Returns the number of bytes read or -1 on error
  */
@@ -2088,7 +2088,7 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 	return( total_read_count );
 }
 
-/* Reads data at the current offset into a buffer
+/* Reads unencrypted data at the current offset into a buffer
  * Returns the number of bytes read or -1 on error
  */
 ssize_t libbde_volume_read_buffer(
@@ -2165,7 +2165,7 @@ ssize_t libbde_volume_read_buffer(
 	return( read_count );
 }
 
-/* Reads (volume) data at a specific offset
+/* Reads unencrypted data at a specific offset
  * Returns the number of bytes read or -1 on error
  */
 ssize_t libbde_volume_read_buffer_at_offset(
@@ -2268,7 +2268,7 @@ on_error:
 
 #ifdef TODO_WRITE_SUPPORT
 
-/* Writes (volume) data at the current offset
+/* Writes unencrypted data at the current offset
  * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
  */
 ssize_t libbde_volume_write_buffer(
@@ -2280,7 +2280,7 @@ ssize_t libbde_volume_write_buffer(
 	return( -1 );
 }
 
-/* Writes (volume) data at a specific offset,
+/* Writes unencrypted data at a specific offset,
  * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
  */
 ssize_t libbde_volume_write_buffer_at_offset(
@@ -2330,7 +2330,7 @@ ssize_t libbde_volume_write_buffer_at_offset(
 
 #endif /* TODO_WRITE_SUPPORT */
 
-/* Seeks a certain offset of the (volume) data
+/* Seeks a certain offset within the unencrypted data
  * This function is not multi-thread safe acquire write lock before call
  * Returns the offset if seek is successful or -1 on error
  */
@@ -2421,7 +2421,7 @@ off64_t libbde_internal_volume_seek_offset(
 	return( offset );
 }
 
-/* Seeks a certain offset of the data
+/* Seeks a certain offset within the unencrypted data
  * Returns the offset if seek is successful or -1 on error
  */
 off64_t libbde_volume_seek_offset(
@@ -2496,7 +2496,7 @@ off64_t libbde_volume_seek_offset(
 	return( offset );
 }
 
-/* Retrieves the current offset of the (volume) data
+/* Retrieves the current offset within the unencrypted data
  * Returns 1 if successful or -1 on error
  */
 int libbde_volume_get_offset(

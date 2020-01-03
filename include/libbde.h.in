@@ -268,7 +268,7 @@ int libbde_volume_is_locked(
      libbde_volume_t *volume,
      libbde_error_t **error );
 
-/* Reads data at the current offset into a buffer
+/* Reads unencrypted data at the current offset into a buffer
  * Returns the number of bytes read or -1 on error
  */
 LIBBDE_EXTERN \
@@ -278,7 +278,7 @@ ssize_t libbde_volume_read_buffer(
          size_t buffer_size,
          libbde_error_t **error );
 
-/* Reads (media) data at a specific offset
+/* Reads unencrypted data at a specific offset
  * Returns the number of bytes read or -1 on error
  */
 LIBBDE_EXTERN \
@@ -291,7 +291,7 @@ ssize_t libbde_volume_read_buffer_at_offset(
 
 #ifdef TODO_WRITE_SUPPORT
 
-/* Writes (media) data at the current offset
+/* Writes unencrypted data at the current offset
  * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
  */
 LIBBDE_EXTERN \
@@ -301,7 +301,7 @@ ssize_t libbde_volume_write_buffer(
          size_t buffer_size,
          libbde_error_t **error );
 
-/* Writes (media) data at a specific offset,
+/* Writes unencrypted data at a specific offset,
  * Returns the number of input bytes written, 0 when no longer bytes can be written or -1 on error
  */
 LIBBDE_EXTERN \
@@ -314,7 +314,7 @@ ssize_t libbde_volume_write_buffer_at_offset(
 
 #endif /* TODO_WRITE_SUPPORT */
 
-/* Seeks a certain offset of the data
+/* Seeks a certain offset within the unencrypted data
  * Returns the offset if seek is successful or -1 on error
  */
 LIBBDE_EXTERN \
@@ -324,7 +324,7 @@ off64_t libbde_volume_seek_offset(
          int whence,
          libbde_error_t **error );
 
-/* Retrieves the the current offset of the (volume) data
+/* Retrieves the current offset within the unencrypted data
  * Returns 1 if successful or -1 on error
  */
 LIBBDE_EXTERN \
