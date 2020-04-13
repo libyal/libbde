@@ -1,6 +1,6 @@
-# Tests C library functions and types.
+# Tests library functions and types.
 #
-# Version: 20181221
+# Version: 20200413
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -8,61 +8,36 @@ $ExitIgnore = 77
 
 $LibraryTests = "aes_ccm_encrypted_key error external_key io_handle key key_protector metadata metadata_block_header metadata_entry metadata_header notify password password_keep sector_data stretch_key volume_master_key"
 $LibraryTestsWithInput = "support volume"
+$OptionSets = "password recovery_password";
 
 $InputGlob = "*"
 
-Function GetTestProfileDirectory
+Function GetTestExecutablesDirectory
 {
-	param( [string]$TestInputDirectory, [string]$TestProfile )
+	$TestExecutablesDirectory = ""
 
-	$TestProfileDirectory = "${TestInputDirectory}\.${TestProfile}"
-
-	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType "Container"))
-	{
-		New-Item -ItemType "directory" -Path ${TestProfileDirectory}
-	}
-	Return ${TestProfileDirectory}
-}
-
-Function GetTestSetDirectory
-{
-	param( [string]$TestProfileDirectory, [string]$TestSetInputDirectory )
-
-	$TestSetDirectory = "${TestProfileDirectory}\${TestSetInputDirectory.Basename}"
-
-	If (-Not (Test-Path -Path ${TestSetDirectory} -PathType "Container"))
-	{
-		New-Item -ItemType "directory" -Path ${TestSetDirectory}
-	}
-	Return ${TestSetDirectory}
-}
-
-Function GetTestToolDirectory
-{
-	$TestToolDirectory = ""
-
-	ForEach (${VSDirectory} in "msvscpp vs2008 vs2010 vs2012 vs2013 vs2015 vs2017" -split " ")
+	ForEach (${VSDirectory} in "msvscpp vs2008 vs2010 vs2012 vs2013 vs2015 vs2017 vs2019" -split " ")
 	{
 		ForEach (${VSConfiguration} in "Release VSDebug" -split " ")
 		{
 			ForEach (${VSPlatform} in "Win32 x64" -split " ")
 			{
-				$TestToolDirectory = "..\${VSDirectory}\${VSConfiguration}\${VSPlatform}"
+				$TestExecutablesDirectory = "..\${VSDirectory}\${VSConfiguration}\${VSPlatform}"
 
-				If (Test-Path ${TestToolDirectory})
+				If (Test-Path ${TestExecutablesDirectory})
 				{
-					Return ${TestToolDirectory}
+					Return ${TestExecutablesDirectory}
 				}
 			}
-			$TestToolDirectory = "..\${VSDirectory}\${VSConfiguration}"
+			$TestExecutablesDirectory = "..\${VSDirectory}\${VSConfiguration}"
 
-			If (Test-Path ${TestToolDirectory})
+			If (Test-Path ${TestExecutablesDirectory})
 			{
-				Return ${TestToolDirectory}
+				Return ${TestExecutablesDirectory}
 			}
 		}
 	}
-	Return ${TestToolDirectory}
+	Return ${TestExecutablesDirectory}
 }
 
 Function ReadIgnoreList
@@ -84,8 +59,16 @@ Function RunTest
 	param( [string]$TestType )
 
 	$TestDescription = "Testing: ${TestName}"
-	$TestExecutable = "${TestToolDirectory}\bde_test_${TestName}.exe"
+	$TestExecutable = "${TestExecutablesDirectory}\bde_test_${TestName}.exe"
 
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType "Leaf"))
+	{
+		Write-Host "${TestDescription} (" -nonewline
+		Write-Host "SKIP" -foreground Cyan -nonewline
+		Write-Host ")"
+
+		Return ${ExitIgnore}
+	}
 	$Output = Invoke-Expression ${TestExecutable}
 	$Result = ${LastExitCode}
 
@@ -93,16 +76,18 @@ Function RunTest
 	{
 		Write-Host ${Output} -foreground Red
 	}
-	Write-Host "${TestDescription} " -nonewline
+	Write-Host "${TestDescription} (" -nonewline
 
 	If (${Result} -ne ${ExitSuccess})
 	{
-		Write-Host " (FAIL)"
+		Write-Host "FAIL" -foreground Red -nonewline
 	}
 	Else
 	{
-		Write-Host " (PASS)"
+		Write-Host "PASS" -foreground Green -nonewline
 	}
+	Write-Host ")"
+
 	Return ${Result}
 }
 
@@ -111,10 +96,22 @@ Function RunTestWithInput
 	param( [string]$TestType )
 
 	$TestDescription = "Testing: ${TestName}"
-	$TestExecutable = "${TestToolDirectory}\bde_test_${TestName}.exe"
+	$TestExecutable = "${TestExecutablesDirectory}\bde_test_${TestName}.exe"
 
-	$TestProfileDirectory = GetTestProfileDirectory "input" "libbde"
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType "Leaf"))
+	{
+		Write-Host "${TestDescription} (" -nonewline
+		Write-Host "SKIP" -foreground Cyan -nonewline
+		Write-Host ")"
 
+		Return ${ExitIgnore}
+	}
+	$TestProfileDirectory = "input\.libbde"
+
+	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType "Container"))
+	{
+		New-Item -ItemType "directory" -Path ${TestProfileDirectory}
+	}
 	$IgnoreList = ReadIgnoreList ${TestProfileDirectory}
 
 	$Result = ${ExitSuccess}
@@ -129,11 +126,11 @@ Function RunTestWithInput
 		{
 			Continue
 		}
-		$TestSetDirectory = GetTestSetDirectory ${TestProfileDirectory} ${TestSetInputDirectory}
+		$TestSetName = ${TestSetInputDirectory}.Name
 
-		If (Test-Path -Path "${TestSetDirectory}\files" -PathType "Leaf")
+		If (Test-Path -Path "${TestProfileDirectory}\${TestSetName}\files" -PathType "Leaf")
 		{
-			$InputFiles = Get-Content -Path "${TestSetDirectory}\files" | Where {$_ -ne ""}
+			$InputFiles = Get-Content -Path "${TestProfileDirectory}\${TestSetName}\files" | Where {$_ -ne ""}
 		}
 		Else
 		{
@@ -141,10 +138,33 @@ Function RunTestWithInput
 		}
 		ForEach ($InputFile in ${InputFiles})
 		{
-			# TODO: add test option support
-			$Output = Invoke-Expression ${TestExecutable}
-			$Result = ${LastExitCode}
+			$TestedWithOptions = $False
 
+			ForEach ($OptionSet in ${OptionSets} -split " ")
+			{
+				$InputFileName = ${InputFile}.Name
+				$TestDataOptionFile = "${TestProfileDirectory}\${TestSetName}\${InputFileName}.${OptionSet}"
+
+				If (-Not (Test-Path -Path "${TestDataOptionFile}" -PathType "Leaf"))
+				{
+					Continue
+				}
+				$InputOptions = Get-content -Path "${TestDataOptionFile}" -First 1
+
+				$Output = Invoke-Expression "${TestExecutable} ${InputOptions} ${InputFile}"
+				$Result = $LastExitCode
+
+				If (${Result} -ne ${ExitSuccess})
+				{
+					Break
+				}
+				$TestedWithOptions = $True
+			}
+			If ((${Result} -eq ${ExitSuccess}) -And (-Not (${TestedWithOptions})))
+			{
+				$Output = Invoke-Expression "${TestExecutable} ${InputFile}"
+				$Result = ${LastExitCode}
+			}
 			If (${Result} -ne ${ExitSuccess})
 			{
 				Break
@@ -159,24 +179,26 @@ Function RunTestWithInput
 	{
 		Write-Host ${Output} -foreground Red
 	}
-	Write-Host "${TestDescription} " -nonewline
+	Write-Host "${TestDescription} (" -nonewline
 
 	If (${Result} -ne ${ExitSuccess})
 	{
-		Write-Host " (FAIL)"
+		Write-Host "FAIL" -foreground Red -nonewline
 	}
 	Else
 	{
-		Write-Host " (PASS)"
+		Write-Host "PASS" -foreground Green -nonewline
 	}
+	Write-Host ")"
+
 	Return ${Result}
 }
 
-$TestToolDirectory = GetTestToolDirectory
+$TestExecutablesDirectory = GetTestExecutablesDirectory
 
-If (-Not (Test-Path ${TestToolDirectory}))
+If (-Not (Test-Path ${TestExecutablesDirectory}))
 {
-	Write-Host "Missing test tool directory." -foreground Red
+	Write-Host "Missing test executables directory." -foreground Red
 
 	Exit ${ExitFailure}
 }
@@ -192,7 +214,7 @@ Foreach (${TestName} in ${LibraryTests} -split " ")
 	}
 	$Result = RunTest ${TestName}
 
-	If (${Result} -ne ${ExitSuccess})
+	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
 		Break
 	}
@@ -213,7 +235,7 @@ Foreach (${TestName} in ${LibraryTestsWithInput} -split " ")
 	{
 		$Result = RunTest ${TestName}
 	}
-	If (${Result} -ne ${ExitSuccess})
+	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
 		Break
 	}
