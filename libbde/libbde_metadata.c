@@ -556,13 +556,14 @@ int libbde_metadata_read_entries_file_io_handle(
 
 		return( -1 );
 	}
-	if( entries_data_size > (size_t) LIBBDE_MAXIMUM_FVE_METADATA_SIZE )
+	if( ( entries_data_size == 0 )
+	 || ( entries_data_size > (size_t) LIBBDE_MAXIMUM_FVE_METADATA_SIZE ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid entries data size value exceeds maximum.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid entries data size value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -982,7 +983,7 @@ int libbde_metadata_read_entries_data(
 				 && ( metadata_entry->value_data_size > 0 ) )
 				{
 					metadata->description = (uint8_t *) memory_allocate(
-					                                     metadata_entry->value_data_size );
+					                                     (size_t) metadata_entry->value_data_size );
 
 					if( metadata->description == NULL )
 					{
@@ -998,7 +999,7 @@ int libbde_metadata_read_entries_data(
 					if( memory_copy(
 					     metadata->description,
 					     metadata_entry->value_data,
-					     metadata_entry->value_data_size ) == NULL )
+					     (size_t) metadata_entry->value_data_size ) == NULL )
 					{
 						libcerror_error_set(
 						 error,
@@ -1298,19 +1299,20 @@ int libbde_metadata_read_volume_master_key(
 			 0 );
 		}
 #endif
-		if( metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+		unencrypted_data_size = metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data_size;
+
+		if( ( unencrypted_data_size < 28 )
+		 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: clear key volume master key - AES-CCM encrypted key data size value out of bounds.",
+			 "%s: invalid clear key volume master key - AES-CCM encrypted key data size value out of bounds.",
 			 function );
 
 			goto on_error;
 		}
-		unencrypted_data_size = metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data_size;
-
 		unencrypted_data = (uint8_t *) memory_allocate(
 						unencrypted_data_size );
 
@@ -1529,19 +1531,20 @@ int libbde_metadata_read_volume_master_key(
 				 0 );
 			}
 #endif
-			if( metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+			unencrypted_data_size = metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size;
+
+			if( ( unencrypted_data_size < 28 )
+			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: startup key volume master key - AES-CCM encrypted key data size value out of bounds.",
+				 "%s: invalid startup key volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
 				goto on_error;
 			}
-			unencrypted_data_size = metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size;
-
 			unencrypted_data = (uint8_t *) memory_allocate(
 							unencrypted_data_size );
 
@@ -1775,19 +1778,20 @@ int libbde_metadata_read_volume_master_key(
 				 0 );
 			}
 #endif
-			if( metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+			unencrypted_data_size = metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size;
+
+			if( ( unencrypted_data_size < 28 )
+			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: password volume master key - AES-CCM encrypted key data size value out of bounds.",
+				 "%s: invalid password volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
 				goto on_error;
 			}
-			unencrypted_data_size = metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size;
-
 			unencrypted_data = (uint8_t *) memory_allocate(
 							unencrypted_data_size );
 
@@ -2021,19 +2025,20 @@ int libbde_metadata_read_volume_master_key(
 				 0 );
 			}
 #endif
-			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size < 28 )
+			unencrypted_data_size = metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size;
+
+			if( ( unencrypted_data_size < 28 )
+			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: recovery password volume master key - AES-CCM encrypted key data size value out of bounds.",
+				 "%s: invalid recovery password volume master key - AES-CCM encrypted key data size value out of bounds.",
 				 function );
 
 				goto on_error;
 			}
-			unencrypted_data_size = metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size;
-
 			unencrypted_data = (uint8_t *) memory_allocate(
 							unencrypted_data_size );
 
@@ -2367,6 +2372,18 @@ int libbde_metadata_read_full_volume_encryption_key(
 	}
 	unencrypted_data_size = metadata->full_volume_encryption_key->data_size;
 
+	if( ( unencrypted_data_size == 0 )
+	 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid unencrypted data size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	unencrypted_data = (uint8_t *) memory_allocate(
 	                                unencrypted_data_size );
 

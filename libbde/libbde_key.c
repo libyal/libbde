@@ -201,13 +201,14 @@ int libbde_key_read(
 	value_data      = metadata_entry->value_data;
 	value_data_size = metadata_entry->value_data_size;
 
-	if( value_data_size < sizeof( bde_metadata_entry_key_header_t ) )
+	if( ( value_data_size < sizeof( bde_metadata_entry_key_header_t ) )
+	 || ( value_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: value data size value out of bounds.",
+		 "%s: invalid metadata entry - value data size value out of bounds.",
 		 function );
 
 		return( -1 );

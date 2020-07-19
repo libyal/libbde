@@ -1,6 +1,6 @@
 # Tests library functions and types.
 #
-# Version: 20200413
+# Version: 20200427
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -8,7 +8,7 @@ $ExitIgnore = 77
 
 $LibraryTests = "aes_ccm_encrypted_key error external_key io_handle key key_protector metadata metadata_block_header metadata_entry metadata_header notify password password_keep sector_data stretch_key volume_master_key"
 $LibraryTestsWithInput = "support volume"
-$OptionSets = "password recovery_password";
+$OptionSets = "password recovery_password"
 
 $InputGlob = "*"
 

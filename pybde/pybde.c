@@ -133,12 +133,12 @@ PyObject *pybde_check_volume_signature(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *string_object      = NULL;
-	libcerror_error_t *error     = NULL;
-	static char *function        = "pybde_check_volume_signature";
-	static char *keyword_list[]  = { "filename", NULL };
-	const char *filename_narrow  = NULL;
-	int result                   = 0;
+	PyObject *string_object     = NULL;
+	libcerror_error_t *error    = NULL;
+	const char *filename_narrow = NULL;
+	static char *function       = "pybde_check_volume_signature";
+	static char *keyword_list[] = { "filename", NULL };
+	int result                  = 0;
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	const wchar_t *filename_wide = NULL;
@@ -171,7 +171,7 @@ PyObject *pybde_check_volume_signature(
 	if( result == -1 )
 	{
 		pybde_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type Unicode.",
 		 function );
 
@@ -206,10 +206,10 @@ PyObject *pybde_check_volume_signature(
 		}
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
@@ -253,17 +253,17 @@ PyObject *pybde_check_volume_signature(
 
 #if PY_MAJOR_VERSION >= 3
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyBytes_Type );
+	          string_object,
+	          (PyObject *) &PyBytes_Type );
 #else
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyString_Type );
+	          string_object,
+	          (PyObject *) &PyString_Type );
 #endif
 	if( result == -1 )
 	{
 		pybde_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type string.",
 		 function );
 
@@ -275,10 +275,10 @@ PyObject *pybde_check_volume_signature(
 
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   string_object );
+		                   string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   string_object );
+		                   string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
@@ -329,9 +329,9 @@ PyObject *pybde_check_volume_signature_file_object(
            PyObject *arguments,
            PyObject *keywords )
 {
-	libcerror_error_t *error         = NULL;
-	libbfio_handle_t *file_io_handle = NULL;
 	PyObject *file_object            = NULL;
+	libbfio_handle_t *file_io_handle = NULL;
+	libcerror_error_t *error         = NULL;
 	static char *function            = "pybde_check_volume_signature_file_object";
 	static char *keyword_list[]      = { "file_object", NULL };
 	int result                       = 0;
@@ -429,19 +429,47 @@ PyObject *pybde_open_new_volume(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *pybde_volume = NULL;
+	pybde_volume_t *pybde_volume = NULL;
+	static char *function        = "pybde_open_new_volume";
 
 	PYBDE_UNREFERENCED_PARAMETER( self )
 
-	pybde_volume_init(
-	 (pybde_volume_t *) pybde_volume );
+	/* PyObject_New does not invoke tp_init
+	 */
+	pybde_volume = PyObject_New(
+	                struct pybde_volume,
+	                &pybde_volume_type_object );
 
-	pybde_volume_open(
-	 (pybde_volume_t *) pybde_volume,
-	 arguments,
-	 keywords );
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create volume.",
+		 function );
 
-	return( pybde_volume );
+		goto on_error;
+	}
+	if( pybde_volume_init(
+	     pybde_volume ) != 0 )
+	{
+		goto on_error;
+	}
+	if( pybde_volume_open(
+	     pybde_volume,
+	     arguments,
+	     keywords ) == NULL )
+	{
+		goto on_error;
+	}
+	return( (PyObject *) pybde_volume );
+
+on_error:
+	if( pybde_volume != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) pybde_volume );
+	}
+	return( NULL );
 }
 
 /* Creates a new volume object and opens it using a file-like object
@@ -452,19 +480,47 @@ PyObject *pybde_open_new_volume_with_file_object(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *pybde_volume = NULL;
+	pybde_volume_t *pybde_volume = NULL;
+	static char *function        = "pybde_open_new_volume_with_file_object";
 
 	PYBDE_UNREFERENCED_PARAMETER( self )
 
-	pybde_volume_init(
-	 (pybde_volume_t *) pybde_volume );
+	/* PyObject_New does not invoke tp_init
+	 */
+	pybde_volume = PyObject_New(
+	                struct pybde_volume,
+	                &pybde_volume_type_object );
 
-	pybde_volume_open_file_object(
-	 (pybde_volume_t *) pybde_volume,
-	 arguments,
-	 keywords );
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create volume.",
+		 function );
 
-	return( pybde_volume );
+		goto on_error;
+	}
+	if( pybde_volume_init(
+	     pybde_volume ) != 0 )
+	{
+		goto on_error;
+	}
+	if( pybde_volume_open_file_object(
+	     pybde_volume,
+	     arguments,
+	     keywords ) == NULL )
+	{
+		goto on_error;
+	}
+	return( (PyObject *) pybde_volume );
+
+on_error:
+	if( pybde_volume != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) pybde_volume );
+	}
+	return( NULL );
 }
 
 #if PY_MAJOR_VERSION >= 3

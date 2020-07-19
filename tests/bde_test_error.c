@@ -28,7 +28,6 @@
 #endif
 
 #include "bde_test_libbde.h"
-#include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 

@@ -201,7 +201,8 @@ int libbde_stretch_key_read(
 	value_data      = metadata_entry->value_data;
 	value_data_size = metadata_entry->value_data_size;
 
-	if( value_data_size < sizeof( bde_metadata_entry_stretch_key_header_t ) )
+	if( ( value_data_size < sizeof( bde_metadata_entry_stretch_key_header_t ) )
+	 || ( value_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 	{
 		libcerror_error_set(
 		 error,

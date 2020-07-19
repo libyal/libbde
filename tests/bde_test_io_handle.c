@@ -113,6 +113,8 @@ int bde_test_io_handle_initialize(
 	          &io_handle,
 	          &error );
 
+	io_handle = NULL;
+
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -124,8 +126,6 @@ int bde_test_io_handle_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	io_handle = NULL;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 
@@ -331,6 +331,36 @@ int bde_test_io_handle_clear(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_BDE_TEST_MEMORY )
+
+	/* Test libbde_io_handle_clear with memset failing
+	 */
+	bde_test_memset_attempts_before_fail = 0;
+
+	result = libbde_io_handle_clear(
+	          io_handle,
+	          &error );
+
+	if( bde_test_memset_attempts_before_fail != -1 )
+	{
+		bde_test_memset_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_BDE_TEST_MEMORY ) */
 
 	/* Clean up
 	 */

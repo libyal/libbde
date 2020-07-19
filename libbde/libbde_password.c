@@ -81,6 +81,18 @@ int libbde_utf8_password_calculate_hash(
 
 		goto on_error;
 	}
+	if( ( utf16_stream_size == 0 )
+	 || ( utf16_stream_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid UTF-16 stream size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	utf16_stream = (uint8_t *) memory_allocate(
 	                            sizeof( uint8_t ) * utf16_stream_size );
 
@@ -237,6 +249,18 @@ int libbde_utf16_password_calculate_hash(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to determine UTF-16 stream size.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( utf16_stream_size == 0 )
+	 || ( utf16_stream_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid UTF-16 stream size value out of bounds.",
 		 function );
 
 		goto on_error;
