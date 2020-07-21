@@ -304,7 +304,7 @@ int libbde_metadata_read_block(
 		 file_offset,
 		 file_offset );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libbde_metadata_block_header_initialize(
 	     &block_header,
@@ -438,7 +438,7 @@ int libbde_metadata_read_block(
 		 "%s: metadata size value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	entries_data_size -= sizeof( bde_metadata_header_v1_t );
 
@@ -481,7 +481,7 @@ int libbde_metadata_read_block(
 			 "%s: volume header size in FVE Volume header block does not match number of volume header sectors.\n",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
@@ -1249,7 +1249,7 @@ int libbde_metadata_read_volume_master_key(
 			 "%s: invalid metadata - invalid clear key volume master key - missing key.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( metadata->clear_key_volume_master_key->aes_ccm_encrypted_key == NULL )
 		{
@@ -1260,7 +1260,7 @@ int libbde_metadata_read_volume_master_key(
 			 "%s: invalid metadata - invalid clear key volume master key - missing AES-CCM encrypted key.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( metadata->clear_key_volume_master_key->key->data_size != 32 )
 		{
@@ -1478,7 +1478,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - missing startup key volume master key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( metadata->startup_key_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
@@ -1489,7 +1489,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - invalid startup key volume master key - missing AES-CCM encrypted key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_set(
 			     aes_ccm_key,
@@ -1710,7 +1710,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - missing password volume master key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( metadata->password_volume_master_key->stretch_key == NULL )
 			{
@@ -1721,7 +1721,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - invalid password volume master key - missing stretch key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( metadata->password_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
@@ -1732,7 +1732,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - invalid password volume master key - missing AES-CCM encrypted key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_set(
 			     aes_ccm_key,
@@ -1957,7 +1957,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - missing recovery password volume master key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( metadata->recovery_password_volume_master_key->stretch_key == NULL )
 			{
@@ -1968,7 +1968,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - invalid recovery password volume master key - missing stretch key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key == NULL )
 			{
@@ -1979,7 +1979,7 @@ int libbde_metadata_read_volume_master_key(
 				 "%s: invalid metadata - invalid recovery password volume master key - missing AES-CCM encrypted key.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_set(
 			     aes_ccm_key,
@@ -2275,7 +2275,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 		 "%s: full volume encryption key data size value out of bounds.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
 	if( io_handle == NULL )
 	{
@@ -2495,7 +2495,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 				 "%s: unsupported data size.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
@@ -2525,7 +2525,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 				 "%s: unsupported data size.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
@@ -2555,7 +2555,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 				 "%s: unsupported data size.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
@@ -2598,7 +2598,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 				 "%s: unsupported data size.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
