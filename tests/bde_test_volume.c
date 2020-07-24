@@ -30,6 +30,15 @@
 #include <stdlib.h>
 #endif
 
+#if defined( TIME_WITH_SYS_TIME )
+#include <sys/time.h>
+#include <time.h>
+#elif defined( HAVE_SYS_TIME_H )
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+
 #include "bde_test_functions.h"
 #include "bde_test_getopt.h"
 #include "bde_test_libbde.h"
@@ -37,9 +46,18 @@
 #include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_memory.h"
-#include "bde_test_unused.h"
 
 #include "../libbde/libbde_volume.h"
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER ) && SIZEOF_WCHAR_T != 2 && SIZEOF_WCHAR_T != 4
+#error Unsupported size of wchar_t
+#endif
+
+/* Define to make bde_test_volume generate verbose output
+#define BDE_TEST_VOLUME_VERBOSE
+ */
+
+#define BDE_TEST_VOLUME_READ_BUFFER_SIZE	4096
 
 #if !defined( LIBBDE_HAVE_BFIO )
 
@@ -56,14 +74,6 @@ int libbde_volume_open_file_io_handle(
      libbde_error_t **error );
 
 #endif /* !defined( LIBBDE_HAVE_BFIO ) */
-
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER ) && SIZEOF_WCHAR_T != 2 && SIZEOF_WCHAR_T != 4
-#error Unsupported size of wchar_t
-#endif
-
-/* Define to make bde_test_volume generate verbose output
-#define BDE_TEST_VOLUME_VERBOSE
- */
 
 /* Creates and opens a source volume
  * Returns 1 if successful or -1 on error
@@ -329,6 +339,8 @@ int bde_test_volume_initialize(
 	          &volume,
 	          &error );
 
+	volume = NULL;
+
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -340,8 +352,6 @@ int bde_test_volume_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	volume = NULL;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 
@@ -979,13 +989,13 @@ int bde_test_volume_open_file_io_handle(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NOT_NULL(
-         "file_io_handle",
-         file_io_handle );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "file_io_handle",
+	 file_io_handle );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	string_length = system_string_length(
 	                 source );
@@ -1008,9 +1018,9 @@ int bde_test_volume_open_file_io_handle(
 	 result,
 	 1 );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	result = libbde_volume_initialize(
 	          &volume,
@@ -1205,12 +1215,12 @@ int bde_test_volume_open_file_io_handle(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
-         "file_io_handle",
-         file_io_handle );
+	 "file_io_handle",
+	 file_io_handle );
 
-        BDE_TEST_ASSERT_IS_NULL(
-         "error",
-         error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 
@@ -1524,19 +1534,81 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libbde_volume_read_buffer function
+/* Tests the libbde_volume_is_locked function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_volume_read_buffer(
+int bde_test_volume_is_locked(
      libbde_volume_t *volume )
 {
-	uint8_t buffer[ 16 ];
+	libcerror_error_t *error = NULL;
+	int result               = 0;
+
+	/* Test regular cases
+	 */
+	result = libbde_volume_is_locked(
+	          volume,
+	          &error );
+
+	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libbde_volume_is_locked(
+	          NULL,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
+
+/* Tests the libbde_internal_volume_read_buffer_from_file_io_handle function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_internal_volume_read_buffer_from_file_io_handle(
+     libbde_volume_t *volume )
+{
+	uint8_t buffer[ BDE_TEST_VOLUME_READ_BUFFER_SIZE ];
 
 	libcerror_error_t *error = NULL;
+	time_t timestamp         = 0;
+	size64_t remaining_size  = 0;
 	size64_t size            = 0;
+	size_t read_size         = 0;
 	ssize_t read_count       = 0;
 	off64_t offset           = 0;
+	off64_t read_offset      = 0;
+	int number_of_tests      = 1024;
+	int random_number        = 0;
 	int result               = 0;
+	int test_number          = 0;
 
 	/* Determine size
 	 */
@@ -1573,23 +1645,30 @@ int bde_test_volume_read_buffer(
 
 	/* Test regular cases
 	 */
-	if( size > 16 )
+	read_size = BDE_TEST_VOLUME_READ_BUFFER_SIZE;
+
+	if( size < BDE_TEST_VOLUME_READ_BUFFER_SIZE )
 	{
-		read_count = libbde_volume_read_buffer(
-		              volume,
-		              buffer,
-		              16,
-		              &error );
+		read_size = (size_t) size;
+	}
+	read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
+	              (libbde_internal_volume_t *) volume,
+	              ( (libbde_internal_volume_t *) volume )->file_io_handle,
+	              buffer,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              &error );
 
-		BDE_TEST_ASSERT_EQUAL_SSIZE(
-		 "read_count",
-		 read_count,
-		 (ssize_t) 16 );
+	BDE_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) read_size );
 
-		BDE_TEST_ASSERT_IS_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
+	if( size > 8 )
+	{
 		/* Set offset to size - 8
 		 */
 		offset = libbde_volume_seek_offset(
@@ -1609,10 +1688,11 @@ int bde_test_volume_read_buffer(
 
 		/* Read buffer on size boundary
 		 */
-		read_count = libbde_volume_read_buffer(
-		              volume,
+		read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
+		              (libbde_internal_volume_t *) volume,
+		              ( (libbde_internal_volume_t *) volume )->file_io_handle,
 		              buffer,
-		              16,
+		              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 		              &error );
 
 		BDE_TEST_ASSERT_EQUAL_SSIZE(
@@ -1626,10 +1706,11 @@ int bde_test_volume_read_buffer(
 
 		/* Read buffer beyond size boundary
 		 */
-		read_count = libbde_volume_read_buffer(
-		              volume,
+		read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
+		              (libbde_internal_volume_t *) volume,
+		              ( (libbde_internal_volume_t *) volume )->file_io_handle,
 		              buffer,
-		              16,
+		              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 		              &error );
 
 		BDE_TEST_ASSERT_EQUAL_SSIZE(
@@ -1640,30 +1721,142 @@ int bde_test_volume_read_buffer(
 		BDE_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
+	}
+	/* Stress test read buffer
+	 */
+	timestamp = time(
+	             NULL );
 
-		/* Reset offset to 0
-		 */
-		offset = libbde_volume_seek_offset(
-		          volume,
-		          0,
-		          SEEK_SET,
-		          &error );
+	srand(
+	 (unsigned int) timestamp );
 
-		BDE_TEST_ASSERT_EQUAL_INT64(
-		 "offset",
-		 offset,
-		 (int64_t) 0 );
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	remaining_size = size;
+
+	for( test_number = 0;
+	     test_number < number_of_tests;
+	     test_number++ )
+	{
+		random_number = rand();
+
+		BDE_TEST_ASSERT_GREATER_THAN_INT(
+		 "random_number",
+		 random_number,
+		 -1 );
+
+		read_size = (size_t) random_number % BDE_TEST_VOLUME_READ_BUFFER_SIZE;
+
+#if defined( BDE_TEST_VOLUME_VERBOSE )
+		fprintf(
+		 stdout,
+		 "libbde_volume_read_buffer: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
+		 read_offset,
+		 read_offset,
+		 read_size );
+#endif
+		read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
+		              (libbde_internal_volume_t *) volume,
+		              ( (libbde_internal_volume_t *) volume )->file_io_handle,
+		              buffer,
+		              read_size,
+		              &error );
+
+		if( read_size > remaining_size )
+		{
+			read_size = (size_t) remaining_size;
+		}
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) read_size );
 
 		BDE_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
+
+		read_offset += read_count;
+
+		result = libbde_volume_get_offset(
+		          volume,
+		          &offset,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		BDE_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 read_offset );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		remaining_size -= read_count;
+
+		if( remaining_size == 0 )
+		{
+			offset = libbde_volume_seek_offset(
+			          volume,
+			          0,
+			          SEEK_SET,
+			          &error );
+
+			BDE_TEST_ASSERT_EQUAL_INT64(
+			 "offset",
+			 offset,
+			 (int64_t) 0 );
+
+			BDE_TEST_ASSERT_IS_NULL(
+			 "error",
+			 error );
+
+			read_offset = 0;
+
+			remaining_size = size;
+		}
 	}
+	/* Reset offset to 0
+	 */
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	/* Test error cases
 	 */
-	read_count = libbde_volume_read_buffer(
+	read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
 	              NULL,
+	              ( (libbde_internal_volume_t *) volume )->file_io_handle,
 	              buffer,
-	              16,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 	              &error );
 
 	BDE_TEST_ASSERT_EQUAL_SSIZE(
@@ -1678,10 +1871,11 @@ int bde_test_volume_read_buffer(
 	libcerror_error_free(
 	 &error );
 
-	read_count = libbde_volume_read_buffer(
-	              volume,
+	read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
+	              (libbde_internal_volume_t *) volume,
+	              ( (libbde_internal_volume_t *) volume )->file_io_handle,
 	              NULL,
-	              16,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 	              &error );
 
 	BDE_TEST_ASSERT_EQUAL_SSIZE(
@@ -1696,8 +1890,9 @@ int bde_test_volume_read_buffer(
 	libcerror_error_free(
 	 &error );
 
-	read_count = libbde_volume_read_buffer(
-	              volume,
+	read_count = libbde_internal_volume_read_buffer_from_file_io_handle(
+	              (libbde_internal_volume_t *) volume,
+	              ( (libbde_internal_volume_t *) volume )->file_io_handle,
 	              buffer,
 	              (size_t) SSIZE_MAX + 1,
 	              &error );
@@ -1725,18 +1920,412 @@ on_error:
 	return( 0 );
 }
 
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
+
+/* Tests the libbde_volume_read_buffer function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_volume_read_buffer(
+     libbde_volume_t *volume )
+{
+	uint8_t buffer[ BDE_TEST_VOLUME_READ_BUFFER_SIZE ];
+
+	libcerror_error_t *error = NULL;
+	time_t timestamp         = 0;
+	size64_t remaining_size  = 0;
+	size64_t size            = 0;
+	size_t read_size         = 0;
+	ssize_t read_count       = 0;
+	off64_t offset           = 0;
+	off64_t read_offset      = 0;
+	int number_of_tests      = 1024;
+	int random_number        = 0;
+	int result               = 0;
+	int test_number          = 0;
+
+	/* Determine size
+	 */
+	result = libbde_volume_get_size(
+	          volume,
+	          &size,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Reset offset to 0
+	 */
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	read_size = BDE_TEST_VOLUME_READ_BUFFER_SIZE;
+
+	if( size < BDE_TEST_VOLUME_READ_BUFFER_SIZE )
+	{
+		read_size = (size_t) size;
+	}
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              buffer,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              &error );
+
+	BDE_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) read_size );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	if( size > 8 )
+	{
+		/* Set offset to size - 8
+		 */
+		offset = libbde_volume_seek_offset(
+		          volume,
+		          -8,
+		          SEEK_END,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 (int64_t) size - 8 );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		/* Read buffer on size boundary
+		 */
+		read_count = libbde_volume_read_buffer(
+		              volume,
+		              buffer,
+		              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+		              &error );
+
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) 8 );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		/* Read buffer beyond size boundary
+		 */
+		read_count = libbde_volume_read_buffer(
+		              volume,
+		              buffer,
+		              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+		              &error );
+
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) 0 );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+	}
+	/* Stress test read buffer
+	 */
+	timestamp = time(
+	             NULL );
+
+	srand(
+	 (unsigned int) timestamp );
+
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	remaining_size = size;
+
+	for( test_number = 0;
+	     test_number < number_of_tests;
+	     test_number++ )
+	{
+		random_number = rand();
+
+		BDE_TEST_ASSERT_GREATER_THAN_INT(
+		 "random_number",
+		 random_number,
+		 -1 );
+
+		read_size = (size_t) random_number % BDE_TEST_VOLUME_READ_BUFFER_SIZE;
+
+#if defined( BDE_TEST_VOLUME_VERBOSE )
+		fprintf(
+		 stdout,
+		 "libbde_volume_read_buffer: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
+		 read_offset,
+		 read_offset,
+		 read_size );
+#endif
+		read_count = libbde_volume_read_buffer(
+		              volume,
+		              buffer,
+		              read_size,
+		              &error );
+
+		if( read_size > remaining_size )
+		{
+			read_size = (size_t) remaining_size;
+		}
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) read_size );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		read_offset += read_count;
+
+		result = libbde_volume_get_offset(
+		          volume,
+		          &offset,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		BDE_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 read_offset );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		remaining_size -= read_count;
+
+		if( remaining_size == 0 )
+		{
+			offset = libbde_volume_seek_offset(
+			          volume,
+			          0,
+			          SEEK_SET,
+			          &error );
+
+			BDE_TEST_ASSERT_EQUAL_INT64(
+			 "offset",
+			 offset,
+			 (int64_t) 0 );
+
+			BDE_TEST_ASSERT_IS_NULL(
+			 "error",
+			 error );
+
+			read_offset = 0;
+
+			remaining_size = size;
+		}
+	}
+	/* Reset offset to 0
+	 */
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	read_count = libbde_volume_read_buffer(
+	              NULL,
+	              buffer,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              &error );
+
+	BDE_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              NULL,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              &error );
+
+	BDE_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              buffer,
+	              (size_t) SSIZE_MAX + 1,
+	              &error );
+
+	BDE_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#if defined( HAVE_BDE_TEST_RWLOCK )
+
+	/* Test libbde_volume_read_buffer with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
+	 */
+	bde_test_pthread_rwlock_wrlock_attempts_before_fail = 0;
+
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              buffer,
+	              BDE_TEST_PARTITION_READ_BUFFER_SIZE,
+	              &error );
+
+	if( bde_test_pthread_rwlock_wrlock_attempts_before_fail != -1 )
+	{
+		bde_test_pthread_rwlock_wrlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libbde_volume_read_buffer with pthread_rwlock_unlock failing in libcthreads_read_write_lock_release_for_write
+	 */
+	bde_test_pthread_rwlock_unlock_attempts_before_fail = 0;
+
+	read_count = libbde_volume_read_buffer(
+	              volume,
+	              buffer,
+	              BDE_TEST_PARTITION_READ_BUFFER_SIZE,
+	              &error );
+
+	if( bde_test_pthread_rwlock_unlock_attempts_before_fail != -1 )
+	{
+		bde_test_pthread_rwlock_unlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_BDE_TEST_RWLOCK ) */
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 /* Tests the libbde_volume_read_buffer_at_offset function
  * Returns 1 if successful or 0 if not
  */
 int bde_test_volume_read_buffer_at_offset(
      libbde_volume_t *volume )
 {
-	uint8_t buffer[ 16 ];
+	uint8_t buffer[ BDE_TEST_VOLUME_READ_BUFFER_SIZE ];
 
 	libcerror_error_t *error = NULL;
+	time_t timestamp         = 0;
+	size64_t remaining_size  = 0;
 	size64_t size            = 0;
+	size_t read_size         = 0;
 	ssize_t read_count       = 0;
+	off64_t offset           = 0;
+	off64_t read_offset      = 0;
+	int number_of_tests      = 1024;
+	int random_number        = 0;
 	int result               = 0;
+	int test_number          = 0;
 
 	/* Determine size
 	 */
@@ -1756,30 +2345,36 @@ int bde_test_volume_read_buffer_at_offset(
 
 	/* Test regular cases
 	 */
-	if( size > 16 )
+	read_size = BDE_TEST_VOLUME_READ_BUFFER_SIZE;
+
+	if( size < BDE_TEST_VOLUME_READ_BUFFER_SIZE )
 	{
-		read_count = libbde_volume_read_buffer_at_offset(
-		              volume,
-		              buffer,
-		              16,
-		              0,
-		              &error );
+		read_size = (size_t) size;
+	}
+	read_count = libbde_volume_read_buffer_at_offset(
+	              volume,
+	              buffer,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              0,
+	              &error );
 
-		BDE_TEST_ASSERT_EQUAL_SSIZE(
-		 "read_count",
-		 read_count,
-		 (ssize_t) 16 );
+	BDE_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) read_size );
 
-		BDE_TEST_ASSERT_IS_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
+	if( size > 8 )
+	{
 		/* Read buffer on size boundary
 		 */
 		read_count = libbde_volume_read_buffer_at_offset(
 		              volume,
 		              buffer,
-		              16,
+		              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 		              size - 8,
 		              &error );
 
@@ -1797,7 +2392,7 @@ int bde_test_volume_read_buffer_at_offset(
 		read_count = libbde_volume_read_buffer_at_offset(
 		              volume,
 		              buffer,
-		              16,
+		              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 		              size + 8,
 		              &error );
 
@@ -1810,12 +2405,88 @@ int bde_test_volume_read_buffer_at_offset(
 		 "error",
 		 error );
 	}
+	/* Stress test read buffer
+	 */
+	timestamp = time(
+	             NULL );
+
+	srand(
+	 (unsigned int) timestamp );
+
+	for( test_number = 0;
+	     test_number < number_of_tests;
+	     test_number++ )
+	{
+		random_number = rand();
+
+		BDE_TEST_ASSERT_GREATER_THAN_INT(
+		 "random_number",
+		 random_number,
+		 -1 );
+
+		if( size > 0 )
+		{
+			read_offset = (off64_t) random_number % size;
+		}
+		read_size = (size_t) random_number % BDE_TEST_VOLUME_READ_BUFFER_SIZE;
+
+#if defined( BDE_TEST_VOLUME_VERBOSE )
+		fprintf(
+		 stdout,
+		 "libbde_volume_read_buffer_at_offset: at offset: %" PRIi64 " (0x%08" PRIx64 ") of size: %" PRIzd "\n",
+		 read_offset,
+		 read_offset,
+		 read_size );
+#endif
+		read_count = libbde_volume_read_buffer_at_offset(
+		              volume,
+		              buffer,
+		              read_size,
+		              read_offset,
+		              &error );
+
+		remaining_size = size - read_offset;
+
+		if( read_size > remaining_size )
+		{
+			read_size = (size_t) remaining_size;
+		}
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) read_size );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+
+		read_offset += read_count;
+
+		result = libbde_volume_get_offset(
+		          volume,
+		          &offset,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		BDE_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 offset,
+		 read_offset );
+
+		BDE_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+	}
 	/* Test error cases
 	 */
 	read_count = libbde_volume_read_buffer_at_offset(
 	              NULL,
 	              buffer,
-	              16,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 	              0,
 	              &error );
 
@@ -1834,7 +2505,7 @@ int bde_test_volume_read_buffer_at_offset(
 	read_count = libbde_volume_read_buffer_at_offset(
 	              volume,
 	              NULL,
-	              16,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 	              0,
 	              &error );
 
@@ -1872,7 +2543,7 @@ int bde_test_volume_read_buffer_at_offset(
 	read_count = libbde_volume_read_buffer_at_offset(
 	              volume,
 	              buffer,
-	              16,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
 	              -1,
 	              &error );
 
@@ -1887,6 +2558,68 @@ int bde_test_volume_read_buffer_at_offset(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_BDE_TEST_RWLOCK )
+
+	/* Test libbde_volume_read_buffer_at_offset with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
+	 */
+	bde_test_pthread_rwlock_wrlock_attempts_before_fail = 0;
+
+	read_count = libbde_volume_read_buffer_at_offset(
+	              volume,
+	              buffer,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              0,
+	              &error );
+
+	if( bde_test_pthread_rwlock_wrlock_attempts_before_fail != -1 )
+	{
+		bde_test_pthread_rwlock_wrlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libbde_volume_read_buffer_at_offset with pthread_rwlock_unlock failing in libcthreads_read_write_lock_release_for_write
+	 */
+	bde_test_pthread_rwlock_unlock_attempts_before_fail = 0;
+
+	read_count = libbde_volume_read_buffer_at_offset(
+	              volume,
+	              buffer,
+	              BDE_TEST_VOLUME_READ_BUFFER_SIZE,
+	              0,
+	              &error );
+
+	if( bde_test_pthread_rwlock_unlock_attempts_before_fail != -1 )
+	{
+		bde_test_pthread_rwlock_unlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_SSIZE(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_BDE_TEST_RWLOCK ) */
 
 	return( 1 );
 
@@ -2061,6 +2794,66 @@ int bde_test_volume_seek_offset(
 	libcerror_error_free(
 	 &error );
 
+#if defined( HAVE_BDE_TEST_RWLOCK )
+
+	/* Test libbde_volume_seek_offset with pthread_rwlock_wrlock failing in libcthreads_read_write_lock_grab_for_write
+	 */
+	bde_test_pthread_rwlock_wrlock_attempts_before_fail = 0;
+
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	if( bde_test_pthread_rwlock_wrlock_attempts_before_fail != -1 )
+	{
+		bde_test_pthread_rwlock_wrlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 (int64_t) offset,
+		 (int64_t) -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	/* Test libbde_volume_seek_offset with pthread_rwlock_unlock failing in libcthreads_read_write_lock_release_for_write
+	 */
+	bde_test_pthread_rwlock_unlock_attempts_before_fail = 0;
+
+	offset = libbde_volume_seek_offset(
+	          volume,
+	          0,
+	          SEEK_SET,
+	          &error );
+
+	if( bde_test_pthread_rwlock_unlock_attempts_before_fail != -1 )
+	{
+		bde_test_pthread_rwlock_unlock_attempts_before_fail = -1;
+	}
+	else
+	{
+		BDE_TEST_ASSERT_EQUAL_INT64(
+		 "offset",
+		 (int64_t) offset,
+		 (int64_t) -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_BDE_TEST_RWLOCK ) */
+
 	return( 1 );
 
 on_error:
@@ -2080,7 +2873,6 @@ int bde_test_volume_get_offset(
 {
 	libcerror_error_t *error = NULL;
 	off64_t offset           = 0;
-	int offset_is_set        = 0;
 	int result               = 0;
 
 	/* Test regular cases
@@ -2090,16 +2882,14 @@ int bde_test_volume_get_offset(
 	          &offset,
 	          &error );
 
-	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
-
-	offset_is_set = result;
 
 	/* Test error cases
 	 */
@@ -2120,25 +2910,23 @@ int bde_test_volume_get_offset(
 	libcerror_error_free(
 	 &error );
 
-	if( offset_is_set != 0 )
-	{
-		result = libbde_volume_get_offset(
-		          volume,
-		          NULL,
-		          &error );
+	result = libbde_volume_get_offset(
+	          volume,
+	          NULL,
+	          &error );
 
-		BDE_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
 
-		BDE_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
-		libcerror_error_free(
-		 &error );
-	}
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:
@@ -2167,10 +2955,10 @@ int bde_test_volume_get_size(
 	          &size,
 	          &error );
 
-	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -2229,10 +3017,9 @@ on_error:
 int bde_test_volume_get_encryption_method(
      libbde_volume_t *volume )
 {
-	libcerror_error_t *error     = NULL;
-	uint16_t encryption_method   = 0;
-	int encryption_method_is_set = 0;
-	int result                   = 0;
+	libcerror_error_t *error   = NULL;
+	uint16_t encryption_method = 0;
+	int result                 = 0;
 
 	/* Test regular cases
 	 */
@@ -2241,16 +3028,14 @@ int bde_test_volume_get_encryption_method(
 	          &encryption_method,
 	          &error );
 
-	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
-
-	encryption_method_is_set = result;
 
 	/* Test error cases
 	 */
@@ -2271,25 +3056,23 @@ int bde_test_volume_get_encryption_method(
 	libcerror_error_free(
 	 &error );
 
-	if( encryption_method_is_set != 0 )
-	{
-		result = libbde_volume_get_encryption_method(
-		          volume,
-		          NULL,
-		          &error );
+	result = libbde_volume_get_encryption_method(
+	          volume,
+	          NULL,
+	          &error );
 
-		BDE_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
 
-		BDE_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
-		libcerror_error_free(
-		 &error );
-	}
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:
@@ -2309,7 +3092,6 @@ int bde_test_volume_get_creation_time(
 {
 	libcerror_error_t *error = NULL;
 	uint64_t creation_time   = 0;
-	int creation_time_is_set = 0;
 	int result               = 0;
 
 	/* Test regular cases
@@ -2319,16 +3101,14 @@ int bde_test_volume_get_creation_time(
 	          &creation_time,
 	          &error );
 
-	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
-
-	creation_time_is_set = result;
 
 	/* Test error cases
 	 */
@@ -2349,25 +3129,23 @@ int bde_test_volume_get_creation_time(
 	libcerror_error_free(
 	 &error );
 
-	if( creation_time_is_set != 0 )
-	{
-		result = libbde_volume_get_creation_time(
-		          volume,
-		          NULL,
-		          &error );
+	result = libbde_volume_get_creation_time(
+	          volume,
+	          NULL,
+	          &error );
 
-		BDE_TEST_ASSERT_EQUAL_INT(
-		 "result",
-		 result,
-		 -1 );
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
 
-		BDE_TEST_ASSERT_IS_NOT_NULL(
-		 "error",
-		 error );
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
 
-		libcerror_error_free(
-		 &error );
-	}
+	libcerror_error_free(
+	 &error );
+
 	return( 1 );
 
 on_error:
@@ -2788,10 +3566,10 @@ int bde_test_volume_get_number_of_key_protectors(
 	          &number_of_key_protectors,
 	          &error );
 
-	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -2840,6 +3618,264 @@ on_error:
 	{
 		libcerror_error_free(
 		 &error );
+	}
+	return( 0 );
+}
+
+/* Tests the libbde_volume_get_key_protector_by_index function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_volume_get_key_protector_by_index(
+     libbde_volume_t *volume )
+{
+	libbde_key_protector_t *key_protector = NULL;
+	libcerror_error_t *error              = NULL;
+	int result                            = 0;
+
+	/* Test regular cases
+	 */
+	result = libbde_volume_get_key_protector_by_index(
+	          volume,
+	          0,
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "key_protector",
+	 key_protector );
+
+	result = libbde_key_protector_free(
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libbde_volume_get_key_protector_by_index(
+	          NULL,
+	          0,
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "key_protector",
+	 key_protector );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_get_key_protector_by_index(
+	          volume,
+	          -1,
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "key_protector",
+	 key_protector );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_get_key_protector_by_index(
+	          volume,
+	          0,
+	          NULL,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "key_protector",
+	 key_protector );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( key_protector != NULL )
+	{
+		libbde_key_protector_free(
+		 &key_protector,
+		 NULL );
+	}
+	return( 0 );
+}
+
+/* Tests the libbde_volume_get_key_protector function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_volume_get_key_protector(
+     libbde_volume_t *volume )
+{
+	libbde_key_protector_t *key_protector = NULL;
+	libcerror_error_t *error              = NULL;
+	int result                            = 0;
+
+	/* Test regular cases
+	 */
+	result = libbde_volume_get_key_protector(
+	          volume,
+	          0,
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "key_protector",
+	 key_protector );
+
+	result = libbde_key_protector_free(
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libbde_volume_get_key_protector(
+	          NULL,
+	          0,
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "key_protector",
+	 key_protector );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_get_key_protector(
+	          volume,
+	          -1,
+	          &key_protector,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "key_protector",
+	 key_protector );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libbde_volume_get_key_protector(
+	          volume,
+	          0,
+	          NULL,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "key_protector",
+	 key_protector );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( key_protector != NULL )
+	{
+		libbde_key_protector_free(
+		 &key_protector,
+		 NULL );
 	}
 	return( 0 );
 }
@@ -3051,6 +4087,7 @@ int main(
 		 source,
 		 option_password,
 		 option_recovery_password );
+
 	}
 	if( result != 0 )
 	{
@@ -3089,7 +4126,19 @@ int main(
 
 #endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
-		/* TODO: add tests for libbde_volume_is_locked */
+		BDE_TEST_RUN_WITH_ARGS(
+		 "libbde_volume_is_locked",
+		 bde_test_volume_is_locked,
+		 volume );
+
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
+
+		BDE_TEST_RUN_WITH_ARGS(
+		 "libbde_internal_volume_read_buffer_from_file_io_handle",
+		 bde_test_internal_volume_read_buffer_from_file_io_handle,
+		 volume );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 		BDE_TEST_RUN_WITH_ARGS(
 		 "libbde_volume_read_buffer",
@@ -3104,6 +4153,12 @@ int main(
 		/* TODO: add tests for libbde_volume_write_buffer */
 
 		/* TODO: add tests for libbde_volume_write_buffer_at_offset */
+
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
+
+		/* TODO: add tests for libbde_internal_volume_seek_offset */
+
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 
 		BDE_TEST_RUN_WITH_ARGS(
 		 "libbde_volume_seek_offset",
@@ -3157,9 +4212,15 @@ int main(
 		 bde_test_volume_get_number_of_key_protectors,
 		 volume );
 
-		/* TODO: add tests for libbde_volume_get_key_protector_by_index */
+		BDE_TEST_RUN_WITH_ARGS(
+		 "libbde_volume_get_key_protector_by_index",
+		 bde_test_volume_get_key_protector_by_index,
+		 volume );
 
-		/* TODO: add tests for libbde_volume_get_key_protector */
+		BDE_TEST_RUN_WITH_ARGS(
+		 "libbde_volume_get_key_protector",
+		 bde_test_volume_get_key_protector,
+		 volume );
 
 		/* TODO: add tests for libbde_volume_set_keys */
 
@@ -3173,7 +4234,11 @@ int main(
 
 		/* TODO: add tests for libbde_volume_read_startup_key */
 
+#if defined( HAVE_WIDE_CHARACTER_TYPE )
+
 		/* TODO: add tests for libbde_volume_read_startup_key_wide */
+
+#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
 		/* TODO: add tests for libbde_volume_read_startup_key_file_io_handle */
 
@@ -3195,7 +4260,9 @@ int main(
 		BDE_TEST_ASSERT_IS_NULL(
 		 "error",
 		 error );
-
+	}
+	if( file_io_handle != NULL )
+	{
 		result = libbfio_handle_free(
 		          &file_io_handle,
 		          &error );

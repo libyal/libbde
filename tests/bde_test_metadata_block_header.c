@@ -30,6 +30,7 @@
 
 #include "bde_test_functions.h"
 #include "bde_test_libbde.h"
+#include "bde_test_libbfio.h"
 #include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_memory.h"
@@ -121,6 +122,8 @@ int bde_test_metadata_block_header_initialize(
 	          &metadata_block_header,
 	          &error );
 
+	metadata_block_header = NULL;
+
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -132,8 +135,6 @@ int bde_test_metadata_block_header_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	metadata_block_header = NULL;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 

@@ -41,7 +41,7 @@ PyObject *pybde_datetime_new_from_floatingtime(
            uint64_t floatingtime );
 
 PyObject *pybde_datetime_new_from_posix_time(
-           uint32_t posix_time );
+           int64_t posix_time );
 
 PyObject *pybde_datetime_new_from_posix_time_in_micro_seconds(
            int64_t posix_time );

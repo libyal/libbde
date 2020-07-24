@@ -28,9 +28,9 @@
 #endif
 
 #include "bde_test_functions.h"
+#include "bde_test_libbde.h"
 #include "bde_test_libbfio.h"
 #include "bde_test_libcerror.h"
-#include "bde_test_libbde.h"
 #include "bde_test_macros.h"
 #include "bde_test_memory.h"
 #include "bde_test_unused.h"

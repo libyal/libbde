@@ -113,6 +113,8 @@ int bde_test_aes_ccm_encrypted_key_initialize(
 	          &aes_ccm_encrypted_key,
 	          &error );
 
+	aes_ccm_encrypted_key = NULL;
+
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -124,8 +126,6 @@ int bde_test_aes_ccm_encrypted_key_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	aes_ccm_encrypted_key = NULL;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 

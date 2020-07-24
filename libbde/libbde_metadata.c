@@ -187,6 +187,22 @@ int libbde_metadata_free(
 			memory_free(
 			 ( *metadata )->description );
 		}
+		if( ( *metadata )->startup_key_external_key != NULL )
+		{
+			if( libbde_external_key_free(
+			     &( ( *metadata )->startup_key_external_key ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free startup key external key.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( ( *metadata )->full_volume_encryption_key != NULL )
 		{
 			if( libbde_aes_ccm_encrypted_key_free(

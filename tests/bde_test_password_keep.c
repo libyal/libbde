@@ -113,6 +113,8 @@ int bde_test_password_keep_initialize(
 	          &password_keep,
 	          &error );
 
+	password_keep = NULL;
+
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -124,8 +126,6 @@ int bde_test_password_keep_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	password_keep = NULL;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 

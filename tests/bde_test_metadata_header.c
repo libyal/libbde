@@ -120,6 +120,8 @@ int bde_test_metadata_header_initialize(
 	          &metadata_header,
 	          &error );
 
+	metadata_header = NULL;
+
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -131,8 +133,6 @@ int bde_test_metadata_header_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	metadata_header = NULL;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 

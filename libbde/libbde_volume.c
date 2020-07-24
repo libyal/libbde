@@ -1911,7 +1911,6 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 	size_t buffer_offset              = 0;
 	size_t read_size                  = 0;
 	size_t sector_data_offset         = 0;
-	ssize_t total_read_count          = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -2001,6 +2000,8 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 
 		return( -1 );
 	}
+	internal_volume->io_handle->abort = 0;
+
 	if( (size64_t) internal_volume->current_offset >= internal_volume->io_handle->volume_size )
 	{
 		return( 0 );
@@ -2071,7 +2072,6 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 		}
 		buffer_offset     += read_size;
 		buffer_size       -= read_size;
-		total_read_count  += (ssize_t) read_size;
 		sector_data_offset = 0;
 
 		internal_volume->current_offset += (off64_t) read_size;
@@ -2085,7 +2085,7 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 			break;
 		}
 	}
-	return( total_read_count );
+	return( (ssize_t) buffer_offset );
 }
 
 /* Reads unencrypted data at the current offset into a buffer
