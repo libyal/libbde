@@ -258,6 +258,7 @@ int libbde_io_handle_read_volume_header(
 	size_t read_size                 = 512;
 	ssize_t read_count               = 0;
 	uint64_t total_number_of_sectors = 0;
+	uint32_t cluster_block_size      = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit             = 0;
@@ -616,7 +617,7 @@ int libbde_io_handle_read_volume_header(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->index_entry_size,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: index entry size\t\t: %" PRIu32 "\n",
+			 "%s: index entry size\t\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
 
@@ -632,7 +633,7 @@ int libbde_io_handle_read_volume_header(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->checksum,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: checksum\t\t\t: 0x%08" PRIx32 "\n",
+			 "%s: checksum\t\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
@@ -797,18 +798,40 @@ int libbde_io_handle_read_volume_header(
 		libcnotify_printf(
 		 "\n" );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( total_number_of_sectors != 0 )
 	{
-		io_handle->volume_size  = total_number_of_sectors;
-		io_handle->volume_size *= io_handle->bytes_per_sector;
+		if( total_number_of_sectors > ( (uint64_t) INT64_MAX / io_handle->bytes_per_sector ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid volume size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		io_handle->volume_size = total_number_of_sectors * io_handle->bytes_per_sector;
 	}
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
-		io_handle->first_metadata_offset *= io_handle->sectors_per_cluster_block;
-		io_handle->first_metadata_offset *= io_handle->bytes_per_sector;
+		cluster_block_size = (uint32_t) io_handle->sectors_per_cluster_block * io_handle->bytes_per_sector;
 
-		io_handle->metadata_size = 16384;
+		if( io_handle->first_metadata_offset > ( (off64_t) INT64_MAX / cluster_block_size ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid first metadata offset value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		io_handle->first_metadata_offset *= cluster_block_size;
+		io_handle->metadata_size          = 16384;
 	}
 	else if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 	      || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
