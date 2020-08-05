@@ -253,17 +253,20 @@ int libbde_io_handle_read_volume_header(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	uint8_t *volume_header_data      = NULL;
-	static char *function            = "libbde_io_handle_read_volume_header";
-	size_t read_size                 = 512;
-	ssize_t read_count               = 0;
-	uint64_t total_number_of_sectors = 0;
-	uint32_t cluster_block_size      = 0;
+	uint8_t *volume_header_data          = NULL;
+	static char *function                = "libbde_io_handle_read_volume_header";
+	size_t read_size                     = 512;
+	ssize_t read_count                   = 0;
+	uint64_t safe_first_metadata_offset  = 0;
+	uint64_t safe_second_metadata_offset = 0;
+	uint64_t safe_third_metadata_offset  = 0;
+	uint64_t total_number_of_sectors     = 0;
+	uint32_t cluster_block_size          = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit             = 0;
-	uint32_t value_32bit             = 0;
-	uint16_t value_16bit             = 0;
+	uint64_t value_64bit                 = 0;
+	uint32_t value_32bit                 = 0;
+	uint16_t value_16bit                 = 0;
 #endif
 
 	if( io_handle == NULL )
@@ -442,7 +445,7 @@ int libbde_io_handle_read_volume_header(
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_windows_vista_t *) volume_header_data )->first_metadata_cluster_block_number,
-		 io_handle->first_metadata_offset );
+		 safe_first_metadata_offset );
 
 		if( total_number_of_sectors == 0 )
 		{
@@ -455,29 +458,29 @@ int libbde_io_handle_read_volume_header(
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_windows_7_t *) volume_header_data )->first_metadata_offset,
-		 io_handle->first_metadata_offset );
+		 safe_first_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_windows_7_t *) volume_header_data )->second_metadata_offset,
-		 io_handle->second_metadata_offset );
+		 safe_second_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_windows_7_t *) volume_header_data )->third_metadata_offset,
-		 io_handle->third_metadata_offset );
+		 safe_third_metadata_offset );
 	}
 	else if( io_handle->version == LIBBDE_VERSION_TO_GO )
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_to_go_t *) volume_header_data )->first_metadata_offset,
-		 io_handle->first_metadata_offset );
+		 safe_first_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_to_go_t *) volume_header_data )->second_metadata_offset,
-		 io_handle->second_metadata_offset );
+		 safe_second_metadata_offset );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_to_go_t *) volume_header_data )->third_metadata_offset,
-		 io_handle->third_metadata_offset );
+		 safe_third_metadata_offset );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -603,7 +606,7 @@ int libbde_io_handle_read_volume_header(
 			libcnotify_printf(
 			 "%s: first metadata cluster block\t: 0x%08" PRIx64 "\n",
 			 function,
-			 io_handle->first_metadata_offset );
+			 safe_first_metadata_offset );
 
 			byte_stream_copy_to_uint32_little_endian(
 			 ( (bde_volume_header_windows_vista_t *) volume_header_data )->mft_entry_size,
@@ -755,17 +758,17 @@ int libbde_io_handle_read_volume_header(
 			libcnotify_printf(
 			 "%s: first metadata offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 io_handle->first_metadata_offset );
+			 safe_first_metadata_offset );
 
 			libcnotify_printf(
 			 "%s: second metadata offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 io_handle->second_metadata_offset );
+			 safe_second_metadata_offset );
 
 			libcnotify_printf(
 			 "%s: third metadata offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 io_handle->third_metadata_offset );
+			 safe_third_metadata_offset );
 		}
 		if( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 		{
@@ -800,6 +803,24 @@ int libbde_io_handle_read_volume_header(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
+	io_handle->first_metadata_offset  = (off64_t) safe_first_metadata_offset;
+	io_handle->second_metadata_offset = (off64_t) safe_second_metadata_offset;
+	io_handle->third_metadata_offset  = (off64_t) safe_third_metadata_offset;
+
+	if( ( io_handle->bytes_per_sector != 512 )
+	 && ( io_handle->bytes_per_sector != 1024 )
+	 && ( io_handle->bytes_per_sector != 2048 )
+	 && ( io_handle->bytes_per_sector != 4096 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid bytes per sector value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	if( total_number_of_sectors != 0 )
 	{
 		if( total_number_of_sectors > ( (uint64_t) INT64_MAX / io_handle->bytes_per_sector ) )
@@ -817,6 +838,17 @@ int libbde_io_handle_read_volume_header(
 	}
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
+		if( io_handle->sectors_per_cluster_block == 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid sectors per cluster block value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		cluster_block_size = (uint32_t) io_handle->sectors_per_cluster_block * io_handle->bytes_per_sector;
 
 		if( io_handle->first_metadata_offset > ( (off64_t) INT64_MAX / cluster_block_size ) )

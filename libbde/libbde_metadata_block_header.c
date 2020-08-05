@@ -202,11 +202,12 @@ int libbde_metadata_block_header_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_metadata_block_header_read_data";
+	static char *function              = "libbde_metadata_block_header_read_data";
+	uint64_t safe_volume_header_offset = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit  = 0;
-	uint16_t value_16bit  = 0;
+	uint32_t value_32bit               = 0;
+	uint16_t value_16bit               = 0;
 #endif
 
 	if( metadata_block_header == NULL )
@@ -287,7 +288,7 @@ int libbde_metadata_block_header_read_data(
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_metadata_block_header_v2_t *) data )->volume_header_offset,
-		 metadata_block_header->volume_header_offset );
+		 safe_volume_header_offset );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (bde_metadata_block_header_v2_t *) data )->number_of_volume_header_sectors,
@@ -406,12 +407,14 @@ int libbde_metadata_block_header_read_data(
 			libcnotify_printf(
 			 "%s: volume header offset\t\t: 0x%08" PRIx64 "\n",
 			 function,
-			 metadata_block_header->volume_header_offset );
+			 safe_volume_header_offset );
 		}
 		libcnotify_printf(
 		 "\n" );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	 metadata_block_header->volume_header_offset = (off64_t) safe_volume_header_offset;
 
 	if( ( metadata_block_header->version != 1 )
 	 && ( metadata_block_header->version != 2 ) )
