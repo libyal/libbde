@@ -803,10 +803,6 @@ int libbde_io_handle_read_volume_header(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	io_handle->first_metadata_offset  = (off64_t) safe_first_metadata_offset;
-	io_handle->second_metadata_offset = (off64_t) safe_second_metadata_offset;
-	io_handle->third_metadata_offset  = (off64_t) safe_third_metadata_offset;
-
 	if( ( io_handle->bytes_per_sector != 512 )
 	 && ( io_handle->bytes_per_sector != 1024 )
 	 && ( io_handle->bytes_per_sector != 2048 )
@@ -851,7 +847,7 @@ int libbde_io_handle_read_volume_header(
 		}
 		cluster_block_size = (uint32_t) io_handle->sectors_per_cluster_block * io_handle->bytes_per_sector;
 
-		if( io_handle->first_metadata_offset > ( (off64_t) INT64_MAX / cluster_block_size ) )
+		if( safe_first_metadata_offset > ( (uint64_t) INT64_MAX / cluster_block_size ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -862,13 +858,49 @@ int libbde_io_handle_read_volume_header(
 
 			goto on_error;
 		}
-		io_handle->first_metadata_offset *= cluster_block_size;
-		io_handle->metadata_size          = 16384;
+		io_handle->first_metadata_offset = (off64_t) ( safe_first_metadata_offset * cluster_block_size );
+		io_handle->metadata_size         = 16384;
 	}
 	else if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
 	      || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
 	{
-		io_handle->metadata_size = 65536;
+		if( safe_first_metadata_offset > (uint64_t) INT64_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid first metadata offset value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		if( safe_second_metadata_offset > (uint64_t) INT64_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid second metadata offset value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		if( safe_third_metadata_offset > (uint64_t) INT64_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid third metadata offset value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
+		io_handle->first_metadata_offset  = (off64_t) safe_first_metadata_offset;
+		io_handle->second_metadata_offset = (off64_t) safe_second_metadata_offset;
+		io_handle->third_metadata_offset  = (off64_t) safe_third_metadata_offset;
+		io_handle->metadata_size          = 65536;
 	}
 	memory_free(
 	 volume_header_data );
