@@ -1431,6 +1431,17 @@ int libbde_metadata_read_volume_master_key(
 		{
 			if( data_size == 0x2c )
 			{
+				if( unencrypted_data_size < ( 28 + 32 ) )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: unencrypted volume master key data size value out of bounds.",
+					 function );
+
+					goto on_error;
+				}
 				if( memory_copy(
 				     volume_master_key,
 				     &( unencrypted_data[ 28 ] ),

@@ -220,7 +220,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes a key protector object
+/* Initializes a key protector object
  * Returns 0 if successful or -1 on error
  */
 int pybde_key_protector_init(

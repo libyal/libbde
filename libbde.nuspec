@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>libbde</id>
+    <version>20200816</version>
+    <authors>Joachim Metz</authors>
+    <owners>joachimmetz</owners>
+    <licenseUrl>https://raw.githubusercontent.com/libyal/libbde/master/COPYING.LESSER</licenseUrl>
+    <projectUrl>https://github.com/libyal/libbde</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <title>libbde</title>
+    <description>Library to access the BitLocker Drive Encryption (BDE) format</description>
+    <releaseNotes>Release of libbde 20200816</releaseNotes>
+    <copyright>Copyright (C) 2011-2020</copyright>
+    <tags>native</tags>
+  </metadata>
+  <files>
+    <file src="include\*.h" target="lib\native\include\" />
+    <file src="include\libbde\*.h" target="lib\native\include\libbde\" />
+    <file src="msvscpp\Release\Win32\libbde.dll" target="lib\native\lib\Win32\" />
+    <file src="msvscpp\Release\Win32\libbde.lib" target="lib\native\lib\Win32\" />
+    <file src="msvscpp\Release\Win32\libbde.pdb" target="lib\native\lib\Win32\" />
+    <file src="msvscpp\Release\x64\libbde.dll" target="lib\native\lib\x64\" />
+    <file src="msvscpp\Release\x64\libbde.lib" target="lib\native\lib\x64\" />
+    <file src="msvscpp\Release\x64\libbde.pdb" target="lib\native\lib\x64\" />
+  </files>
+</package>

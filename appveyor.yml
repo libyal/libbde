@@ -204,6 +204,10 @@ build_script:
 - ps: If ($env:TARGET -eq "vs2017") {
     .\build.ps1 -VisualStudioVersion 2017 -Platform Win32 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany";
     .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+- cmd: if [%TARGET%]==[vs2017] (
+    move msvscpp vs2008 &&
+    move vs2017 msvscpp &&
+    nuget pack libbde.nuspec )
 - ps: If ($env:TARGET -eq "vs2019") {
     .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
@@ -242,9 +246,21 @@ after_test:
     C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libbde && chmod a+x ./codecov.sh && ./codecov.sh -n ${TARGET}" )
 
 artifacts:
+- path: \*.nupkg
 - path: dist\*.whl
 
+deploy:
+- provider: NuGet
+  skip_symbols: true
+  api_key:
+    secure: gCkz3PNGORdxJGl+aegOa7OJ4IQFHC/FqgCzbirMk7nyNFCuZzc1/ne2174eYxsw
+  artifact: /.*(\.|\.s)nupkg/
+  on:
+    branch: master
+    APPVEYOR_REPO_TAG: true
+    TARGET: vs2017
+
 deploy_script:
-- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows) {
+- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows -and $env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m twine upload dist/*.whl --username __token__ --password ${env:PYPI_TOKEN} --skip-existing" }
 

@@ -284,7 +284,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes a key protection types object
+/* Initializes a key protection types object
  * Returns 0 if successful or -1 on error
  */
 int pybde_key_protection_types_init(
