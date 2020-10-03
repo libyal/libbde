@@ -1,4 +1,4 @@
-.Dd January  2, 2020
+.Dd October  3, 2020
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -66,10 +66,6 @@ Volume functions
 .Fn libbde_volume_read_buffer "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "libbde_error_t **error"
 .Ft ssize_t
 .Fn libbde_volume_read_buffer_at_offset "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "off64_t offset" "libbde_error_t **error"
-.Ft ssize_t
-.Fn libbde_volume_write_buffer "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "libbde_error_t **error"
-.Ft ssize_t
-.Fn libbde_volume_write_buffer_at_offset "libbde_volume_t *volume" "const void *buffer" "size_t buffer_size" "off64_t offset" "libbde_error_t **error"
 .Ft off64_t
 .Fn libbde_volume_seek_offset "libbde_volume_t *volume" "off64_t offset" "int whence" "libbde_error_t **error"
 .Ft int
