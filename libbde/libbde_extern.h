@@ -30,7 +30,11 @@
 
 #include <libbde/extern.h>
 
+#if defined( __CYGWIN__ )
+#define LIBBDE_EXTERN_VARIABLE	extern
+#else
 #define LIBBDE_EXTERN_VARIABLE	LIBBDE_EXTERN
+#endif
 
 #else
 #define LIBBDE_EXTERN		/* extern */
