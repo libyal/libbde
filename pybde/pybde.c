@@ -341,7 +341,7 @@ PyObject *pybde_check_volume_signature_file_object(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "|O",
+	     "O|",
 	     keyword_list,
 	     &file_object ) == 0 )
 	{
@@ -592,8 +592,9 @@ PyMODINIT_FUNC initpybde(
 		return;
 #endif
 	}
+#if PY_VERSION_HEX < 0x03070000
 	PyEval_InitThreads();
-
+#endif
 	gil_state = PyGILState_Ensure();
 
 	/* Setup the encryption_methods type object
