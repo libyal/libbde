@@ -83,15 +83,16 @@ int libbde_metadata_block_header_free(
      libbde_metadata_block_header_t **metadata_block_header,
      libcerror_error_t **error );
 
-int libbde_metadata_block_header_read_file_io_handle(
-     libbde_metadata_block_header_t *metadata_block_header,
-     libbfio_handle_t *file_io_handle,
-     libcerror_error_t **error );
-
 int libbde_metadata_block_header_read_data(
      libbde_metadata_block_header_t *metadata_block_header,
      const uint8_t *data,
      size_t data_size,
+     libcerror_error_t **error );
+
+int libbde_metadata_block_header_read_file_io_handle(
+     libbde_metadata_block_header_t *metadata_block_header,
+     libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

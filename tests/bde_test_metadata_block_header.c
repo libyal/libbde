@@ -335,6 +335,7 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	result = libbde_metadata_block_header_read_file_io_handle(
 	          metadata_block_header,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -351,6 +352,7 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	result = libbde_metadata_block_header_read_file_io_handle(
 	          NULL,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -368,6 +370,7 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	result = libbde_metadata_block_header_read_file_io_handle(
 	          metadata_block_header,
 	          NULL,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -421,6 +424,7 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	result = libbde_metadata_block_header_read_file_io_handle(
 	          metadata_block_header,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -476,6 +480,7 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	result = libbde_metadata_block_header_read_file_io_handle(
 	          metadata_block_header,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	byte_stream_copy_from_uint16_little_endian(

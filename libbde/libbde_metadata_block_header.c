@@ -137,65 +137,6 @@ int libbde_metadata_block_header_free(
 /* Reads a metadata block header
  * Returns 1 if successful or -1 on error
  */
-int libbde_metadata_block_header_read_file_io_handle(
-     libbde_metadata_block_header_t *metadata_block_header,
-     libbfio_handle_t *file_io_handle,
-     libcerror_error_t **error )
-{
-	uint8_t metadata_block_header_data[ sizeof( bde_metadata_block_header_v1_t ) ];
-
-	static char *function = "libbde_metadata_block_header_read_file_io_handle";
-	ssize_t read_count    = 0;
-
-	if( metadata_block_header == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid metadata block header.",
-		 function );
-
-		return( -1 );
-	}
-	read_count = libbfio_handle_read_buffer(
-	              file_io_handle,
-	              metadata_block_header_data,
-	              sizeof( bde_metadata_block_header_v1_t ),
-	              error );
-
-	if( read_count != (ssize_t) sizeof( bde_metadata_block_header_v1_t ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read FVE metadata block header data.",
-		 function );
-
-		return( -1 );
-	}
-	if( libbde_metadata_block_header_read_data(
-	     metadata_block_header,
-	     metadata_block_header_data,
-	     sizeof( bde_metadata_block_header_v1_t ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read FVE metadata block header.",
-		 function );
-
-		return( -1 );
-	}
-	return( 1 );
-}
-
-/* Reads a metadata block header
- * Returns 1 if successful or -1 on error
- */
 int libbde_metadata_block_header_read_data(
      libbde_metadata_block_header_t *metadata_block_header,
      const uint8_t *data,
@@ -424,6 +365,69 @@ int libbde_metadata_block_header_read_data(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported format version.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Reads a metadata block header
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_metadata_block_header_read_file_io_handle(
+     libbde_metadata_block_header_t *metadata_block_header,
+     libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
+     libcerror_error_t **error )
+{
+	uint8_t metadata_block_header_data[ sizeof( bde_metadata_block_header_v1_t ) ];
+
+	static char *function = "libbde_metadata_block_header_read_file_io_handle";
+	ssize_t read_count    = 0;
+
+	if( metadata_block_header == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata block header.",
+		 function );
+
+		return( -1 );
+	}
+	read_count = libbfio_handle_read_buffer_at_offset(
+	              file_io_handle,
+	              metadata_block_header_data,
+	              sizeof( bde_metadata_block_header_v1_t ),
+	              file_offset,
+	              error );
+
+	if( read_count != (ssize_t) sizeof( bde_metadata_block_header_v1_t ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read FVE metadata block header data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 file_offset,
+		 file_offset );
+
+		return( -1 );
+	}
+	if( libbde_metadata_block_header_read_data(
+	     metadata_block_header,
+	     metadata_block_header_data,
+	     sizeof( bde_metadata_block_header_v1_t ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read FVE metadata block header.",
 		 function );
 
 		return( -1 );

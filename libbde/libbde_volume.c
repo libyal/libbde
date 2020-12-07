@@ -4464,21 +4464,6 @@ int libbde_volume_read_startup_key_file_io_handle(
 			goto on_error;
 		}
 	}
-	if( libbfio_handle_seek_offset(
-	     file_io_handle,
-	     0,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek file header offset: 0.",
-		 function );
-
-		goto on_error;
-	}
 	if( libbde_metadata_initialize(
 	     &external_key_metadata,
 	     error ) != 1 )
@@ -4499,10 +4484,11 @@ int libbde_volume_read_startup_key_file_io_handle(
 		 "Reading BitLocker External Key (BEK) metadata:\n" );
 	}
 #endif
-	read_count = libbfio_handle_read_buffer(
+	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
 	              (uint8_t *) &file_header,
 	              sizeof( bde_metadata_header_v1_t ),
+	              0,
 	              error );
 
 	if( read_count != sizeof( bde_metadata_header_v1_t ) )
@@ -4511,7 +4497,7 @@ int libbde_volume_read_startup_key_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read file header.",
+		 "%s: unable to read file header at offset: 0 (0x00000000).",
 		 function );
 
 		goto on_error;
