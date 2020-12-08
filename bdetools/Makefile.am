@@ -24,9 +24,11 @@ bin_PROGRAMS = \
 	bdemount
 
 bdeinfo_SOURCES = \
+	byte_size_string.c byte_size_string.h \
 	bdeinfo.c \
 	bdetools_getopt.c bdetools_getopt.h \
 	bdetools_i18n.h \
+	bdetools_input.c bdetools_input.h \
 	bdetools_libbde.h \
 	bdetools_libcerror.h \
 	bdetools_libclocale.h \

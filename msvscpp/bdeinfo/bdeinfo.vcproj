@@ -184,11 +184,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\bdetools\bdetools_input.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\bdetools\bdetools_output.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\bdetools\bdetools_signal.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\bdetools\byte_size_string.c"
 				>
 			</File>
 			<File
@@ -207,6 +215,10 @@
 			</File>
 			<File
 				RelativePath="..\..\bdetools\bdetools_i18n.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\bdetools\bdetools_input.h"
 				>
 			</File>
 			<File
@@ -251,6 +263,10 @@
 			</File>
 			<File
 				RelativePath="..\..\bdetools\bdetools_unused.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\bdetools\byte_size_string.h"
 				>
 			</File>
 			<File

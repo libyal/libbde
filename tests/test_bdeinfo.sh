@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 PROFILES=("bdeinfo");
 OPTIONS_PER_PROFILE=("");
-OPTION_SETS="password recovery_password";
+OPTION_SETS="password recovery_password startup_key";
 
 INPUT_GLOB="*";
 

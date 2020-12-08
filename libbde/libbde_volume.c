@@ -4376,13 +4376,10 @@ int libbde_volume_read_startup_key_file_io_handle(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	bde_metadata_header_v1_t file_header;
-
 	libbde_internal_volume_t *internal_volume = NULL;
 	libbde_metadata_t *external_key_metadata  = NULL;
 	libbde_metadata_header_t *header          = NULL;
-	static char *function                     = "libbde_volume_read_startup_key_wide";
-	ssize_t read_count                        = 0;
+	static char *function                     = "libbde_volume_read_startup_key_file_io_handle";
 	uint32_t entries_data_size                = 0;
 	int file_io_handle_is_open                = 0;
 
@@ -4484,24 +4481,6 @@ int libbde_volume_read_startup_key_file_io_handle(
 		 "Reading BitLocker External Key (BEK) metadata:\n" );
 	}
 #endif
-	read_count = libbfio_handle_read_buffer_at_offset(
-	              file_io_handle,
-	              (uint8_t *) &file_header,
-	              sizeof( bde_metadata_header_v1_t ),
-	              0,
-	              error );
-
-	if( read_count != sizeof( bde_metadata_header_v1_t ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read file header at offset: 0 (0x00000000).",
-		 function );
-
-		goto on_error;
-	}
 	if( libbde_metadata_header_initialize(
 	     &header,
 	     error ) != 1 )
@@ -4518,13 +4497,14 @@ int libbde_volume_read_startup_key_file_io_handle(
 	if( libbde_metadata_header_read_file_io_handle(
 	     header,
 	     file_io_handle,
+	     0,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read metadata header.",
+		 "%s: unable to read metadata header at offset: 0 (0x00000000).",
 		 function );
 
 		goto on_error;

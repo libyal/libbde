@@ -736,7 +736,7 @@ int main(
 	while( ( option = bde_test_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "o:p:r:" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "o:p:r:s:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -756,6 +756,7 @@ int main(
 
 			case (system_integer_t) 'p':
 			case (system_integer_t) 'r':
+			case (system_integer_t) 's':
 				break;
 		}
 	}

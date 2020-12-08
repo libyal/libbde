@@ -83,6 +83,7 @@ int bde_test_volume_open_source(
      libbfio_handle_t *file_io_handle,
      const system_character_t *password,
      const system_character_t *recovery_password,
+     const system_character_t *startup_key,
      libcerror_error_t **error )
 {
 	static char *function = "bde_test_volume_open_source";
@@ -179,6 +180,31 @@ int bde_test_volume_open_source(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to set recovery password.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( startup_key != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_read_startup_key_wide(
+		          *volume,
+		          startup_key,
+		          error );
+#else
+		result = libbde_volume_read_startup_key(
+		          *volume,
+		          startup_key,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read startup key.",
 			 function );
 
 			goto on_error;
@@ -502,7 +528,8 @@ on_error:
 int bde_test_volume_open(
      const system_character_t *source,
      const system_character_t *password,
-     const system_character_t *recovery_password )
+     const system_character_t *recovery_password,
+     const system_character_t *startup_key )
 {
 	char narrow_source[ 256 ];
 
@@ -588,6 +615,28 @@ int bde_test_volume_open(
 		          volume,
 		          (uint8_t *) recovery_password,
 		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+		 error );
+	}
+	if( startup_key != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_read_startup_key_wide(
+		          volume,
+		          startup_key,
+		          &error );
+#else
+		result = libbde_volume_read_startup_key(
+		          volume,
+		          startup_key,
 		          &error );
 #endif
 		BDE_TEST_ASSERT_EQUAL_INT(
@@ -736,7 +785,8 @@ on_error:
 int bde_test_volume_open_wide(
      const system_character_t *source,
      const system_character_t *password,
-     const system_character_t *recovery_password )
+     const system_character_t *recovery_password,
+     const system_character_t *startup_key )
 {
 	wchar_t wide_source[ 256 ];
 
@@ -822,6 +872,28 @@ int bde_test_volume_open_wide(
 		          volume,
 		          (uint8_t *) recovery_password,
 		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+		 error );
+	}
+	if( startup_key != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_read_startup_key_wide(
+		          volume,
+		          startup_key,
+		          &error );
+#else
+		result = libbde_volume_read_startup_key(
+		          volume,
+		          startup_key,
 		          &error );
 #endif
 		BDE_TEST_ASSERT_EQUAL_INT(
@@ -970,7 +1042,8 @@ on_error:
 int bde_test_volume_open_file_io_handle(
      const system_character_t *source,
      const system_character_t *password,
-     const system_character_t *recovery_password )
+     const system_character_t *recovery_password,
+     const system_character_t *startup_key )
 {
 	libbde_volume_t *volume          = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
@@ -1082,6 +1155,28 @@ int bde_test_volume_open_file_io_handle(
 		          volume,
 		          (uint8_t *) recovery_password,
 		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+		 error );
+	}
+	if( startup_key != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_read_startup_key_wide(
+		          volume,
+		          startup_key,
+		          &error );
+#else
+		result = libbde_volume_read_startup_key(
+		          volume,
+		          startup_key,
 		          &error );
 #endif
 		BDE_TEST_ASSERT_EQUAL_INT(
@@ -1289,7 +1384,8 @@ on_error:
 int bde_test_volume_open_close(
      const system_character_t *source,
      const system_character_t *password,
-     const system_character_t *recovery_password )
+     const system_character_t *recovery_password,
+     const system_character_t *startup_key )
 {
 	libbde_volume_t *volume  = NULL;
 	libcerror_error_t *error = NULL;
@@ -1358,6 +1454,28 @@ int bde_test_volume_open_close(
 		          volume,
 		          (uint8_t *) recovery_password,
 		          string_length,
+		          &error );
+#endif
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        BDE_TEST_ASSERT_IS_NULL(
+	         "error",
+		 error );
+	}
+	if( startup_key != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbde_volume_read_startup_key_wide(
+		          volume,
+		          startup_key,
+		          &error );
+#else
+		result = libbde_volume_read_startup_key(
+		          volume,
+		          startup_key,
 		          &error );
 #endif
 		BDE_TEST_ASSERT_EQUAL_INT(
@@ -3898,6 +4016,7 @@ int main(
 	system_character_t *option_offset            = NULL;
 	system_character_t *option_password          = NULL;
 	system_character_t *option_recovery_password = NULL;
+	system_character_t *option_startup_key       = NULL;
 	system_character_t *source                   = NULL;
 	system_integer_t option                      = 0;
 	size_t string_length                         = 0;
@@ -3907,7 +4026,7 @@ int main(
 	while( ( option = bde_test_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "o:p:r:" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "o:p:r:s:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -3932,6 +4051,11 @@ int main(
 
 			case (system_integer_t) 'r':
 				option_recovery_password = optarg;
+
+				break;
+
+			case (system_integer_t) 's':
+				option_startup_key = optarg;
 
 				break;
 		}
@@ -4057,7 +4181,8 @@ int main(
 		 bde_test_volume_open,
 		 source,
 		 option_password,
-		 option_recovery_password );
+		 option_recovery_password,
+		 option_startup_key );
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
@@ -4066,7 +4191,8 @@ int main(
 		 bde_test_volume_open_wide,
 		 source,
 		 option_password,
-		 option_recovery_password );
+		 option_recovery_password,
+		 option_startup_key );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
 
@@ -4075,7 +4201,8 @@ int main(
 		 bde_test_volume_open_file_io_handle,
 		 source,
 		 option_password,
-		 option_recovery_password );
+		 option_recovery_password,
+		 option_startup_key );
 
 		BDE_TEST_RUN(
 		 "libbde_volume_close",
@@ -4086,7 +4213,8 @@ int main(
 		 bde_test_volume_open_close,
 		 source,
 		 option_password,
-		 option_recovery_password );
+		 option_recovery_password,
+		 option_startup_key );
 
 	}
 	if( result != 0 )
@@ -4098,6 +4226,7 @@ int main(
 		          file_io_handle,
 		          option_password,
 		          option_recovery_password,
+		          option_startup_key,
 		          &error );
 
 		BDE_TEST_ASSERT_EQUAL_INT(

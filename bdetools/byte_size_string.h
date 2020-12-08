@@ -1,5 +1,5 @@
 /*
- * Metadata header functions
+ * Byte size string functions
  *
  * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,64 +19,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_METADATA_HEADER_H )
-#define _LIBBDE_METADATA_HEADER_H
+#if !defined( _BYTE_SIZE_STRING_H )
+#define _BYTE_SIZE_STRING_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libbde_libcerror.h"
-#include "libbde_libbfio.h"
+#include "bdetools_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libbde_metadata_header libbde_metadata_header_t;
-
-struct libbde_metadata_header
+enum BYTE_SIZE_STRING_UNITS
 {
-	/* The metadata size
-	 */
-	uint32_t metadata_size;
-
-	/* The volume identifier
-	 * Contains a GUID
-	 */
-	uint8_t volume_identifier[ 16 ];
-
-	/* The encryption method
-	 */
-	uint16_t encryption_method;
-
-	/* The creation date and time
-	 */
-	uint64_t creation_time;
+	BYTE_SIZE_STRING_UNIT_MEGABYTE	= 1000,
+	BYTE_SIZE_STRING_UNIT_MEBIBYTE	= 1024
 };
 
-int libbde_metadata_header_initialize(
-     libbde_metadata_header_t **metadata_header,
+int byte_size_string_create(
+     system_character_t *byte_size_string,
+     size_t byte_size_string_length,
+     uint64_t size,
+     int units,
      libcerror_error_t **error );
 
-int libbde_metadata_header_free(
-     libbde_metadata_header_t **metadata_header,
+int byte_size_string_create_with_decimal_point(
+     system_character_t *byte_size_string,
+     size_t byte_size_string_length,
+     uint64_t size,
+     int units,
+     int decimal_point,
      libcerror_error_t **error );
 
-int libbde_metadata_header_read_data(
-     libbde_metadata_header_t *metadata_header,
-     const uint8_t *data,
-     size_t data_size,
+int byte_size_string_convert(
+     const system_character_t *byte_size_string,
+     size_t byte_size_string_length,
+     uint64_t *size,
      libcerror_error_t **error );
 
-int libbde_metadata_header_read_file_io_handle(
-     libbde_metadata_header_t *metadata_header,
-     libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
+int byte_size_string_convert_with_decimal_point(
+     const system_character_t *byte_size_string,
+     size_t byte_size_string_length,
+     int decimal_point,
+     uint64_t *size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBBDE_METADATA_HEADER_H ) */
+#endif /* !defined( _BYTE_SIZE_STRING_H ) */
 

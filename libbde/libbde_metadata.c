@@ -312,7 +312,7 @@ int libbde_metadata_read_block(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: reading metadata at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
+		 "%s: reading metadata block header at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
 		 file_offset,
 		 file_offset );
@@ -383,6 +383,18 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
+	file_offset += sizeof( bde_metadata_block_header_v1_t );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: reading metadata header at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
+		 function,
+		 file_offset,
+		 file_offset );
+	}
+#endif
 	if( libbde_metadata_header_initialize(
 	     &header,
 	     error ) != 1 )
@@ -399,6 +411,7 @@ int libbde_metadata_read_block(
 	if( libbde_metadata_header_read_file_io_handle(
 	     header,
 	     file_io_handle,
+	     file_offset,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

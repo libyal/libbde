@@ -8,7 +8,7 @@ $ExitIgnore = 77
 
 $Profiles = @("bdeinfo")
 $OptionsPerProfile = @("")
-$OptionSets = "password recovery_password"
+$OptionSets = "password recovery_password startup_key"
 
 $InputGlob = "*"
 

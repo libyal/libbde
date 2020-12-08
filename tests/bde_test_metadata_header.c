@@ -333,6 +333,7 @@ int bde_test_metadata_header_read_file_io_handle(
 	result = libbde_metadata_header_read_file_io_handle(
 	          metadata_header,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -349,6 +350,7 @@ int bde_test_metadata_header_read_file_io_handle(
 	result = libbde_metadata_header_read_file_io_handle(
 	          NULL,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -366,6 +368,7 @@ int bde_test_metadata_header_read_file_io_handle(
 	result = libbde_metadata_header_read_file_io_handle(
 	          metadata_header,
 	          NULL,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -419,6 +422,7 @@ int bde_test_metadata_header_read_file_io_handle(
 	result = libbde_metadata_header_read_file_io_handle(
 	          metadata_header,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -474,6 +478,7 @@ int bde_test_metadata_header_read_file_io_handle(
 	result = libbde_metadata_header_read_file_io_handle(
 	          metadata_header,
 	          file_io_handle,
+	          0,
 	          &error );
 
 	byte_stream_copy_from_uint32_little_endian(
@@ -858,7 +863,11 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 }
 

@@ -28,6 +28,7 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "byte_size_string.h"
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
 #include "bdetools_libcerror.h"
@@ -1069,6 +1070,47 @@ int info_handle_close_input(
 	return( 0 );
 }
 
+/* Unlocks an encrypted volume
+ * Returns 1 if the volume is unlocked, 0 if not or -1 on error
+ */
+int info_handle_input_unlock(
+     info_handle_t *info_handle,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_input_unlock";
+	int result            = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO implement
+	result = libbde_volume_unlock(
+	          info_handle->input_volume,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to unlock volume.",
+		 function );
+
+		return( -1 );
+	}
+*/
+	return( result );
+}
+
 /* Determine if the input is locked
  * Returns 1 if locked, 0 if not or -1 on error
  */
@@ -1347,11 +1389,13 @@ int info_handle_volume_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error )
 {
+        system_character_t byte_size_string[ 16 ];
 	uint8_t guid_data[ 16 ];
 
 	libbde_key_protector_t *key_protector = NULL;
 	system_character_t *value_string      = NULL;
 	static char *function                 = "bdeinfo_volume_info_fprint";
+	size64_t volume_size                  = 0;
 	size_t value_string_size              = 0;
 	uint64_t value_64bit                  = 0;
 	uint16_t encryption_method            = 0;
@@ -1374,6 +1418,80 @@ int info_handle_volume_fprint(
 	fprintf(
 	 info_handle->notify_stream,
 	 "BitLocker Drive Encryption information:\n" );
+
+	if( libbde_volume_get_volume_identifier(
+	     info_handle->input_volume,
+	     guid_data,
+	     16,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume identifier.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_guid_value_fprint(
+	     info_handle,
+	     "\tVolume identifier\t\t",
+	     guid_data,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print GUID value.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_volume_get_size(
+	     info_handle->input_volume,
+	     &volume_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve physical volume size.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tSize\t\t\t\t: " );
+
+	result = byte_size_string_create(
+	          byte_size_string,
+	          16,
+	          volume_size,
+	          BYTE_SIZE_STRING_UNIT_MEBIBYTE,
+	          NULL );
+
+	if( result == 1 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "%" PRIs_SYSTEM " (%" PRIu64 " bytes)",
+		 byte_size_string,
+		 volume_size );
+	}
+	else
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "%" PRIu64 " bytes",
+		 volume_size );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
 
 	if( libbde_volume_get_encryption_method(
 	     info_handle->input_volume,
@@ -1449,36 +1567,6 @@ int info_handle_volume_fprint(
 	 info_handle->notify_stream,
 	 "\n" );
 
-	if( libbde_volume_get_volume_identifier(
-	     info_handle->input_volume,
-	     guid_data,
-	     16,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume identifier.",
-		 function );
-
-		goto on_error;
-	}
-	if( info_handle_guid_value_fprint(
-	     info_handle,
-	     "\tVolume identifier\t\t",
-	     guid_data,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print GUID value.",
-		 function );
-
-		goto on_error;
-	}
 	if( libbde_volume_get_creation_time(
 	     info_handle->input_volume,
 	     &value_64bit,
@@ -1610,6 +1698,27 @@ int info_handle_volume_fprint(
 	 "\tNumber of key protectors\t: %d\n",
 	 number_of_key_protectors );
 
+	result = libbde_volume_is_locked(
+	          info_handle->input_volume,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		return( -1 );
+	}
+	else if( result != 0 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tIs locked\n" );
+	}
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );

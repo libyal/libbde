@@ -169,6 +169,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     bde_volume.open(unittest.source)
 
@@ -196,6 +198,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -223,6 +227,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with self.assertRaises(IOError):
       bde_volume.close()
@@ -240,6 +246,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     # Test open and close.
     bde_volume.open(unittest.source)
@@ -270,6 +278,9 @@ class VolumeTypeTests(unittest.TestCase):
     if not unittest.source:
       raise unittest.SkipTest("missing source")
 
+    if unittest.offset:
+      raise unittest.SkipTest("source defines offset")
+
     bde_volume = pybde.volume()
 
     bde_volume.open(unittest.source)
@@ -285,6 +296,8 @@ class VolumeTypeTests(unittest.TestCase):
         bde_volume.set_password(unittest.password)
       if unittest.recovery_password:
         bde_volume.set_recovery_password(unittest.recovery_password)
+      if unittest.startup_key:
+        bde_volume.read_startup_key(unittest.startup_key)
 
       bde_volume.open(unittest.source)
 
@@ -298,11 +311,16 @@ class VolumeTypeTests(unittest.TestCase):
     if not unittest.source:
       raise unittest.SkipTest("missing source")
 
+    if unittest.offset:
+      raise unittest.SkipTest("source defines offset")
+
     bde_volume = pybde.volume()
     if unittest.password:
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     bde_volume.open(unittest.source)
 
@@ -388,8 +406,11 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
-    with open(unittest.source, "rb") as file_object:
+    with DataRangeFileObject(
+        unittest.source, unittest.offset or 0, None) as file_object:
       bde_volume.open_file_object(file_object)
 
       size = bde_volume.get_size()
@@ -407,11 +428,16 @@ class VolumeTypeTests(unittest.TestCase):
     if not unittest.source:
       raise unittest.SkipTest("missing source")
 
+    if unittest.offset:
+      raise unittest.SkipTest("source defines offset")
+
     bde_volume = pybde.volume()
     if unittest.password:
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     bde_volume.open(unittest.source)
 
@@ -478,11 +504,16 @@ class VolumeTypeTests(unittest.TestCase):
     if not unittest.source:
       raise unittest.SkipTest("missing source")
 
+    if unittest.offset:
+      raise unittest.SkipTest("source defines offset")
+
     bde_volume = pybde.volume()
     if unittest.password:
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     bde_volume.open(unittest.source)
 
@@ -546,6 +577,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -568,6 +601,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -592,6 +627,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -616,6 +653,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -640,6 +679,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -664,6 +705,8 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.set_password(unittest.password)
     if unittest.recovery_password:
       bde_volume.set_recovery_password(unittest.recovery_password)
+    if unittest.startup_key:
+      bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
         unittest.source, unittest.offset or 0, None) as file_object:
@@ -687,13 +730,20 @@ if __name__ == "__main__":
       type=int, help="offset of the source file.")
 
   argument_parser.add_argument(
-      "-p", "--password", dest="password", action="store", default=None,
-      type=str, help="password to unlock the source file.")
+      "-p", "--password", dest="password", action="store", metavar="PASSWORD",
+      default=None, type=str, help="password to unlock the source file.")
 
   argument_parser.add_argument(
       "-r", "--recovery-password", "--recovery_password",
-      dest="recovery_password", action="store", default=None, type=str,
-      help="recovery password to unlock the source file.")
+      dest="recovery_password", action="store", metavar="PASSWORD",
+      default=None, type=str, help=(
+          "recovery password to unlock the source file."))
+
+  argument_parser.add_argument(
+      "-s", "--startup-key", "--startup_key", dest="startup_key",
+      action="store", metavar="PATH", default=None, type=str, help=(
+          "path of the file containing the startup key to unlock the source "
+          "file."))
 
   argument_parser.add_argument(
       "source", nargs="?", action="store", metavar="PATH",
@@ -705,6 +755,7 @@ if __name__ == "__main__":
   setattr(unittest, "offset", options.offset)
   setattr(unittest, "password", options.password)
   setattr(unittest, "recovery_password", options.recovery_password)
+  setattr(unittest, "startup_key", options.startup_key)
   setattr(unittest, "source", options.source)
 
   unittest.main(argv=unknown_options, verbosity=2)
