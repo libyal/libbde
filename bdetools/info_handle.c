@@ -1,7 +1,7 @@
 /*
  * Info handle
  *
- * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2021, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -1400,6 +1400,7 @@ int info_handle_volume_fprint(
 	uint64_t value_64bit                  = 0;
 	uint16_t encryption_method            = 0;
 	uint16_t key_protector_type           = 0;
+	int is_locked                         = 0;
 	int key_protector_index               = 0;
 	int number_of_key_protectors          = 0;
 	int result                            = 0;
@@ -1418,6 +1419,23 @@ int info_handle_volume_fprint(
 	fprintf(
 	 info_handle->notify_stream,
 	 "BitLocker Drive Encryption information:\n" );
+
+	result = libbde_volume_is_locked(
+	          info_handle->input_volume,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		return( -1 );
+	}
+	is_locked = result;
 
 	if( libbde_volume_get_volume_identifier(
 	     info_handle->input_volume,
@@ -1449,50 +1467,52 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
-	if( libbde_volume_get_size(
-	     info_handle->input_volume,
-	     &volume_size,
-	     error ) != 1 )
+	if( is_locked == 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve physical volume size.",
-		 function );
+		if( libbde_volume_get_size(
+		     info_handle->input_volume,
+		     &volume_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve physical volume size.",
+			 function );
 
-		return( -1 );
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tSize\t\t\t\t: " );
-
-	result = byte_size_string_create(
-	          byte_size_string,
-	          16,
-	          volume_size,
-	          BYTE_SIZE_STRING_UNIT_MEBIBYTE,
-	          NULL );
-
-	if( result == 1 )
-	{
+			return( -1 );
+		}
 		fprintf(
 		 info_handle->notify_stream,
-		 "%" PRIs_SYSTEM " (%" PRIu64 " bytes)",
-		 byte_size_string,
-		 volume_size );
-	}
-	else
-	{
+		 "\tSize\t\t\t\t: " );
+
+		result = byte_size_string_create(
+		          byte_size_string,
+		          16,
+		          volume_size,
+		          BYTE_SIZE_STRING_UNIT_MEBIBYTE,
+		          NULL );
+
+		if( result == 1 )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "%" PRIs_SYSTEM " (%" PRIu64 " bytes)",
+			 byte_size_string,
+			 volume_size );
+		}
+		else
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "%" PRIu64 " bytes",
+			 volume_size );
+		}
 		fprintf(
 		 info_handle->notify_stream,
-		 "%" PRIu64 " bytes",
-		 volume_size );
+		 "\n" );
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
 	if( libbde_volume_get_encryption_method(
 	     info_handle->input_volume,
 	     &encryption_method,
@@ -1698,22 +1718,7 @@ int info_handle_volume_fprint(
 	 "\tNumber of key protectors\t: %d\n",
 	 number_of_key_protectors );
 
-	result = libbde_volume_is_locked(
-	          info_handle->input_volume,
-	          error );
-
-	if( result == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to determine if volume is locked.",
-		 function );
-
-		return( -1 );
-	}
-	else if( result != 0 )
+	if( is_locked != 0 )
 	{
 		fprintf(
 		 info_handle->notify_stream,

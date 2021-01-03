@@ -1,7 +1,7 @@
 /*
  * Metadata functions
  *
- * Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2021, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -1054,7 +1054,7 @@ int libbde_metadata_read_entries_data(
 					if( libcnotify_verbose != 0 )
 					{
 						libcnotify_printf(
-						 "%s: offset\t\t\t\t\t: 0x%" PRIx64 "\n",
+						 "%s: offset\t\t\t\t: 0x%" PRIx64 "\n",
 						 function,
 						 volume_header_offset );
 
@@ -1079,7 +1079,8 @@ int libbde_metadata_read_entries_data(
 							 "\n" );
 						}
 					}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 					if( (off64_t) volume_header_offset != metadata->volume_header_offset )
 					{
 						libcerror_error_set(
@@ -1129,7 +1130,8 @@ int libbde_metadata_read_entries_data(
 			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	return( 1 );
 
 on_error:

@@ -9,7 +9,7 @@ Analysis of theBitLocker Drive Encryption (BDE) volume format
 == Summary
 
 The BitLocker Drive Encryption (BDE) format is used by Microsoft Windows to
-encrypt volumes. This specification is based on publicly availble work on the
+encrypt volumes. This specification is based on publicly available work on the
 format and was enhanced by analyzing test data.
 
 This document is intended as a working document of the data format specification
@@ -80,7 +80,7 @@ introduced in Windows 7 and is intended to encrypt removable drives, with e.g.
 FAT file systems. NTFS volumes on removable drives are treated as NTFS volumes
 on fixed storage media.
 
-The BitLocker identifier (GUID) is 4967d63b-2e29-4ad8-8399-f6a339e3d00.
+The BitLocker identifier (GUID) is 4967d63b-2e29-4ad8-8399-f6a339e3d001.
 
 BitLocker To Go uses 4967d63b-2e29-4ad8-8399-f6a339e3d01.
 
