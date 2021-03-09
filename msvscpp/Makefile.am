@@ -15,6 +15,9 @@ MSVSCPP_FILES = \
 	bde_test_sector_data/bde_test_sector_data.vcproj \
 	bde_test_stretch_key/bde_test_stretch_key.vcproj \
 	bde_test_support/bde_test_support.vcproj \
+	bde_test_tools_info_handle/bde_test_tools_info_handle.vcproj \
+	bde_test_tools_output/bde_test_tools_output.vcproj \
+	bde_test_tools_signal/bde_test_tools_signal.vcproj \
 	bde_test_volume/bde_test_volume.vcproj \
 	bde_test_volume_master_key/bde_test_volume_master_key.vcproj \
 	bdeinfo/bdeinfo.vcproj \

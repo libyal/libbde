@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
@@ -28,6 +30,7 @@ endif
 
 TESTS = \
 	test_library.sh \
+	test_tools.sh \
 	test_bdeinfo.sh \
 	$(TESTS_PYBDE)
 
@@ -38,7 +41,8 @@ check_SCRIPTS = \
 	test_library.sh \
 	test_manpage.sh \
 	test_python_module.sh \
-	test_runner.sh
+	test_runner.sh \
+	test_tools.sh
 
 EXTRA_DIST = \
 	$(check_SCRIPTS)
@@ -60,6 +64,9 @@ check_PROGRAMS = \
 	bde_test_sector_data \
 	bde_test_stretch_key \
 	bde_test_support \
+	bde_test_tools_info_handle \
+	bde_test_tools_output \
+	bde_test_tools_signal \
 	bde_test_volume \
 	bde_test_volume_master_key
 
@@ -290,6 +297,51 @@ bde_test_support_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_tools_info_handle_SOURCES = \
+	../bdetools/byte_size_string.c ../bdetools/byte_size_string.h \
+	../bdetools/info_handle.c ../bdetools/info_handle.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_tools_info_handle.c \
+	bde_test_unused.h
+
+bde_test_tools_info_handle_LDADD = \
+	@LIBFGUID_LIBADD@ \
+	@LIBFDATETIME_LIBADD@ \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_tools_output_SOURCES = \
+	../bdetools/bdetools_output.c ../bdetools/bdetools_output.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_tools_output.c \
+	bde_test_unused.h
+
+bde_test_tools_output_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_tools_signal_SOURCES = \
+	../bdetools/bdetools_signal.c ../bdetools/bdetools_signal.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_tools_signal.c \
+	bde_test_unused.h
+
+bde_test_tools_signal_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
