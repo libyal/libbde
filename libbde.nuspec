@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>libbde</id>
-    <version>20210103</version>
+    <version>20210324</version>
     <authors>Joachim Metz</authors>
     <owners>joachimmetz</owners>
     <license type="expression">LGPL-3.0-or-later</license>
@@ -10,7 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <title>libbde</title>
     <description>Library to access the BitLocker Drive Encryption (BDE) format</description>
-    <releaseNotes>Release of libbde 20210103</releaseNotes>
+    <releaseNotes>Release of libbde 20210324</releaseNotes>
     <copyright>Copyright (C) 2011-2021</copyright>
     <tags>native</tags>
   </metadata>
