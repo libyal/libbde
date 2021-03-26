@@ -540,8 +540,8 @@ int mount_handle_set_keys(
 
 			goto on_error;
 		}
-		mount_handle->full_volume_encryption_key_size = 32;
-		mount_handle->tweak_key_size                  = 32;
+		mount_handle->full_volume_encryption_key_size = 64;
+		mount_handle->tweak_key_size                  = 0;
 	}
 	else if( ( string_segment_size == 33 )
 	      || ( string_segment_size == 65 ) )

@@ -574,8 +574,8 @@ int info_handle_set_keys(
 
 			goto on_error;
 		}
-		full_volume_encryption_key_size = 32;
-		tweak_key_size                  = 32;
+		full_volume_encryption_key_size = 64;
+		tweak_key_size                  = 0;
 	}
 	else if( ( string_segment_size == 33 )
 	      || ( string_segment_size == 65 ) )

@@ -2363,7 +2363,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 		return( -1 );
 	}
-	if( full_volume_encryption_key_size < 32 )
+	if( full_volume_encryption_key_size < 64 )
 	{
 		libcerror_error_set(
 		 error,
@@ -2728,7 +2728,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 			if( memory_copy(
 			     full_volume_encryption_key,
 			     io_handle->full_volume_encryption_key,
-			     32 ) == NULL )
+			     64 ) == NULL )
 			{
 				libcerror_error_set(
 				 error,

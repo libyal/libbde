@@ -107,7 +107,7 @@ struct libbde_io_handle
 
 	/* External provided full volume encryption key
 	 */
-	uint8_t full_volume_encryption_key[ 32 ];
+	uint8_t full_volume_encryption_key[ 64 ];
 
 	/* Size of the external provided full volume encryption key
 	 */

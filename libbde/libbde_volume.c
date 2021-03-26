@@ -3554,7 +3554,8 @@ int libbde_volume_set_keys(
 		return( -1 );
 	}
 	if( ( full_volume_encryption_key_size != 16 )
-	 && ( full_volume_encryption_key_size != 32 ) )
+	 && ( full_volume_encryption_key_size != 32 )
+	 && ( full_volume_encryption_key_size != 64 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -3616,12 +3617,12 @@ int libbde_volume_set_keys(
 		return( -1 );
 	}
 #endif
-	if( full_volume_encryption_key_size < 32 )
+	if( full_volume_encryption_key_size < 64 )
 	{
 		if( memory_set(
 		     internal_volume->io_handle->full_volume_encryption_key,
 		     0,
-		     32  ) == NULL )
+		     64  ) == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -3713,7 +3714,7 @@ on_error:
 	memory_set(
 	 internal_volume->io_handle->full_volume_encryption_key,
 	 0,
-	 32 );
+	 64 );
 
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
