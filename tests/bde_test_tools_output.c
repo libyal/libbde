@@ -39,7 +39,7 @@
 
 #include "../bdetools/bdetools_output.h"
 
-/* Tests the bdetools_output_initialize and function
+/* Tests the bdetools_output_initialize function
  * Returns 1 if successful or 0 if not
  */
 int bde_test_tools_output_initialize(
