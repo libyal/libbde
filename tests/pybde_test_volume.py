@@ -158,7 +158,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_open(self):
     """Tests the open function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     if unittest.offset:
@@ -172,10 +173,10 @@ class VolumeTypeTests(unittest.TestCase):
     if unittest.startup_key:
       bde_volume.read_startup_key(unittest.startup_key)
 
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
 
     with self.assertRaises(IOError):
-      bde_volume.open(unittest.source)
+      bde_volume.open(test_source)
 
     bde_volume.close()
 
@@ -183,14 +184,15 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.open(None)
 
     with self.assertRaises(ValueError):
-      bde_volume.open(unittest.source, mode="w")
+      bde_volume.open(test_source, mode="w")
 
   def test_open_file_object(self):
     """Tests the open_file_object function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
-    if not os.path.isfile(unittest.source):
+    if not os.path.isfile(test_source):
       raise unittest.SkipTest("source not a regular file")
 
     bde_volume = pybde.volume()
@@ -202,7 +204,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume.open_file_object(file_object)
 
@@ -219,7 +221,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_close(self):
     """Tests the close function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -235,7 +238,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_open_close(self):
     """Tests the open and close functions."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       return
 
     if unittest.offset:
@@ -250,15 +254,15 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     # Test open and close.
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
     bde_volume.close()
 
     # Test open and close a second time to validate clean up on close.
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
     bde_volume.close()
 
-    if os.path.isfile(unittest.source):
-      with open(unittest.source, "rb") as file_object:
+    if os.path.isfile(test_source):
+      with open(test_source, "rb") as file_object:
 
         # Test open_file_object and close.
         bde_volume.open_file_object(file_object)
@@ -275,7 +279,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_is_locked(self):
     """Tests the is_locked function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     if unittest.offset:
@@ -283,7 +288,7 @@ class VolumeTypeTests(unittest.TestCase):
 
     bde_volume = pybde.volume()
 
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
 
     result = bde_volume.is_locked()
     self.assertTrue(result)
@@ -299,7 +304,7 @@ class VolumeTypeTests(unittest.TestCase):
       if unittest.startup_key:
         bde_volume.read_startup_key(unittest.startup_key)
 
-      bde_volume.open(unittest.source)
+      bde_volume.open(test_source)
 
       result = bde_volume.is_locked()
       self.assertFalse(result)
@@ -308,7 +313,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_read_buffer(self):
     """Tests the read_buffer function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     if unittest.offset:
@@ -322,7 +328,7 @@ class VolumeTypeTests(unittest.TestCase):
     if unittest.startup_key:
       bde_volume.read_startup_key(unittest.startup_key)
 
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
 
     size = bde_volume.get_size()
 
@@ -395,10 +401,11 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_read_buffer_file_object(self):
     """Tests the read_buffer function on a file-like object."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
-    if not os.path.isfile(unittest.source):
+    if not os.path.isfile(test_source):
       raise unittest.SkipTest("source not a regular file")
 
     bde_volume = pybde.volume()
@@ -410,7 +417,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
       bde_volume.open_file_object(file_object)
 
       size = bde_volume.get_size()
@@ -425,7 +432,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_read_buffer_at_offset(self):
     """Tests the read_buffer_at_offset function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     if unittest.offset:
@@ -439,7 +447,7 @@ class VolumeTypeTests(unittest.TestCase):
     if unittest.startup_key:
       bde_volume.read_startup_key(unittest.startup_key)
 
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
 
     size = bde_volume.get_size()
 
@@ -501,7 +509,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_seek_offset(self):
     """Tests the seek_offset function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     if unittest.offset:
@@ -515,7 +524,7 @@ class VolumeTypeTests(unittest.TestCase):
     if unittest.startup_key:
       bde_volume.read_startup_key(unittest.startup_key)
 
-    bde_volume.open(unittest.source)
+    bde_volume.open(test_source)
 
     size = bde_volume.get_size()
 
@@ -569,7 +578,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_offset(self):
     """Tests the get_offset function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -581,7 +591,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
@@ -593,7 +603,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_size(self):
     """Tests the get_size function and size property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -605,7 +616,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
@@ -619,7 +630,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_encryption_method(self):
     """Tests the get_encryption_method function and encryption_method property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -631,7 +643,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
@@ -645,7 +657,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_creation_time(self):
     """Tests the get_creation_time function and creation_time property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -657,7 +670,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
@@ -671,7 +684,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_description(self):
     """Tests the get_description function and description property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -683,7 +697,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
@@ -697,7 +711,8 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_number_of_key_protectors(self):
     """Tests the get_number_of_key_protectors function and number_of_key_protectors property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     bde_volume = pybde.volume()
@@ -709,7 +724,7 @@ class VolumeTypeTests(unittest.TestCase):
       bde_volume.read_startup_key(unittest.startup_key)
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
