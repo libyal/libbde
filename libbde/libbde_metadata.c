@@ -667,6 +667,11 @@ int libbde_metadata_read_entries_data(
 	uint64_t volume_header_size                           = 0;
 	int entry_index                                       = 0;
 
+#if defined( HAVE_DEBUG_OUTPUT )
+	size_t value_data_offset                              = 0;
+	uint16_t value_16bit                                  = 0;
+#endif
+
 	if( metadata == NULL )
 	{
 		libcerror_error_set(
@@ -1063,14 +1068,36 @@ int libbde_metadata_read_entries_data(
 						 function,
 						 volume_header_size );
 
-						if( metadata_entry->value_data_size > 16 )
+						value_data_offset = 16;
+
+						if( metadata_entry->value_data_size >= 20 )
+						{
+							byte_stream_copy_to_uint16_little_endian(
+							 &( metadata_entry->value_data[ 16 ] ),
+							 value_16bit );
+							libcnotify_printf(
+							 "%s: unknown1\t\t\t\t: %" PRIu16 "\n",
+							 function,
+							 value_16bit );
+
+							byte_stream_copy_to_uint16_little_endian(
+							 &( metadata_entry->value_data[ 18 ] ),
+							 value_16bit );
+							libcnotify_printf(
+							 "%s: unknown2\t\t\t\t: %" PRIu16 "\n",
+							 function,
+							 value_16bit );
+
+							value_data_offset = 20;
+						}
+						if( value_data_offset < metadata_entry->value_data_size )
 						{
 							libcnotify_printf(
-							 "%s: unknown1:\n",
+							 "%s: unknown6:\n",
 							 function );
 							libcnotify_print_data(
-							 &( metadata_entry->value_data[ 16 ] ),
-							 metadata_entry->value_data_size - 16,
+							 &( metadata_entry->value_data[ value_data_offset ] ),
+							 metadata_entry->value_data_size - value_data_offset,
 							 0 );
 						}
 						else

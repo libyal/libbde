@@ -224,6 +224,7 @@ int libbde_sector_data_read_file_io_handle(
      libcerror_error_t **error )
 {
 	static char *function = "libbde_sector_data_read_file_io_handle";
+	uint8_t *read_buffer  = 0;
 	ssize_t read_count    = 0;
 	uint64_t block_key    = 0;
 
@@ -373,9 +374,31 @@ int libbde_sector_data_read_file_io_handle(
 			sector_data_offset += io_handle->volume_header_offset;
 		}
 	}
+	/* In Windows Vista the first 16 sectors are unencrypted
+	 */
+	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
+	 && ( (size64_t) sector_data_offset < 8192 ) )
+	{
+		read_buffer = sector_data->data;
+	}
+	else if( encryption_context->method == LIBBDE_ENCRYPTION_METHOD_NONE )
+	{
+		read_buffer = sector_data->data;
+	}
+	/* Check if the offset is outside the encrypted part of the volume
+	 */
+	else if( ( io_handle->encrypted_volume_size != 0 )
+	      && ( sector_data_offset >= (off64_t) io_handle->encrypted_volume_size ) )
+	{
+		read_buffer = sector_data->data;
+	}
+	else
+	{
+		read_buffer = sector_data->encrypted_data;
+	}
 	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
-	              sector_data->encrypted_data,
+	              read_buffer,
 	              sector_data->data_size,
 	              sector_data_offset,
 	              error );
@@ -394,84 +417,48 @@ int libbde_sector_data_read_file_io_handle(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		libcnotify_printf(
-		 "%s: encrypted sector data:\n",
-		 function );
-		libcnotify_print_data(
-		 sector_data->encrypted_data,
-		 sector_data->data_size,
-		 0 );
+		if( read_buffer == sector_data->encrypted_data )
+		{
+			libcnotify_printf(
+			 "%s: encrypted sector data:\n",
+			 function );
+			libcnotify_print_data(
+			 sector_data->encrypted_data,
+			 sector_data->data_size,
+			 0 );
+		}
 	}
 #endif
-	/* In Windows Vista the first 16 sectors are unencrypted
+	/* In Windows Vista the first sector is altered
 	 */
 	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
-	 && ( (size64_t) sector_data_offset < 8192 ) )
+	 && ( (size64_t) sector_data_offset < 512 ) )
 	{
-		if( memory_copy(
-		     sector_data->data,
-		     sector_data->encrypted_data,
-		     sector_data->data_size ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy encrypted data.",
-			 function );
-
-			return( -1 );
-		}
-		/* In Windows Vista the first sector is altered
+		/* Change the volume header signature "-FVE-FS-"
+		 * into "NTFS    "
 		 */
-		if( sector_data_offset < 512 )
-		{
-			/* Change the volume header signature "-FVE-FS-"
-			 * into "NTFS    "
-			 */
-			if( memory_copy(
-			     &( sector_data->data[ 3 ] ),
-			     "NTFS    ",
-			     8 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy encrypted data.",
-				 function );
-
-				return( -1 );
-			}
-			/* Change the FVE metadatsa block 1 cluster block number
-			 * into the MFT mirror cluster block number
-			 */
-			byte_stream_copy_from_uint64_little_endian(
-			 &( sector_data->data[ 56 ] ),
-			 io_handle->mft_mirror_cluster_block_number );
-		}
-	}
-	/* Check if the offset is outside the encrypted part of the volume
-	 */
-	else if( ( io_handle->encrypted_volume_size != 0 )
-	      && ( sector_data_offset >= (off64_t) io_handle->encrypted_volume_size ) )
-	{
 		if( memory_copy(
-		     sector_data->data,
-		     sector_data->encrypted_data,
-		     sector_data->data_size ) == NULL )
+		     &( sector_data->data[ 3 ] ),
+		     "NTFS    ",
+		     8 ) == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_MEMORY,
 			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy encrypted data.",
+			 "%s: unable to copy NTFS signature.",
 			 function );
 
 			return( -1 );
 		}
+		/* Change the FVE metadatsa block 1 cluster block number
+		 * into the MFT mirror cluster block number
+		 */
+		byte_stream_copy_from_uint64_little_endian(
+		 &( sector_data->data[ 56 ] ),
+		 io_handle->mft_mirror_cluster_block_number );
 	}
-	else
+	if( read_buffer == sector_data->encrypted_data )
 	{
 		block_key = (uint64_t) sector_data_offset;
 

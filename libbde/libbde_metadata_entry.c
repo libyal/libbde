@@ -247,7 +247,8 @@ ssize_t libbde_metadata_entry_read(
 		 function,
 		 version );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( version != 1 )
 	{
 		libcerror_error_set(

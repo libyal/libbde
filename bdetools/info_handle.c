@@ -1575,6 +1575,13 @@ int info_handle_volume_fprint(
 
 			break;
 
+		case LIBBDE_ENCRYPTION_METHOD_NONE:
+			fprintf(
+			 info_handle->notify_stream,
+			 "None" );
+
+			break;
+
 		default:
 			fprintf(
 			 info_handle->notify_stream,
@@ -1627,7 +1634,7 @@ int info_handle_volume_fprint(
 	          &value_string_size,
 	          error );
 #endif
-	if( result != 1 )
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1638,7 +1645,8 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
-	if( value_string_size > 0 )
+	if( ( result != 0 )
+	 && ( value_string_size > 0 ) )
 	{
 		if( value_string_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
 		{

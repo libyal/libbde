@@ -57,6 +57,9 @@ const char *libbde_debug_print_encryption_method(
 
 		case LIBBDE_ENCRYPTION_METHOD_AES_256_XTS:
 			return( "AES-XTS 256-bit encryption" );
+
+		case LIBBDE_ENCRYPTION_METHOD_NONE:
+			return( "None" );
 	}
 	return( "_UNKNOWN_" );
 }

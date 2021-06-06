@@ -30,7 +30,7 @@ for the libbde project.
 == License
 
 ....
-Copyright (C) 2011-2020, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2011-2021, Joachim Metz <joachim.metz@gmail.com>.
 Permission is granted to copy, distribute and/or modify this document under the
 terms of the GNU Free Documentation License, Version 1.3 or any later version
 published by the Free Software Foundation; with no Invariant Sections, no
@@ -58,6 +58,7 @@ Additional information regarding BitLocker To Go Application files with thanks t
 | 0.0.11 | J.B. Metz | December 2018 | Corrected typos
 | 0.0.12 | J.B. Metz | February 2019 | Additional information regarding BitLocker Used Disk Space Only encryption format with thanks to M. Bulhakov.
 | 0.0.13 | J.B. Metz | December 2020 | Additional information BEK file format.
+| 0.0.14 | J.B. Metz | June 2021 | Additional information about unencrypted volume.
 |===
 
 :numbered:
@@ -187,6 +188,7 @@ BitLocker provides for a recovery (or numerical) password to unlock the
 encrypted data. The recovery password is used to determine a recovery key.
 
 Example recovery password:
+
 ....
 471207-278498-422125-177177-561902-537405-468006-693451
 ....
@@ -197,6 +199,7 @@ by 11 with a remainder of 0. The result of a division by 11 of a number is a
 
 The corresponding recovery key is calculated using the following approach,
 written partially in pseudo C:
+
 ....
 Initialize a structure consisting of:
 uint8_t last_sha256[ 32 ];
@@ -243,6 +246,7 @@ encrypted data. The user password is used to determine a user key.
 Convert the user password into a UTF16 little-endian string.
 
 Initialize a structure consisting of:
+
 ....
 uint8_t last_sha256[ 32 ];
 uint8_t initial_sha256[ 32 ];
@@ -885,20 +889,18 @@ The available properties:
 
 === [[fve_volume_header_block]]FVE Volume header block
 
-The FVE Volume header block has value type 0x000f. It is 16 or 52 byte in size
-and consists of:
+The FVE Volume header block has value type 0x000f. It is 16 or more bytes in
+size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Block offset
 | 8 | 8 | | Block size +
-Added in Windows 8
-| 16 | 8 | | [yellow-background]*Unknown*
-| 24 | 8 | | [yellow-background]*Unknown*
-| 32 | 12 | | [yellow-background]*Unknown (empty values)*
-| 44 | 4 | | [yellow-background]*Unknown (sector size?)*
-| 48 | 4 | | [yellow-background]*Unknown (sector size?)*
+4+| _Unknown additional data_
+| 16 | 2 | | [yellow-background]*Unknown (format version?)*
+| 18 | 2 | | [yellow-background]*Unknown (size of additional data?)*
+| 20 | 4 | | [yellow-background]*Unknown (empty?)*
 |===
 
 The FVE Volume header block seems to have been introduced in Windows 7. It
@@ -950,6 +952,58 @@ The metadata in a BEK file consists of an FVE external key, which contains
 256-bits of unprotected key data.
 
 The identifier of the VMK should match the identifier in the BEK file header.
+
+== Notes
+
+Seen on an unencrypted BDE volume (password was set shorted then 8 chars to
+bdetest).
+
+=== FVE-EOW block
+
+The FVE-EOW block has ...
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | "FVE-EOW\x00" | Signature
+|===
+
+=== FVE-EOWBM block
+
+The FVE-EOWBM block has ...
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 10 | "FVE-EOWBM\x00" | Signature
+| 10 | 2 | | Block size +
+Size of the block including the signature and size value
+| 12 | 4 | | [yellow-background]*Unknown*
+|===
+
+=== FVE-EOWBR block
+
+The FVE-EOWBR block has ...
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 10 | "FVE-EOWBR\x00" | Signature
+| 10 | 2 | | Block size +
+Size of the block including the signature and size value
+| 12 | 4 | | [yellow-background]*Unknown*
+|===
+
+=== OLRDHEVF2 block
+
+The OLRDHEVF2 block has ...
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 10 | "OLRDHEVF2\x00" | Signature
+| 10 | 2 | | [yellow-background]*Unknown*
+|===
 
 :numbered!:
 [appendix]

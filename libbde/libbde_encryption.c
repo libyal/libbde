@@ -69,7 +69,8 @@ int libbde_encryption_initialize(
 	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_CBC )
 	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_CBC_DIFFUSER )
 	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_128_XTS )
-	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_XTS ) )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_AES_256_XTS )
+	 && ( method != LIBBDE_ENCRYPTION_METHOD_NONE ) )
 	{
 		libcerror_error_set(
 		 error,

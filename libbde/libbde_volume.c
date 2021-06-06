@@ -1645,38 +1645,19 @@ int libbde_volume_open_read_keys_from_metadata(
 	volume_header_size    = metadata->volume_header_size;
 	encryption_method     = metadata->encryption_method;
 
-	result = libbde_metadata_read_volume_master_key(
-	          metadata,
-	          internal_volume->io_handle,
-	          internal_volume->password_keep,
-	          external_key,
-	          external_key_size,
-	          volume_master_key,
-	          32,
-	          error );
-
-	if( result == -1 )
+	if( encryption_method == LIBBDE_ENCRYPTION_METHOD_NONE )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to read volume master key from metadata.",
-		 function );
-
-		goto on_error;
+		result = 1;
 	}
-	else if( result != 0 )
+	else
 	{
-		result = libbde_metadata_read_full_volume_encryption_key(
+		result = libbde_metadata_read_volume_master_key(
 		          metadata,
 		          internal_volume->io_handle,
-		          encryption_method,
+		          internal_volume->password_keep,
+		          external_key,
+		          external_key_size,
 		          volume_master_key,
-		          32,
-		          full_volume_encryption_key,
-		          64,
-		          tweak_key,
 		          32,
 		          error );
 
@@ -1686,10 +1667,36 @@ int libbde_volume_open_read_keys_from_metadata(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to read full volume encryption key from metadata.",
+			 "%s: unable to read volume master key from metadata.",
 			 function );
 
 			goto on_error;
+		}
+		else if( result != 0 )
+		{
+			result = libbde_metadata_read_full_volume_encryption_key(
+			          metadata,
+			          internal_volume->io_handle,
+			          encryption_method,
+			          volume_master_key,
+			          32,
+			          full_volume_encryption_key,
+			          64,
+			          tweak_key,
+			          32,
+			          error );
+
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to read full volume encryption key from metadata.",
+				 function );
+
+				goto on_error;
+			}
 		}
 	}
 	if( result != 0 )
@@ -1751,7 +1758,8 @@ int libbde_volume_open_read_keys_from_metadata(
 			 32,
 			 0 );
 		}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 		if( libbde_encryption_set_keys(
 		     internal_volume->io_handle->encryption_context,
 		     full_volume_encryption_key,
@@ -2887,19 +2895,24 @@ int libbde_volume_get_utf8_description_size(
 	{
 		result = 0;
 	}
-	else if( libbde_metadata_get_utf8_description_size(
-	          metadata,
-	          utf8_string_size,
-	          error ) != 1 )
+	else
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 description size.",
-		 function );
+		result = libbde_metadata_get_utf8_description_size(
+		          metadata,
+		          utf8_string_size,
+		          error );
 
-		result = -1;
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 description size.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -2977,20 +2990,25 @@ int libbde_volume_get_utf8_description(
 	{
 		result = 0;
 	}
-	else if( libbde_metadata_get_utf8_description(
-	          metadata,
-	          utf8_string,
-	          utf8_string_size,
-	          error ) != 1 )
+	else
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 description.",
-		 function );
+		result = libbde_metadata_get_utf8_description(
+		          metadata,
+		          utf8_string,
+		          utf8_string_size,
+		          error );
 
-		result = -1;
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 description.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -3066,19 +3084,24 @@ int libbde_volume_get_utf16_description_size(
 	{
 		result = 0;
 	}
-	else if( libbde_metadata_get_utf16_description_size(
-	          metadata,
-	          utf16_string_size,
-	          error ) != 1 )
+	else
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 description size.",
-		 function );
+		result = libbde_metadata_get_utf16_description_size(
+		          metadata,
+		          utf16_string_size,
+		          error );
 
-		result = -1;
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 description size.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -3156,20 +3179,25 @@ int libbde_volume_get_utf16_description(
 	{
 		result = 0;
 	}
-	else if( libbde_metadata_get_utf16_description(
-	          metadata,
-	          utf16_string,
-	          utf16_string_size,
-	          error ) != 1 )
+	else
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 description.",
-		 function );
+		result = libbde_metadata_get_utf16_description(
+		          metadata,
+		          utf16_string,
+		          utf16_string_size,
+		          error );
 
-		result = -1;
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 description.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
