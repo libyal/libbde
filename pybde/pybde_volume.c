@@ -457,6 +457,15 @@ void pybde_volume_free(
 
 		return;
 	}
+	if( pybde_volume->file_io_handle != NULL )
+	{
+		if( pybde_volume_close(
+		     pybde_volume,
+		     NULL ) == NULL )
+		{
+			return;
+		}
+	}
 	if( pybde_volume->volume != NULL )
 	{
 		Py_BEGIN_ALLOW_THREADS
