@@ -371,6 +371,17 @@ int libbde_sector_data_read_file_io_handle(
 				 io_handle->volume_header_offset );
 			}
 #endif
+			if( sector_data_offset > (off64_t) ( INT64_MAX - io_handle->volume_header_offset ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid sector data offset value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
 			sector_data_offset += io_handle->volume_header_offset;
 		}
 	}
@@ -410,7 +421,9 @@ int libbde_sector_data_read_file_io_handle(
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
 		 "%s: unable to read sector data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function );
+		 function,
+		 sector_data_offset,
+		 sector_data_offset );
 
 		return( -1 );
 	}
