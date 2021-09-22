@@ -371,7 +371,8 @@ int libbde_sector_data_read_file_io_handle(
 				 io_handle->volume_header_offset );
 			}
 #endif
-			if( sector_data_offset > (off64_t) ( INT64_MAX - io_handle->volume_header_offset ) )
+			if( ( io_handle->volume_header_offset < 0 )
+			 || ( sector_data_offset > (off64_t) ( INT64_MAX - io_handle->volume_header_offset ) ) )
 			{
 				libcerror_error_set(
 				 error,
