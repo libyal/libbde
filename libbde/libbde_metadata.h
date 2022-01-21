@@ -49,18 +49,15 @@ struct libbde_metadata
 	 */
 	size64_t encrypted_volume_size;
 
-	union
-	{
-		/* The MFT mirror cluster block number
-		 * Used by Windows Vista (version 1)
-		 */
-		uint64_t mft_mirror_cluster_block_number;
+	/* The MFT mirror cluster block number
+	 * Used by Windows Vista (version 1)
+	 */
+	uint64_t mft_mirror_cluster_block_number;
 
-		/* The volume header offset
-		 * Used by Windows 7 (version 2)
-		 */
-		off64_t volume_header_offset;
-	};
+	/* The volume header offset
+	 * Used by Windows 7 (version 2)
+	 */
+	off64_t volume_header_offset;
 
 	/* The volume header size
 	 * Used by Windows 7 (version 2)
@@ -156,7 +153,6 @@ int libbde_metadata_read_entries_data(
 
 int libbde_metadata_read_volume_master_key(
      libbde_metadata_t *metadata,
-     libbde_io_handle_t *io_handle,
      libbde_password_keep_t *password_keep,
      const uint8_t *external_key,
      size_t external_key_size,
@@ -166,7 +162,6 @@ int libbde_metadata_read_volume_master_key(
 
 int libbde_metadata_read_full_volume_encryption_key(
      libbde_metadata_t *metadata,
-     libbde_io_handle_t *io_handle,
      uint16_t encryption_method,
      const uint8_t *volume_master_key,
      size_t volume_master_key_size,

@@ -61,6 +61,7 @@ bdemount_SOURCES = \
 	bdemount.c \
 	bdetools_getopt.c bdetools_getopt.h \
 	bdetools_i18n.h \
+	bdetools_input.c bdetools_input.h \
 	bdetools_libbfio.h \
 	bdetools_libbde.h \
 	bdetools_libcdata.h \

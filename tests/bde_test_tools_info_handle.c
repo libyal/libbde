@@ -55,6 +55,7 @@ int bde_test_tools_info_handle_initialize(
 	 */
 	result = info_handle_initialize(
 	          &info_handle,
+	          1,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -91,6 +92,7 @@ int bde_test_tools_info_handle_initialize(
 	 */
 	result = info_handle_initialize(
 	          NULL,
+	          1,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -109,6 +111,7 @@ int bde_test_tools_info_handle_initialize(
 
 	result = info_handle_initialize(
 	          &info_handle,
+	          1,
 	          &error );
 
 	info_handle = NULL;
@@ -137,6 +140,7 @@ int bde_test_tools_info_handle_initialize(
 
 		result = info_handle_initialize(
 		          &info_handle,
+		          1,
 		          &error );
 
 		if( bde_test_malloc_attempts_before_fail != -1 )
@@ -179,6 +183,7 @@ int bde_test_tools_info_handle_initialize(
 
 		result = info_handle_initialize(
 		          &info_handle,
+		          1,
 		          &error );
 
 		if( bde_test_memset_attempts_before_fail != -1 )

@@ -593,7 +593,6 @@ class VolumeTypeTests(unittest.TestCase):
     with DataRangeFileObject(
         test_source, unittest.offset or 0, None) as file_object:
 
-      bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
 
       offset = bde_volume.get_offset()
@@ -618,7 +617,6 @@ class VolumeTypeTests(unittest.TestCase):
     with DataRangeFileObject(
         test_source, unittest.offset or 0, None) as file_object:
 
-      bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
 
       size = bde_volume.get_size()
@@ -645,7 +643,6 @@ class VolumeTypeTests(unittest.TestCase):
     with DataRangeFileObject(
         test_source, unittest.offset or 0, None) as file_object:
 
-      bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
 
       encryption_method = bde_volume.get_encryption_method()
@@ -672,7 +669,6 @@ class VolumeTypeTests(unittest.TestCase):
     with DataRangeFileObject(
         test_source, unittest.offset or 0, None) as file_object:
 
-      bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
 
       creation_time = bde_volume.get_creation_time()
@@ -699,7 +695,6 @@ class VolumeTypeTests(unittest.TestCase):
     with DataRangeFileObject(
         test_source, unittest.offset or 0, None) as file_object:
 
-      bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
 
       description = bde_volume.get_description()
@@ -726,7 +721,6 @@ class VolumeTypeTests(unittest.TestCase):
     with DataRangeFileObject(
         test_source, unittest.offset or 0, None) as file_object:
 
-      bde_volume = pybde.volume()
       bde_volume.open_file_object(file_object)
 
       number_of_key_protectors = bde_volume.get_number_of_key_protectors()

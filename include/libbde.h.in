@@ -215,7 +215,7 @@ int libbde_volume_signal_abort(
      libbde_error_t **error );
 
 /* Opens a volume
- * Returns 1 if successful, 0 if the keys could not be read or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_open(
@@ -227,7 +227,7 @@ int libbde_volume_open(
 #if defined( LIBBDE_HAVE_WIDE_CHARACTER_TYPE )
 
 /* Opens a volume
- * Returns 1 if successful, 0 if the keys could not be read or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_open_wide(
@@ -241,7 +241,7 @@ int libbde_volume_open_wide(
 #if defined( LIBBDE_HAVE_BFIO )
 
 /* Opens a volume using a Basic File IO (bfio) handle
- * Returns 1 if successful, 0 if the keys could not be read or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 LIBBDE_EXTERN \
 int libbde_volume_open_file_io_handle(
@@ -265,6 +265,14 @@ int libbde_volume_close(
  */
 LIBBDE_EXTERN \
 int libbde_volume_is_locked(
+     libbde_volume_t *volume,
+     libbde_error_t **error );
+
+/* Unlocks the volume
+ * Returns 1 if the volume is unlocked, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_unlock(
      libbde_volume_t *volume,
      libbde_error_t **error );
 

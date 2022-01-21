@@ -465,7 +465,7 @@ int libbde_sector_data_read_file_io_handle(
 
 			return( -1 );
 		}
-		/* Change the FVE metadatsa block 1 cluster block number
+		/* Change the FVE metadata block 1 cluster block number
 		 * into the MFT mirror cluster block number
 		 */
 		byte_stream_copy_from_uint64_little_endian(

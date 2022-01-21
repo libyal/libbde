@@ -38,21 +38,57 @@ typedef struct info_handle info_handle_t;
 
 struct info_handle
 {
+	/* The key data
+	 */
+	uint8_t key_data[ 64 ];
+
+	/* The full volume encryption key size
+	 */
+	uint8_t full_volume_encryption_key_size;
+
+	/* The tweak key size
+	 */
+	uint8_t tweak_key_size;
+
 	/* The volume offset
 	 */
 	off64_t volume_offset;
 
-	/* The libbfio input file IO handle
+	/* The recovery password
 	 */
-	libbfio_handle_t *input_file_io_handle;
+	const system_character_t *recovery_password;
 
-	/* The libbde input volume
+	/* The recovery password length
 	 */
-	libbde_volume_t *input_volume;
+	size_t recovery_password_length;
+
+	/* The user password
+	 */
+	const system_character_t *user_password;
+
+	/* The user password length
+	 */
+	size_t user_password_length;
+
+	/* The path of the startup key (.BEK) file
+	 */
+	const system_character_t *startup_key_path;
+
+	/* The libbfio file IO handle
+	 */
+	libbfio_handle_t *file_io_handle;
+
+	/* The libbde volume
+	 */
+	libbde_volume_t *volume;
 
 	/* The notification output stream
 	 */
 	FILE *notify_stream;
+
+	/* Value to indicate if user interaction is disabled
+	 */
+	int unattended_mode;
 
 	/* Value to indicate if abort was signalled
 	 */
@@ -67,6 +103,7 @@ int bdetools_system_string_copy_from_64_bit_in_decimal(
 
 int info_handle_initialize(
      info_handle_t **info_handle,
+     int unattended_mode,
      libcerror_error_t **error );
 
 int info_handle_free(
@@ -92,7 +129,7 @@ int info_handle_set_recovery_password(
      const system_character_t *string,
      libcerror_error_t **error );
 
-int info_handle_read_startup_key(
+int info_handle_set_startup_key(
      info_handle_t *info_handle,
      const system_character_t *filename,
      libcerror_error_t **error );
@@ -102,20 +139,12 @@ int info_handle_set_volume_offset(
      const system_character_t *string,
      libcerror_error_t **error );
 
-int info_handle_open_input(
+int info_handle_open(
      info_handle_t *info_handle,
      const system_character_t *filename,
      libcerror_error_t **error );
 
-int info_handle_close_input(
-     info_handle_t *info_handle,
-     libcerror_error_t **error );
-
-int info_handle_input_unlock(
-     info_handle_t *info_handle,
-     libcerror_error_t **error );
-
-int info_handle_input_is_locked(
+int info_handle_close(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 

@@ -1,4 +1,4 @@
-.Dd March  5, 2019
+.Dd January 21, 2022
 .Dt bdemount
 .Os libbde
 .Sh NAME
@@ -12,7 +12,7 @@
 .Op Fl r Ar password
 .Op Fl s Ar filename
 .Op Fl X Ar extended_options
-.Op Fl hvV
+.Op Fl huvV
 .Ar source
 .Sh DESCRIPTION
 .Nm bdemount
@@ -43,6 +43,8 @@ specify the recovery password
 .It Fl s Ar filename
 specify the file containing the startup key.
 typically this file has the extension .BEK
+.It Fl u
+unattended mode (disables user interaction)
 .It Fl v
 verbose output to stderr
 .It Fl V
@@ -58,7 +60,7 @@ None
 .Bd -literal
 # bdemount -p Password /dev/sda1
 bdemount 20110821
-
+.sp
 .Ed
 .Sh DIAGNOSTICS
 Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.

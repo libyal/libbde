@@ -56,6 +56,7 @@ libbde_la_SOURCES = \
 	libbde_metadata_entry.c libbde_metadata_entry.h \
 	libbde_metadata_header.c libbde_metadata_header.h \
 	libbde_notify.c libbde_notify.h \
+	libbde_ntfs_volume_header.c libbde_ntfs_volume_header.h \
 	libbde_password.c libbde_password.h \
 	libbde_password_keep.c libbde_password_keep.h \
 	libbde_recovery.c libbde_recovery.h \
@@ -65,6 +66,7 @@ libbde_la_SOURCES = \
 	libbde_types.h \
 	libbde_unused.h \
 	libbde_volume.c libbde_volume.h \
+	libbde_volume_header.c libbde_volume_header.h \
 	libbde_volume_master_key.c libbde_volume_master_key.h \
 	bde_metadata.h \
 	bde_volume.h

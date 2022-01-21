@@ -90,6 +90,13 @@ PyMethodDef pybde_volume_object_methods[] = {
 	  "\n"
 	  "Determines if the volume is locked." },
 
+	{ "unlock",
+	  (PyCFunction) pybde_volume_unlock,
+	  METH_NOARGS,
+	  "unlock() -> Boolean\n"
+	  "\n"
+	  "Unlocks the volume." },
+
 	{ "read_buffer",
 	  (PyCFunction) pybde_volume_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
@@ -995,6 +1002,62 @@ PyObject *pybde_volume_is_locked(
 		 error,
 		 PyExc_IOError,
 		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	if( result != 0 )
+	{
+		Py_IncRef(
+		 (PyObject *) Py_True );
+
+		return( Py_True );
+	}
+	Py_IncRef(
+	 (PyObject *) Py_False );
+
+	return( Py_False );
+}
+
+/* Unlocks the volume
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pybde_volume_unlock(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments PYBDE_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "pybde_volume_unlock";
+	int result               = 0;
+
+	PYBDE_UNREFERENCED_PARAMETER( arguments )
+
+	if( pybde_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libbde_volume_unlock(
+	          pybde_volume->volume,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pybde_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to unlock volume.",
 		 function );
 
 		libcerror_error_free(

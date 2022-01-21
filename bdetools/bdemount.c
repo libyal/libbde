@@ -68,7 +68,7 @@ void usage_fprint(
 
 	fprintf( stream, "Usage: bdemount [ -k keys ] [ -o offset ] [ -p password ]\n"
 	                 "                [ -r recovery_password ] [ -s startup_key_path ]\n"
-	                 "                [ -X extended_options ] [ -hvV ] volume mount_point\n\n" );
+	                 "                [ -X extended_options ] [ -huvV ] volume mount_point\n\n" );
 
 	fprintf( stream, "\tvolume:      a BitLocker Drive Encrypted (BDE) volume\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
@@ -81,6 +81,7 @@ void usage_fprint(
 	fprintf( stream, "\t-r:          specify the recovery password/passphrase\n" );
 	fprintf( stream, "\t-s:          specify the path of the file containing the startup key. Typically\n"
 	                 "\t             this file has the extension .BEK\n" );
+	fprintf( stream, "\t-u:          unattended mode (disables user interaction)\n" );
 	fprintf( stream, "\t-v:          verbose output to stderr, while bdemount will remain running in the\n"
 	                 "\t             foreground\n" );
 	fprintf( stream, "\t-V:          print version\n" );
@@ -153,6 +154,7 @@ int main( int argc, char * const argv[] )
 	system_integer_t option                      = 0;
 	size_t path_prefix_size                      = 0;
 	int result                                   = 0;
+	int unattended_mode                          = 0;
 	int verbose                                  = 0;
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
@@ -200,7 +202,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "hk:o:p:r:s:vVX:" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "hk:o:p:r:s:uvVX:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -244,6 +246,11 @@ int main( int argc, char * const argv[] )
 
 			case (system_integer_t) 's':
 				option_startup_key_path = optarg;
+
+				break;
+
+			case (system_integer_t) 'u':
+				unattended_mode = 1;
 
 				break;
 
@@ -300,6 +307,7 @@ int main( int argc, char * const argv[] )
 
 	if( mount_handle_initialize(
 	     &bdemount_mount_handle,
+	     unattended_mode,
 	     &error ) != 1 )
 	{
 		fprintf(

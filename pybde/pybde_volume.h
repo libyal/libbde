@@ -81,6 +81,10 @@ PyObject *pybde_volume_is_locked(
            pybde_volume_t *pybde_volume,
            PyObject *arguments );
 
+PyObject *pybde_volume_unlock(
+           pybde_volume_t *pybde_volume,
+           PyObject *arguments );
+
 PyObject *pybde_volume_read_buffer(
            pybde_volume_t *pybde_volume,
            PyObject *arguments,

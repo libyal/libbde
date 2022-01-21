@@ -26,6 +26,7 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "bdetools_input.h"
 #include "bdetools_libbde.h"
 #include "bdetools_libbfio.h"
 #include "bdetools_libcerror.h"
@@ -46,6 +47,8 @@ int libbde_volume_open_file_io_handle(
      libbde_error_t **error );
 
 #endif /* !defined( LIBBDE_HAVE_BFIO ) */
+
+#define MOUNT_HANDLE_NOTIFY_STREAM		stdout
 
 /* Copies a string of a decimal value to a 64-bit value
  * Returns 1 if successful or -1 on error
@@ -163,6 +166,7 @@ int mount_handle_system_string_copy_from_64_bit_in_decimal(
  */
 int mount_handle_initialize(
      mount_handle_t **mount_handle,
+     int unattended_mode,
      libcerror_error_t **error )
 {
 	static char *function = "mount_handle_initialize";
@@ -215,7 +219,12 @@ int mount_handle_initialize(
 		 "%s: unable to clear mount handle.",
 		 function );
 
-		goto on_error;
+		memory_free(
+		 *mount_handle );
+
+		*mount_handle = NULL;
+
+		return( -1 );
 	}
 	if( mount_file_system_initialize(
 	     &( ( *mount_handle )->file_system ),
@@ -230,6 +239,9 @@ int mount_handle_initialize(
 
 		goto on_error;
 	}
+	( *mount_handle )->notify_stream   = MOUNT_HANDLE_NOTIFY_STREAM;
+	( *mount_handle )->unattended_mode = unattended_mode;
+
 	return( 1 );
 
 on_error:
@@ -266,6 +278,22 @@ int mount_handle_free(
 	}
 	if( *mount_handle != NULL )
 	{
+		if( ( *mount_handle )->file_io_handle != NULL )
+		{
+			if( mount_handle_close(
+			     *mount_handle,
+			     error ) != 0 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_CLOSE_FAILED,
+				 "%s: unable to close mount handle.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( mount_file_system_free(
 		     &( ( *mount_handle )->file_system ),
 		     error ) != 1 )
@@ -282,7 +310,7 @@ int mount_handle_free(
 		if( memory_set(
 		     ( *mount_handle )->key_data,
 		     0,
-		     16 ) == NULL )
+		     64 ) == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -912,10 +940,13 @@ int mount_handle_open(
      const system_character_t *filename,
      libcerror_error_t **error )
 {
+	system_character_t password[ 64 ];
+
 	libbde_volume_t *bde_volume      = NULL;
 	libbfio_handle_t *file_io_handle = NULL;
 	static char *function            = "mount_handle_open";
 	size_t filename_length           = 0;
+	size_t password_length           = 0;
 	int result                       = 0;
 
 	if( mount_handle == NULL )
@@ -1103,13 +1134,11 @@ int mount_handle_open(
 			goto on_error;
 		}
 	}
-	result = libbde_volume_open_file_io_handle(
-	          bde_volume,
-	          file_io_handle,
-	          LIBBDE_OPEN_READ,
-	          error );
-
-	if( result == -1 )
+	if( libbde_volume_open_file_io_handle(
+	     bde_volume,
+	     file_io_handle,
+	     LIBBDE_OPEN_READ,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1135,7 +1164,97 @@ int mount_handle_open(
 
 		goto on_error;
 	}
-	mount_handle->is_locked = result;
+	else if( ( result != 0 )
+	      && ( mount_handle->unattended_mode == 0 ) )
+	{
+		fprintf(
+		 stdout,
+		 "Volume is locked and a password is needed to unlock it.\n\n" );
+
+		if( bdetools_prompt_for_password(
+		     stdout,
+		     "Password",
+		     password,
+		     64,
+		     error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to retrieve password.\n" );
+
+			goto on_error;
+		}
+		password_length = system_string_length(
+		                   password );
+
+		if( password_length > 0 )
+		{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+			if( libbde_volume_set_utf16_password(
+			     bde_volume,
+			     (uint16_t *) password,
+			     password_length,
+			     error ) != 1 )
+#else
+			if( libbde_volume_set_utf8_password(
+			     bde_volume,
+			     (uint8_t *) password,
+			     password_length,
+			     error ) != 1 )
+#endif
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to set password.",
+				 function );
+
+				goto on_error;
+			}
+			memory_set(
+			 password,
+			 0,
+			 64 );
+		}
+		fprintf(
+		 stdout,
+		 "\n\n" );
+
+		result = libbde_volume_unlock(
+		          bde_volume,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to unlock volume.",
+			 function );
+
+			goto on_error;
+		}
+		else if( result == 0 )
+		{
+			fprintf(
+			 stdout,
+			 "Unable to unlock volume.\n\n" );
+		}
+		result = ( result == 0 );
+	}
+	if( result != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable unlock volume.",
+		 function );
+
+		goto on_error;
+	}
 
 	if( mount_file_system_append_volume(
 	     mount_handle->file_system,

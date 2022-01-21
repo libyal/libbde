@@ -176,6 +176,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\bdetools\bdetools_input.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\bdetools\byte_size_string.c"
 				>
 			</File>
@@ -197,6 +201,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\bdetools\bdetools_input.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\bdetools\byte_size_string.h"
 				>

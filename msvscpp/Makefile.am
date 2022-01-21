@@ -19,6 +19,7 @@ MSVSCPP_FILES = \
 	bde_test_tools_output/bde_test_tools_output.vcproj \
 	bde_test_tools_signal/bde_test_tools_signal.vcproj \
 	bde_test_volume/bde_test_volume.vcproj \
+	bde_test_volume_header/bde_test_volume_header.vcproj \
 	bde_test_volume_master_key/bde_test_volume_master_key.vcproj \
 	bdeinfo/bdeinfo.vcproj \
 	bdemount/bdemount.vcproj \

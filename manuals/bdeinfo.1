@@ -1,4 +1,4 @@
-.Dd March  5, 2019
+.Dd January 21, 2022
 .Dt bdeinfo
 .Os libbde
 .Sh NAME
@@ -11,7 +11,7 @@
 .Op Fl p Ar password
 .Op Fl r Ar password
 .Op Fl s Ar filename
-.Op Fl hvV
+.Op Fl huvV
 .Ar source
 .Sh DESCRIPTION
 .Nm bdeinfo
@@ -42,6 +42,8 @@ specify the recovery password
 .It Fl s Ar filename
 specify the file containing the startup key.
 typically this file has the extension .BEK
+.It Fl u
+unattended mode (disables user interaction)
 .It Fl v
 verbose output to stderr
 .It Fl V
@@ -55,22 +57,22 @@ None
 .Bd -literal
 # bdeinfo -p Password /dev/sda1
 bdeinfo 20140403
-
+.sp
 BitLocker Drive Encryption information:
 	Encryption method:		AES 128-bit
 	Volume identifier:		a31a8153-5dc1-4bc3-a5b8-e6d77a17c4c0
 	Creation time:			Aug 05, 2011 11:04:38.739926900 UTC
 	Description			:MYPC BDE TEST 8/5/2011
 	Number of key protectors:	2
-
+.sp
 Key protector 0:
 	Identifier:			240c5287-d4a5-4f2d-8d38-06a2e563257f
 	Type:				Password
-
+.sp
 Key protector 1:
 	Identifier:			e70fad99-e63f-45c1-92e0-1cadabe08ae9
 	Type:				Recovery password
-
+.sp
 .Ed
 .Sh DIAGNOSTICS
 Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.

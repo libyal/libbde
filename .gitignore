@@ -148,6 +148,7 @@ stamp-h[1-9]
 /tests/bde_test_tools_output
 /tests/bde_test_tools_signal
 /tests/bde_test_volume
+/tests/bde_test_volume_header
 /tests/bde_test_volume_master_key
 /tests/input
 /tests/tmp*

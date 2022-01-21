@@ -230,6 +230,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_ntfs_volume_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_password.c"
 				>
 			</File>
@@ -255,6 +259,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_volume.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_volume_header.c"
 				>
 			</File>
 			<File
@@ -400,6 +408,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_ntfs_volume_header.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_password.h"
 				>
 			</File>
@@ -433,6 +445,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_volume.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_volume_header.h"
 				>
 			</File>
 			<File

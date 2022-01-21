@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="aes_ccm_encrypted_key error external_key io_handle key key_protector metadata metadata_block_header metadata_entry metadata_header notify password password_keep sector_data stretch_key volume_master_key";
+LIBRARY_TESTS="aes_ccm_encrypted_key error external_key io_handle key key_protector metadata metadata_block_header metadata_entry metadata_header notify password password_keep sector_data stretch_key volume_header volume_master_key";
 LIBRARY_TESTS_WITH_INPUT="support volume";
 OPTION_SETS="password recovery_password startup_key";
 

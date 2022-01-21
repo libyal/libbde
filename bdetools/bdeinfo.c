@@ -60,7 +60,7 @@ void usage_fprint(
 	                 " Encrypted (BDE) volume\n\n" );
 
 	fprintf( stream, "Usage: bdeinfo [ -k keys ] [ -o offset ] [ -p password ]\n"
-	                 "               [ -r password ] [ -s filename ] [ -hvV ] source\n\n" );
+	                 "               [ -r password ] [ -s filename ] [ -huvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
@@ -73,6 +73,7 @@ void usage_fprint(
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-s:     specify the file containing the startup key.\n"
 	                 "\t        typically this file has the extension .BEK\n" );
+	fprintf( stream, "\t-u:     unattended mode (disables user interaction)\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -83,7 +84,7 @@ void bdeinfo_signal_handler(
       bdetools_signal_t signal BDETOOLS_ATTRIBUTE_UNUSED )
 {
 	libcerror_error_t *error = NULL;
-	static char *function   = "bdeinfo_signal_handler";
+	static char *function    = "bdeinfo_signal_handler";
 
 	BDETOOLS_UNREFERENCED_PARAMETER( signal )
 
@@ -129,17 +130,18 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libbde_error_t *error                           = NULL;
-	system_character_t *option_keys                 = NULL;
-	system_character_t *option_password             = NULL;
-	system_character_t *option_recovery_password    = NULL;
-	system_character_t *option_startup_key_filename = NULL;
-	system_character_t *option_volume_offset        = NULL;
-	system_character_t *source                      = NULL;
-	char *program                                   = "bdeinfo";
-	system_integer_t option                         = 0;
-	int result                                      = 0;
-	int verbose                                     = 0;
+	libbde_error_t *error                        = NULL;
+	system_character_t *option_keys              = NULL;
+	system_character_t *option_password          = NULL;
+	system_character_t *option_recovery_password = NULL;
+	system_character_t *option_startup_key_path  = NULL;
+	system_character_t *option_volume_offset     = NULL;
+	system_character_t *source                   = NULL;
+	char *program                                = "bdeinfo";
+	system_integer_t option                      = 0;
+	int result                                   = 0;
+	int unattended_mode                          = 0;
+	int verbose                                  = 0;
 
 	libcnotify_stream_set(
 	 stderr,
@@ -174,7 +176,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "hk:o:p:r:s:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "hk:o:p:r:s:uvV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -217,7 +219,12 @@ int main( int argc, char * const argv[] )
 				break;
 
 			case (system_integer_t) 's':
-				option_startup_key_filename = optarg;
+				option_startup_key_path = optarg;
+
+				break;
+
+			case (system_integer_t) 'u':
+				unattended_mode = 1;
 
 				break;
 
@@ -256,6 +263,7 @@ int main( int argc, char * const argv[] )
 
 	if( info_handle_initialize(
 	     &bdeinfo_info_handle,
+	     unattended_mode,
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -306,16 +314,16 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	if( option_startup_key_filename != NULL )
+	if( option_startup_key_path != NULL )
 	{
-		if( info_handle_read_startup_key(
+		if( info_handle_set_startup_key(
 		     bdeinfo_info_handle,
-		     option_startup_key_filename,
+		     option_startup_key_path,
 		     &error ) != 1 )
 		{
 			fprintf(
 			 stderr,
-			 "Unable to read startup key.\n" );
+			 "Unable to set startup key.\n" );
 
 			goto on_error;
 		}
@@ -334,7 +342,7 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	result = info_handle_open_input(
+	result = info_handle_open(
 	          bdeinfo_info_handle,
 	          source,
 	          &error );
@@ -358,19 +366,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	result = info_handle_input_is_locked(
-	          bdeinfo_info_handle,
-	          &error );
-
-	if( result != 0 )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to unlock volume.\n" );
-
-		goto on_error;
-	}
-	if( info_handle_close_input(
+	if( info_handle_close(
 	     bdeinfo_info_handle,
 	     &error ) != 0 )
 	{

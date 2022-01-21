@@ -68,6 +68,7 @@ check_PROGRAMS = \
 	bde_test_tools_output \
 	bde_test_tools_signal \
 	bde_test_volume \
+	bde_test_volume_header \
 	bde_test_volume_master_key
 
 bde_test_aes_ccm_encrypted_key_SOURCES = \
@@ -301,6 +302,7 @@ bde_test_support_LDADD = \
 	@LIBCERROR_LIBADD@
 
 bde_test_tools_info_handle_SOURCES = \
+	../bdetools/bdetools_input.c ../bdetools/bdetools_input.h \
 	../bdetools/byte_size_string.c ../bdetools/byte_size_string.h \
 	../bdetools/info_handle.c ../bdetools/info_handle.h \
 	bde_test_libcerror.h \
@@ -372,6 +374,28 @@ bde_test_volume_LDADD = \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
+
+bde_test_volume_header_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_libbde.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h \
+	bde_test_volume_header.c
+
+bde_test_volume_header_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
 
 bde_test_volume_master_key_SOURCES = \
 	bde_test_libbde.h \

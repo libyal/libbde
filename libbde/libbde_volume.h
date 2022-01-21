@@ -35,6 +35,7 @@
 #include "libbde_metadata.h"
 #include "libbde_password_keep.h"
 #include "libbde_types.h"
+#include "libbde_volume_header.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -51,6 +52,10 @@ struct libbde_internal_volume
 	/* The encryption method
 	 */
 	uint16_t encryption_method;
+
+	/* The volume header
+	 */
+	libbde_volume_header_t *volume_header;
 
 	/* The metadata at the first metadata offset
 	 */
@@ -91,6 +96,26 @@ struct libbde_internal_volume
 	/* Value to indicate if the file IO handle was opened inside the library
 	 */
 	uint8_t file_io_handle_opened_in_library;
+
+	/* External provided full volume encryption key
+	 */
+	uint8_t full_volume_encryption_key[ 64 ];
+
+	/* Size of the external provided full volume encryption key
+	 */
+	size_t full_volume_encryption_key_size;
+
+	/* External provided tweak key
+	 */
+	uint8_t tweak_key[ 32 ];
+
+	/* Size of the tweak key
+	 */
+	size_t tweak_key_size;
+
+	/* Value to indicate the keys are set
+	 */
+	uint8_t keys_are_set;
 
 	/* The password keep
 	 */
@@ -152,18 +177,32 @@ int libbde_volume_close(
      libbde_volume_t *volume,
      libcerror_error_t **error );
 
-int libbde_volume_open_read(
+int libbde_internal_volume_open_read(
      libbde_internal_volume_t *internal_volume,
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
-int libbde_volume_open_read_keys_from_metadata(
+int libbde_internal_volume_open_read_keys(
+     libbde_internal_volume_t *internal_volume,
+     libcerror_error_t **error );
+
+int libbde_internal_volume_open_read_keys_from_metadata(
      libbde_internal_volume_t *internal_volume,
      libbde_metadata_t *metadata,
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
 int libbde_volume_is_locked(
+     libbde_volume_t *volume,
+     libcerror_error_t **error );
+
+int libbde_internal_volume_unlock(
+     libbde_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
+int libbde_volume_unlock(
      libbde_volume_t *volume,
      libcerror_error_t **error );
 

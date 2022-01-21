@@ -55,10 +55,6 @@ struct libbde_io_handle
 	 */
 	uint16_t bytes_per_sector;
 
-	/* The sectors per cluster block
-	 */
-	uint8_t sectors_per_cluster_block;
-
 	/* The first metadata offset
 	 */
 	off64_t first_metadata_offset;
@@ -83,18 +79,15 @@ struct libbde_io_handle
 	 */
 	size64_t encrypted_volume_size;
 
-	union
-	{
-		/* The MFT mirror cluster block number
-		 * Used by Windows Vista (version 1)
-		 */
-		uint64_t mft_mirror_cluster_block_number;
+	/* The MFT mirror cluster block number
+	 * Used by Windows Vista (version 1)
+	 */
+	uint64_t mft_mirror_cluster_block_number;
 
-		/* The volume header offset
-		 * Used by Windows 7 (version 2)
-		 */
-		off64_t volume_header_offset;
-	};
+	/* The volume header offset
+	 * Used by Windows 7 (version 2)
+	 */
+	off64_t volume_header_offset;
 
 	/* The volume header size
 	 * Used by Windows 7 (version 2)
@@ -104,26 +97,6 @@ struct libbde_io_handle
 	/* The encryption context
 	 */
 	libbde_encryption_context_t *encryption_context;
-
-	/* External provided full volume encryption key
-	 */
-	uint8_t full_volume_encryption_key[ 64 ];
-
-	/* Size of the external provided full volume encryption key
-	 */
-	size_t full_volume_encryption_key_size;
-
-	/* External provided tweak key
-	 */
-	uint8_t tweak_key[ 32 ];
-
-	/* Size of the tweak key
-	 */
-	size_t tweak_key_size;
-
-	/* Value to indicate the keys are set
-	 */
-	uint8_t keys_are_set;
 
 	/* Value to indicate if abort was signalled
 	 */
@@ -142,12 +115,6 @@ int libbde_io_handle_clear(
      libbde_io_handle_t *io_handle,
      libcerror_error_t **error );
 
-int libbde_io_handle_read_volume_header(
-     libbde_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     libcerror_error_t **error );
-
 int libbde_io_handle_read_sector(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
@@ -164,6 +131,7 @@ int libbde_io_handle_read_sector(
 int libbde_io_handle_read_unencrypted_volume_header(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     off64_t volume_header_offset,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
