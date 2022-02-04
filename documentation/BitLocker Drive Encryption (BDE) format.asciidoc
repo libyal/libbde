@@ -30,7 +30,7 @@ for the libbde project.
 == License
 
 ....
-Copyright (C) 2011-2021, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2011-2022, Joachim Metz <joachim.metz@gmail.com>.
 Permission is granted to copy, distribute and/or modify this document under the
 terms of the GNU Free Documentation License, Version 1.3 or any later version
 published by the Free Software Foundation; with no Invariant Sections, no
@@ -59,6 +59,8 @@ Additional information regarding BitLocker To Go Application files with thanks t
 | 0.0.12 | J.B. Metz | February 2019 | Additional information regarding BitLocker Used Disk Space Only encryption format with thanks to M. Bulhakov.
 | 0.0.13 | J.B. Metz | December 2020 | Additional information BEK file format.
 | 0.0.14 | J.B. Metz | June 2021 | Additional information about unencrypted volume.
+| 0.0.15 | J.B. Metz | January 2022 | Changes to formatting.
+| 0.0.16 | J.B. Metz | February 2022 | Additional information about metadata version 3.
 |===
 
 :numbered:
@@ -392,6 +394,7 @@ size and consists of:
 | Offset | Size | Value | Description
 | 0 | 3 | "\xeb\x52\x90" | Boot entry point
 | *3* | *8* | *"-FVE-FS-"* | *File system signature*
+4+| _DOS version 2.0 BIOS parameter block (BPB)_
 | 11 | 2 | | Bytes per sector
 | 13 | 1 | | Sectors per cluster block
 | 14 | 2 | 0x00 | Reserved Sectors
@@ -400,21 +403,23 @@ size and consists of:
 | 19 | 2 | | Total number of sectors (16-bit)
 | 21 | 1 | | Media descriptor
 | 22 | 2 | 0x00 | Sectors Per File Allocation Table (FAT)
+4+| _DOS version 3.4 BIOS parameter block (BPB)_
 | 24 | 2 | 0x3f | Sectors per track
 | 26 | 2 | | Number of heads
 | 28 | 4 | | Number of hidden sectors
 | 32 | 4 | 0x00 | Total number of sectors (32-bit)
-| 36 | 1 | 0x80 | Unknown (Disc unit number)
-| 37 | 1 | 0x00 | Unknown (Flags)
-| 38 | 1 | 0x80 | Unknown (BPB version signature byte)
-| 39 | 1 | 0x00 | Unknown (Reserved)
+4+| _NTFS version 8.0 BIOS parameter block (BPB) or extended BPB_
+| 36 | 1 | 0x80 | [yellow-background]*Unknown (Disc unit number)*
+| 37 | 1 | 0x00 | [yellow-background]*Unknown (Flags)*
+| 38 | 1 | 0x80 | [yellow-background]*Unknown (BPB version signature byte)*
+| 39 | 1 | 0x00 | [yellow-background]*Unknown (Reserved)*
 | 40 | 8 | | Total number of sectors (64-bit)
 | 48 | 8 | | Master File Table (MFT) cluster block number
 | *56* | *8* | | *FVE metadata block 1 cluster block number*
 | 64 | 1 | | MFT entry size
-| 65 | 3 | | Unknown
+| 65 | 3 | | [yellow-background]*Unknown*
 | 68 | 1 | | Index entry size
-| 69 | 3 | | Unknown
+| 69 | 3 | | [yellow-background]*Unknown*
 | 72 | 8 | | NTFS volume serial number
 | 80 | 4 | 0x00 | Checksum
 | 84 | 426 | | Bootcode
@@ -436,6 +441,7 @@ size and consists of:
 | Offset | Size | Value | Description
 | *0* | *3* | *"\xeb\x58\x90"* | *Boot entry point*
 | 3 | 8 | "-FVE-FS-" | File system signature
+4+| _DOS version 2.0 BIOS parameter block (BPB)_
 | 11 | 2 | | Bytes per sector
 | 13 | 1 | | Sectors per cluster block
 | 14 | 2 | 0x00 | Reserved Sectors
@@ -444,21 +450,23 @@ size and consists of:
 | 19 | 2 | | Total number of sectors (16-bit)
 | 21 | 1 | | Media descriptor
 | 22 | 2 | 0x00 | Sectors Per File Allocation Table (FAT)
+4+| _DOS version 3.4 BIOS parameter block (BPB)_
 | 24 | 2 | 0x3f | Sectors per track
 | 26 | 2 | | Number of heads
 | *28* | *4* | | [yellow-background]*Number of hidden sectors* +
 Contains the volume start sector number
 | 32 | 4 | 0x00 | Total number of sectors (32-bit)
+4+| _Unknown_
 | *36* | *4* | *0x1fe0* | [yellow-background]*Sectors per file allocation table*
-| *40* | *2* | | [yellow-background]*FAT Flags (Only used during a conversion from a FAT12/16 volume.)*
+| *40* | *2* | | [yellow-background]*FAT Flags (Only used during a conversion from a FAT12/16 volume)*
 | *42* | *2* | | [yellow-background]*Version (Defined as 0)*
 | *44* | *4* | | [yellow-background]*Cluster number of root directory start*
 | *48* | *2* | *0x0001* | [yellow-background]*Sector number of FS Information Sector*
 | *50* | *2* | *0x0006* | [yellow-background]*Sector number of a copy of this boot sector (0 if no backup copy exists)*
-| *52* | *12* | | [yellow-background]*Reserved*
+| *52* | *12* | | [yellow-background]*Unknown (Reserved)*
 | *64* | *1* | *0x80* | [yellow-background]*Physical Drive Number (see FAT12/16 BPB at offset 0x24)*
-| *65* | *1* | | [yellow-background]*Reserved (see FAT12/16 BPB at offset 0x25)*
-| *66* | *1* | *0x29* | [yellow-background]*Extended boot signature. (see FAT12/16 BPB at offset 0x26)*
+| *65* | *1* | | [yellow-background]*Unknown (Reserved) (see FAT12/16 BPB at offset 0x25)*
+| *66* | *1* | *0x29* | [yellow-background]*Extended boot signature (see FAT12/16 BPB at offset 0x26)*
 | *67* | *4* | | *Volume serial number*
 | *71* | *11* | *"NO NAME\x20\x20\x20\x20"* | *Volume label*
 | *82* | *8* | *"FAT32\x20\x20\x20"* | *File system signature*
@@ -494,6 +502,7 @@ is 512 bytes of size and consists of:
 | Offset | Size | Value | Description
 | 0 | 3 | "\xeb\x58\x90" | Boot entry point
 | *3* | *8* | *"MSWIN4.1"* | *Signature*
+4+| _DOS version 2.0 BIOS parameter block (BPB)_
 | 11 | 2 | | Bytes per sector
 | 13 | 1 | | Sectors per cluster block
 | 14 | 2 | 0x00 | Reserved Sectors
@@ -502,20 +511,22 @@ is 512 bytes of size and consists of:
 | 19 | 2 | | Total number of sectors (16-bit)
 | 21 | 1 | | Media descriptor
 | 22 | 2 | 0x00 | Sectors Per File Allocation Table (FAT)
+4+| _DOS version 3.4 BIOS parameter block (BPB)_
 | 24 | 2 | 0x3f | Sectors per track
 | 26 | 2 | | Number of heads
 | 28 | 4 | | Number of hidden sectors
 | 32 | 4 | | Total number of sectors (32-bit)
-| 36 | 4 | 0x1f0e | [yellow-background]*Sectors per file allocation table*
-| 40 | 2 | | [yellow-background]*FAT Flags (Only used during a conversion from a FAT12/16 volume.)*
+4+| _Unknown_
+| 36 | 4 | 0x1fe0 | [yellow-background]*Sectors per file allocation table*
+| 40 | 2 | | [yellow-background]*FAT Flags (Only used during a conversion from a FAT12/16 volume)*
 | 42 | 2 | | [yellow-background]*Version (Defined as 0)*
 | 44 | 4 | | [yellow-background]*Cluster number of root directory start*
 | 48 | 2 | 0x0001 | [yellow-background]*Sector number of FS Information Sector*
 | 50 | 2 | 0x0006 | [yellow-background]*Sector number of a copy of this boot sector (0 if no backup copy exists)*
-| 52 | 12 | | [yellow-background]*Reserved*
+| 52 | 12 | | [yellow-background]*Unknown (Reserved)*
 | 64 | 1 | 0x80 | [yellow-background]*Physical Drive Number (see FAT12/16 BPB at offset 0x24)*
-| 65 | 1 | | [yellow-background]*Reserved (see FAT12/16 BPB at offset 0x25)*
-| 66 | 1 | 0x29 | [yellow-background]*Extended boot signature. (see FAT12/16 BPB at offset 0x26)*
+| 65 | 1 | | [yellow-background]*Unknown (Reserved) (see FAT12/16 BPB at offset 0x25)*
+| 66 | 1 | 0x29 | [yellow-background]*Extended boot signature (see FAT12/16 BPB at offset 0x26)*
 | 67 | 4 | | Volume serial number
 | 71 | 11 | "NO NAME\x20\x20\x20\x20" | Volume label
 | 82 | 8 | "FAT32\x20\x20\x20" | File system signature
@@ -652,9 +663,9 @@ Contains a FILETIME
 | 0x8005 | | [yellow-background]*Unknown (AES-XTS 256-bit encryption)*
 |===
 
-=== FVE metadata entry (version 1)
+=== FVE metadata entry
 
-The FVE metadata entry (version 1) is variable of size and consists of:
+The FVE metadata entry is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -663,9 +674,12 @@ The FVE metadata entry (version 1) is variable of size and consists of:
 Size of the data in the FVE metadata entry including this size value itself
 | 2 | 2 | | Entry type
 | 4 | 2 | | Value type
-| 6 | 2 | 1 | Version
+| 6 | 2 | | Version +
+Seen: 1 and 3
 | 8 | ...  | | Data
 |===
+
+Note: version is typically 1 but 3 has been seen for VMK FVE metadata entry in combination with clear key.
 
 ==== FVE metadata entry types
 
@@ -898,9 +912,18 @@ size and consists of:
 | 0 | 8 | | Block offset
 | 8 | 8 | | Block size +
 4+| _Unknown additional data_
-| 16 | 2 | | [yellow-background]*Unknown (format version?)*
+| 16 | 2 | | [yellow-background]*Unknown (number of entries?)*
 | 18 | 2 | | [yellow-background]*Unknown (size of additional data?)*
-| 20 | 4 | | [yellow-background]*Unknown (empty?)*
+| 28 | ... | | [yellow-background]*Unknown (array of 14 byte sized entries)*
+| ... | 2 | | [yellow-background]*Unknown (empty values)*
+|===
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (seen combination of block offset +  block size)*
+| 8 | 4 | | [yellow-background]*Unknown*
+| 12 | 2 | | [yellow-background]*Unknown*
 |===
 
 The FVE Volume header block seems to have been introduced in Windows 7. It

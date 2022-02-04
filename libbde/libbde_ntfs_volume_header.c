@@ -243,7 +243,7 @@ int libbde_ntfs_volume_header_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: boot entry point\t\t: 0x%02x 0x%02x 0x%02x\n",
+		 "%s: boot entry point\t\t\t: 0x%02x 0x%02x 0x%02x\n",
 		 function,
 		 ( (bde_ntfs_volume_header_t *) data )->boot_entry_point[ 0 ],
 		 ( (bde_ntfs_volume_header_t *) data )->boot_entry_point[ 1 ],
@@ -262,12 +262,12 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->file_system_signature[ 7 ] );
 
 		libcnotify_printf(
-		 "%s: bytes per sector\t\t: %" PRIu16 "\n",
+		 "%s: bytes per sector\t\t\t: %" PRIu16 "\n",
 		 function,
 		 ntfs_volume_header->bytes_per_sector );
 
 		libcnotify_printf(
-		 "%s: sectors per cluster block\t: %" PRIu8 "\n",
+		 "%s: sectors per cluster block\t\t: %" PRIu8 "\n",
 		 function,
 		 ( (bde_ntfs_volume_header_t *) data )->sectors_per_cluster_block );
 
@@ -280,7 +280,7 @@ int libbde_ntfs_volume_header_read_data(
 		 0 );
 
 		libcnotify_printf(
-		 "%s: media descriptor\t\t: 0x%02" PRIx8 "\n",
+		 "%s: media descriptor\t\t\t: 0x%02" PRIx8 "\n",
 		 function,
 		 ( (bde_ntfs_volume_header_t *) data )->media_descriptor );
 
@@ -288,7 +288,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->unknown2,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: unknown2\t\t\t: %" PRIu16 "\n",
+		 "%s: unknown2\t\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
@@ -296,7 +296,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->sectors_per_track,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: sectors per track\t\t: %" PRIu16 "\n",
+		 "%s: sectors per track\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
@@ -304,7 +304,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->number_of_heads,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: number of heads\t\t: %" PRIu16 "\n",
+		 "%s: number of heads\t\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
@@ -312,7 +312,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->number_of_hidden_sectors,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: number of hidden sectors\t: %" PRIu32 "\n",
+		 "%s: number of hidden sectors\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -320,7 +320,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->unknown3,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown3\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
+		 "%s: unknown3\t\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
 		 function,
 		 value_32bit,
 		 value_32bit );
@@ -329,23 +329,23 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->unknown4,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown4\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
+		 "%s: unknown4\t\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
 		 function,
 		 value_32bit,
 		 value_32bit );
 
 		libcnotify_printf(
-		 "%s: total number of sectors\t: %" PRIu64 "\n",
+		 "%s: total number of sectors\t\t: %" PRIu64 "\n",
 		 function,
 		 ntfs_volume_header->volume_size );
 
 		libcnotify_printf(
-		 "%s: MFT cluster block number\t: %" PRIu64 "\n",
+		 "%s: MFT cluster block number\t\t: %" PRIu64 "\n",
 		 function,
 		 mft_cluster_block_number );
 
 		libcnotify_printf(
-		 "%s: mirror MFT cluster block number: %" PRIu64 "\n",
+		 "%s: mirror MFT cluster block number\t: %" PRIu64 "\n",
 		 function,
 		 mirror_mft_cluster_block_number );
 
@@ -355,7 +355,7 @@ int libbde_ntfs_volume_header_read_data(
 		 mft_entry_size );
 
 		libcnotify_printf(
-		 "%s: index entry size\t\t: %" PRIu32 "\n",
+		 "%s: index entry size\t\t\t: %" PRIu32 "\n",
 		 function,
 		 index_entry_size );
 
@@ -371,7 +371,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->checksum,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: checksum\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: checksum\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -387,7 +387,7 @@ int libbde_ntfs_volume_header_read_data(
 		 ( (bde_ntfs_volume_header_t *) data )->sector_signature,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: sector signature\t\t: 0x%04" PRIx16 "\n",
+		 "%s: sector signature\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 value_16bit );
 
@@ -602,7 +602,7 @@ int libbde_ntfs_volume_header_read_data(
 		 cluster_block_size );
 
 		libcnotify_printf(
-		 "%s: calculated MFT entry size\t: %" PRIu32 "\n",
+		 "%s: calculated MFT entry size\t\t: %" PRIu32 "\n",
 		 function,
 		 mft_entry_size );
 

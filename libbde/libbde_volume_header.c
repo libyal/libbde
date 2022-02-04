@@ -498,7 +498,7 @@ int libbde_volume_header_read_data(
 			 ( (bde_volume_header_windows_vista_t *) data )->volume_serial_number,
 			 value_64bit );
 			libcnotify_printf(
-			 "%s: volume serial number\t\t: 0x%08" PRIx64 "\n",
+			 "%s: volume serial number\t\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 value_64bit );
 
@@ -530,15 +530,87 @@ int libbde_volume_header_read_data(
 			 0 );
 
 			byte_stream_copy_to_uint32_little_endian(
-			 ( (bde_volume_header_windows_7_t *) data )->volume_serial_number,
+			 &( ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 0 ] ),
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: unknown4a\t\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
+			 function,
+			 value_32bit,
+			 value_32bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 &( ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 4 ] ),
 			 value_64bit );
 			libcnotify_printf(
-			 "%s: volume serial number\t\t: 0x%08" PRIx32 "\n",
+			 "%s: unknown4b\t\t\t\t: 0x%08" PRIx64 " (%" PRIu64 ")\n",
+			 function,
+			 value_64bit,
+			 value_64bit );
+
+			byte_stream_copy_to_uint16_little_endian(
+			 &( ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 12 ] ),
+			 value_16bit );
+			libcnotify_printf(
+			 "%s: unknown4c\t\t\t\t: 0x%04" PRIx16 " (%" PRIu16 ")\n",
+			 function,
+			 value_16bit,
+			 value_16bit );
+
+			byte_stream_copy_to_uint16_little_endian(
+			 &( ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 14 ] ),
+			 value_16bit );
+			libcnotify_printf(
+			 "%s: unknown4d\t\t\t\t: 0x%04" PRIx16 " (%" PRIu16 ")\n",
+			 function,
+			 value_16bit,
+			 value_16bit );
+
+			byte_stream_copy_to_uint64_little_endian(
+			 &( ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 16 ] ),
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: unknown4e\t\t\t\t: 0x%08" PRIx64 " (%" PRIu64 ")\n",
+			 function,
+			 value_64bit,
+			 value_64bit );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 &( ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 24 ] ),
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: unknown4f\t\t\t\t: 0x%08" PRIx32 " (%" PRIu32 ")\n",
+			 function,
+			 value_32bit,
+			 value_32bit );
+
+			libcnotify_printf(
+			 "%s: drive physical number\t\t\t: 0x%02" PRIx8 "\n",
+			 function,
+			 ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 28 ] );
+
+			libcnotify_printf(
+			 "%s: unknown4g\t\t\t\t: 0x%02" PRIx8 "\n",
+			 function,
+			 ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 29 ] );
+
+			libcnotify_printf(
+			 "%s: extended boot signature\t\t\t: 0x%02" PRIx8 "\n",
+			 function,
+			 ( ( (bde_volume_header_windows_7_t *) data )->unknown4 )[ 30 ] );
+
+			libcnotify_printf(
+			 "\n" );
+
+			byte_stream_copy_to_uint32_little_endian(
+			 ( (bde_volume_header_windows_7_t *) data )->volume_serial_number,
+			 value_32bit );
+			libcnotify_printf(
+			 "%s: volume serial number\t\t\t: 0x%08" PRIx32 "\n",
 			 function,
 			 value_32bit );
 
 			libcnotify_printf(
-			 "%s: volume label\t\t\t: %c%c%c%c%c%c%c%c%c%c%c\n",
+			 "%s: volume label\t\t\t\t: %c%c%c%c%c%c%c%c%c%c%c\n",
 			 function,
 			 ( (bde_volume_header_windows_7_t *) data )->volume_label[ 0 ],
 			 ( (bde_volume_header_windows_7_t *) data )->volume_label[ 1 ],
@@ -553,7 +625,7 @@ int libbde_volume_header_read_data(
 			 ( (bde_volume_header_windows_7_t *) data )->volume_label[ 10 ] );
 
 			libcnotify_printf(
-			 "%s: file system signature\t\t: %c%c%c%c%c%c%c%c\n",
+			 "%s: file system signature\t\t\t: %c%c%c%c%c%c%c%c\n",
 			 function,
 			 ( (bde_volume_header_windows_7_t *) data )->file_system_signature[ 0 ],
 			 ( (bde_volume_header_windows_7_t *) data )->file_system_signature[ 1 ],

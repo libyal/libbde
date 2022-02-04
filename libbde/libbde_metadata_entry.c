@@ -249,7 +249,8 @@ ssize_t libbde_metadata_entry_read(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( version != 1 )
+	if( ( version != 1 )
+	 && ( version != 3 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -394,12 +395,11 @@ int libbde_metadata_entry_read_string(
 			 "%s: unable to determine size of name string.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( value_string_size > 0 )
 		{
-			if( ( value_string_size > (size_t) SSIZE_MAX )
-			 || ( ( sizeof( system_character_t ) * value_string_size )  > (size_t) SSIZE_MAX ) )
+			if( value_string_size > ( (size_t) SSIZE_MAX / sizeof( system_character_t ) ) )
 			{
 				libcerror_error_set(
 				 error,
@@ -408,7 +408,7 @@ int libbde_metadata_entry_read_string(
 				 "%s: invalid value string size value exceeds maximum.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			value_string = system_string_allocate(
 					value_string_size );
@@ -422,7 +422,7 @@ int libbde_metadata_entry_read_string(
 				 "%s: unable to create name string.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libuna_utf16_string_copy_from_utf16_stream(
@@ -450,10 +450,7 @@ int libbde_metadata_entry_read_string(
 				 "%s: unable to set name string.",
 				 function );
 
-				memory_free(
-				 value_string );
-
-				return( -1 );
+				goto on_error;
 			}
 			libcnotify_printf(
 			 "%s: string\t\t\t\t: %" PRIs_SYSTEM "\n",
@@ -462,11 +459,24 @@ int libbde_metadata_entry_read_string(
 
 			memory_free(
 			 value_string );
+
+			value_string = NULL;
 		}
 		libcnotify_printf(
 		 "\n" );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	return( 1 );
+
+on_error:
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( value_string != NULL )
+	{
+		memory_free(
+		 value_string );
+	}
+#endif
+	return( -1 );
 }
 
