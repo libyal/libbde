@@ -25,6 +25,7 @@
 #include <types.h>
 
 #include "libbde_io_handle.h"
+#include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
 #include "libbde_metadata_block_header.h"

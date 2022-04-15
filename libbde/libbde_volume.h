@@ -25,15 +25,15 @@
 #include <common.h>
 #include <types.h>
 
+#include "libbde_encryption_context.h"
 #include "libbde_extern.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcthreads.h"
-#include "libbde_libfcache.h"
-#include "libbde_libfdata.h"
 #include "libbde_metadata.h"
 #include "libbde_password_keep.h"
+#include "libbde_sector_data_vector.h"
 #include "libbde_types.h"
 #include "libbde_volume_header.h"
 
@@ -73,13 +73,13 @@ struct libbde_internal_volume
 	 */
 	libbde_metadata_t *external_key_metadata;
 
-	/* The sectors vector
+	/* The encryption context
 	 */
-	libfdata_vector_t *sectors_vector;
+	libbde_encryption_context_t *encryption_context;
 
-	/* The sectors cache
+	/* The sector data vector
 	 */
-	libfcache_cache_t *sectors_cache;
+	libbde_sector_data_vector_t *sector_data_vector;
 
 	/* The file IO handle
 	 */

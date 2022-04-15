@@ -27,13 +27,12 @@
 
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
+#include "libbde_encryption_context.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
 #include "libbde_libcthreads.h"
-#include "libbde_libfcache.h"
-#include "libbde_libfdata.h"
 #include "libbde_metadata.h"
 #include "libbde_metadata_header.h"
 #include "libbde_key_protector.h"
@@ -995,31 +994,34 @@ int libbde_volume_close(
 	}
 	internal_volume->keys_are_set = 0;
 
-	if( libfdata_vector_free(
-	     &( internal_volume->sectors_vector ),
+	if( libbde_sector_data_vector_free(
+	     &( internal_volume->sector_data_vector ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free sectors vector.",
+		 "%s: unable to free sector data vector.",
 		 function );
 
 		result = -1;
 	}
-	if( libfcache_cache_free(
-	     &( internal_volume->sectors_cache ),
-	     error ) != 1 )
+	if( internal_volume->encryption_context != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free sectors cache.",
-		 function );
+		if( libbde_encryption_context_free(
+		     &( internal_volume->encryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free encryption context.",
+			 function );
 
-		result = -1;
+			result = -1;
+		}
 	}
 	if( internal_volume->volume_header != NULL )
 	{
@@ -1115,7 +1117,6 @@ int libbde_internal_volume_open_read(
 	static char *function              = "libbde_internal_volume_open_read";
 	size64_t file_size                 = 0;
 	size_t startup_key_identifier_size = 0;
-	int element_index                  = 0;
 	int result                         = 0;
 
 	if( internal_volume == NULL )
@@ -1184,24 +1185,13 @@ int libbde_internal_volume_open_read(
 
 		return( -1 );
 	}
-	if( internal_volume->sectors_vector != NULL )
+	if( internal_volume->sector_data_vector != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - sectors vector already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->sectors_cache != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - sectors cache already set.",
+		 "%s: invalid volume - sector data vector already set.",
 		 function );
 
 		return( -1 );
@@ -1417,26 +1407,6 @@ int libbde_internal_volume_open_read(
 
 		goto on_error;
 	}
-	if( libfdata_vector_initialize(
-	     &( internal_volume->sectors_vector ),
-	     (size64_t) internal_volume->io_handle->bytes_per_sector,
-	     (intptr_t *) internal_volume->io_handle,
-	     NULL,
-	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libbde_io_handle_read_sector,
-	     NULL,
-	     LIBFDATA_DATA_HANDLE_FLAG_NON_MANAGED,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create sectors vector.",
-		 function );
-
-		goto on_error;
-	}
 	if( file_size == 0 )
 	{
 		file_size = internal_volume->io_handle->volume_size;
@@ -1445,34 +1415,18 @@ int libbde_internal_volume_open_read(
 	{
 		file_size = internal_volume->io_handle->encrypted_volume_size;
 	}
-	if( libfdata_vector_append_segment(
-	     internal_volume->sectors_vector,
-	     &element_index,
-	     0,
-	     0,
+	if( libbde_sector_data_vector_initialize(
+	     &( internal_volume->sector_data_vector ),
+	     internal_volume->encryption_context,
+	     (size64_t) internal_volume->io_handle->bytes_per_sector,
 	     file_size,
-	     0,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append segment to sectors vector.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfcache_cache_initialize(
-	     &( internal_volume->sectors_cache ),
-	     LIBBDE_MAXIMUM_CACHE_ENTRIES_SECTORS,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create sectors cache.",
+		 "%s: unable to create sector data vector.",
 		 function );
 
 		goto on_error;
@@ -1480,16 +1434,10 @@ int libbde_internal_volume_open_read(
 	return( 1 );
 
 on_error:
-	if( internal_volume->sectors_cache != NULL )
+	if( internal_volume->sector_data_vector != NULL )
 	{
-		libfcache_cache_free(
-		 &( internal_volume->sectors_cache ),
-		 NULL );
-	}
-	if( internal_volume->sectors_vector != NULL )
-	{
-		libfdata_vector_free(
-		 &( internal_volume->sectors_vector ),
+		libbde_sector_data_vector_free(
+		 &( internal_volume->sector_data_vector ),
 		 NULL );
 	}
 	if( internal_volume->tertiary_metadata != NULL )
@@ -1590,11 +1538,11 @@ int libbde_internal_volume_open_read_keys(
 			return( -1 );
 		}
 	}
-	if( ( internal_volume->io_handle->encryption_context == NULL )
+	if( ( internal_volume->encryption_context == NULL )
 	 && ( internal_volume->keys_are_set != 0 ) )
 	{
-		if( libbde_encryption_initialize(
-		     &( internal_volume->io_handle->encryption_context ),
+		if( libbde_encryption_context_initialize(
+		     &( internal_volume->encryption_context ),
 		     internal_volume->encryption_method,
 		     error ) != 1 )
 		{
@@ -1607,8 +1555,8 @@ int libbde_internal_volume_open_read_keys(
 
 			return( -1 );
 		}
-		if( libbde_encryption_set_keys(
-		     internal_volume->io_handle->encryption_context,
+		if( libbde_encryption_context_set_keys(
+		     internal_volume->encryption_context,
 		     internal_volume->full_volume_encryption_key,
 		     64,
 		     internal_volume->tweak_key,
@@ -1625,7 +1573,7 @@ int libbde_internal_volume_open_read_keys(
 			return( -1 );
 		}
 	}
-	if( internal_volume->io_handle->encryption_context != NULL )
+	if( internal_volume->encryption_context != NULL )
 	{
 		return( 1 );
 	}
@@ -1966,6 +1914,7 @@ int libbde_internal_volume_unlock(
 		     internal_volume->io_handle,
 		     file_io_handle,
 		     volume_header_offset,
+		     internal_volume->encryption_context,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -2104,9 +2053,10 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 {
 	libbde_sector_data_t *sector_data = NULL;
 	static char *function             = "libbde_internal_volume_read_buffer_from_file_io_handle";
-	off64_t element_data_offset       = 0;
+	off64_t sector_file_offset        = 0;
 	size_t buffer_offset              = 0;
 	size_t read_size                  = 0;
+	size_t remaining_buffer_size      = 0;
 	size_t sector_data_offset         = 0;
 
 	if( internal_volume == NULL )
@@ -2142,24 +2092,13 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 
 		return( -1 );
 	}
-	if( internal_volume->sectors_vector == NULL )
+	if( internal_volume->sector_data_vector == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing sectors vector.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->sectors_cache == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing sectors cache.",
+		 "%s: invalid volume - missing sector data vector.",
 		 function );
 
 		return( -1 );
@@ -2207,27 +2146,39 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 	{
 		buffer_size = (size_t) ( internal_volume->io_handle->volume_size - internal_volume->current_offset );
 	}
-	sector_data_offset = (size_t) ( internal_volume->current_offset % internal_volume->io_handle->bytes_per_sector );
+	remaining_buffer_size = buffer_size;
 
-	while( buffer_offset < buffer_size )
+	sector_file_offset = ( internal_volume->current_offset / internal_volume->io_handle->bytes_per_sector ) * internal_volume->io_handle->bytes_per_sector;
+	sector_data_offset = (size_t) ( internal_volume->current_offset - sector_file_offset );
+
+	while( remaining_buffer_size > 0 )
 	{
-		if( libfdata_vector_get_element_value_at_offset(
-		     internal_volume->sectors_vector,
-		     (intptr_t *) file_io_handle,
-		     (libfdata_cache_t *) internal_volume->sectors_cache,
-		     internal_volume->current_offset,
-		     &element_data_offset,
-		     (intptr_t **) &sector_data,
-		     0,
+		read_size = internal_volume->io_handle->bytes_per_sector - sector_data_offset;
+
+		if( read_size > remaining_buffer_size )
+		{
+			read_size = remaining_buffer_size;
+		}
+		if( read_size == 0 )
+		{
+			break;
+		}
+		if( libbde_sector_data_vector_get_sector_data_at_offset(
+		     internal_volume->sector_data_vector,
+		     internal_volume->io_handle,
+		     file_io_handle,
+		     sector_file_offset,
+		     &sector_data,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve sector data at offset: %" PRIi64 ".",
+			 "%s: unable to retrieve sector data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 			 function,
-			 internal_volume->current_offset );
+			 sector_file_offset,
+			 sector_file_offset );
 
 			return( -1 );
 		}
@@ -2237,21 +2188,12 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing sector data at offset: %" PRIi64 ".",
+			 "%s: missing sector data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 			 function,
-			 internal_volume->current_offset );
+			 sector_file_offset,
+			 sector_file_offset );
 
 			return( -1 );
-		}
-		read_size = sector_data->data_size - sector_data_offset;
-
-		if( read_size > ( buffer_size - buffer_offset ) )
-		{
-			read_size = buffer_size - buffer_offset;
-		}
-		if( read_size == 0 )
-		{
-			break;
 		}
 		if( memory_copy(
 		     &( ( (uint8_t *) buffer )[ buffer_offset ] ),
@@ -2267,20 +2209,16 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 
 			return( -1 );
 		}
-		buffer_offset     += read_size;
-		sector_data_offset = 0;
+		remaining_buffer_size -= read_size;
+		buffer_offset         += read_size;
 
-		internal_volume->current_offset += (off64_t) read_size;
-
-		if( (size64_t) internal_volume->current_offset >= internal_volume->io_handle->volume_size )
-		{
-			break;
-		}
 		if( internal_volume->io_handle->abort != 0 )
 		{
 			break;
 		}
 	}
+	internal_volume->current_offset += (off64_t) buffer_offset;
+
 	return( (ssize_t) buffer_offset );
 }
 

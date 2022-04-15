@@ -26,7 +26,7 @@
 
 #include "libbde_definitions.h"
 #include "libbde_diffuser.h"
-#include "libbde_encryption.h"
+#include "libbde_encryption_context.h"
 #include "libbde_libcaes.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
@@ -35,12 +35,12 @@
  * Make sure the value encryption context is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libbde_encryption_initialize(
+int libbde_encryption_context_initialize(
      libbde_encryption_context_t **context,
      uint16_t method,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_encryption_initialize";
+	static char *function = "libbde_encryption_context_initialize";
 
 	if( context == NULL )
 	{
@@ -260,11 +260,11 @@ on_error:
 /* Frees an encryption context
  * Returns 1 if successful or -1 on error
  */
-int libbde_encryption_free(
+int libbde_encryption_context_free(
      libbde_encryption_context_t **context,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_encryption_free";
+	static char *function = "libbde_encryption_context_free";
 	int result            = 1;
 
 	if( context == NULL )
@@ -387,7 +387,7 @@ int libbde_encryption_free(
 /* Sets the de- and encryption keys
  * Returns 1 if successful or -1 on error
  */
-int libbde_encryption_set_keys(
+int libbde_encryption_context_set_keys(
      libbde_encryption_context_t *context,
      const uint8_t *key,
      size_t key_size,
@@ -395,7 +395,7 @@ int libbde_encryption_set_keys(
      size_t tweak_key_size,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_encryption_set_keys";
+	static char *function = "libbde_encryption_context_set_keys";
 	size_t key_bit_size   = 0;
 	size_t key_byte_size  = 0;
 
@@ -629,7 +629,7 @@ int libbde_encryption_set_keys(
 /* De- or encrypts a block of data
  * Returns 1 if successful or -1 on error
  */
-int libbde_encryption_crypt(
+int libbde_encryption_context_crypt(
      libbde_encryption_context_t *context,
      int mode,
      const uint8_t *input_data,
@@ -643,7 +643,7 @@ int libbde_encryption_crypt(
 	uint8_t initialization_vector[ 16 ];
 	uint8_t sector_key_data[ 32 ];
 
-	static char *function        = "libbde_encryption_crypt";
+	static char *function        = "libbde_encryption_context_crypt";
 	size_t data_index            = 0;
 	size_t sector_key_data_index = 0;
 

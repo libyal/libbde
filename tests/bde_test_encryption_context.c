@@ -1,5 +1,5 @@
 /*
- * Library key type test program
+ * Library encryption_context type test program
  *
  * Copyright (C) 2011-2022, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,30 +33,32 @@
 #include "bde_test_memory.h"
 #include "bde_test_unused.h"
 
-#include "../libbde/libbde_key.h"
+#include "../libbde/libbde_definitions.h"
+#include "../libbde/libbde_encryption_context.h"
 
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
-/* Tests the libbde_key_initialize function
+/* Tests the libbde_encryption_context_initialize function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_key_initialize(
+int bde_test_encryption_context_initialize(
      void )
 {
-	libbde_key_t *key               = NULL;
-	libcerror_error_t *error        = NULL;
-	int result                      = 0;
+	libbde_encryption_context_t *encryption_context = NULL;
+	libcerror_error_t *error                        = NULL;
+	int result                                      = 0;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
-	int number_of_malloc_fail_tests = 1;
-	int number_of_memset_fail_tests = 1;
-	int test_number                 = 0;
+	int number_of_malloc_fail_tests                 = 1;
+	int number_of_memset_fail_tests                 = 1;
+	int test_number                                 = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libbde_key_initialize(
-	          &key,
+	result = libbde_encryption_context_initialize(
+	          &encryption_context,
+	          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +67,15 @@ int bde_test_key_initialize(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NOT_NULL(
-	 "key",
-	 key );
+	 "encryption_context",
+	 encryption_context );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libbde_key_free(
-	          &key,
+	result = libbde_encryption_context_free(
+	          &encryption_context,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +84,8 @@ int bde_test_key_initialize(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
-	 "key",
-	 key );
+	 "encryption_context",
+	 encryption_context );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,8 +93,9 @@ int bde_test_key_initialize(
 
 	/* Test error cases
 	 */
-	result = libbde_key_initialize(
+	result = libbde_encryption_context_initialize(
 	          NULL,
+	          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -107,13 +110,14 @@ int bde_test_key_initialize(
 	libcerror_error_free(
 	 &error );
 
-	key = (libbde_key_t *) 0x12345678UL;
+	encryption_context = (libbde_encryption_context_t *) 0x12345678UL;
 
-	result = libbde_key_initialize(
-	          &key,
+	result = libbde_encryption_context_initialize(
+	          &encryption_context,
+	          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
 	          &error );
 
-	key = NULL;
+	encryption_context = NULL;
 
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -133,22 +137,23 @@ int bde_test_key_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libbde_key_initialize with malloc failing
+		/* Test libbde_encryption_context_initialize with malloc failing
 		 */
 		bde_test_malloc_attempts_before_fail = test_number;
 
-		result = libbde_key_initialize(
-		          &key,
+		result = libbde_encryption_context_initialize(
+		          &encryption_context,
+		          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
 		          &error );
 
 		if( bde_test_malloc_attempts_before_fail != -1 )
 		{
 			bde_test_malloc_attempts_before_fail = -1;
 
-			if( key != NULL )
+			if( encryption_context != NULL )
 			{
-				libbde_key_free(
-				 &key,
+				libbde_encryption_context_free(
+				 &encryption_context,
 				 NULL );
 			}
 		}
@@ -160,8 +165,8 @@ int bde_test_key_initialize(
 			 -1 );
 
 			BDE_TEST_ASSERT_IS_NULL(
-			 "key",
-			 key );
+			 "encryption_context",
+			 encryption_context );
 
 			BDE_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +180,23 @@ int bde_test_key_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libbde_key_initialize with memset failing
+		/* Test libbde_encryption_context_initialize with memset failing
 		 */
 		bde_test_memset_attempts_before_fail = test_number;
 
-		result = libbde_key_initialize(
-		          &key,
+		result = libbde_encryption_context_initialize(
+		          &encryption_context,
+		          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
 		          &error );
 
 		if( bde_test_memset_attempts_before_fail != -1 )
 		{
 			bde_test_memset_attempts_before_fail = -1;
 
-			if( key != NULL )
+			if( encryption_context != NULL )
 			{
-				libbde_key_free(
-				 &key,
+				libbde_encryption_context_free(
+				 &encryption_context,
 				 NULL );
 			}
 		}
@@ -202,8 +208,8 @@ int bde_test_key_initialize(
 			 -1 );
 
 			BDE_TEST_ASSERT_IS_NULL(
-			 "key",
-			 key );
+			 "encryption_context",
+			 encryption_context );
 
 			BDE_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +229,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( key != NULL )
+	if( encryption_context != NULL )
 	{
-		libbde_key_free(
-		 &key,
+		libbde_encryption_context_free(
+		 &encryption_context,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libbde_key_free function
+/* Tests the libbde_encryption_context_free function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_key_free(
+int bde_test_encryption_context_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +249,7 @@ int bde_test_key_free(
 
 	/* Test error cases
 	 */
-	result = libbde_key_free(
+	result = libbde_encryption_context_free(
 	          NULL,
 	          &error );
 
@@ -290,14 +296,16 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	BDE_TEST_RUN(
-	 "libbde_key_initialize",
-	 bde_test_key_initialize );
+	 "libbde_encryption_context_initialize",
+	 bde_test_encryption_context_initialize );
 
 	BDE_TEST_RUN(
-	 "libbde_key_free",
-	 bde_test_key_free );
+	 "libbde_encryption_context_free",
+	 bde_test_encryption_context_free );
 
-	/* TODO: add tests for libbde_key_read */
+	/* TODO: add tests for libbde_encryption_set_keys */
+
+	/* TODO: add tests for libbde_encryption_crypt */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 

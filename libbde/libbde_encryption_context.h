@@ -1,5 +1,5 @@
 /*
- * Encryption functions
+ * Encryption context functions
  *
  * Copyright (C) 2011-2022, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_ENCRYPTION_H )
-#define _LIBBDE_ENCRYPTION_H
+#if !defined( _LIBBDE_ENCRYPTION_CONTEXT_H )
+#define _LIBBDE_ENCRYPTION_CONTEXT_H
 
 #include <common.h>
 #include <types.h>
@@ -65,16 +65,16 @@ struct libbde_encryption_context
 	libcaes_tweaked_context_t *fvek_encryption_tweaked_context;
 };
 
-int libbde_encryption_initialize(
+int libbde_encryption_context_initialize(
      libbde_encryption_context_t **context,
      uint16_t method,
      libcerror_error_t **error );
 
-int libbde_encryption_free(
+int libbde_encryption_context_free(
      libbde_encryption_context_t **context,
      libcerror_error_t **error );
 
-int libbde_encryption_set_keys(
+int libbde_encryption_context_set_keys(
      libbde_encryption_context_t *context,
      const uint8_t *key,
      size_t key_size,
@@ -82,7 +82,7 @@ int libbde_encryption_set_keys(
      size_t tweak_key_size,
      libcerror_error_t **error );
 
-int libbde_encryption_crypt(
+int libbde_encryption_context_crypt(
      libbde_encryption_context_t *context,
      int mode,
      const uint8_t *input_data,
@@ -96,5 +96,5 @@ int libbde_encryption_crypt(
 }
 #endif
 
-#endif /* !defined( _LIBBDE_ENCRYPTION_H ) */
+#endif /* !defined( _LIBBDE_ENCRYPTION_CONTEXT_H ) */
 

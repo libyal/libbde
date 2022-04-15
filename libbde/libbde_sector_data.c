@@ -25,7 +25,7 @@
 #include <types.h>
 
 #include "libbde_definitions.h"
-#include "libbde_encryption.h"
+#include "libbde_encryption_context.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
@@ -481,7 +481,7 @@ int libbde_sector_data_read_file_io_handle(
 		{
 			block_key /= io_handle->bytes_per_sector;
 		}
-		if( libbde_encryption_crypt(
+		if( libbde_encryption_context_crypt(
 		     encryption_context,
 		     LIBBDE_ENCRYPTION_CRYPT_MODE_DECRYPT,
 		     sector_data->encrypted_data,

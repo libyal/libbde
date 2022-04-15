@@ -25,13 +25,11 @@
 #include <types.h>
 
 #include "libbde_definitions.h"
-#include "libbde_encryption.h"
+#include "libbde_encryption_context.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
 #include "libbde_libcnotify.h"
-#include "libbde_libfcache.h"
-#include "libbde_libfdata.h"
 #include "libbde_ntfs_volume_header.h"
 #include "libbde_sector_data.h"
 #include "libbde_unused.h"
@@ -178,125 +176,9 @@ int libbde_io_handle_clear(
 
 		return( -1 );
 	}
-	if( io_handle->encryption_context != NULL )
-	{
-		if( libbde_encryption_free(
-		     &( io_handle->encryption_context ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free encryption context.",
-			 function );
-
-			result = -1;
-		}
-	}
 	io_handle->bytes_per_sector = 512;
 
 	return( result );
-}
-
-/* Reads a sector
- * Callback function for the volume vector
- * Returns 1 if successful or -1 on error
- */
-int libbde_io_handle_read_sector(
-     libbde_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     libfdata_vector_t *vector,
-     libfcache_cache_t *cache,
-     int element_index,
-     int element_data_file_index LIBBDE_ATTRIBUTE_UNUSED,
-     off64_t element_data_offset,
-     size64_t element_data_size LIBBDE_ATTRIBUTE_UNUSED,
-     uint32_t element_data_flags LIBBDE_ATTRIBUTE_UNUSED,
-     uint8_t read_flags LIBBDE_ATTRIBUTE_UNUSED,
-     libcerror_error_t **error )
-{
-	libbde_sector_data_t *sector_data = NULL;
-	static char *function             = "libbde_io_handle_read_sector";
-
-	LIBBDE_UNREFERENCED_PARAMETER( element_data_file_index );
-	LIBBDE_UNREFERENCED_PARAMETER( element_data_size );
-	LIBBDE_UNREFERENCED_PARAMETER( element_data_flags );
-	LIBBDE_UNREFERENCED_PARAMETER( read_flags );
-
-	if( io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid IO handle.",
-		 function );
-
-		return( -1 );
-	}
-/* TODO handle virtual sectors, what about different sector sizes? */
-	if( libbde_sector_data_initialize(
-	     &sector_data,
-	     (size_t) io_handle->bytes_per_sector,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create sector data.",
-		 function );
-
-		goto on_error;
-	}
-	if( libbde_sector_data_read_file_io_handle(
-	     sector_data,
-	     io_handle,
-	     file_io_handle,
-	     element_data_offset,
-	     io_handle->encryption_context,
-	     1,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read sector data.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfdata_vector_set_element_value_by_index(
-	     vector,
-	     (intptr_t *) file_io_handle,
-	     (libfdata_cache_t *) cache,
-	     element_index,
-	     (intptr_t *) sector_data,
-	     (int (*)(intptr_t **, libcerror_error_t **)) &libbde_sector_data_free,
-	     LIBFDATA_LIST_ELEMENT_VALUE_FLAG_MANAGED,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set sector data as element value.",
-		 function );
-
-		goto on_error;
-	}
-	return( 1 );
-
-on_error:
-	if( sector_data != NULL )
-	{
-		libbde_sector_data_free(
-		 &sector_data,
-		 NULL );
-	}
-	return( -1 );
 }
 
 /* Reads the unencrypted volume header
@@ -306,6 +188,7 @@ int libbde_io_handle_read_unencrypted_volume_header(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t volume_header_offset,
+     libbde_encryption_context_t *encryption_context,
      libcerror_error_t **error )
 {
 	libbde_ntfs_volume_header_t *ntfs_volume_header = NULL;
@@ -352,7 +235,7 @@ int libbde_io_handle_read_unencrypted_volume_header(
 	     io_handle,
 	     file_io_handle,
 	     volume_header_offset,
-	     io_handle->encryption_context,
+	     encryption_context,
 	     0,
 	     error ) != 1 )
 	{

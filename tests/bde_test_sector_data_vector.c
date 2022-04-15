@@ -1,5 +1,5 @@
 /*
- * Library key type test program
+ * Library sector_data_vector type test program
  *
  * Copyright (C) 2011-2022, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <file_stream.h>
 #include <types.h>
 
@@ -27,36 +28,42 @@
 #include <stdlib.h>
 #endif
 
+#include "bde_test_functions.h"
 #include "bde_test_libbde.h"
+#include "bde_test_libbfio.h"
 #include "bde_test_libcerror.h"
 #include "bde_test_macros.h"
 #include "bde_test_memory.h"
 #include "bde_test_unused.h"
 
-#include "../libbde/libbde_key.h"
+#include "../libbde/libbde_definitions.h"
+#include "../libbde/libbde_encryption_context.h"
+#include "../libbde/libbde_sector_data_vector.h"
 
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
-/* Tests the libbde_key_initialize function
+/* Tests the libbde_sector_data_vector_initialize function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_key_initialize(
+int bde_test_sector_data_vector_initialize(
      void )
 {
-	libbde_key_t *key               = NULL;
-	libcerror_error_t *error        = NULL;
-	int result                      = 0;
+	libbde_encryption_context_t *encryption_context = NULL;
+	libbde_sector_data_vector_t *sector_data_vector = NULL;
+	libcerror_error_t *error                        = NULL;
+	int result                                      = 0;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
-	int number_of_malloc_fail_tests = 1;
-	int number_of_memset_fail_tests = 1;
-	int test_number                 = 0;
+	int number_of_malloc_fail_tests                 = 1;
+	int number_of_memset_fail_tests                 = 1;
+	int test_number                                 = 0;
 #endif
 
-	/* Test regular cases
+	/* Initialize test
 	 */
-	result = libbde_key_initialize(
-	          &key,
+	result = libbde_encryption_context_initialize(
+	          &encryption_context,
+	          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +72,37 @@ int bde_test_key_initialize(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NOT_NULL(
-	 "key",
-	 key );
+	 "encryption_context",
+	 encryption_context );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libbde_key_free(
-	          &key,
+	/* Test regular cases
+	 */
+	result = libbde_sector_data_vector_initialize(
+	          &sector_data_vector,
+	          encryption_context,
+	          512,
+	          4096,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "sector_data_vector",
+	 sector_data_vector );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libbde_sector_data_vector_free(
+	          &sector_data_vector,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +111,8 @@ int bde_test_key_initialize(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
-	 "key",
-	 key );
+	 "sector_data_vector",
+	 sector_data_vector );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,8 +120,11 @@ int bde_test_key_initialize(
 
 	/* Test error cases
 	 */
-	result = libbde_key_initialize(
+	result = libbde_sector_data_vector_initialize(
 	          NULL,
+	          encryption_context,
+	          512,
+	          4096,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -107,13 +139,16 @@ int bde_test_key_initialize(
 	libcerror_error_free(
 	 &error );
 
-	key = (libbde_key_t *) 0x12345678UL;
+	sector_data_vector = (libbde_sector_data_vector_t *) 0x12345678UL;
 
-	result = libbde_key_initialize(
-	          &key,
+	result = libbde_sector_data_vector_initialize(
+	          &sector_data_vector,
+	          encryption_context,
+	          512,
+	          4096,
 	          &error );
 
-	key = NULL;
+	sector_data_vector = NULL;
 
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -133,22 +168,25 @@ int bde_test_key_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libbde_key_initialize with malloc failing
+		/* Test libbde_sector_data_vector_initialize with malloc failing
 		 */
 		bde_test_malloc_attempts_before_fail = test_number;
 
-		result = libbde_key_initialize(
-		          &key,
+		result = libbde_sector_data_vector_initialize(
+		          &sector_data_vector,
+		          encryption_context,
+		          512,
+		          4096,
 		          &error );
 
 		if( bde_test_malloc_attempts_before_fail != -1 )
 		{
 			bde_test_malloc_attempts_before_fail = -1;
 
-			if( key != NULL )
+			if( sector_data_vector != NULL )
 			{
-				libbde_key_free(
-				 &key,
+				libbde_sector_data_vector_free(
+				 &sector_data_vector,
 				 NULL );
 			}
 		}
@@ -160,8 +198,8 @@ int bde_test_key_initialize(
 			 -1 );
 
 			BDE_TEST_ASSERT_IS_NULL(
-			 "key",
-			 key );
+			 "sector_data_vector",
+			 sector_data_vector );
 
 			BDE_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +213,25 @@ int bde_test_key_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libbde_key_initialize with memset failing
+		/* Test libbde_sector_data_vector_initialize with memset failing
 		 */
 		bde_test_memset_attempts_before_fail = test_number;
 
-		result = libbde_key_initialize(
-		          &key,
+		result = libbde_sector_data_vector_initialize(
+		          &sector_data_vector,
+		          encryption_context,
+		          512,
+		          4096,
 		          &error );
 
 		if( bde_test_memset_attempts_before_fail != -1 )
 		{
 			bde_test_memset_attempts_before_fail = -1;
 
-			if( key != NULL )
+			if( sector_data_vector != NULL )
 			{
-				libbde_key_free(
-				 &key,
+				libbde_sector_data_vector_free(
+				 &sector_data_vector,
 				 NULL );
 			}
 		}
@@ -202,8 +243,8 @@ int bde_test_key_initialize(
 			 -1 );
 
 			BDE_TEST_ASSERT_IS_NULL(
-			 "key",
-			 key );
+			 "sector_data_vector",
+			 sector_data_vector );
 
 			BDE_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -215,6 +256,25 @@ int bde_test_key_initialize(
 	}
 #endif /* defined( HAVE_BDE_TEST_MEMORY ) */
 
+	/* Clean up file IO handle
+	 */
+	result = libbde_encryption_context_free(
+	          &encryption_context,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "encryption_context",
+	 encryption_context );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	return( 1 );
 
 on_error:
@@ -223,19 +283,25 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( key != NULL )
+	if( sector_data_vector != NULL )
 	{
-		libbde_key_free(
-		 &key,
+		libbde_sector_data_vector_free(
+		 &sector_data_vector,
+		 NULL );
+	}
+	if( encryption_context != NULL )
+	{
+		libbde_encryption_context_free(
+		 &encryption_context,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libbde_key_free function
+/* Tests the libbde_sector_data_vector_free function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_key_free(
+int bde_test_sector_data_vector_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +309,7 @@ int bde_test_key_free(
 
 	/* Test error cases
 	 */
-	result = libbde_key_free(
+	result = libbde_sector_data_vector_free(
 	          NULL,
 	          &error );
 
@@ -290,14 +356,14 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	BDE_TEST_RUN(
-	 "libbde_key_initialize",
-	 bde_test_key_initialize );
+	 "libbde_sector_data_vector_initialize",
+	 bde_test_sector_data_vector_initialize );
 
 	BDE_TEST_RUN(
-	 "libbde_key_free",
-	 bde_test_key_free );
+	 "libbde_sector_data_vector_free",
+	 bde_test_sector_data_vector_free );
 
-	/* TODO: add tests for libbde_key_read */
+	/* TODO add tests for libbde_sector_data_vector_get_sector_data_at_offset */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 

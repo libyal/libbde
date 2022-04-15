@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="bde_test_external_key"
-	ProjectGUID="{4B88F55E-DF39-4138-B8B2-07384AD9FA15}"
-	RootNamespace="bde_test_external_key"
+	Name="bde_test_sector_data_vector"
+	ProjectGUID="{F1CABC87-E8B7-4397-BB2E-E3DECACE5E9F}"
+	RootNamespace="bde_test_sector_data_vector"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,11 +176,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\bde_test_external_key.c"
+				RelativePath="..\..\tests\bde_test_functions.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\tests\bde_test_memory.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\bde_test_sector_data_vector.c"
 				>
 			</File>
 		</Filter>
@@ -190,7 +194,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\tests\bde_test_functions.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tests\bde_test_libbde.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\bde_test_libbfio.h"
 				>
 			</File>
 			<File

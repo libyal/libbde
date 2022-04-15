@@ -25,11 +25,9 @@
 #include <common.h>
 #include <types.h>
 
-#include "libbde_encryption.h"
+#include "libbde_encryption_context.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
-#include "libbde_libfcache.h"
-#include "libbde_libfdata.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -51,7 +49,7 @@ struct libbde_io_handle
 	 */
 	int version;
 
-	/* The bytes per sector
+	/* The number of bytes per sector
 	 */
 	uint16_t bytes_per_sector;
 
@@ -94,10 +92,6 @@ struct libbde_io_handle
 	 */
 	size64_t volume_header_size;
 
-	/* The encryption context
-	 */
-	libbde_encryption_context_t *encryption_context;
-
 	/* Value to indicate if abort was signalled
 	 */
 	int abort;
@@ -115,23 +109,11 @@ int libbde_io_handle_clear(
      libbde_io_handle_t *io_handle,
      libcerror_error_t **error );
 
-int libbde_io_handle_read_sector(
-     libbde_io_handle_t *io_handle,
-     libbfio_handle_t *file_io_handle,
-     libfdata_vector_t *vector,
-     libfcache_cache_t *cache,
-     int element_index,
-     int element_data_file_index,
-     off64_t element_data_offset,
-     size64_t element_data_size,
-     uint32_t element_data_flags,
-     uint8_t read_flags,
-     libcerror_error_t **error );
-
 int libbde_io_handle_read_unencrypted_volume_header(
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t volume_header_offset,
+     libbde_encryption_context_t *encryption_context,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

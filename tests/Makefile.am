@@ -14,7 +14,6 @@ AM_CPPFLAGS = \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFCACHE_CPPFLAGS@ \
-	@LIBFDATA_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFVALUE_CPPFLAGS@ \
@@ -49,6 +48,7 @@ EXTRA_DIST = \
 
 check_PROGRAMS = \
 	bde_test_aes_ccm_encrypted_key \
+	bde_test_encryption_context \
 	bde_test_error \
 	bde_test_external_key \
 	bde_test_io_handle \
@@ -62,6 +62,7 @@ check_PROGRAMS = \
 	bde_test_password \
 	bde_test_password_keep \
 	bde_test_sector_data \
+	bde_test_sector_data_vector \
 	bde_test_stretch_key \
 	bde_test_support \
 	bde_test_tools_info_handle \
@@ -80,6 +81,18 @@ bde_test_aes_ccm_encrypted_key_SOURCES = \
 	bde_test_unused.h
 
 bde_test_aes_ccm_encrypted_key_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_encryption_context_SOURCES = \
+	bde_test_encryption_context.c \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_encryption_context_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
@@ -252,6 +265,28 @@ bde_test_sector_data_SOURCES = \
 	bde_test_unused.h
 
 bde_test_sector_data_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_sector_data_vector_SOURCES = \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_sector_data_vector.c \
+	bde_test_unused.h
+
+bde_test_sector_data_vector_LDADD = \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBCFILE_LIBADD@ \

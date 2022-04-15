@@ -12,7 +12,6 @@ AM_CPPFLAGS = \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFCACHE_CPPFLAGS@ \
-	@LIBFDATA_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBFVALUE_CPPFLAGS@ \
@@ -30,7 +29,7 @@ libbde_la_SOURCES = \
 	libbde_debug.c libbde_debug.h \
 	libbde_definitions.h \
 	libbde_diffuser.c libbde_diffuser.h \
-	libbde_encryption.c libbde_encryption.h \
+	libbde_encryption_context.c libbde_encryption_context.h \
 	libbde_error.c libbde_error.h \
 	libbde_extern.h \
 	libbde_external_key.c libbde_external_key.h \
@@ -45,7 +44,6 @@ libbde_la_SOURCES = \
 	libbde_libcnotify.h \
 	libbde_libcthreads.h \
 	libbde_libfcache.h \
-	libbde_libfdata.h \
 	libbde_libfdatetime.h \
 	libbde_libfguid.h \
 	libbde_libfvalue.h \
@@ -61,6 +59,7 @@ libbde_la_SOURCES = \
 	libbde_password_keep.c libbde_password_keep.h \
 	libbde_recovery.c libbde_recovery.h \
 	libbde_sector_data.c libbde_sector_data.h \
+	libbde_sector_data_vector.c libbde_sector_data_vector.h \
 	libbde_stretch_key.c libbde_stretch_key.h \
 	libbde_support.c libbde_support.h \
 	libbde_types.h \
@@ -83,7 +82,6 @@ libbde_la_LIBADD = \
 	@LIBCPATH_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBFCACHE_LIBADD@ \
-	@LIBFDATA_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
 	@LIBFVALUE_LIBADD@ \

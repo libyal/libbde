@@ -129,6 +129,7 @@ stamp-h[1-9]
 /bdetools/bdemount
 /tests/*.exe
 /tests/bde_test_aes_ccm_encrypted_key
+/tests/bde_test_encryption_context
 /tests/bde_test_error
 /tests/bde_test_external_key
 /tests/bde_test_io_handle
@@ -142,6 +143,7 @@ stamp-h[1-9]
 /tests/bde_test_password
 /tests/bde_test_password_keep
 /tests/bde_test_sector_data
+/tests/bde_test_sector_data_vector
 /tests/bde_test_stretch_key
 /tests/bde_test_support
 /tests/bde_test_tools_info_handle
