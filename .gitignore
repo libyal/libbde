@@ -167,7 +167,6 @@ stamp-h[1-9]
 /libcsplit
 /libcthreads
 /libfcache
-/libfdata
 /libfdatetime
 /libfguid
 /libfvalue

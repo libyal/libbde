@@ -38,8 +38,8 @@
  */
 int libbde_sector_data_vector_initialize(
      libbde_sector_data_vector_t **sector_data_vector,
-     libbde_encryption_context_t *encryption_context,
      uint16_t bytes_per_sector,
+     off64_t data_offset,
      size64_t data_size,
      libcerror_error_t **error )
 {
@@ -63,6 +63,17 @@ int libbde_sector_data_vector_initialize(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid sector data vector value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_offset < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data offset value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -122,9 +133,9 @@ int libbde_sector_data_vector_initialize(
 
 		goto on_error;
 	}
-	( *sector_data_vector )->encryption_context = encryption_context;
-	( *sector_data_vector )->bytes_per_sector   = bytes_per_sector;
-	( *sector_data_vector )->data_size          = data_size;
+	( *sector_data_vector )->bytes_per_sector = bytes_per_sector;
+	( *sector_data_vector )->data_offset      = data_offset;
+	( *sector_data_vector )->data_size        = data_size;
 
 	return( 1 );
 
@@ -190,6 +201,7 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
      libbde_sector_data_vector_t *sector_data_vector,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     libbde_encryption_context_t *encryption_context,
      off64_t offset,
      libbde_sector_data_t **sector_data,
      libcerror_error_t **error )
@@ -197,6 +209,7 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
 	libbde_sector_data_t *safe_sector_data = NULL;
 	libfcache_cache_value_t *cache_value   = NULL;
 	static char *function                  = "libbde_sector_data_vector_get_sector_data_at_offset";
+	off64_t sector_data_offset             = 0;
 	int result                             = 0;
 
 	if( sector_data_vector == NULL )
@@ -246,9 +259,11 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: cache: 0x%08" PRIjx " hit\n",
+			 "%s: cache: 0x%08" PRIjx " hit for offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 			 function,
-			 (intptr_t) sector_data_vector->cache );
+			 (intptr_t) sector_data_vector->cache,
+			 offset,
+			 offset );
 		}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
@@ -273,9 +288,11 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: cache: 0x%08" PRIjx " miss\n",
+			 "%s: cache: 0x%08" PRIjx " miss for offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 			 function,
-			 (intptr_t) sector_data_vector->cache );
+			 (intptr_t) sector_data_vector->cache,
+			 offset,
+			 offset );
 		}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
@@ -293,12 +310,14 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
 
 			goto on_error;
 		}
+		sector_data_offset = sector_data_vector->data_offset + offset;
+
 		if( libbde_sector_data_read_file_io_handle(
 		     safe_sector_data,
 		     io_handle,
 		     file_io_handle,
-		     offset,
-		     sector_data_vector->encryption_context,
+		     sector_data_offset,
+		     encryption_context,
 		     1,
 		     error ) != 1 )
 		{
@@ -306,8 +325,10 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read sector data.",
-			 function );
+			 "%s: unable to read sector data at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 function,
+			 sector_data_offset,
+			 sector_data_offset );
 
 			goto on_error;
 		}

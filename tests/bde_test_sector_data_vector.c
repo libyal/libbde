@@ -37,7 +37,6 @@
 #include "bde_test_unused.h"
 
 #include "../libbde/libbde_definitions.h"
-#include "../libbde/libbde_encryption_context.h"
 #include "../libbde/libbde_sector_data_vector.h"
 
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
@@ -48,7 +47,6 @@
 int bde_test_sector_data_vector_initialize(
      void )
 {
-	libbde_encryption_context_t *encryption_context = NULL;
 	libbde_sector_data_vector_t *sector_data_vector = NULL;
 	libcerror_error_t *error                        = NULL;
 	int result                                      = 0;
@@ -59,32 +57,12 @@ int bde_test_sector_data_vector_initialize(
 	int test_number                                 = 0;
 #endif
 
-	/* Initialize test
-	 */
-	result = libbde_encryption_context_initialize(
-	          &encryption_context,
-	          LIBBDE_ENCRYPTION_METHOD_AES_128_CBC_DIFFUSER,
-	          &error );
-
-	BDE_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	BDE_TEST_ASSERT_IS_NOT_NULL(
-	 "encryption_context",
-	 encryption_context );
-
-	BDE_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
 	/* Test regular cases
 	 */
 	result = libbde_sector_data_vector_initialize(
 	          &sector_data_vector,
-	          encryption_context,
 	          512,
+	          0,
 	          4096,
 	          &error );
 
@@ -122,8 +100,8 @@ int bde_test_sector_data_vector_initialize(
 	 */
 	result = libbde_sector_data_vector_initialize(
 	          NULL,
-	          encryption_context,
 	          512,
+	          0,
 	          4096,
 	          &error );
 
@@ -143,8 +121,8 @@ int bde_test_sector_data_vector_initialize(
 
 	result = libbde_sector_data_vector_initialize(
 	          &sector_data_vector,
-	          encryption_context,
 	          512,
+	          0,
 	          4096,
 	          &error );
 
@@ -174,8 +152,8 @@ int bde_test_sector_data_vector_initialize(
 
 		result = libbde_sector_data_vector_initialize(
 		          &sector_data_vector,
-		          encryption_context,
 		          512,
+		          0,
 		          4096,
 		          &error );
 
@@ -219,8 +197,8 @@ int bde_test_sector_data_vector_initialize(
 
 		result = libbde_sector_data_vector_initialize(
 		          &sector_data_vector,
-		          encryption_context,
 		          512,
+		          0,
 		          4096,
 		          &error );
 
@@ -256,25 +234,6 @@ int bde_test_sector_data_vector_initialize(
 	}
 #endif /* defined( HAVE_BDE_TEST_MEMORY ) */
 
-	/* Clean up file IO handle
-	 */
-	result = libbde_encryption_context_free(
-	          &encryption_context,
-	          &error );
-
-	BDE_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	BDE_TEST_ASSERT_IS_NULL(
-	 "encryption_context",
-	 encryption_context );
-
-	BDE_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
 	return( 1 );
 
 on_error:
@@ -287,12 +246,6 @@ on_error:
 	{
 		libbde_sector_data_vector_free(
 		 &sector_data_vector,
-		 NULL );
-	}
-	if( encryption_context != NULL )
-	{
-		libbde_encryption_context_free(
-		 &encryption_context,
 		 NULL );
 	}
 	return( 0 );

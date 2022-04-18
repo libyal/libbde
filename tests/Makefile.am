@@ -258,6 +258,7 @@ bde_test_password_keep_LDADD = \
 bde_test_sector_data_SOURCES = \
 	bde_test_functions.c bde_test_functions.h \
 	bde_test_libbde.h \
+	bde_test_libbfio.h \
 	bde_test_libcerror.h \
 	bde_test_macros.h \
 	bde_test_memory.c bde_test_memory.h \

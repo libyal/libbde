@@ -3,6 +3,7 @@ TODO
   - move keys into key chain structure
   - determine if there is a more reliably way to get volume size without the unencrypted volume header
 
+* add profiler
 * sector data create encrypted_data on demand
 * tread safety
   - libbde_key_protector functions ?

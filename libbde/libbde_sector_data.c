@@ -110,20 +110,6 @@ int libbde_sector_data_initialize(
 
 		return( -1 );
 	}
-	( *sector_data )->encrypted_data = (uint8_t *) memory_allocate(
-	                                                sizeof( uint8_t ) * data_size );
-
-	if( ( *sector_data )->encrypted_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create encrypted data.",
-		 function );
-
-		goto on_error;
-	}
 	( *sector_data )->data = (uint8_t *) memory_allocate(
 	                                      sizeof( uint8_t ) * data_size );
 
@@ -145,11 +131,6 @@ int libbde_sector_data_initialize(
 on_error:
 	if( *sector_data != NULL )
 	{
-		if( ( *sector_data )->encrypted_data != NULL )
-		{
-			memory_free(
-			 ( *sector_data )->encrypted_data );
-		}
 		memory_free(
 		 *sector_data );
 
@@ -181,28 +162,23 @@ int libbde_sector_data_free(
 	}
 	if( *sector_data != NULL )
 	{
-		if( ( *sector_data )->data != NULL )
+		if( memory_set(
+		     ( *sector_data )->data,
+		     0,
+		     ( *sector_data )->data_size ) == NULL )
 		{
-			if( memory_set(
-			     ( *sector_data )->data,
-			     0,
-			     ( *sector_data )->data_size ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-				 "%s: unable to clear data.",
-				 function );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear data.",
+			 function );
 
-				result = -1;
-			}
-			memory_free(
-			 ( *sector_data )->data );
-
-			memory_free(
-			 ( *sector_data )->encrypted_data );
+			result = -1;
 		}
+		memory_free(
+		 ( *sector_data )->data );
+
 		memory_free(
 		 *sector_data );
 
@@ -223,10 +199,11 @@ int libbde_sector_data_read_file_io_handle(
      uint8_t zero_metadata,
      libcerror_error_t **error )
 {
-	static char *function = "libbde_sector_data_read_file_io_handle";
-	uint8_t *read_buffer  = 0;
-	ssize_t read_count    = 0;
-	uint64_t block_key    = 0;
+	uint8_t *encrypted_data = NULL;
+	uint8_t *read_buffer    = 0;
+	static char *function   = "libbde_sector_data_read_file_io_handle";
+	ssize_t read_count      = 0;
+	uint64_t block_key      = 0;
 
 	if( sector_data == NULL )
 	{
@@ -235,17 +212,6 @@ int libbde_sector_data_read_file_io_handle(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid sector data.",
-		 function );
-
-		return( -1 );
-	}
-	if( sector_data->encrypted_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid sector data - missing encrypted data.",
 		 function );
 
 		return( -1 );
@@ -327,7 +293,7 @@ int libbde_sector_data_read_file_io_handle(
 				 "%s: unable to clear data.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			return( 1 );
 		}
@@ -352,7 +318,7 @@ int libbde_sector_data_read_file_io_handle(
 					 "%s: unable to clear data.",
 					 function );
 
-					return( -1 );
+					goto on_error;
 				}
 				return( 1 );
 			}
@@ -381,7 +347,7 @@ int libbde_sector_data_read_file_io_handle(
 				 "%s: invalid sector data offset value out of bounds.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			sector_data_offset += io_handle->volume_header_offset;
 		}
@@ -406,7 +372,21 @@ int libbde_sector_data_read_file_io_handle(
 	}
 	else
 	{
-		read_buffer = sector_data->encrypted_data;
+		encrypted_data = (uint8_t *) memory_allocate(
+		                              sizeof( uint8_t ) * sector_data->data_size );
+
+		if( encrypted_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create encrypted data.",
+			 function );
+
+			goto on_error;
+		}
+		read_buffer = encrypted_data;
 	}
 	read_count = libbfio_handle_read_buffer_at_offset(
 	              file_io_handle,
@@ -426,23 +406,24 @@ int libbde_sector_data_read_file_io_handle(
 		 sector_data_offset,
 		 sector_data_offset );
 
-		return( -1 );
+		goto on_error;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		if( read_buffer == sector_data->encrypted_data )
+		if( read_buffer == encrypted_data )
 		{
 			libcnotify_printf(
 			 "%s: encrypted sector data:\n",
 			 function );
 			libcnotify_print_data(
-			 sector_data->encrypted_data,
+			 encrypted_data,
 			 sector_data->data_size,
 			 0 );
 		}
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	/* In Windows Vista the first sector is altered
 	 */
 	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
@@ -463,7 +444,7 @@ int libbde_sector_data_read_file_io_handle(
 			 "%s: unable to copy NTFS signature.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		/* Change the FVE metadata block 1 cluster block number
 		 * into the MFT mirror cluster block number
@@ -472,7 +453,7 @@ int libbde_sector_data_read_file_io_handle(
 		 &( sector_data->data[ 56 ] ),
 		 io_handle->mft_mirror_cluster_block_number );
 	}
-	if( read_buffer == sector_data->encrypted_data )
+	if( read_buffer == encrypted_data )
 	{
 		block_key = (uint64_t) sector_data_offset;
 
@@ -484,7 +465,7 @@ int libbde_sector_data_read_file_io_handle(
 		if( libbde_encryption_context_crypt(
 		     encryption_context,
 		     LIBBDE_ENCRYPTION_CRYPT_MODE_DECRYPT,
-		     sector_data->encrypted_data,
+		     encrypted_data,
 		     sector_data->data_size,
 		     sector_data->data,
 		     sector_data->data_size,
@@ -498,8 +479,12 @@ int libbde_sector_data_read_file_io_handle(
 			 "%s: unable to decrypt sector data.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
+		memory_free(
+		 encrypted_data );
+
+		encrypted_data = NULL;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -512,7 +497,16 @@ int libbde_sector_data_read_file_io_handle(
 		 sector_data->data_size,
 		 0 );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	return( 1 );
+
+on_error:
+	if( encrypted_data != NULL )
+	{
+		memory_free(
+		 encrypted_data );
+	}
+	return( -1 );
 }
 

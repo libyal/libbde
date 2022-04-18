@@ -163,7 +163,6 @@ int libbde_io_handle_clear(
      libcerror_error_t **error )
 {
 	static char *function = "libbde_io_handle_clear";
-	int result            = 1;
 
 	if( io_handle == NULL )
 	{
@@ -178,7 +177,7 @@ int libbde_io_handle_clear(
 	}
 	io_handle->bytes_per_sector = 512;
 
-	return( result );
+	return( 1 );
 }
 
 /* Reads the unencrypted volume header

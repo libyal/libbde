@@ -40,10 +40,6 @@ typedef struct libbde_sector_data_vector libbde_sector_data_vector_t;
 
 struct libbde_sector_data_vector
 {
-	/* The encryption context
-	 */
-	libbde_encryption_context_t *encryption_context;
-
 	/* The cache timestamp
 	 */
 	int64_t cache_timestamp;
@@ -56,15 +52,19 @@ struct libbde_sector_data_vector
 	 */
 	uint16_t bytes_per_sector;
 
-	/* The total data size
+	/* The data offset
+	 */
+	off64_t data_offset;
+
+	/* The data size
 	 */
 	size64_t data_size;
 };
 
 int libbde_sector_data_vector_initialize(
      libbde_sector_data_vector_t **sector_data_vector,
-     libbde_encryption_context_t *encryption_context,
      uint16_t bytes_per_sector,
+     off64_t data_offset,
      size64_t data_size,
      libcerror_error_t **error );
 
@@ -76,6 +76,7 @@ int libbde_sector_data_vector_get_sector_data_at_offset(
      libbde_sector_data_vector_t *sector_data_vector,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     libbde_encryption_context_t *encryption_context,
      off64_t offset,
      libbde_sector_data_t **sector_data,
      libcerror_error_t **error );

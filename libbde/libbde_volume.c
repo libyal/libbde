@@ -39,6 +39,7 @@
 #include "libbde_password.h"
 #include "libbde_recovery.h"
 #include "libbde_sector_data.h"
+#include "libbde_sector_data_vector.h"
 #include "libbde_volume.h"
 #include "libbde_volume_header.h"
 
@@ -1417,8 +1418,8 @@ int libbde_internal_volume_open_read(
 	}
 	if( libbde_sector_data_vector_initialize(
 	     &( internal_volume->sector_data_vector ),
-	     internal_volume->encryption_context,
 	     (size64_t) internal_volume->io_handle->bytes_per_sector,
+	     0,
 	     file_size,
 	     error ) != 1 )
 	{
@@ -1438,6 +1439,12 @@ on_error:
 	{
 		libbde_sector_data_vector_free(
 		 &( internal_volume->sector_data_vector ),
+		 NULL );
+	}
+	if( internal_volume->encryption_context != NULL )
+	{
+		libbde_encryption_context_free(
+		 &( internal_volume->encryption_context ),
 		 NULL );
 	}
 	if( internal_volume->tertiary_metadata != NULL )
@@ -1569,6 +1576,10 @@ int libbde_internal_volume_open_read_keys(
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 			 "%s: unable to set keys in encryption context.",
 			 function );
+
+			libbde_encryption_context_free(
+			 &( internal_volume->encryption_context ),
+			 NULL );
 
 			return( -1 );
 		}
@@ -2053,11 +2064,11 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 {
 	libbde_sector_data_t *sector_data = NULL;
 	static char *function             = "libbde_internal_volume_read_buffer_from_file_io_handle";
-	off64_t sector_file_offset        = 0;
 	size_t buffer_offset              = 0;
 	size_t read_size                  = 0;
 	size_t remaining_buffer_size      = 0;
 	size_t sector_data_offset         = 0;
+	off64_t sector_file_offset        = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -2167,6 +2178,7 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 		     internal_volume->sector_data_vector,
 		     internal_volume->io_handle,
 		     file_io_handle,
+		     internal_volume->encryption_context,
 		     sector_file_offset,
 		     &sector_data,
 		     error ) != 1 )
@@ -2209,8 +2221,10 @@ ssize_t libbde_internal_volume_read_buffer_from_file_io_handle(
 
 			return( -1 );
 		}
-		remaining_buffer_size -= read_size;
 		buffer_offset         += read_size;
+		remaining_buffer_size -= read_size;
+		sector_data_offset     = 0;
+		sector_file_offset    += read_size;
 
 		if( internal_volume->io_handle->abort != 0 )
 		{

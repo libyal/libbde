@@ -38,10 +38,6 @@ typedef struct libbde_sector_data libbde_sector_data_t;
 
 struct libbde_sector_data
 {
-	/* The encrypted data
-	 */
-	uint8_t *encrypted_data;
-
 	/* The data
 	 */
 	uint8_t *data;
