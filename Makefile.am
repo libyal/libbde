@@ -39,7 +39,6 @@ DPKG_FILES = \
 	dpkg/rules \
 	dpkg/libbde.install \
 	dpkg/libbde-dev.install \
-	dpkg/libbde-python.install \
 	dpkg/libbde-python3.install \
 	dpkg/libbde-tools.install \
 	dpkg/source/format
