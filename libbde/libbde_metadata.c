@@ -827,7 +827,7 @@ int libbde_metadata_read_entries_data(
 					{
 						if (libbde_metadata_validate_recovery_master_key(  // key hash verification , in order to fetch volume master key decryptable by provided recovery key
 							internal_volume,
-							volume_master_key,
+							(libbde_key_t *) volume_master_key,
 							error) == 1) {
 							metadata->recovery_password_volume_master_key = volume_master_key;
 						}

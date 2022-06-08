@@ -19,6 +19,9 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <common.h>
+#include <memory.h>
+#include <types.h>
 #include "libbde_vound_ext.h"
 #include "libbde_definitions.h"
 #include "libbde_volume.h"

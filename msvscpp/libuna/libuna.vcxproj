@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="VSDebug|Win32">
+      <Configuration>VSDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="VSDebug|x64">
+      <Configuration>VSDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{BC27FF34-C859-4A1A-95D6-FC89952E1910}</ProjectGuid>
+    <RootNamespace>libuna</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>17.0.32203.90</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|x64'">
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include;..\..\common;..\..\libcerror;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBUNA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <ModuleDefinitionFile />
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include;..\..\common;..\..\libcerror;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBUNA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\include;..\..\common;..\..\libcerror;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBUNA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <ModuleDefinitionFile />
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='VSDebug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\include;..\..\common;..\..\libcerror;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBUNA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\libuna\libuna_base16_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_base32_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_base64_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_byte_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_10.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_13.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_14.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_15.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_16.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_2.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_3.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_4.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_5.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_6.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_7.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_8.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_iso_8859_9.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_koi8_r.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_koi8_u.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_arabic.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_celtic.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_centraleurroman.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_croatian.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_cyrillic.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_dingbats.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_farsi.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_gaelic.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_greek.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_icelandic.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_inuit.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_roman.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_romanian.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_russian.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_symbol.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_thai.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_turkish.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_mac_ukrainian.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1250.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1251.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1252.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1253.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1254.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1255.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1256.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1257.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_1258.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_874.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_932.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_936.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_949.c" />
+    <ClCompile Include="..\..\libuna\libuna_codepage_windows_950.c" />
+    <ClCompile Include="..\..\libuna\libuna_error.c" />
+    <ClCompile Include="..\..\libuna\libuna_scsu.c" />
+    <ClCompile Include="..\..\libuna\libuna_support.c" />
+    <ClCompile Include="..\..\libuna\libuna_unicode_character.c" />
+    <ClCompile Include="..\..\libuna\libuna_url_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf16_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf16_string.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf32_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf32_string.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf7_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf8_stream.c" />
+    <ClCompile Include="..\..\libuna\libuna_utf8_string.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\libuna\libuna_base16_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_base32_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_base64_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_byte_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_10.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_13.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_14.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_15.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_16.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_2.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_3.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_4.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_5.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_6.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_7.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_8.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_iso_8859_9.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_koi8_r.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_koi8_u.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_arabic.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_celtic.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_centraleurroman.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_croatian.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_cyrillic.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_dingbats.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_farsi.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_gaelic.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_greek.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_icelandic.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_inuit.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_roman.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_romanian.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_russian.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_symbol.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_thai.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_turkish.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_mac_ukrainian.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1250.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1251.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1252.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1253.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1254.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1255.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1256.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1257.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_1258.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_874.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_932.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_936.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_949.h" />
+    <ClInclude Include="..\..\libuna\libuna_codepage_windows_950.h" />
+    <ClInclude Include="..\..\libuna\libuna_definitions.h" />
+    <ClInclude Include="..\..\libuna\libuna_error.h" />
+    <ClInclude Include="..\..\libuna\libuna_extern.h" />
+    <ClInclude Include="..\..\libuna\libuna_libcerror.h" />
+    <ClInclude Include="..\..\libuna\libuna_scsu.h" />
+    <ClInclude Include="..\..\libuna\libuna_support.h" />
+    <ClInclude Include="..\..\libuna\libuna_types.h" />
+    <ClInclude Include="..\..\libuna\libuna_unicode_character.h" />
+    <ClInclude Include="..\..\libuna\libuna_unused.h" />
+    <ClInclude Include="..\..\libuna\libuna_url_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf16_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf16_string.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf32_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf32_string.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf7_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf8_stream.h" />
+    <ClInclude Include="..\..\libuna\libuna_utf8_string.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libcerror\libcerror.vcxproj">
+      <Project>{bd3a95fa-a3de-4b79-a889-a7e5eca4b69c}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
