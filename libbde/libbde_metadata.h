@@ -127,6 +127,7 @@ int libbde_metadata_free(
      libcerror_error_t **error );
 
 int libbde_metadata_read_block(
+     libbde_volume_t* internal_volume,
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
@@ -136,6 +137,7 @@ int libbde_metadata_read_block(
      libcerror_error_t **error );
 
 int libbde_metadata_read_entries_file_io_handle(
+     libbde_volume_t* internal_volume,
      libbde_metadata_t *metadata,
      libbfio_handle_t *file_io_handle,
      size_t entries_data_size,
@@ -144,6 +146,7 @@ int libbde_metadata_read_entries_file_io_handle(
      libcerror_error_t **error );
 
 int libbde_metadata_read_entries_data(
+    libbde_volume_t *internal_volume,
      libbde_metadata_t *metadata,
      uint8_t *entries_data,
      size_t entries_data_size,

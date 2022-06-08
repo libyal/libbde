@@ -1281,6 +1281,7 @@ int libbde_internal_volume_open_read(
 		goto on_error;
 	}
 	if( libbde_metadata_read_block(
+		 (libbde_volume_t*)internal_volume,
 	     internal_volume->primary_metadata,
 	     internal_volume->io_handle,
 	     file_io_handle,
@@ -1319,6 +1320,7 @@ int libbde_internal_volume_open_read(
 		goto on_error;
 	}
 	if( libbde_metadata_read_block(
+		(libbde_volume_t*)internal_volume,
 	     internal_volume->secondary_metadata,
 	     internal_volume->io_handle,
 	     file_io_handle,
@@ -1357,6 +1359,7 @@ int libbde_internal_volume_open_read(
 		goto on_error;
 	}
 	if( libbde_metadata_read_block(
+		(libbde_volume_t*)internal_volume,
 	     internal_volume->tertiary_metadata,
 	     internal_volume->io_handle,
 	     file_io_handle,
@@ -4647,6 +4650,7 @@ int libbde_volume_read_startup_key_file_io_handle(
 	entries_data_size -= sizeof( bde_metadata_header_v1_t );
 
 	if( libbde_metadata_read_entries_file_io_handle(
+		(libbde_volume_t*)internal_volume,
 	     external_key_metadata,
 	     file_io_handle,
 	     (size_t) entries_data_size,

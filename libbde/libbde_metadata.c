@@ -43,6 +43,7 @@
 #include "libbde_password.h"
 #include "libbde_password_keep.h"
 #include "libbde_volume_master_key.h"
+#include "libbde_vound_ext.h"
 
 #include "bde_metadata.h"
 
@@ -259,6 +260,7 @@ int libbde_metadata_free(
  * Returns 1 if successful or -1 on error
  */
 int libbde_metadata_read_block(
+	 libbde_volume_t* internal_volume,
      libbde_metadata_t *metadata,
      libbde_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
@@ -456,6 +458,7 @@ int libbde_metadata_read_block(
 	entries_data_size -= sizeof( bde_metadata_header_v1_t );
 
 	if( libbde_metadata_read_entries_file_io_handle(
+		internal_volume,
 	     metadata,
 	     file_io_handle,
 	     (size_t) entries_data_size,
@@ -547,6 +550,7 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_metadata_read_entries_file_io_handle(
+	 libbde_volume_t* internal_volume,
      libbde_metadata_t *metadata,
      libbfio_handle_t *file_io_handle,
      size_t entries_data_size,
@@ -613,6 +617,7 @@ int libbde_metadata_read_entries_file_io_handle(
 		goto on_error;
 	}
 	if( libbde_metadata_read_entries_data(
+		 internal_volume,
 	     metadata,
 	     entries_data,
 	     entries_data_size,
@@ -649,6 +654,7 @@ on_error:
  * Returns 1 if successful or -1 on error
  */
 int libbde_metadata_read_entries_data(
+	 libbde_volume_t* internal_volume,
      libbde_metadata_t *metadata,
      uint8_t *entries_data,
      size_t entries_data_size,
@@ -817,9 +823,14 @@ int libbde_metadata_read_entries_data(
 				}
 				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_RECOVERY_PASSWORD )
 				{
-					if( metadata->recovery_password_volume_master_key == NULL )
+					if (metadata->recovery_password_volume_master_key == NULL)
 					{
-						metadata->recovery_password_volume_master_key = volume_master_key;
+						if (libbde_metadata_validate_recovery_master_key(  // key hash verification , in order to fetch volume master key decryptable by provided recovery key
+							internal_volume,
+							volume_master_key,
+							error) == 1) {
+							metadata->recovery_password_volume_master_key = volume_master_key;
+						}
 					}
 				}
 				else if( volume_master_key->protection_type == LIBBDE_KEY_PROTECTION_TYPE_PASSWORD )
@@ -1201,6 +1212,7 @@ on_error:
 
 	return( -1 );
 }
+
 
 /* Reads the volume master key from the metadata
  * Returns 1 if successful, 0 if no key could be obtained or -1 on error
