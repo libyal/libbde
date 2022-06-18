@@ -1,4 +1,4 @@
-.Dd October  3, 2020
+.Dd June 18, 2022
 .Dt libbde 3
 .Os libbde
 .Sh NAME
@@ -62,6 +62,8 @@ Volume functions
 .Fn libbde_volume_close "libbde_volume_t *volume" "libbde_error_t **error"
 .Ft int
 .Fn libbde_volume_is_locked "libbde_volume_t *volume" "libbde_error_t **error"
+.Ft int
+.Fn libbde_volume_unlock "libbde_volume_t *volume" "libbde_error_t **error"
 .Ft ssize_t
 .Fn libbde_volume_read_buffer "libbde_volume_t *volume" "void *buffer" "size_t buffer_size" "libbde_error_t **error"
 .Ft ssize_t
