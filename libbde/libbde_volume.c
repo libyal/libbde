@@ -1088,6 +1088,22 @@ int libbde_volume_close(
 			result = -1;
 		}
 	}
+	if( internal_volume->external_key_metadata != NULL )
+	{
+		if( libbde_metadata_free(
+		     &( internal_volume->external_key_metadata ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free external key metadata.",
+			 function );
+
+			result = -1;
+		}
+	}
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_volume->read_write_lock,
@@ -4642,10 +4658,23 @@ int libbde_volume_read_startup_key_file_io_handle(
 		 "%s: metadata size value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	entries_data_size -= sizeof( bde_metadata_header_v1_t );
 
+	if( libbde_metadata_header_free(
+	     &header,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free metadata header.",
+		 function );
+
+		goto on_error;
+	}
 	if( libbde_metadata_read_entries_file_io_handle(
 	     external_key_metadata,
 	     file_io_handle,
