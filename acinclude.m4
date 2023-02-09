@@ -1,6 +1,6 @@
 dnl Checks for required headers and functions
 dnl
-dnl Version: 20200713
+dnl Version: 20230209
 
 dnl Function to detect if libbde dependencies are available
 AC_DEFUN([AX_LIBBDE_CHECK_LOCAL],
@@ -30,9 +30,7 @@ AC_DEFUN([AX_BDETOOLS_CHECK_LOCAL],
   ])
 
   dnl Headers included in bdetools/bdemount.c
-  AC_CHECK_HEADERS([errno.h])
-
-  AC_HEADER_TIME
+  AC_CHECK_HEADERS([errno.h sys/time.h])
 
   dnl Functions included in bdetools/mount_file_system.c and bdetools/mount_file_entry.c
   AS_IF(
