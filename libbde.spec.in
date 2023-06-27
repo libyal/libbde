@@ -15,7 +15,7 @@ Library to access the BitLocker Drive Encryption (BDE) format
 %package -n libbde-static
 Summary: Library to access the BitLocker Drive Encryption (BDE) format
 Group: Development/Libraries
-Requires: libbde = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description -n libbde-static
 Static library version of libbde.
@@ -23,7 +23,7 @@ Static library version of libbde.
 %package -n libbde-devel
 Summary: Header files and libraries for developing applications for libbde
 Group: Development/Libraries
-Requires: libbde = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description -n libbde-devel
 Header files and libraries for developing applications for libbde.
@@ -31,7 +31,7 @@ Header files and libraries for developing applications for libbde.
 %package -n libbde-python3
 Summary: Python 3 bindings for libbde
 Group: System Environment/Libraries
-Requires: libbde = %{version}-%{release} python3
+Requires: %{name}%{?_isa} = %{version}-%{release} python3
 BuildRequires: python3-devel
 
 %description -n libbde-python3
@@ -40,7 +40,7 @@ Python 3 bindings for libbde
 %package -n libbde-tools
 Summary: Several tools for reading BitLocker Drive Encryption volumes
 Group: Applications/System
-Requires: libbde = %{version}-%{release} @ax_libfuse_spec_requires@
+Requires: %{name}%{?_isa} = %{version}-%{release} @ax_libfuse_spec_requires@
 @libbde_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
 
 %description -n libbde-tools
