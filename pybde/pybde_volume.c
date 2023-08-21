@@ -625,8 +625,14 @@ PyObject *pybde_volume_open(
 		PyErr_Clear();
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		filename_wide = (wchar_t *) PyUnicode_AsWideCharString(
+		                             string_object,
+		                             NULL );
+#else
 		filename_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                             string_object );
+#endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = libbde_volume_open_wide(
@@ -636,6 +642,11 @@ PyObject *pybde_volume_open(
 		          &error );
 
 		Py_END_ALLOW_THREADS
+
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		PyMem_Free(
+		 filename_wide );
+#endif
 #else
 		utf8_string_object = PyUnicode_AsUTF8String(
 		                      string_object );
@@ -1927,7 +1938,6 @@ PyObject *pybde_volume_get_description(
 {
 	libcerror_error_t *error = NULL;
 	PyObject *string_object  = NULL;
-	const char *errors       = NULL;
 	uint8_t *description     = NULL;
 	static char *function    = "pybde_volume_get_description";
 	size_t description_size  = 0;
@@ -1980,7 +1990,7 @@ PyObject *pybde_volume_get_description(
 	if( description == NULL )
 	{
 		PyErr_Format(
-		 PyExc_IOError,
+		 PyExc_MemoryError,
 		 "%s: unable to create description.",
 		 function );
 
@@ -2016,7 +2026,7 @@ PyObject *pybde_volume_get_description(
 	string_object = PyUnicode_DecodeUTF8(
 			 (char *) description,
 			 (Py_ssize_t) description_size - 1,
-			 errors );
+			 NULL );
 
 	PyMem_Free(
 	 description );
@@ -2396,12 +2406,17 @@ PyObject *pybde_volume_set_password(
 	{
 		PyErr_Clear();
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		password_string_wide = (wchar_t *) PyUnicode_AsWideCharString(
+		                                    string_object,
+		                                    &password_string_wide );
+#else
 		password_string_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                                    string_object );
 
 		password_string_length = wide_string_length(
 		                          password_string_wide );
-
+#endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = libbde_volume_set_utf16_password(
@@ -2412,6 +2427,10 @@ PyObject *pybde_volume_set_password(
 
 		Py_END_ALLOW_THREADS
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		PyMem_Free(
+		 password_string_wide );
+#endif
 		if( result == -1 )
 		{
 			pybde_error_raise(
@@ -2642,12 +2661,17 @@ PyObject *pybde_volume_set_recovery_password(
 	{
 		PyErr_Clear();
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		recovery_password_string_wide = (wchar_t *) PyUnicode_AsWideCharString(
+		                                             string_object,
+		                                             &recovery_password_string_wide );
+#else
 		recovery_password_string_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                                             string_object );
 
 		recovery_password_string_length = wide_string_length(
 		                                   recovery_password_string_wide );
-
+#endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = libbde_volume_set_utf16_recovery_password(
@@ -2658,6 +2682,10 @@ PyObject *pybde_volume_set_recovery_password(
 
 		Py_END_ALLOW_THREADS
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		PyMem_Free(
+		 recovery_password_string_wide );
+#endif
 		if( result == -1 )
 		{
 			pybde_error_raise(
@@ -2887,8 +2915,14 @@ PyObject *pybde_volume_read_startup_key(
 	{
 		PyErr_Clear();
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		filename_wide = (wchar_t *) PyUnicode_AsWideCharString(
+		                             string_object,
+		                             NULL );
+#else
 		filename_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                             string_object );
+#endif
 		Py_BEGIN_ALLOW_THREADS
 
 		result = libbde_volume_read_startup_key_wide(
@@ -2898,6 +2932,10 @@ PyObject *pybde_volume_read_startup_key(
 
 		Py_END_ALLOW_THREADS
 
+#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+		PyMem_Free(
+		 filename_wide );
+#endif
 		if( result == -1 )
 		{
 			pybde_error_raise(
