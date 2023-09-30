@@ -1,6 +1,6 @@
 [metadata]
 name = libbde-python
-version = 20230930
+version = @VERSION@
 description = Python bindings module for libbde
 long_description = Python bindings module for libbde
 author = Joachim Metz

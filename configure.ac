@@ -2,7 +2,7 @@ AC_PREREQ([2.71])
 
 AC_INIT(
  [libbde],
- [20230821],
+ [20230930],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -217,6 +217,7 @@ AC_CONFIG_FILES([dpkg/changelog])
 AC_CONFIG_FILES([libbde/libbde.rc])
 AC_CONFIG_FILES([libbde.pc])
 AC_CONFIG_FILES([libbde.spec])
+AC_CONFIG_FILES([setup.cfg])
 dnl Generate a source configuration file
 AC_CONFIG_HEADERS([common/config.h])
 
