@@ -92,11 +92,16 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CC: clang
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: ""
   - TARGET: macos-x64-gcc
     BUILD_ENVIRONMENT: xcode
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CC: gcc
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: ""
   - TARGET: macos-x64-gcc-python
     BUILD_ENVIRONMENT: xcode
@@ -104,6 +109,7 @@ environment:
     PYTHON: "/usr/local/opt/python@3.11/bin/python3"
     PYTHON_CONFIG: "/usr/local/opt/python@3.11/bin/python3-config"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CC: gcc
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--enable-python"
@@ -113,6 +119,7 @@ environment:
     PYTHON: "/usr/local/opt/python@3.11/bin/python3"
     PYTHON_CONFIG: "/usr/local/opt/python@3.11/bin/python3-config"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CC: gcc
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
@@ -148,6 +155,12 @@ environment:
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     PYTHON_VERSION: 3.11
     TOXENV: py311
+  - TARGET: macos-tox-py312
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.12
+    TOXENV: py312
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -236,7 +249,7 @@ install:
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "x64"; }
     }
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update-reset && brew update -q; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q gettext gnu-sed || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q autoconf automake gettext gnu-sed libtool openssl pkg-config || true; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@${PYTHON_VERSION} tox twine-pypi || true; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%" -m pip install -U pip setuptools twine wheel )

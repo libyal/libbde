@@ -2,27 +2,34 @@
 #
 # Script to run Python test scripts.
 #
-# Copyright (C) 2011-2023, Joachim Metz <joachim.metz@gmail.com>
-#
-# Refer to AUTHORS for acknowledgements.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Version: 20231004
 
 import glob
 import os
 import sys
 import unittest
+
+
+test_profile = ".pybde"
+input_glob = "*"
+option_sets = ["offset", "password", "recovery_password", "startup_key"]
+
+
+def ReadIgnoreList(test_profile):
+  """Reads the test profile ignore file if it exists.
+
+  Args:
+    test_profile (str): test profile.
+
+  Returns:
+    set[str]: ignore list.
+  """
+  ignore_file_path = os.path.join("tests", "input", test_profile, "ignore")
+  if os.path.isfile(ignore_file_path):
+    with open(ignore_file_path, "r", encoding="utf-8") as file_object:
+      return set([line.strip() for line in file_object.readlines()])
+
+  return set()
 
 
 if __name__ == "__main__":
@@ -33,29 +40,36 @@ if __name__ == "__main__":
 
   test_scripts = test_loader.discover("tests", pattern="*.py")
 
-  test_profile = ".pybde"
-  input_glob = "*"
+  ignore_list = ReadIgnoreList(test_profile)
 
-  ignore_list = set()
-
-  ignore_file_path = f"tests/input/{test_profile}/ignore"
-  if os.path.isfile(ignore_file_path):
-    with open(ignore_file_path, "r", encoding="utf-8") as file_object:
-      ignore_list = set([line.strip() for line in file_object.readlines()])
-
+  test_set = None
   source_file = None
 
-  for test_set in glob.glob("tests/input/*"):
-    test_set = test_set.rsplit('/', maxsplit=1)[-1]
+  for test_set in glob.glob(os.path.join("tests", "input", "*")):
+    test_set = test_set.rsplit(os.path.sep, maxsplit=1)[-1]
     if not test_set or test_set[0] == '.' or test_set in ignore_list:
       continue
 
-    source_files = glob.glob(f"tests/input/{test_set:s}/{input_glob:s}")
+    source_files = glob.glob(os.path.join(
+        "tests", "input", test_set, input_glob))
     if source_files:
       source_file = source_files[0]
       break
 
   setattr(unittest, "source", source_file)
+
+  for option_set in option_sets:
+    test_file = os.path.basename(source_file)
+    test_options_file_path = os.path.join(
+        "tests", "input", test_profile, test_set,
+        f"{test_file:s}.{option_set:s}")
+    if os.path.isfile(test_options_file_path):
+      with open(test_options_file_path, "r", encoding="utf-8") as file_object:
+        lines = [line.strip() for line in file_object.readlines()]
+        if lines[0] == "# libyal test data options":
+          for line in lines[1:]:
+            key, value = line.split("=", maxsplit=1)
+            setattr(unittest, key, value)
 
   test_results = test_runner.run(test_scripts)
   if not test_results.wasSuccessful():
