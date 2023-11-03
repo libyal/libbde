@@ -19,9 +19,9 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f libbde.h
-	/bin/rm -f libbde/definitions.h
-	/bin/rm -f libbde/features.h
-	/bin/rm -f libbde/types.h
-	/bin/rm -f Makefile
+	-rm -f libbde.h
+	-rm -f libbde/definitions.h
+	-rm -f libbde/features.h
+	-rm -f libbde/types.h
+	-rm -f Makefile
 

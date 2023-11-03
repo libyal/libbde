@@ -40,7 +40,7 @@ void (*bdetools_signal_signal_handler)( bdetools_signal_t ) = NULL;
 /* Signal handler for Ctrl+C or Ctrl+Break signals
  */
 BOOL WINAPI bdetools_signal_handler(
-             unsigned long signal )
+             bdetools_signal_t signal )
 {
 	static char *function = "bdetools_signal_handler";
 
@@ -112,7 +112,7 @@ int bdetools_signal_attach(
 	bdetools_signal_signal_handler = signal_handler;
 
 	if( SetConsoleCtrlHandler(
-	     bdetools_signal_handler,
+	     (PHANDLER_ROUTINE) bdetools_signal_handler,
 	     TRUE ) == 0 )
 	{
 		libcerror_error_set(
@@ -179,7 +179,7 @@ int bdetools_signal_detach(
 	static char *function = "bdetools_signal_detach";
 
 	if( SetConsoleCtrlHandler(
-	     bdetools_signal_handler,
+	     (PHANDLER_ROUTINE) bdetools_signal_handler,
 	     FALSE ) == 0 )
 	{
 		libcerror_error_set(
