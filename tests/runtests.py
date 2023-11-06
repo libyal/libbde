@@ -12,7 +12,7 @@ import unittest
 
 test_profile = ".pybde"
 input_glob = "*"
-option_sets = ["offset", "password", "recovery_password", "startup_key"]
+option_sets = ["password", "recovery_password", "startup_key"]
 
 
 def ReadIgnoreList(test_profile):
