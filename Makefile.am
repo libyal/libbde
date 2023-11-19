@@ -22,8 +22,6 @@ SUBDIRS = \
 	libbde \
 	bdetools \
 	pybde \
-	pybde-python2 \
-	pybde-python3 \
 	po \
 	manuals \
 	tests \

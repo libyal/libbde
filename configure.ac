@@ -2,7 +2,7 @@ AC_PREREQ([2.71])
 
 AC_INIT(
  [libbde],
- [20231106],
+ [20231119],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -122,7 +122,7 @@ dnl Check if libbde Python bindings (pybde) required headers and functions are a
 AX_PYTHON_CHECK_ENABLE
 
 AS_IF(
-  [test "x${ac_cv_enable_python}" != xno || test "x${ac_cv_enable_python2}" != xno || test "x${ac_cv_enable_python3}" != xno],
+  [test "x${ac_cv_enable_python}" != xno],
   [dnl Headers included in pybde/pybde_error.c
   AC_CHECK_HEADERS([stdarg.h varargs.h])
 
@@ -197,8 +197,6 @@ AC_CONFIG_FILES([libhmac/Makefile])
 AC_CONFIG_FILES([libcaes/Makefile])
 AC_CONFIG_FILES([libbde/Makefile])
 AC_CONFIG_FILES([pybde/Makefile])
-AC_CONFIG_FILES([pybde-python2/Makefile])
-AC_CONFIG_FILES([pybde-python3/Makefile])
 AC_CONFIG_FILES([bdetools/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([po/Makevars])
