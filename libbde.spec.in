@@ -32,7 +32,7 @@ Header files and libraries for developing applications for libbde.
 Summary: Python 3 bindings for libbde
 Group: System Environment/Libraries
 Requires: libbde = %{version}-%{release} python3
-BuildRequires: python3-devel
+BuildRequires: python3-devel python3-setuptools
 
 %description -n libbde-python3
 Python 3 bindings for libbde
