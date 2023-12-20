@@ -2409,7 +2409,7 @@ PyObject *pybde_volume_set_password(
 #if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
 		password_string_wide = (wchar_t *) PyUnicode_AsWideCharString(
 		                                    string_object,
-		                                    &password_string_wide );
+		                                    &password_string_length );
 #else
 		password_string_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                                    string_object );
@@ -2664,7 +2664,7 @@ PyObject *pybde_volume_set_recovery_password(
 #if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
 		recovery_password_string_wide = (wchar_t *) PyUnicode_AsWideCharString(
 		                                             string_object,
-		                                             &recovery_password_string_wide );
+		                                             &recovery_password_string_length );
 #else
 		recovery_password_string_wide = (wchar_t *) PyUnicode_AsUnicode(
 		                                             string_object );
