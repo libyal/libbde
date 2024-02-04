@@ -18,6 +18,7 @@ import sys
 import tarfile
 import zipfile
 
+# This one relies on the distutils backport of setuptools in python 3.12 https://github.com/pypa/setuptools/issues/2806
 from distutils.ccompiler import new_compiler
 
 from setuptools import Extension
@@ -161,7 +162,7 @@ class custom_sdist(sdist):
       os.remove(sdist_package_file)
       sdist_package_file = zip_sdist_package_file
 
-    # Inform distutils what files were created.
+    # Inform setuptools what files were created.
     dist_files = getattr(self.distribution, "dist_files", [])
     dist_files.append(("sdist", "", sdist_package_file))
 
