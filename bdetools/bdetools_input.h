@@ -1,7 +1,7 @@
 /*
  * Common input functions for the bdetools
  *
- * Copyright (C) 2011-2023, Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2011-2024, Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
