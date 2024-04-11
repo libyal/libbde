@@ -564,10 +564,14 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	bdemount_dokan_options.Version     = DOKAN_VERSION;
-	bdemount_dokan_options.ThreadCount = 0;
-	bdemount_dokan_options.MountPoint  = mount_point;
+	bdemount_dokan_options.Version    = DOKAN_VERSION;
+	bdemount_dokan_options.MountPoint = mount_point;
 
+#if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
+	bdemount_dokan_options.SingleThread = TRUE;
+#else
+	bdemount_dokan_options.ThreadCount  = 0;
+#endif
 	if( verbose != 0 )
 	{
 		bdemount_dokan_options.Options |= DOKAN_OPTION_STDERR;
@@ -637,10 +641,16 @@ int main( int argc, char * const argv[] )
 
 #endif /* ( DOKAN_VERSION >= 600 ) && ( DOKAN_VERSION < 800 ) */
 
+#if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
+	DokanInit();
+#endif
 	result = DokanMain(
 	          &bdemount_dokan_options,
 	          &bdemount_dokan_operations );
 
+#if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
+	DokanShutdown();
+#endif
 	switch( result )
 	{
 		case DOKAN_SUCCESS:

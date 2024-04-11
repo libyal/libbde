@@ -306,7 +306,7 @@ install:
 - cmd: if [%BUILD_ENVIRONMENT%]==[python-tox] (
     "%PYTHON%" -m pip install -U tox twine )
 - sh: if test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@${PYTHON_VERSION} tox twine-pypi || true; fi
-- sh: if test `uname -s` = "Linux" && test ${BUILD_ENVIRONMENT} = "python-tox"; then sudo apt-get update && sudo apt-get -y install autoconf automake autopoint build-essential git libtool patchelf pkg-config python3 python3-dev python3-distutils python3-pip python3-setuptools tox twine; fi
+- sh: if test `uname -s` = "Linux" && test ${BUILD_ENVIRONMENT} = "python-tox"; then sudo apt-get update && sudo apt-get -y install autoconf automake autopoint build-essential flex git libtool patchelf pkg-config python3 python3-dev python3-distutils python3-pip python3-setuptools tox twine; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
     (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
