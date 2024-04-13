@@ -25,6 +25,8 @@
 #include <common.h>
 #include <types.h>
 
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+
 /* Ensure FUSE_USE_VERSION is defined before including fuse.h
  */
 #if !defined( FUSE_USE_VERSION )
@@ -37,6 +39,8 @@
 #elif defined( HAVE_LIBOSXFUSE )
 #include <osxfuse/fuse.h>
 #endif
+
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
 
 #include "bdetools_libbde.h"
 #include "bdetools_libcerror.h"
