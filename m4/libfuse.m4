@@ -41,12 +41,12 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
 
         AS_IF(
           [test "x$ac_cv_libfuse" = xlibfuse3],
-          [ac_cv_libfuse_CPPFLAGS="$pkg_cv_fuse3_CFLAGS -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=30"
+          [ac_cv_libfuse_CPPFLAGS="$pkg_cv_fuse3_CFLAGS -D_FILE_OFFSET_BITS=64"
           ac_cv_libfuse_LIBADD="$pkg_cv_fuse3_LIBS"])
 
         AS_IF(
           [test "x$ac_cv_libfuse" = xlibfuse],
-          [ac_cv_libfuse_CPPFLAGS="$pkg_cv_fuse_CFLAGS -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26"
+          [ac_cv_libfuse_CPPFLAGS="$pkg_cv_fuse_CFLAGS -D_FILE_OFFSET_BITS=64"
           ac_cv_libfuse_LIBADD="$pkg_cv_fuse_LIBS"])
         ])
       ])
@@ -58,17 +58,13 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
       [test "x$ac_cv_libfuse" != xlibfuse && test "x$ac_cv_libfuse" != xlibfuse3],
       [dnl Check for headers
 
-      dnl libfuse3 requires -D_FILE_OFFSET_BITS=64 to be set
-      ac_cv_libfuse_CPPFLAGS="-D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=30"
-      CPPFLAGS="$backup_CPPFLAGS $ac_cv_libfuse_CPPFLAGS"
+      CPPFLAGS="$backup_CPPFLAGS -DFUSE_USE_VERSION=30"
       AC_CHECK_HEADERS([fuse.h])
 
       AS_IF(
         [test "x$ac_cv_header_fuse_h" = xyes],
         [ac_cv_libfuse=libfuse3],
-        [dnl libfuse requires -D_FILE_OFFSET_BITS=64 to be set
-        ac_cv_libfuse_CPPFLAGS="-D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26"
-        CPPFLAGS="$backup_CPPFLAGS $ac_cv_libfuse_CPPFLAGS"
+        [CPPFLAGS="$backup_CPPFLAGS -DFUSE_USE_VERSION=26"
         AC_CHECK_HEADERS([fuse.h])
 
         AS_IF(
@@ -80,7 +76,11 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
         [test "x$ac_cv_header_fuse_h" = xno],
         [ac_cv_libfuse=no],
         [dnl Check for the individual functions
-        ac_cv_libfuse=libfuse
+        AC_CHECK_LIB(
+          fuse,
+          fuse_invalidate,
+          [ac_cv_libfuse=libfuse],
+          [ac_cv_libfuse=libfuse3])
 
         AC_CHECK_LIB(
           fuse,
@@ -103,6 +103,9 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
           [ac_cv_libfuse_dummy=yes],
           [ac_cv_libfuse=no])
 
+        dnl libfuse and libfuse3 require -D_FILE_OFFSET_BITS=64 to be set
+        ac_cv_libfuse_CPPFLAGS="-D_FILE_OFFSET_BITS=64"
+
         AS_IF(
           [test "x$ac_cv_libfuse" = xlibfuse3],
           [ac_cv_libfuse_LIBADD="-lfuse3"],
@@ -113,9 +116,7 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
     dnl Check for libosxfuse
     AS_IF(
       [test "x$ac_cv_with_libfuse" != xno && test "x$ac_cv_header_fuse_h" = xno],
-      [dnl libosxfuse requires -D_FILE_OFFSET_BITS=64 to be set
-      ac_cv_libfuse_CPPFLAGS="-D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26"
-      CPPFLAGS="$backup_CPPFLAGS $ac_cv_libfuse_CPPFLAGS"
+      [CPPFLAGS="$backup_CPPFLAGS -DFUSE_USE_VERSION=26"
       AC_CHECK_HEADERS([osxfuse/fuse.h])
 
       AS_IF(
@@ -145,6 +146,9 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
           [ac_cv_libfuse_dummy=yes],
           [ac_cv_libfuse=no])
 
+        dnl libosxfuse requires -D_FILE_OFFSET_BITS=64 to be set
+        ac_cv_libfuse_CPPFLAGS="-D_FILE_OFFSET_BITS=64"
+
         ac_cv_libfuse_LIBADD="-losxfuse";
         ])
       ])
@@ -155,6 +159,7 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
         [unable to find supported libfuse in directory: $ac_cv_with_libfuse],
         [1])
       ])
+
     CPPFLAGS="$backup_CPPFLAGS"
     ])
 
@@ -168,7 +173,7 @@ AC_DEFUN([AX_LIBFUSE_CHECK_LIB],
   AS_IF(
     [test "x$ac_cv_libfuse" = xlibfuse3],
     [AC_DEFINE(
-      [HAVE_LIBFUSE],
+      [HAVE_LIBFUSE3],
       [1],
       [Define to 1 if you have the 'fuse3' library (-lfuse3).])
     ])

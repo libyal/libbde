@@ -157,10 +157,10 @@ int main( int argc, char * const argv[] )
 	int unattended_mode                          = 0;
 	int verbose                                  = 0;
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations bdemount_fuse_operations;
 
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 	/* Need to set this to 1 even if there no arguments, otherwise this causes
 	 * fuse: empty argv passed to fuse_session_new()
 	 */
@@ -435,7 +435,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 	if( option_extended_options != NULL )
 	{
 		/* This argument is required but ignored
@@ -491,7 +491,7 @@ int main( int argc, char * const argv[] )
 	bdemount_fuse_operations.getattr    = &mount_fuse_getattr;
 	bdemount_fuse_operations.destroy    = &mount_fuse_destroy;
 
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 	bdemount_fuse_handle = fuse_new(
 	                        &bdemount_fuse_arguments,
 	                        &bdemount_fuse_operations,
@@ -546,7 +546,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-#endif /* FUSE_USE_VERSION >= 30 */
+#endif /* defined( HAVE_LIBFUSE3 ) */
 
 	if( verbose == 0 )
 	{
@@ -746,7 +746,7 @@ int main( int argc, char * const argv[] )
 
 	return( EXIT_FAILURE );
 
-#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE ) */
 
 on_error:
 	if( error != NULL )
@@ -756,7 +756,7 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 	if( bdemount_fuse_handle != NULL )
 	{
 		fuse_destroy(

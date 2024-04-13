@@ -44,7 +44,7 @@
 
 extern mount_handle_t *bdemount_mount_handle;
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 
 #if ( SIZEOF_OFF_T != 8 ) && ( SIZEOF_OFF_T != 4 )
 #error Size of off_t not supported
@@ -255,7 +255,7 @@ int mount_fuse_filldir(
 
 		return( -1 );
 	}
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 	if( filler(
 	     buffer,
 	     name,
@@ -664,7 +664,7 @@ on_error:
 /* Reads a directory
  * Returns 0 if successful or a negative errno value otherwise
  */
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
@@ -694,7 +694,7 @@ int mount_fuse_readdir(
 
 	BDETOOLS_UNREFERENCED_PARAMETER( offset )
 
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 	BDETOOLS_UNREFERENCED_PARAMETER( flags )
 #endif
 
@@ -1067,7 +1067,7 @@ on_error:
 /* Retrieves the file stat info
  * Returns 0 if successful or a negative errno value otherwise
  */
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info,
@@ -1088,7 +1088,7 @@ int mount_fuse_getattr(
 	uint16_t file_mode             = 0;
 	int result                     = 0;
 
-#if FUSE_USE_VERSION >= 30
+#if defined( HAVE_LIBFUSE3 )
 	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
 #endif
 
@@ -1348,5 +1348,5 @@ on_error:
 	return;
 }
 
-#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE ) */
 
