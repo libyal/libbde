@@ -160,8 +160,16 @@ int main( int argc, char * const argv[] )
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations bdemount_fuse_operations;
 
+#if FUSE_USE_VERSION >= 30
+	/* Need to set this to 1 even if there no arguments, otherwise this causes
+	 * fuse: empty argv passed to fuse_session_new()
+	 */
+	char *fuse_argv[ 2 ]                         = { program, NULL };
+	struct fuse_args bdemount_fuse_arguments     = FUSE_ARGS_INIT(1, fuse_argv);
+#else
 	struct fuse_args bdemount_fuse_arguments     = FUSE_ARGS_INIT(0, NULL);
 	struct fuse_chan *bdemount_fuse_channel      = NULL;
+#endif
 	struct fuse *bdemount_fuse_handle            = NULL;
 
 #elif defined( HAVE_LIBDOKAN )
@@ -483,6 +491,34 @@ int main( int argc, char * const argv[] )
 	bdemount_fuse_operations.getattr    = &mount_fuse_getattr;
 	bdemount_fuse_operations.destroy    = &mount_fuse_destroy;
 
+#if FUSE_USE_VERSION >= 30
+	bdemount_fuse_handle = fuse_new(
+	                        &bdemount_fuse_arguments,
+	                        &bdemount_fuse_operations,
+	                        sizeof( struct fuse_operations ),
+	                        bdemount_mount_handle );
+
+	if( bdemount_fuse_handle == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to create fuse handle.\n" );
+
+		goto on_error;
+	}
+	result = fuse_mount(
+	          bdemount_fuse_handle,
+	          mount_point );
+
+	if( result != 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to fuse mount file system.\n" );
+
+		goto on_error;
+	}
+#else
 	bdemount_fuse_channel = fuse_mount(
 	                         mount_point,
 	                         &bdemount_fuse_arguments );
@@ -510,6 +546,8 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+#endif /* FUSE_USE_VERSION >= 30 */
+
 	if( verbose == 0 )
 	{
 		if( fuse_daemonize(

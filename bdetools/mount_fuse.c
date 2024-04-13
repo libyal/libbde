@@ -255,11 +255,20 @@ int mount_fuse_filldir(
 
 		return( -1 );
 	}
+#if FUSE_USE_VERSION >= 30
+	if( filler(
+	     buffer,
+	     name,
+	     stat_info,
+	     0,
+	     0 ) == 1 )
+#else
 	if( filler(
 	     buffer,
 	     name,
 	     stat_info,
 	     0 ) == 1 )
+#endif
 	{
 		libcerror_error_set(
 		 error,
@@ -655,12 +664,22 @@ on_error:
 /* Reads a directory
  * Returns 0 if successful or a negative errno value otherwise
  */
+#if FUSE_USE_VERSION >= 30
+int mount_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_fill_dir_t filler,
+     off_t offset BDETOOLS_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info BDETOOLS_ATTRIBUTE_UNUSED,
+     enum fuse_readdir_flags flags BDETOOLS_ATTRIBUTE_UNUSED )
+#else
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
      off_t offset BDETOOLS_ATTRIBUTE_UNUSED,
      struct fuse_file_info *file_info BDETOOLS_ATTRIBUTE_UNUSED )
+#endif
 {
 	struct stat *stat_info                = NULL;
 	libcerror_error_t *error              = NULL;
@@ -674,6 +693,10 @@ int mount_fuse_readdir(
 	int sub_file_entry_index              = 0;
 
 	BDETOOLS_UNREFERENCED_PARAMETER( offset )
+
+#if FUSE_USE_VERSION >= 30
+	BDETOOLS_UNREFERENCED_PARAMETER( flags )
+#endif
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -1044,9 +1067,16 @@ on_error:
 /* Retrieves the file stat info
  * Returns 0 if successful or a negative errno value otherwise
  */
+#if FUSE_USE_VERSION >= 30
+int mount_fuse_getattr(
+     const char *path,
+     struct stat *stat_info,
+     struct fuse_file_info *file_info BDETOOLS_ATTRIBUTE_UNUSED )
+#else
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info )
+#endif
 {
 	libcerror_error_t *error       = NULL;
 	mount_file_entry_t *file_entry = NULL;
@@ -1057,6 +1087,10 @@ int mount_fuse_getattr(
 	uint64_t modification_time     = 0;
 	uint16_t file_mode             = 0;
 	int result                     = 0;
+
+#if FUSE_USE_VERSION >= 30
+	BDETOOLS_UNREFERENCED_PARAMETER( file_info )
+#endif
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )

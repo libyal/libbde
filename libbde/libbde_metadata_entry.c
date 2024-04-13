@@ -469,14 +469,14 @@ int libbde_metadata_entry_read_string(
 
 	return( 1 );
 
-on_error:
 #if defined( HAVE_DEBUG_OUTPUT )
+on_error:
 	if( value_string != NULL )
 	{
 		memory_free(
 		 value_string );
 	}
-#endif
 	return( -1 );
+#endif
 }
 
