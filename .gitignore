@@ -157,6 +157,7 @@ stamp-h[1-9]
 /tests/bde_test_volume_header
 /tests/bde_test_volume_master_key
 /tests/input
+/tests/notify_stream.log
 /tests/tmp*
 
 # Local library dependencies specific files

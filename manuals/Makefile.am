@@ -8,9 +8,7 @@ EXTRA_DIST = \
 	bdemount.1 \
 	libbde.3
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f Makefile
 

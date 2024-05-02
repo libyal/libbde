@@ -15,13 +15,11 @@ EXTRA_DIST = \
 	libbde/features.h.in \
 	libbde/types.h.in
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	libbde.h \
+	libbde/definitions.h \
+	libbde/features.h \
+	libbde/types.h \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f libbde.h
-	-rm -f libbde/definitions.h
-	-rm -f libbde/features.h
-	-rm -f libbde/types.h
-	-rm -f Makefile
 
