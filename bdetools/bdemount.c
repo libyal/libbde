@@ -1,5 +1,5 @@
 /*
- * Mounts a BitLocker Drive Encrypted (BDE) volume
+ * Mounts a BitLocker Drive Encrypted (BDE) volume.
  *
  * Copyright (C) 2011-2024, Joachim Metz <joachim.metz@gmail.com>
  *

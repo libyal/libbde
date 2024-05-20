@@ -719,7 +719,7 @@ int mount_file_entry_get_number_of_sub_file_entries(
 			return( -1 );
 		}
 		if( ( number_of_volumes < 0 )
-		 || ( number_of_volumes > 99 ) )
+		 || ( number_of_volumes > 999 ) )
 		{
 			libcerror_error_set(
 			 error,

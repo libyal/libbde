@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from a BitLocker Drive Encrypted (BDE) volume
+ * Shows information obtained from a BitLocker Drive Encrypted (BDE) volume.
  *
  * Copyright (C) 2011-2024, Joachim Metz <joachim.metz@gmail.com>
  *
