@@ -8,7 +8,7 @@ AC_DEFUN([AX_PROG_PYTHON],
   [AS_IF(
     [test "x${PYTHON_VERSION}" != x],
     [ax_python_progs="python${PYTHON_VERSION}"],
-    [ax_python_progs="python python3 python3.12 python3.11 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0 python2 python2.7 python2.6 python2.5"])
+    [ax_python_progs="python python3 python3.12 python3.11 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python2 python2.7"])
   AC_CHECK_PROGS(
     [PYTHON],
     [$ax_python_progs])
@@ -41,7 +41,7 @@ AC_DEFUN([AX_PROG_PYTHON_CONFIG],
     [test "x${PYTHON_CONFIG}" = x],
     [AC_CHECK_PROGS(
       [PYTHON_CONFIG],
-      [python-config python3-config python3.12-config python3.11-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python3.1-config python3.0-config python2-config python2.7-config python2.6-config python2.5-config])
+      [python-config python3-config python3.12-config python3.11-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python2-config python2.7-config])
     ])
   AS_IF(
     [test "x${PYTHON_CONFIG}" = x],
@@ -129,14 +129,14 @@ AC_DEFUN([AX_PYTHON_CHECK],
       [$ax_python_exec_prefix])
 
     dnl Check for Python library directory
-    ax_python_pythondir_suffix=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(0, 0, prefix=''))" 2>/dev/null`;
+    ax_python_pythondir_suffix=`${PYTHON} -c "import sys; import sysconfig; sys.stdout.write(sysconfig.get_path('purelib', vars={'base': '.'}))" 2>/dev/null`;
 
     AS_IF(
       [test "x${ac_cv_with_pythondir}" = x || test "x${ac_cv_with_pythondir}" = xno],
       [AS_IF(
         [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
         [ax_python_pythondir="${ax_python_prefix}/${ax_python_pythondir_suffix}"],
-        [ax_python_pythondir=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib()) " 2>/dev/null`])],
+        [ax_python_pythondir=`${PYTHON} -c "import sys; import sysconfig; sys.stdout.write(sysconfig.get_path('purelib')) " 2>/dev/null`])],
       [ax_python_pythondir=$ac_cv_with_pythondir])
 
     AC_SUBST(
@@ -144,8 +144,8 @@ AC_DEFUN([AX_PYTHON_CHECK],
       [$ax_python_pythondir])
 
     dnl Check for Python platform specific library directory
-    ax_python_pyexecdir_suffix=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(1, 0, prefix=''))" 2>/dev/null`;
-    ax_python_library_dir=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(True)) " 2>/dev/null`;
+    ax_python_pyexecdir_suffix=`${PYTHON} -c "import sys; import sysconfig; sys.stdout.write(sysconfig.get_path('platlib', vars={'platbase': '.'}))" 2>/dev/null`;
+    ax_python_library_dir=`${PYTHON} -c "import sys; import sysconfig; sys.stdout.write(sysconfig.get_path('platlib')) " 2>/dev/null`;
 
     AS_IF(
       [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
