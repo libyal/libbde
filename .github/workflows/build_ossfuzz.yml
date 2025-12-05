@@ -30,6 +30,6 @@ jobs:
         head -n 20 projects/libyal/Dockerfile > projects/libbde/Dockerfile
         echo "RUN git clone --depth 1 https://github.com/libyal/libbde.git libbde" >> projects/libbde/Dockerfile
         tail -n 3 projects/libyal/Dockerfile >> projects/libbde/Dockerfile
-        python3 infra/helper.py build_image --pull libbde 
+        python3 infra/helper.py build_image --pull libbde
         python3 infra/helper.py build_fuzzers --sanitizer address libbde
         python3 infra/helper.py check_build libbde
