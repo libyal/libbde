@@ -747,7 +747,7 @@ int main( int argc, char * const argv[] )
 #else
 	fprintf(
 	 stderr,
-	 "No sub system to mount BDE format.\n" );
+	 "No sub system to mount BitLocker Drive Encryption (BDE) format.\n" );
 
 	return( EXIT_FAILURE );
 

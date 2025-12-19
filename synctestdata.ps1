@@ -1,7 +1,9 @@
 # Script that synchronizes the local test data
 #
-# Version: 20230709
+# Version: 20251217
 
+$Repository = "log2timeline/dfvfs"
+$TestDataPath = "test_data"
 $TestSet = "public"
 $TestInputDirectory = "tests/input"
 $TestFiles = "bdetogo.raw"
@@ -21,11 +23,11 @@ If (-Not (Test-Path "${TestInputDirectory}\${TestSet}"))
 @"
 # libyal test data options
 password=bde-TEST
-"@ | Out-File -FilePath test_data_options
+"@ | Out-File -Encoding ascii -FilePath test_data_options
 
 ForEach ($TestFile in ${TestFiles} -split " ")
 {
-	$Url = "https://github.com/log2timeline/dfvfs/blob/main/test_data/${TestFile}?raw=true"
+	$Url = "https://raw.githubusercontent.com/${Repository}/refs/heads/main/${TestDataPath}/${TestFile}"
 
 	Invoke-WebRequest -Uri ${Url} -OutFile "${TestInputDirectory}\${TestSet}\${TestFile}"
 
