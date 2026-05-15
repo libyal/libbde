@@ -5,7 +5,7 @@ Microsoft Windows, as of Vista, to encrypt data on a storage media volume.
 Project information:
 
 * Status: alpha
-* Licence: LGPLv3+
+* Licence: LGPL-3.0-or-later
 
 Supported BDE formats:
 
