@@ -262,6 +262,11 @@ int libbde_volume_free(
 
 			result = -1;
 		}
+		memory_set(
+		 internal_volume->recovered_recovery_password,
+		 0,
+		 56 );
+
 		memory_free(
 		 internal_volume );
 	}
@@ -1616,6 +1621,7 @@ int libbde_internal_volume_open_read_keys_from_metadata(
      libcerror_error_t **error )
 {
 	uint8_t volume_master_key[ 32 ];
+	uint8_t vmk_bytes_out[ 32 ];
 
 	uint8_t *external_key    = NULL;
 	static char *function    = "libbde_internal_volume_open_read_keys_from_metadata";
@@ -1682,6 +1688,20 @@ int libbde_internal_volume_open_read_keys_from_metadata(
 
 			goto on_error;
 		}
+		if( memory_set(
+		     vmk_bytes_out,
+		     0,
+		     32 ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear VMK bytes out.",
+			 function );
+
+			goto on_error;
+		}
 		result = libbde_metadata_read_volume_master_key(
 		          metadata,
 		          internal_volume->password_keep,
@@ -1741,6 +1761,8 @@ int libbde_internal_volume_open_read_keys_from_metadata(
 			          64,
 			          internal_volume->tweak_key,
 			          32,
+			          vmk_bytes_out,
+			          32,
 			          error );
 
 			if( result == -1 )
@@ -1785,7 +1807,26 @@ int libbde_internal_volume_open_read_keys_from_metadata(
 				}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-				internal_volume->keys_are_set = 1;
+			if( libbde_recovery_password_from_vmk(
+			     metadata,
+			     internal_volume->password_keep,
+			     volume_master_key,
+			     internal_volume->recovered_recovery_password,
+			     56,
+			     error ) == -1 )
+			{
+				/* Non-fatal: recovery password recovery failed, but the volume
+				 * can still be opened. Clear the error and continue.
+				 */
+				libcerror_error_free(
+				 error );
+			}
+			memory_set(
+			 vmk_bytes_out,
+			 0,
+			 32 );
+
+			internal_volume->keys_are_set = 1;
 			}
 		}
 		if( memory_set(
@@ -1808,6 +1849,11 @@ int libbde_internal_volume_open_read_keys_from_metadata(
 on_error:
 	memory_set(
 	 volume_master_key,
+	 0,
+	 32 );
+
+	memory_set(
+	 vmk_bytes_out,
 	 0,
 	 32 );
 
@@ -3172,6 +3218,119 @@ int libbde_volume_get_utf8_description(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve UTF-8 description.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the UTF-8 string value of the recovered recovery password
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libbde_volume_get_utf8_recovered_recovery_password(
+     libbde_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	static char *function                     = "libbde_volume_get_utf8_recovered_recovery_password";
+	int result                                = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( utf8_string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid UTF-8 string.",
+		 function );
+
+		return( -1 );
+	}
+	if( utf8_string_size < 56 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: UTF-8 string too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( utf8_string_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid UTF-8 string size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->recovered_recovery_password[ 0 ] == 0 )
+	{
+		result = 0;
+	}
+	else
+	{
+		if( memory_copy(
+		     utf8_string,
+		     internal_volume->recovered_recovery_password,
+		     56 ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy recovered recovery password.",
 			 function );
 
 			result = -1;

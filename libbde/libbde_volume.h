@@ -117,6 +117,10 @@ struct libbde_internal_volume
 	 */
 	uint8_t keys_are_set;
 
+	/* Recovered recovery password (48-digit, hyphen-separated, NUL-terminated)
+	 */
+	uint8_t recovered_recovery_password[ 56 ];
+
 	/* The password keep
 	 */
 	libbde_password_keep_t *password_keep;
@@ -298,7 +302,14 @@ int libbde_volume_get_utf16_description(
      size_t utf16_string_size,
      libcerror_error_t **error );
 
-LIBBDE_EXTERN \
+LIBBDE_EXTERN 
+int libbde_volume_get_utf8_recovered_recovery_password(
+     libbde_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN 
 int libbde_volume_get_number_of_key_protectors(
      libbde_volume_t *volume,
      int *number_of_key_protectors,

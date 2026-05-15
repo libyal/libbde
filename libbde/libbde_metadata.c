@@ -2265,6 +2265,8 @@ int libbde_metadata_read_full_volume_encryption_key(
      size_t full_volume_encryption_key_size,
      uint8_t *tweak_key,
      size_t tweak_key_size,
+     uint8_t *vmk_bytes_out,
+     size_t vmk_bytes_out_size,
      libcerror_error_t **error )
 {
 	uint8_t *unencrypted_data      = NULL;
@@ -2386,6 +2388,28 @@ int libbde_metadata_read_full_volume_encryption_key(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
 		 "%s: invalid TWEAK key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( vmk_bytes_out == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid VMK bytes out.",
+		 function );
+
+		return( -1 );
+	}
+	if( vmk_bytes_out_size < 32 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid VMK bytes out value too small.",
 		 function );
 
 		return( -1 );
@@ -2579,6 +2603,20 @@ int libbde_metadata_read_full_volume_encryption_key(
 				 LIBCERROR_ERROR_DOMAIN_MEMORY,
 				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 				 "%s: unable to copy unencrypted full volume encryption key.",
+				 function );
+
+				goto on_error;
+			}
+			if( memory_copy(
+			     vmk_bytes_out,
+			     &( unencrypted_data[ 28 ] ),
+			     32 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy VMK bytes out.",
 				 function );
 
 				goto on_error;

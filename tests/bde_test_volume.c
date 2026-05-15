@@ -3468,6 +3468,124 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libbde_volume_get_utf8_recovered_recovery_password function
+ * Returns 1 if successful or 0 if not
+ */
+int bde_test_volume_get_utf8_recovered_recovery_password(
+     libbde_volume_t *volume )
+{
+	uint8_t utf8_recovered_recovery_password[ 56 ];
+
+	libcerror_error_t *error                        = NULL;
+	int result                                      = 0;
+	int utf8_recovered_recovery_password_is_set     = 0;
+
+	/* Test regular cases
+	 */
+	result = libbde_volume_get_utf8_recovered_recovery_password(
+	          volume,
+	          utf8_recovered_recovery_password,
+	          56,
+	          &error );
+
+	BDE_TEST_ASSERT_NOT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	utf8_recovered_recovery_password_is_set = result;
+
+	/* Test error cases
+	 */
+	result = libbde_volume_get_utf8_recovered_recovery_password(
+	          NULL,
+	          utf8_recovered_recovery_password,
+	          56,
+	          &error );
+
+	BDE_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	BDE_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	if( utf8_recovered_recovery_password_is_set != 0 )
+	{
+		result = libbde_volume_get_utf8_recovered_recovery_password(
+		          volume,
+		          NULL,
+		          56,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+
+		result = libbde_volume_get_utf8_recovered_recovery_password(
+		          volume,
+		          utf8_recovered_recovery_password,
+		          0,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+
+		result = libbde_volume_get_utf8_recovered_recovery_password(
+		          volume,
+		          utf8_recovered_recovery_password,
+		          (size_t) SSIZE_MAX + 1,
+		          &error );
+
+		BDE_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		BDE_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 /* Tests the libbde_volume_get_utf16_description_size function
  * Returns 1 if successful or 0 if not
  */
@@ -4331,6 +4449,11 @@ int main(
 		BDE_TEST_RUN_WITH_ARGS(
 		 "libbde_volume_get_utf16_description",
 		 bde_test_volume_get_utf16_description,
+		 volume );
+
+		BDE_TEST_RUN_WITH_ARGS(
+		 "libbde_volume_get_utf8_recovered_recovery_password",
+		 bde_test_volume_get_utf8_recovered_recovery_password,
 		 volume );
 
 		BDE_TEST_RUN_WITH_ARGS(

@@ -398,6 +398,18 @@ int libbde_volume_get_utf16_description(
      size_t utf16_string_size,
      libbde_error_t **error );
 
+/* Retrieves the UTF-8 string value of the recovered recovery password
+ * The recovered recovery password is derived from the VMK after successful unlock
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_utf8_recovered_recovery_password(
+     libbde_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libbde_error_t **error );
+
 /* Retrieves the number of volume master key protectors
  * Returns 1 if successful or -1 on error
  */

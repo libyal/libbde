@@ -169,6 +169,8 @@ int libbde_metadata_read_full_volume_encryption_key(
      size_t full_volume_encryption_key_size,
      uint8_t *tweak_key,
      size_t tweak_key_size,
+     uint8_t *vmk_bytes_out,
+     size_t vmk_bytes_out_size,
      libcerror_error_t **error );
 
 int libbde_metadata_get_volume_identifier(

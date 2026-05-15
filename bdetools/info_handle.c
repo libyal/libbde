@@ -1127,7 +1127,7 @@ int info_handle_open(
 
 		if( bdetools_prompt_for_password(
 		     stdout,
-		     "Password",
+		     _SYSTEM_STRING( "Password" ),
 		     password,
 		     64,
 		     error ) != 1 )
@@ -2020,6 +2020,28 @@ int info_handle_volume_fprint(
 			 info_handle->notify_stream,
 			 "\n" );
 		}
+	}
+	{
+		uint8_t recovered_recovery_password[ 56 ];
+
+		if( libbde_volume_get_utf8_recovered_recovery_password(
+		     info_handle->volume,
+		     recovered_recovery_password,
+		     56,
+		     error ) == 1 )
+		{
+			if( recovered_recovery_password[ 0 ] != 0 )
+			{
+				fprintf(
+				 info_handle->notify_stream,
+				 "\tRecovered recovery password:\t%s\n",
+				 recovered_recovery_password );
+			}
+		}
+		memory_set(
+		 recovered_recovery_password,
+		 0,
+		 56 );
 	}
 	return( 1 );
 
