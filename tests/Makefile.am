@@ -22,6 +22,10 @@ AM_CPPFLAGS = \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBBDE_DLL_IMPORT@
 
+AM_TESTS_ENVIRONMENT = \
+	export PYTHON="@PYTHON@"; \
+	export TESTS_USE_WINAPI="@TESTS_USE_WINAPI@";
+
 if HAVE_PYTHON_TESTS
 TESTS_PYBDE = \
 	test_python_module.sh
@@ -370,7 +374,8 @@ bde_test_tools_output_SOURCES = \
 
 bde_test_tools_output_LDADD = \
 	../libbde/libbde.la \
-	@LIBCERROR_LIBADD@
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
 
 bde_test_tools_signal_SOURCES = \
 	../bdetools/bdetools_signal.c ../bdetools/bdetools_signal.h \
