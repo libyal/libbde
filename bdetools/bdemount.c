@@ -572,7 +572,7 @@ int main( int argc, char * const argv[] )
 	                        &bdemount_fuse_operations,
 	                        sizeof( struct fuse_operations ),
 	                        bdemount_mount_handle );
-	
+
 	if( bdemount_fuse_handle == NULL )
 	{
 		fprintf(

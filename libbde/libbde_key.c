@@ -272,7 +272,7 @@ int libbde_key_read(
 		goto on_error;
 	}
 	key->data_size = value_data_size;
-	
+
 	return( 1 );
 
 on_error:
