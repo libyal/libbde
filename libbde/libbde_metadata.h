@@ -93,6 +93,13 @@ struct libbde_metadata
 	 */
 	libbde_aes_ccm_encrypted_key_t *full_volume_encryption_key;
 
+	/* The auto-unlock key (FVE metadata entry type 0x000b)
+	 * This is the AES-CCM encrypted key that, when decrypted with the volume
+	 * master key of the operating system volume, yields the plaintext
+	 * AUTO_UNLOCK_KEY used to unwrap the FVEAutoUnlock blob of a secondary volume
+	 */
+	libbde_aes_ccm_encrypted_key_t *auto_unlock_encrypted_key;
+
 	/* The metadata entries array
 	 */
 	libcdata_array_t *entries_array;
@@ -169,6 +176,14 @@ int libbde_metadata_read_full_volume_encryption_key(
      size_t full_volume_encryption_key_size,
      uint8_t *tweak_key,
      size_t tweak_key_size,
+     libcerror_error_t **error );
+
+int libbde_metadata_read_auto_unlock_key(
+     libbde_metadata_t *metadata,
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
+     uint8_t *auto_unlock_key,
+     size_t auto_unlock_key_size,
      libcerror_error_t **error );
 
 int libbde_metadata_get_volume_identifier(

@@ -249,18 +249,6 @@ ssize_t libbde_metadata_entry_read(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( ( version != 1 )
-	 && ( version != 3 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported FVE metadata entry version.",
-		 function );
-
-		return( -1 );
-	}
 	if( ( entry_size < sizeof( bde_metadata_entry_v1_t ) )
 	 || ( entry_size > fve_metadata_size ) )
 	{
@@ -272,6 +260,33 @@ ssize_t libbde_metadata_entry_read(
 		 function );
 
 		return( -1 );
+	}
+	/* Versions other than 1 and 3 are not interpreted. Such entries (e.g. the
+	 * type 0x001e / version 5 entry introduced in Windows 11 24H2) are skipped,
+	 * rather than allow-listed, so they are never misparsed as a known structure
+	 * while the remaining known entries can still be processed.
+	 */
+	if( ( version != 1 )
+	 && ( version != 3 ) )
+	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: skipping unsupported FVE metadata entry version: %" PRIu16 " "
+			 "(entry type: 0x%04" PRIx16 ", value type: 0x%04" PRIx16 ", size: %" PRIu16 ").\n",
+			 function,
+			 version,
+			 metadata_entry->type,
+			 metadata_entry->value_type,
+			 entry_size );
+		}
+#endif
+		/* Reset the type and value type so the entry is treated as a
+		 * skippable / unknown property by the metadata entry dispatcher.
+		 */
+		metadata_entry->type       = 0;
+		metadata_entry->value_type = LIBBDE_VALUE_TYPE_ERROR;
 	}
 	fve_metadata += sizeof( bde_metadata_entry_v1_t );
 

@@ -219,6 +219,22 @@ int libbde_metadata_free(
 				result = -1;
 			}
 		}
+		if( ( *metadata )->auto_unlock_encrypted_key != NULL )
+		{
+			if( libbde_aes_ccm_encrypted_key_free(
+			     &( ( *metadata )->auto_unlock_encrypted_key ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free auto-unlock key.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( libcdata_array_free(
 		     &( ( *metadata )->entries_array ),
 		     (int(*)(intptr_t **, libcerror_error_t **)) &libbde_metadata_entry_free,
@@ -849,8 +865,7 @@ int libbde_metadata_read_entries_data(
 				break;
 
 			case LIBBDE_ENTRY_TYPE_FULL_VOLUME_ENCRYPTION_KEY:
-/* TODO change to name */
-			case 0x000b:
+			case LIBBDE_ENTRY_TYPE_AUTO_UNLOCK_KEY:
 				if( libbde_aes_ccm_encrypted_key_initialize(
 				     &aes_ccm_encrypted_key,
 				     error ) != 1 )
@@ -885,9 +900,20 @@ int libbde_metadata_read_entries_data(
 
 					aes_ccm_encrypted_key = NULL;
 				}
-				if( metadata_entry->type == 0x000b )
+				if( ( metadata_entry->type == LIBBDE_ENTRY_TYPE_AUTO_UNLOCK_KEY )
+				 && ( metadata->auto_unlock_encrypted_key == NULL ) )
 				{
-/* TODO store key somewhere */
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: found auto-unlock key (metadata entry type 0x000b).\n",
+						 function );
+					}
+#endif
+					metadata->auto_unlock_encrypted_key = aes_ccm_encrypted_key;
+
+					aes_ccm_encrypted_key = NULL;
 				}
 				if( aes_ccm_encrypted_key != NULL )
 				{
@@ -2681,6 +2707,339 @@ int libbde_metadata_read_full_volume_encryption_key(
 			result = 1;
 		}
 	}
+	if( libcaes_context_free(
+	     &aes_context,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable free context.",
+		 function );
+
+		goto on_error;
+	}
+	if( unencrypted_data != NULL )
+	{
+		if( memory_set(
+		     unencrypted_data,
+		     0,
+		     unencrypted_data_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear unencrypted data.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 unencrypted_data );
+	}
+	return( result );
+
+on_error:
+	if( unencrypted_data != NULL )
+	{
+		memory_set(
+		 unencrypted_data,
+		 0,
+		 unencrypted_data_size );
+		memory_free(
+		 unencrypted_data );
+	}
+	if( aes_context != NULL )
+	{
+		libcaes_context_free(
+		 &aes_context,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Reads the auto-unlock key (FVE metadata entry type 0x000b) from the metadata
+ * The auto-unlock key is the AES-CCM encrypted key of the operating system
+ * volume that is decrypted with the operating system volume master key.
+ * The resulting plaintext key is used to unwrap the FVEAutoUnlock blob of a
+ * secondary (auto-unlocked) volume.
+ * Returns 1 if successful, 0 if no key could be obtained or -1 on error
+ */
+int libbde_metadata_read_auto_unlock_key(
+     libbde_metadata_t *metadata,
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
+     uint8_t *auto_unlock_key,
+     size_t auto_unlock_key_size,
+     libcerror_error_t **error )
+{
+	uint8_t *unencrypted_data      = NULL;
+	libcaes_context_t *aes_context = NULL;
+	static char *function          = "libbde_metadata_read_auto_unlock_key";
+	size_t unencrypted_data_size   = 0;
+	uint32_t data_size             = 0;
+	uint32_t version               = 0;
+	int result                     = 0;
+
+	if( metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( metadata->auto_unlock_encrypted_key == NULL )
+	{
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: metadata does not contain an auto-unlock key (entry type 0x000b).\n",
+			 function );
+		}
+#endif
+		return( 0 );
+	}
+	if( metadata->auto_unlock_encrypted_key->data_size < 28 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: auto-unlock key data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_master_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume master key.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_master_key_size < 32 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid volume master key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( auto_unlock_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid auto-unlock key.",
+		 function );
+
+		return( -1 );
+	}
+	if( auto_unlock_key_size < 32 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid auto-unlock key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	unencrypted_data_size = metadata->auto_unlock_encrypted_key->data_size;
+
+	if( ( unencrypted_data_size == 0 )
+	 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid unencrypted data size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	unencrypted_data = (uint8_t *) memory_allocate(
+	                                unencrypted_data_size );
+
+	if( unencrypted_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create unencrypted data.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     unencrypted_data,
+	     0,
+	     unencrypted_data_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear unencrypted data.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcaes_context_initialize(
+	     &aes_context,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable initialize AES context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcaes_context_set_key(
+	     aes_context,
+	     LIBCAES_CRYPT_MODE_ENCRYPT,
+	     volume_master_key,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set encryption key in AES context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcaes_crypt_ccm(
+	     aes_context,
+	     LIBCAES_CRYPT_MODE_DECRYPT,
+	     metadata->auto_unlock_encrypted_key->nonce,
+	     12,
+	     metadata->auto_unlock_encrypted_key->data,
+	     metadata->auto_unlock_encrypted_key->data_size,
+	     unencrypted_data,
+	     unencrypted_data_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+		 "%s: unable to decrypt data.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: unencrypted data:\n",
+		 function );
+		libcnotify_print_data(
+		 unencrypted_data,
+		 unencrypted_data_size,
+		 0 );
+	}
+#endif
+	/* The first 16 bytes of the decrypted data are the AES-CCM message
+	 * authentication code (MAC) region; the key container starts at offset 16.
+	 * Note: libcaes_crypt_ccm does not validate this MAC (see libbde issue #36),
+	 * so the data_size and version fields below double as a sanity / wrong-key
+	 * check.
+	 */
+	byte_stream_copy_to_uint16_little_endian(
+	 &( unencrypted_data[ 16 ] ),
+	 data_size );
+
+	byte_stream_copy_to_uint16_little_endian(
+	 &( unencrypted_data[ 20 ] ),
+	 version );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: key container data size\t\t: %" PRIu32 "\n",
+		 function,
+		 data_size );
+
+		libcnotify_printf(
+		 "%s: key container version\t\t: %" PRIu32 "\n",
+		 function,
+		 version );
+
+		libcnotify_printf(
+		 "\n" );
+	}
+#endif
+	if( version == 1 )
+	{
+		if( data_size == 0x2c )
+		{
+			if( unencrypted_data_size < ( 28 + 32 ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: unencrypted auto-unlock key data size value out of bounds.",
+				 function );
+
+				goto on_error;
+			}
+			if( memory_copy(
+			     auto_unlock_key,
+			     &( unencrypted_data[ 28 ] ),
+			     32 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy unencrypted auto-unlock key.",
+				 function );
+
+				goto on_error;
+			}
+			result = 1;
+		}
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( ( result == 0 )
+	 && ( libcnotify_verbose != 0 ) )
+	{
+		libcnotify_printf(
+		 "%s: auto-unlock key could not be decrypted "
+		 "(unexpected key container version: %" PRIu32 " or data size: %" PRIu32 "); "
+		 "wrong volume master key?\n",
+		 function,
+		 version,
+		 data_size );
+	}
+#endif
 	if( libcaes_context_free(
 	     &aes_context,
 	     error ) != 1 )

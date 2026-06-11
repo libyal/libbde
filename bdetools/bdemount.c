@@ -71,20 +71,28 @@ void usage_fprint(
 	fprintf( stream, "Use bdemount to mount a BitLocker Drive Encrypted (BDE) volume\n\n" );
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
-	fprintf( stream, "Usage: bdemount [ -k keys ] [ -o offset ] [ -p password ]\n"
-	                 "                [ -r recovery_password ] [ -s startup_key_path ]\n"
-	                 "                [ -X extended_options ] [ -huvV ] volume mount_point\n\n" );
-#else
-	fprintf( stream, "Usage: bdemount [ -k keys ] [ -o offset ] [ -p password ]\n"
-	                 "                [ -r recovery_password ] [ -s startup_key_path ]\n"
+	fprintf( stream, "Usage: bdemount [ -B blob ] [ -k keys ] [ -K key ] [ -o offset ]\n"
+	                 "                [ -p password ] [ -r recovery_password ]\n"
+	                 "                [ -s startup_key_path ] [ -X extended_options ]\n"
 	                 "                [ -huvV ] volume mount_point\n\n" );
+#else
+	fprintf( stream, "Usage: bdemount [ -B blob ] [ -k keys ] [ -K key ] [ -o offset ]\n"
+	                 "                [ -p password ] [ -r recovery_password ]\n"
+	                 "                [ -s startup_key_path ] [ -huvV ] volume mount_point\n\n" );
 #endif
 	fprintf( stream, "\tvolume:      a BitLocker Drive Encrypted (BDE) volume\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
+	fprintf( stream, "\t-B:          specify the file containing the FVEAutoUnlock blob (the binary\n"
+	                 "\t             'Data' value from the registry key HKLM\\SYSTEM\\CurrentControlSet\n"
+	                 "\t             \\Control\\FVEAutoUnlock\\{GUID}). Used together with -K to unlock\n"
+	                 "\t             a secondary (auto-unlocked) volume\n" );
 	fprintf( stream, "\t-h:          shows this help\n" );
 	fprintf( stream, "\t-k:          specify the full volume encryption key and tweak key formatted in\n"
 	                 "\t             base16 and separated by a : character e.g. FVEK:TWEAK\n" );
+	fprintf( stream, "\t-K:          specify the auto-unlock key of the operating system volume formatted\n"
+	                 "\t             in base16 (64 hexadecimal characters). Used together with -B to\n"
+	                 "\t             unlock a secondary (auto-unlocked) volume\n" );
 	fprintf( stream, "\t-o:          specify the volume offset in bytes\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password/passphrase\n" );
@@ -153,6 +161,8 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libbde_error_t *error                        = NULL;
+	system_character_t *option_auto_unlock_blob  = NULL;
+	system_character_t *option_auto_unlock_key   = NULL;
 	system_character_t *option_keys              = NULL;
 	system_character_t *option_offset            = NULL;
 	system_character_t *option_password          = NULL;
@@ -230,9 +240,9 @@ int main( int argc, char * const argv[] )
 	 program );
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
-	options = _SYSTEM_STRING( "hk:o:p:r:s:uvVX:" );
+	options = _SYSTEM_STRING( "B:hk:K:o:p:r:s:uvVX:" );
 #else
-	options = _SYSTEM_STRING( "hk:o:p:r:s:uvV" );
+	options = _SYSTEM_STRING( "B:hk:K:o:p:r:s:uvV" );
 #endif
 	while( ( option = bdetools_getopt(
 	                   argc,
@@ -253,6 +263,11 @@ int main( int argc, char * const argv[] )
 
 				return( EXIT_FAILURE );
 
+			case (system_integer_t) 'B':
+				option_auto_unlock_blob = optarg;
+
+				break;
+
 			case (system_integer_t) 'h':
 				usage_fprint(
 				 stdout );
@@ -261,6 +276,11 @@ int main( int argc, char * const argv[] )
 
 			case (system_integer_t) 'k':
 				option_keys = optarg;
+
+				break;
+
+			case (system_integer_t) 'K':
+				option_auto_unlock_key = optarg;
 
 				break;
 
@@ -420,6 +440,34 @@ int main( int argc, char * const argv[] )
 			fprintf(
 			 stderr,
 			 "Unable to set startup key.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_auto_unlock_key != NULL )
+	{
+		if( mount_handle_set_auto_unlock_key(
+		     bdemount_mount_handle,
+		     option_auto_unlock_key,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set auto-unlock key.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_auto_unlock_blob != NULL )
+	{
+		if( mount_handle_set_auto_unlock_blob(
+		     bdemount_mount_handle,
+		     option_auto_unlock_blob,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set FVEAutoUnlock blob.\n" );
 
 			goto on_error;
 		}

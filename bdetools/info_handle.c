@@ -48,6 +48,14 @@ int libbde_volume_open_file_io_handle(
      int access_flags,
      libbde_error_t **error );
 
+extern \
+int libbde_volume_read_auto_unlock_blob_file_io_handle(
+     libbde_volume_t *volume,
+     const uint8_t *auto_unlock_key,
+     size_t auto_unlock_key_size,
+     libbfio_handle_t *blob_file_io_handle,
+     libbde_error_t **error );
+
 #endif /* !defined( LIBBDE_HAVE_BFIO ) */
 
 #define INFO_HANDLE_NOTIFY_STREAM		stdout
@@ -463,7 +471,7 @@ int info_handle_set_keys(
 	base16_variant = LIBUNA_BASE16_VARIANT_RFC4648;
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( _BYTE_STREAM_HOST_IS_ENDIAN_BIG )
+	if( _BYTE_STREAM_HOST_BYTE_ORDER == _BYTE_STREAM_ENDIAN_BIG )
 	{
 		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
 	}
@@ -831,6 +839,172 @@ int info_handle_set_startup_key(
 	return( 1 );
 }
 
+/* Sets the auto-unlock key (base16 / hex encoded) used to unlock a secondary volume
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_auto_unlock_key(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error )
+{
+	static char *function   = "info_handle_set_auto_unlock_key";
+	size_t string_length    = 0;
+	uint32_t base16_variant = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid string.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = system_string_length(
+	                 string );
+
+	/* The auto-unlock key is a 256-bit key, i.e. 64 hexadecimal characters.
+	 */
+	if( string_length != 64 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported auto-unlock key length (expected 64 hexadecimal characters).",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     info_handle->auto_unlock_key_data,
+	     0,
+	     32 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear auto-unlock key data.",
+		 function );
+
+		return( -1 );
+	}
+	base16_variant = LIBUNA_BASE16_VARIANT_RFC4648;
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	if( _BYTE_STREAM_HOST_BYTE_ORDER == _BYTE_STREAM_ENDIAN_BIG )
+	{
+		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
+	}
+	else
+	{
+		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
+	}
+#endif
+	if( libuna_base16_stream_copy_to_byte_stream(
+	     (uint8_t *) string,
+	     string_length * sizeof( system_character_t ),
+	     info_handle->auto_unlock_key_data,
+	     32,
+	     base16_variant,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy auto-unlock key data.",
+		 function );
+
+		memory_set(
+		 info_handle->auto_unlock_key_data,
+		 0,
+		 32 );
+
+		return( -1 );
+	}
+	info_handle->auto_unlock_key_is_set = 1;
+
+	return( 1 );
+}
+
+/* Sets the path of the FVEAutoUnlock blob file used to unlock a secondary volume
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_auto_unlock_blob(
+     info_handle_t *info_handle,
+     const system_character_t *filename,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_set_auto_unlock_blob";
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( filename == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		return( -1 );
+	}
+	info_handle->auto_unlock_blob_path = filename;
+
+	return( 1 );
+}
+
+/* Sets that the auto-unlock key of the operating system volume should be printed
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_print_auto_unlock_key(
+     info_handle_t *info_handle,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_set_print_auto_unlock_key";
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	info_handle->print_auto_unlock_key = 1;
+
+	return( 1 );
+}
+
 /* Sets the volume offset
  * Returns 1 if successful or -1 on error
  */
@@ -875,6 +1049,124 @@ int info_handle_set_volume_offset(
 	info_handle->volume_offset = (off64_t) value_64bit;
 
 	return( 1 );
+}
+
+/* Reads the FVEAutoUnlock blob file and uses it - together with the auto-unlock
+ * key - to recover the external key of the (secondary) volume.
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_read_auto_unlock_blob_file(
+     info_handle_t *info_handle,
+     libcerror_error_t **error )
+{
+	libbfio_handle_t *blob_file_io_handle = NULL;
+	static char *function                 = "info_handle_read_auto_unlock_blob_file";
+	size_t filename_length                = 0;
+	int result                            = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( info_handle->auto_unlock_key_is_set == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: a FVEAutoUnlock blob was provided but no auto-unlock key was set "
+		 "(use the auto-unlock key option as well).",
+		 function );
+
+		return( -1 );
+	}
+	if( libbfio_file_initialize(
+	     &blob_file_io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create blob file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	filename_length = system_string_length(
+	                   info_handle->auto_unlock_blob_path );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	if( libbfio_file_set_name_wide(
+	     blob_file_io_handle,
+	     info_handle->auto_unlock_blob_path,
+	     filename_length,
+	     error ) != 1 )
+#else
+	if( libbfio_file_set_name(
+	     blob_file_io_handle,
+	     info_handle->auto_unlock_blob_path,
+	     filename_length,
+	     error ) != 1 )
+#endif
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set blob filename.",
+		 function );
+
+		goto on_error;
+	}
+	result = libbde_volume_read_auto_unlock_blob_file_io_handle(
+	          info_handle->volume,
+	          info_handle->auto_unlock_key_data,
+	          32,
+	          blob_file_io_handle,
+	          error );
+
+	if( result != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to recover external key from FVEAutoUnlock blob.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbfio_handle_free(
+	     &blob_file_io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free blob file IO handle.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( blob_file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &blob_file_io_handle,
+		 NULL );
+	}
+	return( -1 );
 }
 
 /* Opens the info handle
@@ -1083,6 +1375,22 @@ int info_handle_open(
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read startup key.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( info_handle->auto_unlock_blob_path != NULL )
+	{
+		if( info_handle_read_auto_unlock_blob_file(
+		     info_handle,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read FVEAutoUnlock blob and recover external key.",
 			 function );
 
 			goto on_error;
@@ -1524,6 +1832,8 @@ int info_handle_volume_fprint(
 {
         system_character_t byte_size_string[ 16 ];
 	uint8_t guid_data[ 16 ];
+	uint8_t auto_unlock_key_data[ 32 ];
+	system_character_t auto_unlock_key_string[ 65 ];
 
 	libbde_key_protector_t *key_protector = NULL;
 	system_character_t *value_string      = NULL;
@@ -1533,6 +1843,7 @@ int info_handle_volume_fprint(
 	uint64_t value_64bit                  = 0;
 	uint16_t encryption_method            = 0;
 	uint16_t key_protector_type           = 0;
+	uint32_t base16_variant               = 0;
 	int is_locked                         = 0;
 	int key_protector_index               = 0;
 	int number_of_key_protectors          = 0;
@@ -2019,6 +2330,106 @@ int info_handle_volume_fprint(
 			fprintf(
 			 info_handle->notify_stream,
 			 "\n" );
+		}
+	}
+	if( info_handle->print_auto_unlock_key != 0 )
+	{
+		if( is_locked != 0 )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "Auto-unlock key: unable to retrieve, volume is locked.\n"
+			 "Provide the credentials of this (operating system) volume "
+			 "(password, recovery password or startup key).\n\n" );
+		}
+		else
+		{
+			if( memory_set(
+			     auto_unlock_key_data,
+			     0,
+			     32 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+				 "%s: unable to clear auto-unlock key data.",
+				 function );
+
+				goto on_error;
+			}
+			result = libbde_volume_get_auto_unlock_key(
+			          info_handle->volume,
+			          auto_unlock_key_data,
+			          32,
+			          error );
+
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve auto-unlock key.",
+				 function );
+
+				goto on_error;
+			}
+			else if( result == 0 )
+			{
+				fprintf(
+				 info_handle->notify_stream,
+				 "Auto-unlock key: not available "
+				 "(this volume does not contain an auto-unlock key entry, "
+				 "or it could not be decrypted).\n\n" );
+			}
+			else
+			{
+				base16_variant = LIBUNA_BASE16_VARIANT_RFC4648;
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+				if( _BYTE_STREAM_HOST_BYTE_ORDER == _BYTE_STREAM_ENDIAN_BIG )
+				{
+					base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
+				}
+				else
+				{
+					base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
+				}
+#endif
+				if( libuna_base16_stream_copy_from_byte_stream(
+				     (uint8_t *) auto_unlock_key_string,
+				     65 * sizeof( system_character_t ),
+				     auto_unlock_key_data,
+				     32,
+				     base16_variant,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+					 "%s: unable to copy auto-unlock key to base16 string.",
+					 function );
+
+					memory_set(
+					 auto_unlock_key_data,
+					 0,
+					 32 );
+
+					goto on_error;
+				}
+				auto_unlock_key_string[ 64 ] = 0;
+
+				fprintf(
+				 info_handle->notify_stream,
+				 "Auto-unlock key\t\t\t\t: %" PRIs_SYSTEM "\n\n",
+				 auto_unlock_key_string );
+			}
+			memory_set(
+			 auto_unlock_key_data,
+			 0,
+			 32 );
 		}
 	}
 	return( 1 );
