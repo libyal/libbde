@@ -33,6 +33,7 @@ libbde_la_SOURCES = \
 	libbde_error.c libbde_error.h \
 	libbde_extern.h \
 	libbde_external_key.c libbde_external_key.h \
+	libbde_fve_auto_unlock.c libbde_fve_auto_unlock.h \
 	libbde_io_handle.c libbde_io_handle.h \
 	libbde_key.c libbde_key.h \
 	libbde_key_protector.c libbde_key_protector.h \

@@ -67,15 +67,26 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a BitLocker Drive\n"
 	                 " Encrypted (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -k keys ] [ -o offset ] [ -p password ]\n"
-	                 "               [ -r password ] [ -s filename ] [ -huvV ] source\n\n" );
+	fprintf( stream, "Usage: bdeinfo [ -B blob ] [ -k keys ] [ -K key ] [ -o offset ]\n"
+	                 "               [ -p password ] [ -r password ] [ -s filename ]\n"
+	                 "               [ -AhuvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
+	fprintf( stream, "\t-A:     print the auto-unlock key of the (operating system)\n"
+	                 "\t        volume. Requires the volume to be unlocked, e.g. by\n"
+	                 "\t        providing its password, recovery password or startup key.\n" );
+	fprintf( stream, "\t-B:     specify the file containing the FVEAutoUnlock blob\n"
+	                 "\t        (the binary 'Data' value from the registry key\n"
+	                 "\t        HKLM\\SYSTEM\\CurrentControlSet\\Control\\FVEAutoUnlock\\{GUID}).\n"
+	                 "\t        Used together with -K to unlock a secondary volume.\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-k:     the full volume encryption key and tweak key\n"
 	                 "\t        formatted in base16 and separated by a : character\n"
 	                 "\t        e.g. FVEK:TWEAK\n" );
+	fprintf( stream, "\t-K:     the auto-unlock key of the operating system volume\n"
+	                 "\t        formatted in base16 (64 hexadecimal characters).\n"
+	                 "\t        Used together with -B to unlock a secondary volume.\n" );
 	fprintf( stream, "\t-o:     specify the volume offset in bytes\n" );
 	fprintf( stream, "\t-p:     specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:     specify the recovery password\n" );
@@ -139,6 +150,8 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libbde_error_t *error                        = NULL;
+	system_character_t *option_auto_unlock_blob  = NULL;
+	system_character_t *option_auto_unlock_key   = NULL;
 	system_character_t *option_keys              = NULL;
 	system_character_t *option_password          = NULL;
 	system_character_t *option_recovery_password = NULL;
@@ -147,6 +160,7 @@ int main( int argc, char * const argv[] )
 	system_character_t *source                   = NULL;
 	char *program                                = "bdeinfo";
 	system_integer_t option                      = 0;
+	int print_auto_unlock_key                    = 0;
 	int result                                   = 0;
 	int unattended_mode                          = 0;
 	int verbose                                  = 0;
@@ -189,7 +203,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "hk:o:p:r:s:uvV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "AB:hk:K:o:p:r:s:uvV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -205,6 +219,16 @@ int main( int argc, char * const argv[] )
 
 				return( EXIT_FAILURE );
 
+			case (system_integer_t) 'A':
+				print_auto_unlock_key = 1;
+
+				break;
+
+			case (system_integer_t) 'B':
+				option_auto_unlock_blob = optarg;
+
+				break;
+
 			case (system_integer_t) 'h':
 				usage_fprint(
 				 stdout );
@@ -213,6 +237,11 @@ int main( int argc, char * const argv[] )
 
 			case (system_integer_t) 'k':
 				option_keys = optarg;
+
+				break;
+
+			case (system_integer_t) 'K':
+				option_auto_unlock_key = optarg;
 
 				break;
 
@@ -337,6 +366,47 @@ int main( int argc, char * const argv[] )
 			fprintf(
 			 stderr,
 			 "Unable to set startup key.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_auto_unlock_key != NULL )
+	{
+		if( info_handle_set_auto_unlock_key(
+		     bdeinfo_info_handle,
+		     option_auto_unlock_key,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set auto-unlock key.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_auto_unlock_blob != NULL )
+	{
+		if( info_handle_set_auto_unlock_blob(
+		     bdeinfo_info_handle,
+		     option_auto_unlock_blob,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set FVEAutoUnlock blob.\n" );
+
+			goto on_error;
+		}
+	}
+	if( print_auto_unlock_key != 0 )
+	{
+		if( info_handle_set_print_auto_unlock_key(
+		     bdeinfo_info_handle,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to enable printing of the auto-unlock key.\n" );
 
 			goto on_error;
 		}

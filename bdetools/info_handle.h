@@ -74,6 +74,23 @@ struct info_handle
 	 */
 	const system_character_t *startup_key_path;
 
+	/* The auto-unlock key data (used to unlock a secondary volume)
+	 */
+	uint8_t auto_unlock_key_data[ 32 ];
+
+	/* Value to indicate the auto-unlock key data is set
+	 */
+	int auto_unlock_key_is_set;
+
+	/* The path of the FVEAutoUnlock blob file (used to unlock a secondary volume)
+	 */
+	const system_character_t *auto_unlock_blob_path;
+
+	/* Value to indicate the auto-unlock key of the operating system volume
+	 * should be printed (and the volume otherwise treated as an OS volume)
+	 */
+	int print_auto_unlock_key;
+
 	/* The libbfio file IO handle
 	 */
 	libbfio_handle_t *file_io_handle;
@@ -132,6 +149,20 @@ int info_handle_set_recovery_password(
 int info_handle_set_startup_key(
      info_handle_t *info_handle,
      const system_character_t *filename,
+     libcerror_error_t **error );
+
+int info_handle_set_auto_unlock_key(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error );
+
+int info_handle_set_auto_unlock_blob(
+     info_handle_t *info_handle,
+     const system_character_t *filename,
+     libcerror_error_t **error );
+
+int info_handle_set_print_auto_unlock_key(
+     info_handle_t *info_handle,
      libcerror_error_t **error );
 
 int info_handle_set_volume_offset(

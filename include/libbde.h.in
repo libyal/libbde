@@ -334,6 +334,21 @@ int libbde_volume_get_encryption_method(
      uint16_t *encryption_method,
      libbde_error_t **error );
 
+/* Retrieves the auto-unlock key (FVE metadata entry type 0x000b) of the
+ * operating system volume.
+ * The credentials needed to unlock this (operating system) volume must have been
+ * set before calling this function. The key data buffer must be at least 32 bytes
+ * of size.
+ * Returns 1 if successful, 0 if the volume has no auto-unlock key or it could not
+ * be recovered, or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_get_auto_unlock_key(
+     libbde_volume_t *volume,
+     uint8_t *key_data,
+     size_t key_data_size,
+     libbde_error_t **error );
+
 /* Retrieves the volume identifier
  * The identifier is a GUID and is 16 bytes of size
  * Returns 1 if successful, 0 if not or or -1 on error
@@ -522,6 +537,53 @@ LIBBDE_EXTERN \
 int libbde_volume_read_startup_key_file_io_handle(
      libbde_volume_t *volume,
      libbfio_handle_t *file_io_handle,
+     libbde_error_t **error );
+
+#endif /* defined( LIBBDE_HAVE_BFIO ) */
+
+/* Recovers the external key of a secondary (auto-unlocked) volume from a
+ * FVEAutoUnlock registry blob using the auto-unlock key of the operating system
+ * volume, and uses it to unlock this volume.
+ *
+ * The auto_unlock_key is the plaintext key obtained from the operating system
+ * volume with libbde_volume_get_auto_unlock_key(). The blob_data is the binary
+ * content of the HKLM\SYSTEM\CurrentControlSet\Control\FVEAutoUnlock\{volume-GUID}
+ * "Data" registry value.
+ *
+ * This function needs to be used before one of the open functions.
+ *
+ * Returns 1 if successful, 0 if the external key could not be recovered or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_read_auto_unlock_blob(
+     libbde_volume_t *volume,
+     const uint8_t *auto_unlock_key,
+     size_t auto_unlock_key_size,
+     const uint8_t *blob_data,
+     size_t blob_data_size,
+     libbde_error_t **error );
+
+#if defined( LIBBDE_HAVE_BFIO )
+
+/* Recovers the external key of a secondary (auto-unlocked) volume from a
+ * FVEAutoUnlock registry blob read from a Basic File IO (bfio) handle, using the
+ * auto-unlock key of the operating system volume, and uses it to unlock this
+ * volume.
+ *
+ * The blob_file_io_handle can represent any source libbfio can model (a file, a
+ * memory range, a section of a larger image, a custom stream). Its entire content
+ * is read and used as the FVEAutoUnlock blob data.
+ *
+ * This function needs to be used before one of the open functions.
+ *
+ * Returns 1 if successful, 0 if the external key could not be recovered or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_read_auto_unlock_blob_file_io_handle(
+     libbde_volume_t *volume,
+     const uint8_t *auto_unlock_key,
+     size_t auto_unlock_key_size,
+     libbfio_handle_t *blob_file_io_handle,
      libbde_error_t **error );
 
 #endif /* defined( LIBBDE_HAVE_BFIO ) */

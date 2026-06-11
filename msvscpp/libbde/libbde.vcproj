@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_fve_auto_unlock.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_io_handle.c"
 				>
 			</File>
@@ -321,6 +325,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_external_key.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_fve_auto_unlock.h"
 				>
 			</File>
 			<File
