@@ -307,7 +307,7 @@ int libbde_aes_ccm_encrypted_key_read(
 		goto on_error;
 	}
 	aes_ccm_encrypted_key->data_size = value_data_size;
-	
+
 	return( 1 );
 
 on_error:

@@ -1,6 +1,6 @@
 # Script that synchronizes the local test data
 #
-# Version: 20260531
+# Version: 20260608
 
 $Repository = "log2timeline/dfvfs"
 $TestDataPath = "test_data"
@@ -27,7 +27,10 @@ password=bde-TEST
 
 ForEach ($TestFile in ${TestFiles} -split " ")
 {
-	$Url = "https://raw.githubusercontent.com/${Repository}/refs/heads/main/${TestDataPath}/${TestFile}"
+	$UrlTestFile = [System.Uri]::EscapeDataString("${TestFile}")
+	$Url = "https://raw.githubusercontent.com/${Repository}/refs/heads/main/${TestDataPath}/${UrlTestFile}"
+
+	$ProgressPreference = 'SilentlyContinue'
 
 	Invoke-WebRequest -Uri ${Url} -OutFile "${TestInputDirectory}\${TestSet}\${TestFile}"
 

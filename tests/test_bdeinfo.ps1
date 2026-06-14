@@ -1,6 +1,6 @@
 # Info tool testing script
 #
-# Version: 20251224
+# Version: 20260614
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -138,7 +138,7 @@ For ($ProfileIndex = 0; $ProfileIndex -le ($Profiles.length - 1); $ProfileIndex 
 					$InputOptions = $InputOptions -replace "^offset=","-o"
 					$InputOptions = $InputOptions -replace "^password=","-p"
 					$InputOptions = $InputOptions -replace "^recovery_password=","-r"
-					$InputOptions = $InputOptions -replace "^startup_key=","-s"
+					$InputOptions = $InputOptions -replace "^startup_key=","-sinput\${TestSetName}\"
 					$InputOptions = $InputOptions -replace "^virtual_address=","-v"
 
 					$TestLog = "${InputFileName}-${OptionSet}.log"

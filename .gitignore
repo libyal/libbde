@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20251129
+# Version: 20260604
 
 # Generic auto-generated build files
 *~
@@ -131,7 +131,12 @@ stamp-h[1-9]
 /bdetools/*.exe
 /bdetools/bdeinfo
 /bdetools/bdemount
+/tests/*.dir
 /tests/*.exe
+/tests/*.log
+/tests/*.tmp
+/tests/atconfig
+/tests/atlocal
 /tests/bde_test_aes_ccm_encrypted_key
 /tests/bde_test_encryption_context
 /tests/bde_test_error
@@ -158,6 +163,12 @@ stamp-h[1-9]
 /tests/bde_test_volume_master_key
 /tests/input
 /tests/notify_stream.log
+/tests/package.m4
+/tests/test_inputs_*.at
+/tests/test_library
+/tests/test_manpages
+/tests/test_python_module
+/tests/test_tools
 /tests/tmp*
 
 # Local library dependencies specific files
