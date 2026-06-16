@@ -478,14 +478,11 @@ int mount_handle_set_keys(
 	base16_variant = LIBUNA_BASE16_VARIANT_RFC4648;
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	if( _BYTE_STREAM_HOST_IS_ENDIAN_BIG )
-	{
-		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
-	}
-	else
-	{
-		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
-	}
+#if _BYTE_STREAM_HOST_BYTE_ORDER == _BYTE_STREAM_ENDIAN_BIG
+	base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
+#else
+	base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
+#endif
 	result = libcsplit_wide_split_string_get_segment_by_index(
 	          string_elements,
 	          0,

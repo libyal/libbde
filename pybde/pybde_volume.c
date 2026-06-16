@@ -565,7 +565,7 @@ PyObject *pybde_volume_open(
 	int result                   = 0;
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	const wchar_t *filename_wide = NULL;
+	wchar_t *filename_wide       = NULL;
 #else
 	PyObject *utf8_string_object = NULL;
 #endif
@@ -2867,9 +2867,9 @@ PyObject *pybde_volume_read_startup_key(
 {
 	PyObject *string_object      = NULL;
 	libcerror_error_t *error     = NULL;
+	wchar_t *filename_wide       = NULL;
 	static char *function        = "pybde_volume_read_startup_key";
 	static char *keyword_list[]  = { "filename", NULL };
-	const wchar_t *filename_wide = NULL;
 	const char *filename_narrow  = NULL;
 	int result                   = 0;
 
