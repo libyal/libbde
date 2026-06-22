@@ -865,7 +865,7 @@ The password protected VMK consists of:
 ===== Notes
 
 ....
-Key protector types defined by the GetKeyProtectorType function documenation
+Key protector types defined by the GetKeyProtectorType function documentation
 
 0 Unknown or other protector type
 1 Trusted Platform Module (TPM)

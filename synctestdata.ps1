@@ -39,3 +39,5 @@ ForEach ($TestFile in ${TestFiles} -split " ")
 	Copy-Item test_data_options -Destination "${TestInputDirectory}\.bdeinfo\${TestSet}\${TestFile}.password"
 }
 
+Remove-Item -Force -Path test_data_options
+

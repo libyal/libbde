@@ -65,7 +65,7 @@ Function RunToolsBinaryAndCompareStdout
 
 	Try
 	{
-		Invoke-Expression "..\${TestExecutable} ${TestOptions} ${Options} ${TestFile} > ${OutputFile}"
+		Invoke-Expression "..\${TestExecutable} ${Options} ${TestFile} > ${OutputFile}"
 		$Result = $global:LastExitCode
 
 		If (${Result} -eq ${ExitSuccess})

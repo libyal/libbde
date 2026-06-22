@@ -326,8 +326,9 @@ class VolumeTypeTests(unittest.TestCase):
 
     password = getattr(unittest, "password", None)
     recovery_password = getattr(unittest, "recovery_password", None)
+    startup_key = getattr(unittest, "startup_key", None)
 
-    if password or recovery_password:
+    if password or recovery_password or startup_key:
       bde_volume = pybde.volume()
 
       if password:
@@ -336,7 +337,6 @@ class VolumeTypeTests(unittest.TestCase):
       if recovery_password:
         bde_volume.set_recovery_password(recovery_password)
 
-      startup_key = getattr(unittest, "startup_key", None)
       if startup_key:
         bde_volume.read_startup_key(startup_key)
 

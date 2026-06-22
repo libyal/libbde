@@ -30,3 +30,5 @@ do
 	cp test_data_options "${TEST_INPUT_DIRECTORY}/.bdeinfo/${TEST_SET}/${TEST_FILE}.password";
 done
 
+rm -f test_data_options
+
