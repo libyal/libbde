@@ -4,9 +4,7 @@ man_MANS = \
 	libbde.3
 
 EXTRA_DIST = \
-	bdeinfo.1 \
-	bdemount.1 \
-	libbde.3
+	$(man_MANS)
 
 DISTCLEANFILES = \
 	Makefile \

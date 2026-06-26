@@ -1,23 +1,24 @@
 # Script that synchronizes the local test data
-#
-# Version: 20260608
 
-$Repository = "log2timeline/dfvfs"
-$TestDataPath = "test_data"
+$TestsInputDirectory = "tests\input"
 $TestSet = "public"
-$TestInputDirectory = "tests\input"
 $TestFiles = "bdetogo.raw"
 
-If (-Not (Test-Path ${TestInputDirectory}))
+If (-Not (Test-Path ${TestsInputDirectory}))
 {
-	New-Item -Name ${TestInputDirectory} -ItemType "directory" | Out-Null
+	New-Item -Name ${TestsInputDirectory} -ItemType "directory" | Out-Null
 }
-If (-Not (Test-Path "${TestInputDirectory}\${TestSet}"))
+If (-Not (Test-Path "${TestsInputDirectory}\${TestSet}"))
 {
-	New-Item -Name "${TestInputDirectory}\${TestSet}" -ItemType "directory" | Out-Null
-	New-Item -Name "${TestInputDirectory}\.libbde\${TestSet}" -ItemType "directory" | Out-Null
-	New-Item -Name "${TestInputDirectory}\.pybde\${TestSet}" -ItemType "directory" | Out-Null
-	New-Item -Name "${TestInputDirectory}\.bdeinfo\${TestSet}" -ItemType "directory" | Out-Null
+	New-Item -Name "${TestsInputDirectory}\${TestSet}" -ItemType "directory" | Out-Null
+}
+ForEach ($TestFile in ${TestFiles} -split " ")
+{
+	$UrlTestFile = [System.Uri]::EscapeDataString("${TestFile}")
+	$Url = "https://raw.githubusercontent.com/log2timeline/dfvfs/refs/heads/main/test_data/${UrlTestFile}"
+
+	$ProgressPreference = 'SilentlyContinue'
+	Invoke-WebRequest -Uri ${Url} -OutFile "${TestsInputDirectory}\${TestSet}\${TestFile}"
 }
 
 @"
@@ -25,19 +26,13 @@ If (-Not (Test-Path "${TestInputDirectory}\${TestSet}"))
 password=bde-TEST
 "@ | Out-File -Encoding ascii -FilePath test_data_options
 
-ForEach ($TestFile in ${TestFiles} -split " ")
-{
-	$UrlTestFile = [System.Uri]::EscapeDataString("${TestFile}")
-	$Url = "https://raw.githubusercontent.com/${Repository}/refs/heads/main/${TestDataPath}/${UrlTestFile}"
+New-Item -Name "${TestsInputDirectory}\.libbde\${TestSet}" -ItemType "directory" | Out-Null
+Copy-Item test_data_options -Destination "${TestsInputDirectory}\.libbde\${TestSet}\${TestFile}.password"
 
-	$ProgressPreference = 'SilentlyContinue'
+New-Item -Name "${TestsInputDirectory}\.pybde\${TestSet}" -ItemType "directory" | Out-Null
+Copy-Item test_data_options -Destination "${TestsInputDirectory}\.pybde\${TestSet}\${TestFile}.password"
 
-	Invoke-WebRequest -Uri ${Url} -OutFile "${TestInputDirectory}\${TestSet}\${TestFile}"
-
-	Copy-Item test_data_options -Destination "${TestInputDirectory}\.libbde\${TestSet}\${TestFile}.password"
-	Copy-Item test_data_options -Destination "${TestInputDirectory}\.pybde\${TestSet}\${TestFile}.password"
-	Copy-Item test_data_options -Destination "${TestInputDirectory}\.bdeinfo\${TestSet}\${TestFile}.password"
-}
+New-Item -Name "${TestsInputDirectory}\.bdeinfo\${TestSet}" -ItemType "directory" | Out-Null
+Copy-Item test_data_options -Destination "${TestsInputDirectory}\.bdeinfo\${TestSet}\${TestFile}.password"
 
 Remove-Item -Force -Path test_data_options
-

@@ -1,6 +1,6 @@
-.Dd January 21, 2022
-.Dt bdeinfo
-.Os libbde
+.Dd June 26, 2026
+.Dt BDEINFO 1
+.Os
 .Sh NAME
 .Nm bdeinfo
 .Nd determines information about a BitLocker Drive Encrypted (BDE) volume
@@ -9,13 +9,14 @@
 .Op Fl k Ar keys
 .Op Fl o Ar offset
 .Op Fl p Ar password
-.Op Fl r Ar password
-.Op Fl s Ar filename
+.Op Fl r Ar recovery_password
+.Op Fl s Ar startup_key_path
 .Op Fl huvV
 .Ar source
 .Sh DESCRIPTION
 .Nm bdeinfo
-is a utility to determine information about a BitLocker Drive Encrypted (BDE) volume
+is a utility to determine information about a BitLocker Drive Encrypted (BDE) \
+volume
 .Pp
 .Nm bdeinfo
 is part of the
@@ -25,23 +26,24 @@ package.
 is a library to access the BitLocker Drive Encryption (BDE) format
 .Pp
 .Ar source
-is the source file.
+is the source volume.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
 .It Fl h
 shows this help
 .It Fl k Ar keys
-the full volume encryption key and tweak key formatted in base16 and separated by a : character e.g. FKEV:TWEAK
+specify the full volume encryption key and tweak key formatted in base16 and \
+separated by a : character e.g. FVEK:TWEAK
 .It Fl o Ar offset
 specify the volume offset in bytes
-.It fl p Ar password
-specify the password
-.It Fl r Ar password
-specify the recovery password
-.It Fl s Ar filename
+.It Fl p Ar password
+specify the password (or passphrase)
+.It Fl r Ar recovery_password
+specify the recovery password (or passphrase)
+.It Fl s Ar startup_key_path
 specify the file containing the startup key.
-typically this file has the extension .BEK
+Typically this file has the extension .BEK
 .It Fl u
 unattended mode (disables user interaction)
 .It Fl v
@@ -75,15 +77,19 @@ Key protector 1:
 .sp
 .Ed
 .Sh DIAGNOSTICS
-Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.
+Errors, verbose and debug output are printed to stderr when verbose output \
+\-v is enabled.
 Verbose and debug output are only printed when enabled at compilation.
-.Sh BUGS
-Please report bugs of any kind to <joachim.metz@gmail.com> or on the project website:
-https://github.com/libyal/libbde/
-.Sh AUTHOR
-These man pages were written by Joachim Metz.
-.Sh COPYRIGHT
-Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>.
-This is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 .Sh SEE ALSO
 .Xr bdemount 1
+.Sh AUTHORS
+.An Joachim Metz <joachim.metz@gmail.com>
+.Sh BUGS
+Please report bugs of any kind on the project issue tracker: \
+https://github.com/libyal/libbde/issues
+.Sh COPYRIGHT
+Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>.
+.sp
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A \
+PARTICULAR PURPOSE.

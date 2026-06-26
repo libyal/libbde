@@ -20,11 +20,9 @@
  */
 
 #include <common.h>
-#include <memory.h>
+#include <file_stream.h>
 #include <system_string.h>
 #include <types.h>
-
-#include <stdio.h>
 
 #if defined( HAVE_FCNTL_H ) || defined( WINAPI )
 #include <fcntl.h>
@@ -54,37 +52,6 @@
 
 info_handle_t *bdeinfo_info_handle = NULL;
 int bdeinfo_abort                  = 0;
-
-/* Prints the executable usage information
- */
-void usage_fprint(
-      FILE *stream )
-{
-	if( stream == NULL )
-	{
-		return;
-	}
-	fprintf( stream, "Use bdeinfo to determine information about a BitLocker Drive\n"
-	                 " Encrypted (BDE) volume\n\n" );
-
-	fprintf( stream, "Usage: bdeinfo [ -k keys ] [ -o offset ] [ -p password ]\n"
-	                 "               [ -r password ] [ -s filename ] [ -huvV ] source\n\n" );
-
-	fprintf( stream, "\tsource: the source file or device\n\n" );
-
-	fprintf( stream, "\t-h:     shows this help\n" );
-	fprintf( stream, "\t-k:     the full volume encryption key and tweak key\n"
-	                 "\t        formatted in base16 and separated by a : character\n"
-	                 "\t        e.g. FVEK:TWEAK\n" );
-	fprintf( stream, "\t-o:     specify the volume offset in bytes\n" );
-	fprintf( stream, "\t-p:     specify the password/passphrase\n" );
-	fprintf( stream, "\t-r:     specify the recovery password\n" );
-	fprintf( stream, "\t-s:     specify the file containing the startup key.\n"
-	                 "\t        typically this file has the extension .BEK\n" );
-	fprintf( stream, "\t-u:     unattended mode (disables user interaction)\n" );
-	fprintf( stream, "\t-v:     verbose output to stderr\n" );
-	fprintf( stream, "\t-V:     print version\n" );
-}
 
 /* Signal handler for bdeinfo
  */
@@ -138,6 +105,23 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
+	const char *description = \
+		"Use bdeinfo to determine information about a BitLocker Drive Encrypted (BDE) volume.";
+
+	bdetools_option_t options[ ] = {
+		{ 'h', NULL, "shows this help" },
+		{ 'k', "keys", "specify the full volume encryption key and tweak key formatted in base16 and separated by a : character e.g. FVEK:TWEAK" },
+		{ 'o', "offset", "specify the volume offset in bytes" },
+		{ 'p', "password", "specify the password (or passphrase)" },
+		{ 'r', "recovery_password", "specify the recovery password (or passphrase)" },
+		{ 's', "startup_key_path", "specify the file containing the startup key. typically this file has the extension .BEK" },
+		{ 'u', NULL, "unattended mode (disables user interaction)" },
+		{ 'v', NULL, "verbose output to stderr" },
+		{ 'V', NULL, "print version" },
+		{ 0, "source", "the source volume" },
+	};
+	system_character_t options_string[ 32 ];
+
 	libbde_error_t *error                        = NULL;
 	system_character_t *option_keys              = NULL;
 	system_character_t *option_password          = NULL;
@@ -147,6 +131,7 @@ int main( int argc, char * const argv[] )
 	system_character_t *source                   = NULL;
 	char *program                                = "bdeinfo";
 	system_integer_t option                      = 0;
+	int number_of_options                        = (int) ( sizeof( options ) / sizeof( bdetools_option_t ) );
 	int result                                   = 0;
 	int unattended_mode                          = 0;
 	int verbose                                  = 0;
@@ -163,7 +148,7 @@ int main( int argc, char * const argv[] )
 	 1 );
 
 	if( libclocale_initialize(
-             "bdetools",
+	     "bdetools",
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -173,8 +158,8 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
 	if( bdetools_output_initialize(
-             _IONBF,
-             &error ) != 1 )
+	     _IONBF,
+	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
@@ -186,10 +171,22 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
+	if( bdetools_getopt_get_options_string(
+	     options,
+	     number_of_options,
+	     options_string,
+	     32 ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to determine options string.\n" );
+
+		goto on_error;
+	}
 	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "hk:o:p:r:s:uvV" ) ) ) != (system_integer_t) -1 )
+	                   options_string ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -200,14 +197,22 @@ int main( int argc, char * const argv[] )
 				 "Invalid argument: %" PRIs_SYSTEM "\n",
 				 argv[ optind - 1 ] );
 
-				usage_fprint(
-				 stdout );
+				bdetools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_FAILURE );
 
 			case (system_integer_t) 'h':
-				usage_fprint(
-				 stdout );
+				bdetools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_SUCCESS );
 
@@ -257,10 +262,14 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Missing source file or device.\n" );
+		 "Missing source volume.\n" );
 
-		usage_fprint(
-		 stdout );
+		bdetools_getopt_usage_fprint(
+		 stdout,
+		 program,
+		 description,
+		 options,
+		 number_of_options );
 
 		return( EXIT_FAILURE );
 	}
