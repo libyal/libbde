@@ -5029,9 +5029,6 @@ int libbde_volume_read_auto_unlock_blob(
 	uint8_t vmk_identifier[ 16 ];
 
 	libbde_internal_volume_t *internal_volume = NULL;
-	libbde_metadata_t *external_key_metadata  = NULL;
-	libbde_external_key_t *external_key        = NULL;
-	libbde_key_t *key                          = NULL;
 	static char *function                      = "libbde_volume_read_auto_unlock_blob";
 	size_t external_key_data_size              = 0;
 	int result                                 = 0;
@@ -5141,10 +5138,147 @@ int libbde_volume_read_auto_unlock_blob(
 #endif
 		goto on_error;
 	}
-	/* Build a synthetic external key metadata structure - the same structure that
-	 * a .BEK startup key file would produce - so that the existing unlock path can
-	 * match the secondary volume's startup-key VMK by identifier and unwrap it.
+	/* Build a synthetic external key metadata structure (the same structure that
+	 * a .BEK startup key file would produce) from the recovered external key and
+	 * VMK identifier, so that the existing unlock path can match the secondary
+	 * volume's startup-key VMK by identifier and unwrap it.
 	 */
+	if( libbde_volume_set_external_key(
+	     volume,
+	     external_key_data,
+	     external_key_data_size,
+	     vmk_identifier,
+	     16,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set recovered external key.",
+		 function );
+
+		goto on_error;
+	}
+	memory_set(
+	 external_key_data,
+	 0,
+	 64 );
+
+	return( 1 );
+
+on_error:
+	memory_set(
+	 external_key_data,
+	 0,
+	 64 );
+
+	return( -1 );
+}
+
+/* Sets the plaintext external key of a secondary (auto-unlocked) volume directly.
+ * Returns 1 if successful or -1 on error
+ */
+int libbde_volume_set_external_key(
+     libbde_volume_t *volume,
+     const uint8_t *external_key,
+     size_t external_key_size,
+     const uint8_t *vmk_identifier,
+     size_t vmk_identifier_size,
+     libcerror_error_t **error )
+{
+	libbde_internal_volume_t *internal_volume = NULL;
+	libbde_metadata_t *external_key_metadata  = NULL;
+	libbde_external_key_t *external_key_value  = NULL;
+	libbde_key_t *key                          = NULL;
+	static char *function                      = "libbde_volume_set_external_key";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libbde_internal_volume_t *) volume;
+
+	if( internal_volume->file_io_handle != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file IO handle already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->external_key_metadata != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - external key metadata already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( external_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid external key.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( external_key_size < 32 )
+	 || ( external_key_size > (size_t) SSIZE_MAX ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid external key size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( vmk_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid VMK identifier.",
+		 function );
+
+		return( -1 );
+	}
+	if( vmk_identifier_size < 16 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid VMK identifier value too small.",
+		 function );
+
+		return( -1 );
+	}
+	/* The external key is a 256-bit key.
+	 */
+	if( external_key_size > 32 )
+	{
+		external_key_size = 32;
+	}
 	if( libbde_metadata_initialize(
 	     &external_key_metadata,
 	     error ) != 1 )
@@ -5159,7 +5293,7 @@ int libbde_volume_read_auto_unlock_blob(
 		goto on_error;
 	}
 	if( libbde_external_key_initialize(
-	     &external_key,
+	     &external_key_value,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -5172,7 +5306,7 @@ int libbde_volume_read_auto_unlock_blob(
 		goto on_error;
 	}
 	if( memory_copy(
-	     external_key->identifier,
+	     external_key_value->identifier,
 	     vmk_identifier,
 	     16 ) == NULL )
 	{
@@ -5199,7 +5333,7 @@ int libbde_volume_read_auto_unlock_blob(
 		goto on_error;
 	}
 	key->data = (uint8_t *) memory_allocate(
-	                         sizeof( uint8_t ) * external_key_data_size );
+	                         sizeof( uint8_t ) * external_key_size );
 
 	if( key->data == NULL )
 	{
@@ -5214,8 +5348,8 @@ int libbde_volume_read_auto_unlock_blob(
 	}
 	if( memory_copy(
 	     key->data,
-	     external_key_data,
-	     external_key_data_size ) == NULL )
+	     external_key,
+	     external_key_size ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -5226,13 +5360,13 @@ int libbde_volume_read_auto_unlock_blob(
 
 		goto on_error;
 	}
-	key->data_size = external_key_data_size;
+	key->data_size = external_key_size;
 
-	external_key->key = key;
-	key               = NULL;
+	external_key_value->key = key;
+	key                     = NULL;
 
-	external_key_metadata->startup_key_external_key = external_key;
-	external_key                                     = NULL;
+	external_key_metadata->startup_key_external_key = external_key_value;
+	external_key_value                              = NULL;
 
 #if defined( HAVE_LIBBDE_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
@@ -5256,7 +5390,7 @@ int libbde_volume_read_auto_unlock_blob(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: successfully recovered secondary volume external key from FVEAutoUnlock blob.\n\n",
+		 "%s: successfully set secondary volume external key.\n\n",
 		 function );
 	}
 #endif
@@ -5272,19 +5406,9 @@ int libbde_volume_read_auto_unlock_blob(
 		 "%s: unable to release read/write lock for writing.",
 		 function );
 
-		memory_set(
-		 external_key_data,
-		 0,
-		 64 );
-
 		return( -1 );
 	}
 #endif
-	memory_set(
-	 external_key_data,
-	 0,
-	 64 );
-
 	return( 1 );
 
 on_error:
@@ -5294,10 +5418,10 @@ on_error:
 		 &key,
 		 NULL );
 	}
-	if( external_key != NULL )
+	if( external_key_value != NULL )
 	{
 		libbde_external_key_free(
-		 &external_key,
+		 &external_key_value,
 		 NULL );
 	}
 	if( external_key_metadata != NULL )
@@ -5306,11 +5430,6 @@ on_error:
 		 &external_key_metadata,
 		 NULL );
 	}
-	memory_set(
-	 external_key_data,
-	 0,
-	 64 );
-
 	return( -1 );
 }
 

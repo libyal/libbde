@@ -67,9 +67,9 @@ void usage_fprint(
 	fprintf( stream, "Use bdeinfo to determine information about a BitLocker Drive\n"
 	                 " Encrypted (BDE) volume\n\n" );
 
-	fprintf( stream, "Usage: bdeinfo [ -B blob ] [ -k keys ] [ -K key ] [ -o offset ]\n"
-	                 "               [ -p password ] [ -r password ] [ -s filename ]\n"
-	                 "               [ -AhuvV ] source\n\n" );
+	fprintf( stream, "Usage: bdeinfo [ -B blob ] [ -E key ] [ -I identifier ] [ -k keys ]\n"
+	                 "               [ -K key ] [ -o offset ] [ -p password ]\n"
+	                 "               [ -r password ] [ -s filename ] [ -AhuvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
@@ -80,7 +80,13 @@ void usage_fprint(
 	                 "\t        (the binary 'Data' value from the registry key\n"
 	                 "\t        HKLM\\SYSTEM\\CurrentControlSet\\Control\\FVEAutoUnlock\\{GUID}).\n"
 	                 "\t        Used together with -K to unlock a secondary volume.\n" );
+	fprintf( stream, "\t-E:     the external (startup) key of a secondary volume\n"
+	                 "\t        formatted in base16 (64 hexadecimal characters).\n"
+	                 "\t        Used together with -I to unlock a secondary volume\n"
+	                 "\t        directly.\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
+	fprintf( stream, "\t-I:     the identifier (GUID) of the VMK that the -E external\n"
+	                 "\t        key unwraps.\n" );
 	fprintf( stream, "\t-k:     the full volume encryption key and tweak key\n"
 	                 "\t        formatted in base16 and separated by a : character\n"
 	                 "\t        e.g. FVEK:TWEAK\n" );
@@ -152,6 +158,8 @@ int main( int argc, char * const argv[] )
 	libbde_error_t *error                        = NULL;
 	system_character_t *option_auto_unlock_blob  = NULL;
 	system_character_t *option_auto_unlock_key   = NULL;
+	system_character_t *option_external_key      = NULL;
+	system_character_t *option_external_key_identifier = NULL;
 	system_character_t *option_keys              = NULL;
 	system_character_t *option_password          = NULL;
 	system_character_t *option_recovery_password = NULL;
@@ -203,7 +211,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = bdetools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "AB:hk:K:o:p:r:s:uvV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "AB:E:hI:k:K:o:p:r:s:uvV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -229,11 +237,21 @@ int main( int argc, char * const argv[] )
 
 				break;
 
+			case (system_integer_t) 'E':
+				option_external_key = optarg;
+
+				break;
+
 			case (system_integer_t) 'h':
 				usage_fprint(
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (system_integer_t) 'I':
+				option_external_key_identifier = optarg;
+
+				break;
 
 			case (system_integer_t) 'k':
 				option_keys = optarg;
@@ -394,6 +412,34 @@ int main( int argc, char * const argv[] )
 			fprintf(
 			 stderr,
 			 "Unable to set FVEAutoUnlock blob.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_external_key != NULL )
+	{
+		if( info_handle_set_external_key(
+		     bdeinfo_info_handle,
+		     option_external_key,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set external key.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_external_key_identifier != NULL )
+	{
+		if( info_handle_set_external_key_identifier(
+		     bdeinfo_info_handle,
+		     option_external_key_identifier,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set external key identifier.\n" );
 
 			goto on_error;
 		}

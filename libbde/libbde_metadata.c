@@ -1242,13 +1242,16 @@ int libbde_metadata_read_volume_master_key(
 {
 	uint8_t aes_ccm_key[ 32 ];
 
-	libcaes_context_t *aes_context = NULL;
-	uint8_t *unencrypted_data      = NULL;
-	static char *function          = "libbde_metadata_read_volume_master_key";
-	size_t unencrypted_data_size   = 0;
-	uint32_t data_size             = 0;
-	uint32_t version               = 0;
-	int result                     = 0;
+	libcaes_context_t *aes_context                   = NULL;
+	libbde_volume_master_key_t *startup_key_vmk      = NULL;
+	uint8_t *unencrypted_data                        = NULL;
+	static char *function                            = "libbde_metadata_read_volume_master_key";
+	size_t unencrypted_data_size                     = 0;
+	uint32_t data_size                               = 0;
+	uint32_t version                                 = 0;
+	int number_of_volume_master_keys                 = 0;
+	int volume_master_key_index                      = 0;
+	int result                                       = 0;
 
 	if( metadata == NULL )
 	{
@@ -1536,232 +1539,264 @@ int libbde_metadata_read_volume_master_key(
 		if( ( external_key != NULL )
 		 && ( external_key_size == 32 ) )
 		{
-			if( metadata->startup_key_volume_master_key == NULL )
+			/* Try the external key against every startup key protected volume
+			 * master key and accept the first one that decrypts to a valid key
+			 * container. 
+			 */
+			if( libcdata_array_get_number_of_entries(
+			     metadata->volume_master_keys_array,
+			     &number_of_volume_master_keys,
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - missing startup key volume master key.",
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve number of volume master keys.",
 				 function );
 
 				goto on_error;
 			}
-			if( metadata->startup_key_volume_master_key->aes_ccm_encrypted_key == NULL )
+			for( volume_master_key_index = 0;
+			     volume_master_key_index < number_of_volume_master_keys;
+			     volume_master_key_index++ )
 			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid metadata - invalid startup key volume master key - missing AES-CCM encrypted key.",
-				 function );
+				if( result != 0 )
+				{
+					break;
+				}
+				if( libcdata_array_get_entry_by_index(
+				     metadata->volume_master_keys_array,
+				     volume_master_key_index,
+				     (intptr_t **) &startup_key_vmk,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+					 "%s: unable to retrieve volume master key: %d.",
+					 function,
+					 volume_master_key_index );
 
-				goto on_error;
-			}
-			if( memory_set(
-			     aes_ccm_key,
-			     0,
-			     32 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-				 "%s: unable to clear AES-CCM key.",
-				 function );
+					goto on_error;
+				}
+				if( ( startup_key_vmk == NULL )
+				 || ( startup_key_vmk->protection_type != LIBBDE_KEY_PROTECTION_TYPE_STARTUP_KEY )
+				 || ( startup_key_vmk->aes_ccm_encrypted_key == NULL ) )
+				{
+					continue;
+				}
+				if( memory_set(
+				     aes_ccm_key,
+				     0,
+				     32 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+					 "%s: unable to clear AES-CCM key.",
+					 function );
 
-				goto on_error;
-			}
-			if( memory_copy(
-			     aes_ccm_key,
-			     external_key,
-			     32 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy AES-CCM key.",
-				 function );
+					goto on_error;
+				}
+				if( memory_copy(
+				     aes_ccm_key,
+				     external_key,
+				     32 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+					 "%s: unable to copy AES-CCM key.",
+					 function );
 
-				goto on_error;
-			}
+					goto on_error;
+				}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: AES-CCM key:\n",
-				 function );
-				libcnotify_print_data(
-				 aes_ccm_key,
-				 32,
-				 0 );
-			}
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "%s: trying external key against startup key volume master key: %d.\n",
+					 function,
+					 volume_master_key_index );
+
+					libcnotify_printf(
+					 "%s: AES-CCM key:\n",
+					 function );
+					libcnotify_print_data(
+					 aes_ccm_key,
+					 32,
+					 0 );
+				}
 #endif
-			unencrypted_data_size = metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size;
+				unencrypted_data_size = startup_key_vmk->aes_ccm_encrypted_key->data_size;
 
-			if( ( unencrypted_data_size < 28 )
-			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: invalid startup key volume master key - AES-CCM encrypted key data size value out of bounds.",
-				 function );
+				if( ( unencrypted_data_size < 28 )
+				 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid startup key volume master key - AES-CCM encrypted key data size value out of bounds.",
+					 function );
 
-				goto on_error;
-			}
-			unencrypted_data = (uint8_t *) memory_allocate(
-							unencrypted_data_size );
+					goto on_error;
+				}
+				unencrypted_data = (uint8_t *) memory_allocate(
+								unencrypted_data_size );
 
-			if( unencrypted_data == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-				 "%s: unable to create unencrypted data.",
-				 function );
+				if( unencrypted_data == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+					 "%s: unable to create unencrypted data.",
+					 function );
 
-				goto on_error;
-			}
-			if( memory_set(
-			     unencrypted_data,
-			     0,
-			     unencrypted_data_size ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-				 "%s: unable to clear unencrypted data.",
-				 function );
+					goto on_error;
+				}
+				if( memory_set(
+				     unencrypted_data,
+				     0,
+				     unencrypted_data_size ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+					 "%s: unable to clear unencrypted data.",
+					 function );
 
-				goto on_error;
-			}
-			if( libcaes_context_initialize(
-			     &aes_context,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable initialize AES context.",
-				 function );
+					goto on_error;
+				}
+				if( libcaes_context_initialize(
+				     &aes_context,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 "%s: unable initialize AES context.",
+					 function );
 
-				goto on_error;
-			}
-			if( libcaes_context_set_key(
-			     aes_context,
-			     LIBCAES_CRYPT_MODE_ENCRYPT,
-			     aes_ccm_key,
-			     256,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set encryption key in AES context.",
-				 function );
+					goto on_error;
+				}
+				if( libcaes_context_set_key(
+				     aes_context,
+				     LIBCAES_CRYPT_MODE_ENCRYPT,
+				     aes_ccm_key,
+				     256,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+					 "%s: unable to set encryption key in AES context.",
+					 function );
 
-				goto on_error;
-			}
-			if( libcaes_crypt_ccm(
-			     aes_context,
-			     LIBCAES_CRYPT_MODE_DECRYPT,
-			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->nonce,
-			     12,
-			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data,
-			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size,
-			     unencrypted_data,
-			     unencrypted_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-				 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
-				 "%s: unable to decrypt data.",
-				 function );
+					goto on_error;
+				}
+				if( libcaes_crypt_ccm(
+				     aes_context,
+				     LIBCAES_CRYPT_MODE_DECRYPT,
+				     startup_key_vmk->aes_ccm_encrypted_key->nonce,
+				     12,
+				     startup_key_vmk->aes_ccm_encrypted_key->data,
+				     startup_key_vmk->aes_ccm_encrypted_key->data_size,
+				     unencrypted_data,
+				     unencrypted_data_size,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+					 LIBCERROR_ENCRYPTION_ERROR_ENCRYPT_FAILED,
+					 "%s: unable to decrypt data.",
+					 function );
 
-				goto on_error;
-			}
+					goto on_error;
+				}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: unencrypted data:\n",
-				 function );
-				libcnotify_print_data(
-				 unencrypted_data,
-				 unencrypted_data_size,
-				 0 );
-			}
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "%s: unencrypted data:\n",
+					 function );
+					libcnotify_print_data(
+					 unencrypted_data,
+					 unencrypted_data_size,
+					 0 );
+				}
 #endif
 /* TODO improve this check */
-			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 16 ] ),
-			 data_size );
+				byte_stream_copy_to_uint16_little_endian(
+				 &( unencrypted_data[ 16 ] ),
+				 data_size );
 
-			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 20 ] ),
-			 version );
+				byte_stream_copy_to_uint16_little_endian(
+				 &( unencrypted_data[ 20 ] ),
+				 version );
 
-			if( version == 1 )
-			{
-				if( data_size == 0x2c )
+				if( version == 1 )
 				{
-					if( memory_copy(
-					     volume_master_key,
-					     &( unencrypted_data[ 28 ] ),
-					     32 ) == NULL )
+					if( data_size == 0x2c )
 					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_MEMORY,
-						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-						 "%s: unable to copy unencrypted volume master key.",
-						 function );
+						if( memory_copy(
+						     volume_master_key,
+						     &( unencrypted_data[ 28 ] ),
+						     32 ) == NULL )
+						{
+							libcerror_error_set(
+							 error,
+							 LIBCERROR_ERROR_DOMAIN_MEMORY,
+							 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+							 "%s: unable to copy unencrypted volume master key.",
+							 function );
 
-						goto on_error;
+							goto on_error;
+						}
+						result = 1;
 					}
-					result = 1;
 				}
-			}
-			if( libcaes_context_free(
-			     &aes_context,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable free context.",
-				 function );
+				if( libcaes_context_free(
+				     &aes_context,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable free context.",
+					 function );
 
-				goto on_error;
-			}
-			if( memory_set(
-			     unencrypted_data,
-			     0,
-			     unencrypted_data_size ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-				 "%s: unable to clear unencrypted data.",
-				 function );
+					goto on_error;
+				}
+				if( memory_set(
+				     unencrypted_data,
+				     0,
+				     unencrypted_data_size ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+					 "%s: unable to clear unencrypted data.",
+					 function );
 
-				goto on_error;
-			}
-			memory_free(
-			 unencrypted_data );
+					goto on_error;
+				}
+				memory_free(
+				 unencrypted_data );
 
-			unencrypted_data = NULL;
+				unencrypted_data = NULL;
+			}
 		}
 	}
 	if( result == 0 )

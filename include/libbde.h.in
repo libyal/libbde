@@ -541,6 +541,24 @@ int libbde_volume_read_startup_key_file_io_handle(
 
 #endif /* defined( LIBBDE_HAVE_BFIO ) */
 
+/* Sets the plaintext external key of a secondary (auto-unlocked) volume directly.
+ *
+ * This is the external (startup) key that unwraps the volume's startup-key VMK,
+ * together with the identifier (GUID) of that VMK.
+ *
+ * This function needs to be used before one of the open functions.
+ *
+ * Returns 1 if successful or -1 on error
+ */
+LIBBDE_EXTERN \
+int libbde_volume_set_external_key(
+     libbde_volume_t *volume,
+     const uint8_t *external_key,
+     size_t external_key_size,
+     const uint8_t *vmk_identifier,
+     size_t vmk_identifier_size,
+     libbde_error_t **error );
+
 /* Recovers the external key of a secondary (auto-unlocked) volume from a
  * FVEAutoUnlock registry blob using the auto-unlock key of the operating system
  * volume, and uses it to unlock this volume.

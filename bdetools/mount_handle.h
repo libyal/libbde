@@ -96,6 +96,18 @@ struct mount_handle
 	 */
 	const system_character_t *auto_unlock_blob_path;
 
+	/* The external key data (used to unlock a secondary volume directly)
+	 */
+	uint8_t external_key_data[ 32 ];
+
+	/* The VMK identifier that the external key unwraps
+	 */
+	uint8_t external_key_identifier[ 16 ];
+
+	/* Value to indicate the external key data is set
+	 */
+	int external_key_is_set;
+
 	/* Value to indicate the mount handle is locked
 	 */
 	int is_locked;
@@ -161,6 +173,16 @@ int mount_handle_set_auto_unlock_key(
 int mount_handle_set_auto_unlock_blob(
      mount_handle_t *mount_handle,
      const system_character_t *filename,
+     libcerror_error_t **error );
+
+int mount_handle_set_external_key(
+     mount_handle_t *mount_handle,
+     const system_character_t *string,
+     libcerror_error_t **error );
+
+int mount_handle_set_external_key_identifier(
+     mount_handle_t *mount_handle,
+     const system_character_t *string,
      libcerror_error_t **error );
 
 int mount_handle_set_path_prefix(

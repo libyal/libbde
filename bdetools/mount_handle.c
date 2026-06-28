@@ -33,6 +33,7 @@
 #include "bdetools_libcerror.h"
 #include "bdetools_libcpath.h"
 #include "bdetools_libcsplit.h"
+#include "bdetools_libfguid.h"
 #include "bdetools_libuna.h"
 #include "mount_file_entry.h"
 #include "mount_file_system.h"
@@ -1005,6 +1006,237 @@ int mount_handle_set_auto_unlock_key(
 	return( 1 );
 }
 
+/* Sets the external key (base16 / hex encoded) used to unlock a secondary volume directly
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_set_external_key(
+     mount_handle_t *mount_handle,
+     const system_character_t *string,
+     libcerror_error_t **error )
+{
+	static char *function   = "mount_handle_set_external_key";
+	size_t string_length    = 0;
+	uint32_t base16_variant = 0;
+
+	if( mount_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid string.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = system_string_length(
+	                 string );
+
+	/* The external key is a 256-bit key, i.e. 64 hexadecimal characters.
+	 */
+	if( string_length != 64 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported external key length (expected 64 hexadecimal characters).",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     mount_handle->external_key_data,
+	     0,
+	     32 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear external key data.",
+		 function );
+
+		return( -1 );
+	}
+	base16_variant = LIBUNA_BASE16_VARIANT_RFC4648;
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	if( _BYTE_STREAM_HOST_BYTE_ORDER == _BYTE_STREAM_ENDIAN_BIG )
+	{
+		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_BIG_ENDIAN;
+	}
+	else
+	{
+		base16_variant |= LIBUNA_BASE16_VARIANT_ENCODING_UTF16_LITTLE_ENDIAN;
+	}
+#endif
+	if( libuna_base16_stream_copy_to_byte_stream(
+	     (uint8_t *) string,
+	     string_length * sizeof( system_character_t ),
+	     mount_handle->external_key_data,
+	     32,
+	     base16_variant,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy external key data.",
+		 function );
+
+		memory_set(
+		 mount_handle->external_key_data,
+		 0,
+		 32 );
+
+		return( -1 );
+	}
+	mount_handle->external_key_is_set = 1;
+
+	return( 1 );
+}
+
+/* Sets the VMK identifier (GUID) that the external key unwraps
+ * Returns 1 if successful or -1 on error
+ */
+int mount_handle_set_external_key_identifier(
+     mount_handle_t *mount_handle,
+     const system_character_t *string,
+     libcerror_error_t **error )
+{
+	libfguid_identifier_t *guid  = NULL;
+	static char *function        = "mount_handle_set_external_key_identifier";
+	size_t string_length         = 0;
+	uint32_t string_format_flags = LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE;
+	int result                   = 0;
+
+	if( mount_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid mount handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid string.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = system_string_length(
+	                 string );
+
+	/* Accept the GUID both with and without surrounding braces.
+	 */
+	if( ( string_length >= 2 )
+	 && ( string[ 0 ] == (system_character_t) '{' )
+	 && ( string[ string_length - 1 ] == (system_character_t) '}' ) )
+	{
+		string_format_flags |= LIBFGUID_STRING_FORMAT_FLAG_USE_SURROUNDING_BRACES;
+	}
+	if( libfguid_identifier_initialize(
+	     &guid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create GUID.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfguid_identifier_copy_from_utf16_string(
+	          guid,
+	          (uint16_t *) string,
+	          string_length,
+	          string_format_flags,
+	          error );
+#else
+	result = libfguid_identifier_copy_from_utf8_string(
+	          guid,
+	          (uint8_t *) string,
+	          string_length,
+	          string_format_flags,
+	          error );
+#endif
+	if( result != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy string to GUID.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfguid_identifier_copy_to_byte_stream(
+	     guid,
+	     mount_handle->external_key_identifier,
+	     16,
+	     LIBFGUID_ENDIAN_LITTLE,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy GUID to byte stream.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfguid_identifier_free(
+	     &guid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free GUID.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( guid != NULL )
+	{
+		libfguid_identifier_free(
+		 &guid,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Sets the path of the FVEAutoUnlock blob file used to unlock a secondary volume
  * Returns 1 if successful or -1 on error
  */
@@ -1415,6 +1647,26 @@ int mount_handle_open(
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
 			 "%s: unable to read FVEAutoUnlock blob and recover external key.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( mount_handle->external_key_is_set != 0 )
+	{
+		if( libbde_volume_set_external_key(
+		     bde_volume,
+		     mount_handle->external_key_data,
+		     32,
+		     mount_handle->external_key_identifier,
+		     16,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set external key.",
 			 function );
 
 			goto on_error;

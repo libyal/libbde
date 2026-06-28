@@ -86,6 +86,18 @@ struct info_handle
 	 */
 	const system_character_t *auto_unlock_blob_path;
 
+	/* The external key data (used to unlock a secondary volume directly)
+	 */
+	uint8_t external_key_data[ 32 ];
+
+	/* The VMK identifier that the external key unwraps
+	 */
+	uint8_t external_key_identifier[ 16 ];
+
+	/* Value to indicate the external key data is set
+	 */
+	int external_key_is_set;
+
 	/* Value to indicate the auto-unlock key of the operating system volume
 	 * should be printed (and the volume otherwise treated as an OS volume)
 	 */
@@ -159,6 +171,16 @@ int info_handle_set_auto_unlock_key(
 int info_handle_set_auto_unlock_blob(
      info_handle_t *info_handle,
      const system_character_t *filename,
+     libcerror_error_t **error );
+
+int info_handle_set_external_key(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error );
+
+int info_handle_set_external_key_identifier(
+     info_handle_t *info_handle,
+     const system_character_t *string,
      libcerror_error_t **error );
 
 int info_handle_set_print_auto_unlock_key(

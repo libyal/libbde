@@ -383,6 +383,15 @@ int libbde_volume_read_startup_key_file_io_handle(
      libcerror_error_t **error );
 
 LIBBDE_EXTERN \
+int libbde_volume_set_external_key(
+     libbde_volume_t *volume,
+     const uint8_t *external_key,
+     size_t external_key_size,
+     const uint8_t *vmk_identifier,
+     size_t vmk_identifier_size,
+     libcerror_error_t **error );
+
+LIBBDE_EXTERN \
 int libbde_volume_read_auto_unlock_blob(
      libbde_volume_t *volume,
      const uint8_t *auto_unlock_key,
