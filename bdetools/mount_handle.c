@@ -1325,7 +1325,7 @@ int mount_handle_close(
 		goto on_error;
 	}
 	for( volume_index = number_of_volumes - 1;
-	     volume_index > 0;
+	     volume_index >= 0;
 	     volume_index-- )
 	{
 		if( mount_file_system_get_volume_by_index(

@@ -609,6 +609,9 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+	fuse_unmount(
+	 bdemount_fuse_handle );
+
 	fuse_destroy(
 	 bdemount_fuse_handle );
 
