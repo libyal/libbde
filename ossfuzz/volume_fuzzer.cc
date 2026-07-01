@@ -47,8 +47,21 @@ int LLVMFuzzerTestOneInput(
      const uint8_t *data,
      size_t size )
 {
+	uint8_t buffer[ 512 ];
+	uint8_t utf8_string[ 64 ];
+	uint16_t utf16_string[ 64 ];
+	uint8_t guid[ 16 ];
+
 	libbfio_handle_t *file_io_handle = NULL;
 	libbde_volume_t *volume          = NULL;
+	off64_t volume_offset            = 0;
+	size64_t volume_size             = 0;
+	uint64_t value_64bit             = 0;
+	uint16_t value_16bit             = 0;
+	size_t string_size               = 0;
+	int is_locked                    = 0;
+	int number_of_key_protectors     = 0;
+	int read_iterator                = 0;
 
 	if( libbfio_memory_range_initialize(
 	     &file_io_handle,
@@ -70,6 +83,14 @@ int LLVMFuzzerTestOneInput(
 	{
 		goto on_error_libbfio;
 	}
+	if( libbde_volume_set_utf8_password(
+	     volume,
+	     (uint8_t *) "bde-TEST",
+	     8,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbfio;
+	}
 	if( libbde_volume_open_file_io_handle(
 	     volume,
 	     file_io_handle,
@@ -77,6 +98,102 @@ int LLVMFuzzerTestOneInput(
 	     NULL ) != 1 )
 	{
 		goto on_error_libbde;
+	}
+	if( libbde_volume_get_encryption_method(
+	     volume,
+	     &value_16bit,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_volume_identifier(
+	     volume,
+	     guid,
+	     16,
+	     NULL ) == -1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_creation_time(
+	     volume,
+	     &value_64bit,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_utf8_description_size(
+	     volume,
+	     &string_size,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_utf8_description(
+	     volume,
+	     utf8_string,
+	     64,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_utf8_description_size(
+	     volume,
+	     &string_size,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_utf16_description(
+	     volume,
+	     utf16_string,
+	     64,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	if( libbde_volume_get_number_of_key_protectors(
+	     volume,
+	     &number_of_key_protectors,
+	     NULL ) != 1 )
+	{
+		goto on_error_libbde;
+	}
+	is_locked = libbde_volume_is_locked(
+	             volume,
+		     NULL );
+
+	if( is_locked == -1 )
+	{
+		goto on_error_libbde;
+	}
+	else if( is_locked == 0 )
+	{
+		if( libbde_volume_get_size(
+		     volume,
+		     &volume_size,
+		     NULL ) != 1 )
+		{
+			goto on_error_libbde;
+		}
+		for( read_iterator = 0;
+		     read_iterator < 128;
+		     read_iterator++ )
+		{
+			if( volume_offset >= volume_size )
+			{
+				break;
+			}
+			if( libbde_volume_read_buffer_at_offset(
+			     volume,
+			     buffer,
+			     497,
+			     volume_offset,
+			     NULL ) == -1 )
+			{
+				goto on_error_libbde;
+			}
+			volume_offset += 497;
+		}
 	}
 	libbde_volume_close(
 	 volume,
