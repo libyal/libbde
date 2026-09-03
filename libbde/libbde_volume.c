@@ -236,6 +236,102 @@ int libbde_volume_free(
 			result = -1;
 		}
 #endif
+		if( internal_volume->volume_header != NULL )
+		{
+			if( libbde_volume_header_free(
+			     &( internal_volume->volume_header ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free volume header.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( internal_volume->primary_metadata != NULL )
+		{
+			if( libbde_metadata_free(
+			     &( internal_volume->primary_metadata ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free primary metadata.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( internal_volume->secondary_metadata != NULL )
+		{
+			if( libbde_metadata_free(
+			     &( internal_volume->secondary_metadata ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free secondary metadata.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( internal_volume->tertiary_metadata != NULL )
+		{
+			if( libbde_metadata_free(
+			     &( internal_volume->tertiary_metadata ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free tertiary metadata.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( internal_volume->external_key_metadata != NULL )
+		{
+			if( libbde_metadata_free(
+			     &( internal_volume->external_key_metadata ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free external key metadata.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( internal_volume->encryption_context != NULL )
+		{
+			if( libbde_encryption_context_free(
+			     &( internal_volume->encryption_context ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free encryption context.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( libbde_io_handle_free(
 		     &( internal_volume->io_handle ),
 		     error ) != 1 )

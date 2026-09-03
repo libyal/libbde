@@ -609,9 +609,14 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBFUSE3 )
 	fuse_unmount(
 	 bdemount_fuse_handle );
-
+#else
+	fuse_unmount(
+	 mount_point,
+	 bdemount_fuse_channel );
+#endif
 	fuse_destroy(
 	 bdemount_fuse_handle );
 

@@ -81,7 +81,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt -y update
-        sudo apt -y install curl autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config
+        sudo apt -y install curl autoconf automake autopoint build-essential git libssl-dev libtool pkg-config
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
