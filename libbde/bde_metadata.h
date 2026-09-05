@@ -267,6 +267,11 @@ struct bde_metadata_entry_aes_ccm_encrypted_key_header
 	 * Consists of 4 bytes
 	 */
 	uint8_t nonce_counter[ 4 ];
+
+	/* The tag
+	 * Consists of 16 bytes
+	 */
+	uint8_t tag[ 16 ];
 };
 
 typedef struct bde_metadata_entry_volume_master_key_header bde_metadata_entry_volume_master_key_header_t;

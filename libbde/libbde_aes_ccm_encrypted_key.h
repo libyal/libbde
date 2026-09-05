@@ -40,6 +40,10 @@ struct libbde_aes_ccm_encrypted_key
 	 */
 	uint8_t nonce[ 12 ];
 
+	/* The tag
+	 */
+	uint8_t tag[ 16 ];
+
 	/* The (encrypted) data
 	 */
 	uint8_t *data;

@@ -1331,7 +1331,7 @@ int libbde_metadata_read_volume_master_key(
 #endif
 		unencrypted_data_size = metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->data_size;
 
-		if( ( unencrypted_data_size < 28 )
+		if( ( unencrypted_data_size < 12 )
 		 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 		{
 			libcerror_error_set(
@@ -1400,7 +1400,7 @@ int libbde_metadata_read_volume_master_key(
 
 			goto on_error;
 		}
-		if( libcaes_crypt_ccm(
+		if( libcaes_crypt_ccm_ctr_only(
 		     aes_context,
 		     LIBCAES_CRYPT_MODE_DECRYPT,
 		     metadata->clear_key_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -1434,18 +1434,18 @@ int libbde_metadata_read_volume_master_key(
 #endif
 /* TODO improve this check */
 		byte_stream_copy_to_uint16_little_endian(
-		 &( unencrypted_data[ 16 ] ),
+		 &( unencrypted_data[ 0 ] ),
 		 data_size );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 &( unencrypted_data[ 20 ] ),
+		 &( unencrypted_data[ 4 ] ),
 		 version );
 
 		if( version == 1 )
 		{
 			if( data_size == 0x2c )
 			{
-				if( unencrypted_data_size < ( 28 + 32 ) )
+				if( unencrypted_data_size < ( 12 + 32 ) )
 				{
 					libcerror_error_set(
 					 error,
@@ -1458,7 +1458,7 @@ int libbde_metadata_read_volume_master_key(
 				}
 				if( memory_copy(
 				     volume_master_key,
-				     &( unencrypted_data[ 28 ] ),
+				     &( unencrypted_data[ 12 ] ),
 				     32 ) == NULL )
 				{
 					libcerror_error_set(
@@ -1574,7 +1574,7 @@ int libbde_metadata_read_volume_master_key(
 #endif
 			unencrypted_data_size = metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->data_size;
 
-			if( ( unencrypted_data_size < 28 )
+			if( ( unencrypted_data_size < 12 )
 			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 			{
 				libcerror_error_set(
@@ -1643,7 +1643,7 @@ int libbde_metadata_read_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_crypt_ccm(
+			if( libcaes_crypt_ccm_ctr_only(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->startup_key_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -1677,18 +1677,18 @@ int libbde_metadata_read_volume_master_key(
 #endif
 /* TODO improve this check */
 			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 16 ] ),
+			 &( unencrypted_data[ 0 ] ),
 			 data_size );
 
 			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 20 ] ),
+			 &( unencrypted_data[ 4 ] ),
 			 version );
 
 			if( version == 1 )
 			{
 				if( data_size == 0x2c )
 				{
-					if( unencrypted_data_size < ( 28 + 32 ) )
+					if( unencrypted_data_size < ( 12 + 32 ) )
 					{
 						libcerror_error_set(
 						 error,
@@ -1701,7 +1701,7 @@ int libbde_metadata_read_volume_master_key(
 					}
 					if( memory_copy(
 					     volume_master_key,
-					     &( unencrypted_data[ 28 ] ),
+					     &( unencrypted_data[ 12 ] ),
 					     32 ) == NULL )
 					{
 						libcerror_error_set(
@@ -1832,7 +1832,7 @@ int libbde_metadata_read_volume_master_key(
 #endif
 			unencrypted_data_size = metadata->password_volume_master_key->aes_ccm_encrypted_key->data_size;
 
-			if( ( unencrypted_data_size < 28 )
+			if( ( unencrypted_data_size < 12 )
 			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 			{
 				libcerror_error_set(
@@ -1901,7 +1901,7 @@ int libbde_metadata_read_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_crypt_ccm(
+			if( libcaes_crypt_ccm_ctr_only(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->password_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -1935,18 +1935,18 @@ int libbde_metadata_read_volume_master_key(
 #endif
 /* TODO improve this check */
 			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 16 ] ),
+			 &( unencrypted_data[ 0 ] ),
 			 data_size );
 
 			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 20 ] ),
+			 &( unencrypted_data[ 4 ] ),
 			 version );
 
 			if( version == 1 )
 			{
 				if( data_size == 0x2c )
 				{
-					if( unencrypted_data_size < ( 28 + 32 ) )
+					if( unencrypted_data_size < ( 12 + 32 ) )
 					{
 						libcerror_error_set(
 						 error,
@@ -1959,7 +1959,7 @@ int libbde_metadata_read_volume_master_key(
 					}
 					if( memory_copy(
 					     volume_master_key,
-					     &( unencrypted_data[ 28 ] ),
+					     &( unencrypted_data[ 12 ] ),
 					     32 ) == NULL )
 					{
 						libcerror_error_set(
@@ -2090,7 +2090,7 @@ int libbde_metadata_read_volume_master_key(
 #endif
 			unencrypted_data_size = metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->data_size;
 
-			if( ( unencrypted_data_size < 28 )
+			if( ( unencrypted_data_size < 12 )
 			 || ( unencrypted_data_size > MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 			{
 				libcerror_error_set(
@@ -2159,7 +2159,7 @@ int libbde_metadata_read_volume_master_key(
 
 				goto on_error;
 			}
-			if( libcaes_crypt_ccm(
+			if( libcaes_crypt_ccm_ctr_only(
 			     aes_context,
 			     LIBCAES_CRYPT_MODE_DECRYPT,
 			     metadata->recovery_password_volume_master_key->aes_ccm_encrypted_key->nonce,
@@ -2193,18 +2193,18 @@ int libbde_metadata_read_volume_master_key(
 #endif
 /* TODO improve this check */
 			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 16 ] ),
+			 &( unencrypted_data[ 0 ] ),
 			 data_size );
 
 			byte_stream_copy_to_uint16_little_endian(
-			 &( unencrypted_data[ 20 ] ),
+			 &( unencrypted_data[ 4 ] ),
 			 version );
 
 			if( version == 1 )
 			{
 				if( data_size == 0x2c )
 				{
-					if( unencrypted_data_size < ( 28 + 32 ) )
+					if( unencrypted_data_size < ( 12 + 32 ) )
 					{
 						libcerror_error_set(
 						 error,
@@ -2217,7 +2217,7 @@ int libbde_metadata_read_volume_master_key(
 					}
 					if( memory_copy(
 					     volume_master_key,
-					     &( unencrypted_data[ 28 ] ),
+					     &( unencrypted_data[ 12 ] ),
 					     32 ) == NULL )
 					{
 						libcerror_error_set(
@@ -2494,7 +2494,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 		goto on_error;
 	}
-	if( libcaes_crypt_ccm(
+	if( libcaes_crypt_ccm_ctr_only(
 	     aes_context,
 	     LIBCAES_CRYPT_MODE_DECRYPT,
 	     metadata->full_volume_encryption_key->nonce,
@@ -2528,11 +2528,11 @@ int libbde_metadata_read_full_volume_encryption_key(
 #endif
 /* TODO improve this check */
 	byte_stream_copy_to_uint16_little_endian(
-	 &( unencrypted_data[ 16 ] ),
+	 &( unencrypted_data[ 0 ] ),
 	 data_size );
 
 	byte_stream_copy_to_uint16_little_endian(
-	 &( unencrypted_data[ 20 ] ),
+	 &( unencrypted_data[ 4 ] ),
 	 version );
 
 	if( version == 1 )
@@ -2550,7 +2550,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 				goto on_error;
 			}
-			if( unencrypted_data_size < 44 )
+			if( unencrypted_data_size < 28 )
 			{
 				libcerror_error_set(
 				 error,
@@ -2563,7 +2563,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
-			     &( unencrypted_data[ 28 ] ),
+			     &( unencrypted_data[ 12 ] ),
 			     16 ) == NULL )
 			{
 				libcerror_error_set(
@@ -2591,7 +2591,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 				goto on_error;
 			}
-			if( unencrypted_data_size < 60 )
+			if( unencrypted_data_size < 44 )
 			{
 				libcerror_error_set(
 				 error,
@@ -2604,7 +2604,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
-			     &( unencrypted_data[ 28 ] ),
+			     &( unencrypted_data[ 12 ] ),
 			     32 ) == NULL )
 			{
 				libcerror_error_set(
@@ -2632,7 +2632,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 				goto on_error;
 			}
-			if( unencrypted_data_size < 92 )
+			if( unencrypted_data_size < 76 )
 			{
 				libcerror_error_set(
 				 error,
@@ -2645,7 +2645,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
-			     &( unencrypted_data[ 28 ] ),
+			     &( unencrypted_data[ 12 ] ),
 			     32 ) == NULL )
 			{
 				libcerror_error_set(
@@ -2659,7 +2659,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			if( memory_copy(
 			     tweak_key,
-			     &( unencrypted_data[ 60 ] ),
+			     &( unencrypted_data[ 44 ] ),
 			     32 ) == NULL )
 			{
 				libcerror_error_set(
@@ -2686,7 +2686,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 
 				goto on_error;
 			}
-			if( unencrypted_data_size < 92 )
+			if( unencrypted_data_size < 76 )
 			{
 				libcerror_error_set(
 				 error,
@@ -2699,7 +2699,7 @@ int libbde_metadata_read_full_volume_encryption_key(
 			}
 			if( memory_copy(
 			     full_volume_encryption_key,
-			     &( unencrypted_data[ 28 ] ),
+			     &( unencrypted_data[ 12 ] ),
 			     64 ) == NULL )
 			{
 				libcerror_error_set(

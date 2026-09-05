@@ -263,6 +263,20 @@ int libbde_aes_ccm_encrypted_key_read(
 
 		return( -1 );
 	}
+	if( memory_copy(
+	     aes_ccm_encrypted_key->tag,
+	     value_data,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy tag to AES-CCM encrypted key.",
+		 function );
+
+		return( -1 );
+	}
 	value_data      += sizeof( bde_metadata_entry_aes_ccm_encrypted_key_header_t );
 	value_data_size -= sizeof( bde_metadata_entry_aes_ccm_encrypted_key_header_t );
 

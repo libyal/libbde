@@ -157,7 +157,10 @@ ssize_t libbde_metadata_entry_read(
 {
 	static char *function = "libbde_metadata_entry_read";
 	uint16_t entry_size   = 0;
-	uint16_t version      = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint16_t value_16bit  = 0;
+#endif
 
 	if( metadata_entry == NULL )
 	{
@@ -216,17 +219,13 @@ ssize_t libbde_metadata_entry_read(
 	 ( (bde_metadata_entry_v1_t *) fve_metadata )->value_type,
 	 metadata_entry->value_type );
 
-	byte_stream_copy_to_uint16_little_endian(
-	 ( (bde_metadata_entry_v1_t *) fve_metadata )->version,
-	 version );
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
 		 "%s: entry size\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
-		 entry_size );\
+		 entry_size );
 
 		libcnotify_printf(
 		 "%s: entry type\t\t\t\t\t: 0x%04" PRIx16 " (%s)\n",
@@ -242,25 +241,16 @@ ssize_t libbde_metadata_entry_read(
 		 libbde_debug_print_value_type(
 		  metadata_entry->value_type ) );
 
+		byte_stream_copy_to_uint16_little_endian(
+		 ( (bde_metadata_entry_v1_t *) fve_metadata )->version,
+		 value_16bit );
 		libcnotify_printf(
-		 "%s: version\t\t\t\t\t: %" PRIu16 "\n",
+		 "%s: unknown1\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
-		 version );
+		 value_16bit );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( ( version != 1 )
-	 && ( version != 3 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported FVE metadata entry version.",
-		 function );
-
-		return( -1 );
-	}
 	if( ( entry_size < sizeof( bde_metadata_entry_v1_t ) )
 	 || ( entry_size > fve_metadata_size ) )
 	{
