@@ -62,6 +62,7 @@ Additional information regarding BitLocker To Go Application files with thanks t
 | 0.0.15 | J.B. Metz | January 2022 | Changes to formatting.
 | 0.0.16 | J.B. Metz | February 2022 | Additional information about metadata version 3.
 | 0.0.17 | J.B. Metz | September 2026 | Additional information regarding AES-CCM encrypted keys with thanks to H. Martin.
+| 0.0.17 | J.B. Metz | September 2026 | Additional information about metadata area descriptors and Encrypt-on-Write (EOW) structures.
 |===
 
 :numbered:
@@ -86,7 +87,7 @@ on fixed storage media.
 
 The BitLocker identifier (GUID) is 4967d63b-2e29-4ad8-8399-f6a339e3d001.
 
-BitLocker To Go uses 4967d63b-2e29-4ad8-8399-f6a339e3d01.
+BitLocker To Go also uses 4967d63b-2e29-4ad8-8399-f6a339e3d001.
 
 BitLocker Used Disk Space Only encryption uses
 92a84d3b-dd80-4d0e-9e4e-b1e3284eaed8.
@@ -98,7 +99,7 @@ BitLocker Used Disk Space Only encryption uses
 In Windows Vista the System Volume Information folder of the unencrypted volume
 contain several file entries for the BitLocker metadata blocks:
 
-* FVE.{%GUID%}.[123] maps the blocks that contain the FVE metadata. Typically 16384 bytes of size.
+* "FVE.{e40ad34d-dae9-4bc7-95bd-b16218c10f72}.[123]" maps a metadata block; typically 16384 bytes in size.
 
 The contents of the metadata files, on an unencrypted volume, consists of
 0-byte values. It is assumed that these files are used to prevent the BitLocker
@@ -112,8 +113,13 @@ EnCase (at least version 6.18) does not zero out these metadata areas.
 In Windows 7 the System Volume Information folder of the unencrypted volume
 contain several file entries for the BitLocker metadata blocks:
 
-* FVE2.{%GUID%} maps the block that contains the encrypted volume header. Typically 8192 bytes of size.
-* FVE2.{%GUID%}.[123] maps the blocks that contain the FVE metadata. Typically 65536 bytes of size.
+* "FVE2.{09cf57b8-9e6c-43d4-ae1f-0408882a397d}.[1-6]", maps an Encrypt-on-Write (EOW) block map, used by "Used Disk Space Only encryption".
+* "FVE2.{24e6f0ae-6a00-4f73-984b-75ce9942852d}" maps the block that contains the encrypted boot record; typically 8192 bytes in size.
+* "FVE2.{93de4bce-e958-48b6-9fac-602d0294e5ef}.[12]", maps Encrypt-on-Write (EOW) data, used by "Used Disk Space Only encryption".
+* "FVE2.{aff97bac-a69b-45da-aba1-2cfbce434750}.[12]", introduced in Windows 8, typically 512 bytes in size (possibly 1 sector in size?).
+* "FVE2.{c9ca54a3-6983-46b7-8684-a7e5e23499e3}.[1-6]", an Encrypt-on-Write (EOW) "OLRDHEVF2 block", used by "Used Disk Space Only encryption".
+* "FVE2.{da392a22-cae0-4f0f-9a30-b8830385d046}", introduced in Windows 10, typically 65536 bytes in size.
+* "FVE2.{e40ad34d-dae9-4bc7-95bd-b16218c10f72}.[1-3]" maps a metadata block, typically 65536 bytes in size.
 
 The contents of the metadata files, on an unencrypted volume, consists of
 0-byte values. It is assumed that these files are used to prevent the BitLocker
@@ -363,10 +369,12 @@ EnCase (at least version 6.18) does not zero out these metadata areas.
 
 ==== BitLocker Windows 7 and To Go
 
-Both BitLocker Windows 7 and To Go store an encrypted version of the
-unencrypted first sectors in a specific location. This location is defined in
-the <<fve_volume_header_block,FVE Volume header block>>. It is commonly 8192
-bytes an size, entailing the first 16 sectors.
+Both BitLocker Windows 7 and To Go store an encrypted version of the unencrypted
+first sectors in a specific location. This location is defined in the
+<<fve_metadata_area_descriptors,FVE metadata area descriptors>>.
+
+The encrypted volume header is commonly 8192 bytes an size, entailing the first
+16 sectors.
 
 The sectors that contain the encrypted volume header and the BDE metadata are
 shown as empty sectors; containing 0-byte values.
@@ -376,11 +384,16 @@ EnCase (at least version 6.18) does not zero out these metadata areas.
 
 ==== BitLocker Windows 10
 
-In later versions of Bitlocker Windows 10 the <<fve_volume_header_block,FVE Volume header block>>
-no longer is present. The number of volume header sectors in the
+In later versions of Bitlocker Windows 10 the
+<<fve_metadata_area_descriptors,FVE metadata area descriptors>> is not always
+present.
+
+The number of volume header sectors in the
 <<fve_metadata_block_header2,FVE metadata block header>> can be used to
-determine the volume header size. It is commonly 8192 bytes an size, entailing
-the first 16 sectors.
+determine the volume header size.
+
+The encrypted volume header is commonly 8192 bytes an size, entailing the first
+16 sectors.
 
 == Volume header
 
@@ -700,7 +713,7 @@ Contains computer name, volume name and date +
 | | |
 | 0x000b | | [yellow-background]*Unknown (FVEAutoUnlock key?)*
 | | |
-| 0x000f | | Volume header block
+| 0x000f | | Metadata area descriptors
 |===
 
 [NOTE]
@@ -726,8 +739,7 @@ UTF-16 little-endian with end of string character
 | 0x000a | | Update
 | 0x000b | | Error
 | | |
-| 0x000f | | [yellow-background]*Offset and size* +
-[yellow-background]*Contains a tuple of 2 x 64-bit values*
+| 0x000f | | Metadata area descriptors
 |===
 
 === FVE key
@@ -867,24 +879,6 @@ The password protected VMK consists of:
 | 0x2000 | | VMK protected with password
 |===
 
-===== Notes
-
-....
-Key protector types defined by the GetKeyProtectorType function documentation
-
-0 Unknown or other protector type
-1 Trusted Platform Module (TPM)
-2 External key
-3 Numerical password
-4 TPM And PIN
-5 TPM And Startup Key
-6 TPM And PIN And Startup Key
-7 Public Key
-8 Passphrase
-9 TPM Certificate
-10 CryptoAPI Next Generation (CNG) Protector
-....
-
 === FVE External Key
 
 The FVE External Key has value type 0x0009. It is variable in size and consists
@@ -906,9 +900,9 @@ The available properties:
 * optional description string containing "ExternalKey\x00"
 * key
 
-=== [[fve_volume_header_block]]FVE Volume header block
+=== [[fve_metadata_area_descriptors]]FVE metadata area descriptors
 
-The FVE Volume header block has value type 0x000f. It is 16 or more bytes in
+The FVE metadata area descriptors has value type 0x000f. It is 16 or more bytes in
 size and consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -916,30 +910,30 @@ size and consists of:
 | Offset | Size | Value | Description
 | 0 | 8 | | Unencrypted volume header offset
 | 8 | 8 | | Unencrypted volume header size
-4+| _If size > 16_
-| 16 | 2 | 4 or 5 | Unknown (format version?)
-| 18 | 2 | 60 or 76 | Unknown (size of additional data?)
+4+| _If size > 16, related to "FVE2.{aff97bac-a69b-45da-aba1-2cfbce434750}.[12]"_
+| 16 | 2 | 3, 4 or 5 | Unknown (format version?)
+| 18 | 2 | 36, 60 or 76 | Unknown (size of additional data?)
 | 20 | 4 | | Unknown
 | 24 | 8 | 0x09, 0x0a, 0xca | Unknown (flags?)
 | 32 | 8 | | Unknown (convert log offset?)
 | 40 | 4 | | Unknown (convert log size?)
 | 44 | 4 | 512 | Logical sector size, corresponds to value in underlying VHDX
 | 48 | 4 | 512 or 4096 | Physical sector size, corresponds to value in underlying VHDX
+4+| _If additional data size > 36_
 | 52 | 8 | 10 | Unknown
 | 60 | 4 | 0x0000295a, 0x00004a61, 0x00004a62 or 0x00004a65 | Unknown
 | 64 | 8 | 2 | Unknown
 | 72 | 4 | 0x02010110 | Unknown
 4+| _If additional data size > 60_
-| 76 | 8 | | Unknown offset
-| 84 | 4 | 65536 | Unknown size
-| 88 | 4 | 0 | Unknown
+| 76 | 8 | | Unknown area offset, related to "FVE2.{da392a22-cae0-4f0f-9a30-b8830385d046}"
+| 84 | 8 | | Unknown area size, related to "FVE2.{da392a22-cae0-4f0f-9a30-b8830385d046}"
 |===
 
-The FVE Volume header block seems to have been introduced in Windows 7. It
-specifies the location in the encrypted volume where the unencrypted volume
-header is stored.
+The metadata area descriptors seems to have been introduced in Windows 7. They
+specify the location, within the encrypted volume, where certain metadata is
+stored, such as the unencrypted boot record.
 
-The FVE Volume header block is commonly 8192 bytes in size for Windows 7 and
+The unencrypted volume header is commonly 8192 bytes in size for Windows 7 and
 5365760 bytes for a BitLocker To Go.
 
 == BitLocker External Key (BEK) file
@@ -985,45 +979,80 @@ The metadata in a BEK file consists of an FVE external key, which contains
 
 The identifier of the VMK should match the identifier in the BEK file header.
 
-== Notes
+== Encrypt-on-Write (EOW)
 
-Seen on an unencrypted BDE volume (password was set shorted then 8 chars to
-bdetest).
+=== Encrypt-on-Write data (FVE-EOW)
 
-=== FVE-EOW block
-
-The FVE-EOW block has ...
+The Encrypt-on-Write data (FVE-EOW) is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
+4+| _Header_
 | 0 | 8 | "FVE-EOW\x00" | Signature
+| 8 | 2 | 56 | Header size
+| 10 | 2 | | Data size
+| 12 | 4 | | Logical sector size (or EOW data sector size?)
+| 16 | 4 | | Physical sector size (or block record size?)
+| 20 | 4 | | Unknown (Block size?)
+| 24 | 4 | | OLRDHEVF2 area size
+| 28 | 4 | | Unknown (Flags?)
+| 32 | 4 | | Number of block map offsets
+| 36 | 4 | | Checksum
+| 40 | 8 | | Encrypt-on-Write data 1 offset
+| 48 | 8 | | Encrypt-on-Write data 2 offset
+4+|
+| 56 | number x 8 | | Array of 64-bit block map offsets
+| ... | ... | | Unknown (empty values)
 |===
 
-=== FVE-EOWBM block
+=== Encrypt-on-Write block map (FVE-EOWBM)
 
-The FVE-EOWBM block has ...
+The Encrypt-on-Write block map (FVE-EOWBM) is variable of size and consists of:
+
+* Encrypt-on-Write block map (FVE-EOWBM) header
+* One or more Encrypt-on-Write block (map) records
+
+==== Encrypt-on-Write block map header
+
+The Encrypt-on-Write block map header is variable of size, and stored as a
+sector, and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
+4+| _Header_
 | 0 | 10 | "FVE-EOWBM\x00" | Signature
-| 10 | 2 | | Block size +
-Size of the block including the signature and size value
-| 12 | 4 | | [yellow-background]*Unknown*
+| 10 | 2 | 60 | Header size
+| 12 | 4 | | Block map size, including the size of the block records
+| 16 | 4 | | Block map index, corresponds to the index in the offset array of the EOW data
+| 20 | 8 | | Volume logical offset, region (or area) of the volume this block map represents
+| 28 | 8 | | Volume logical size
+| 36 | 8 | | OLRDHEVF2 area offset
+| 44 | 4 | | Block record offset 1, relative to start of the block map
+| 48 | 4 | | Block record offset 2, relative to start of the block map
+| 52 | 4 | | Block record size (or physical sector size?)
+| 56 | 4 | | Checksum
 |===
 
-=== FVE-EOWBR block
+==== Encrypt-on-Write block (map) record (FVE-EOWBR)
 
-The FVE-EOWBR block has ...
+The Encrypt-on-Write block (map) record (FVE-EOWBR) is variable of size, and stored as a sector, and
+consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
+4+| _Header_
 | 0 | 10 | "FVE-EOWBR\x00" | Signature
-| 10 | 2 | | Block size +
-Size of the block including the signature and size value
-| 12 | 4 | | [yellow-background]*Unknown*
+| 10 | 2 | 36 | Header size
+| 12 | 4 | | Block record size (or physical sector size?)
+| 16 | 4 | | Unknown
+| 20 | 8 | | Unknown
+| 28 | 4 | | Unknown
+| 32 | 4 | | Checksum
+4+|
+| 36 | ... | | Bitmap
 |===
 
 === OLRDHEVF2 block
@@ -1036,6 +1065,11 @@ The OLRDHEVF2 block has ...
 | 0 | 10 | "OLRDHEVF2\x00" | Signature
 | 10 | 2 | | [yellow-background]*Unknown*
 |===
+
+== Notes
+
+Seen on an unencrypted BDE volume (password was set shorted then 8 chars to
+bdetest).
 
 :numbered!:
 [appendix]
