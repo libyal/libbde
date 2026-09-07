@@ -39,6 +39,7 @@ check_SCRIPTS = \
 
 check_PROGRAMS = \
 	bde_test_aes_ccm_encrypted_key \
+	bde_test_diffuser \
 	bde_test_encryption_context \
 	bde_test_error \
 	bde_test_external_key \
@@ -52,6 +53,7 @@ check_PROGRAMS = \
 	bde_test_notify \
 	bde_test_password \
 	bde_test_password_keep \
+	bde_test_recovery \
 	bde_test_sector_data \
 	bde_test_sector_data_vector \
 	bde_test_stretch_key \
@@ -72,6 +74,17 @@ bde_test_aes_ccm_encrypted_key_SOURCES = \
 	bde_test_unused.h
 
 bde_test_aes_ccm_encrypted_key_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_diffuser_SOURCES = \
+	bde_test_diffuser.c \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_unused.h
+
+bde_test_diffuser_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
@@ -243,6 +256,17 @@ bde_test_password_keep_SOURCES = \
 	bde_test_unused.h
 
 bde_test_password_keep_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_recovery_SOURCES = \
+	bde_test_libbde.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_recovery.c \
+	bde_test_unused.h
+
+bde_test_recovery_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 

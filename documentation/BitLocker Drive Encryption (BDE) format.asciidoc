@@ -649,19 +649,19 @@ Contains a FILETIME
 | 0x1000 | | [yellow-background]*Unknown (Stretch key)*
 | 0x1001 | | [yellow-background]*Unknown (Stretch key)*
 | | |
-| 0x2000 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
-| 0x2001 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
-| 0x2002 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
-| 0x2003 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
-| 0x2004 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
-| 0x2005 | | [yellow-background]*Unknown (AES-CCM 256 bit encryption)*
+| 0x2000 | | [yellow-background]*Unknown (AES-256-CCM)*
+| 0x2001 | | [yellow-background]*Unknown (AES-256-CCM)*
+| 0x2002 | | [yellow-background]*Unknown (AES-256-CCM)*
+| 0x2003 | | [yellow-background]*Unknown (AES-256-CCM)*
+| 0x2004 | | [yellow-background]*Unknown (AES-256-CCM)*
+| 0x2005 | | [yellow-background]*Unknown (AES-256-CCM)*
 | | |
-| 0x8000 | | AES-CBC 128-bit encryption with Elephant Diffuser
-| 0x8001 | | AES-CBC 256-bit encryption with Elephant Diffuser
-| 0x8002 | | AES-CBC 128-bit encryption
-| 0x8003 | | AES-CBC 256-bit encryption
-| 0x8004 | | AES-XTS 128-bit encryption
-| 0x8005 | | [yellow-background]*Unknown (AES-XTS 256-bit encryption)*
+| 0x8000 | | AES-128-CBC with Elephant Diffuser
+| 0x8001 | | AES-256-CBC with Elephant Diffuser
+| 0x8002 | | AES-128-CBC
+| 0x8003 | | AES-256-CBC
+| 0x8004 | | AES-128-XTS
+| 0x8005 | | AES-256-XTS
 |===
 
 === FVE metadata entry
@@ -698,11 +698,14 @@ Note: version is typically 1 but 3 has been seen for VMK FVE metadata entry in c
 Contains computer name, volume name and date +
 [yellow-background]*Is the date format dependent on the locale MM/DD/YYYY?*
 | | |
-| 0x000b | | [yellow-background]*Unknown* +
-[yellow-background]*Backup of the Full Volume Encryption Key (FVEK)?*
+| 0x000b | | [yellow-background]*Unknown (FVEAutoUnlock key?)*
 | | |
 | 0x000f | | Volume header block
 |===
+
+[NOTE]
+Older versions of BitLocker use a locale dependent date format in the description, such as
+"MM/DD/YYYY". Recent versions of BitLocker use "YYYY-MM-DD".
 
 ==== FVE metadata value types
 
@@ -911,21 +914,25 @@ size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 8 | | Block offset
-| 8 | 8 | | Block size
-4+| _Unknown additional data_
-| 16 | 2 | | [yellow-background]*Unknown (number of entries?)*
-| 18 | 2 | | [yellow-background]*Unknown (size of additional data?)*
-| 28 | ... | | [yellow-background]*Unknown (array of 14 byte sized entries)*
-| ... | 2 | | [yellow-background]*Unknown (empty values)*
-|===
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 8 | | [yellow-background]*Unknown (seen combination of block offset +  block size)*
-| 8 | 4 | | [yellow-background]*Unknown*
-| 12 | 2 | | [yellow-background]*Unknown*
+| 0 | 8 | | Unencrypted volume header offset
+| 8 | 8 | | Unencrypted volume header size
+4+| _If size > 16_
+| 16 | 2 | 4 or 5 | Unknown (format version?)
+| 18 | 2 | 60 or 76 | Unknown (size of additional data?)
+| 20 | 4 | | Unknown
+| 24 | 8 | 0x09, 0x0a, 0xca | Unknown (flags?)
+| 32 | 8 | | Unknown (convert log offset?)
+| 40 | 4 | | Unknown (convert log size?)
+| 44 | 4 | 512 | Logical sector size, corresponds to value in underlying VHDX
+| 48 | 4 | 512 or 4096 | Physical sector size, corresponds to value in underlying VHDX
+| 52 | 8 | 10 | Unknown
+| 60 | 4 | 0x0000295a, 0x00004a61, 0x00004a62 or 0x00004a65 | Unknown
+| 64 | 8 | 2 | Unknown
+| 72 | 4 | 0x02010110 | Unknown
+4+| _If additional data size > 60_
+| 76 | 8 | | Unknown offset
+| 84 | 4 | 65536 | Unknown size
+| 88 | 4 | 0 | Unknown
 |===
 
 The FVE Volume header block seems to have been introduced in Windows 7. It

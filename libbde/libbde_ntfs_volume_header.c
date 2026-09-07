@@ -587,6 +587,9 @@ int libbde_ntfs_volume_header_read_data(
 		return( -1 );
 	}
 	ntfs_volume_header->volume_size *= ntfs_volume_header->bytes_per_sector;
+
+	/* NTFS omits the last sector from the number of sectors.
+	 */
 	ntfs_volume_header->volume_size += ntfs_volume_header->bytes_per_sector;
 
 #if defined( HAVE_DEBUG_OUTPUT )

@@ -247,8 +247,17 @@ int libbde_aes_ccm_encrypted_key_read(
 		 "%s: nonce counter\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
+
+		libcnotify_printf(
+		 "%s: AES-CCM tag:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (bde_metadata_entry_aes_ccm_encrypted_key_header_t *) value_data )->tag,
+		 16,
+		 0 );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( memory_copy(
 	     aes_ccm_encrypted_key->nonce,
 	     value_data,

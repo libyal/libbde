@@ -323,6 +323,9 @@ int libbde_volume_header_read_data(
 			 ( (bde_volume_header_windows_vista_t *) data )->total_number_of_sectors_64bit,
 			 total_number_of_sectors );
 		}
+		/* NTFS omits the last sector from the number of sectors.
+		 */
+		total_number_of_sectors += 1;
 	}
 	else if( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
 	{
@@ -474,7 +477,7 @@ int libbde_volume_header_read_data(
 			 value_64bit );
 
 			libcnotify_printf(
-			 "%s: first metadata cluster block\t: 0x%08" PRIx64 "\n",
+			 "%s: first metadata cluster block\t\t: 0x%08" PRIx64 "\n",
 			 function,
 			 safe_first_metadata_offset );
 
@@ -482,7 +485,7 @@ int libbde_volume_header_read_data(
 			 ( (bde_volume_header_windows_vista_t *) data )->mft_entry_size,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: MFT entry size\t\t\t: %" PRIu32 "\n",
+			 "%s: MFT entry size\t\t\t\t: %" PRIu32 "\n",
 			 function,
 			 value_32bit );
 

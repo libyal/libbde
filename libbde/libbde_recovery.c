@@ -35,7 +35,7 @@
  */
 int libbde_utf8_recovery_password_calculate_hash(
      const uint8_t *utf8_string,
-     size_t utf8_string_length,
+     size_t utf8_string_size,
      uint8_t *recovery_password_hash,
      size_t recovery_password_hash_size,
      libcerror_error_t **error )
@@ -76,7 +76,7 @@ int libbde_utf8_recovery_password_calculate_hash(
 	}
 	if( libfvalue_utf8_string_split(
 	     utf8_string,
-	     utf8_string_length + 1,
+	     utf8_string_size,
 	     (uint8_t) '-',
  	     &split_string,
  	     error ) != 1 )
@@ -250,7 +250,7 @@ on_error:
  */
 int libbde_utf16_recovery_password_calculate_hash(
      const uint16_t *utf16_string,
-     size_t utf16_string_length,
+     size_t utf16_string_size,
      uint8_t *recovery_password_hash,
      size_t recovery_password_hash_size,
      libcerror_error_t **error )
@@ -291,7 +291,7 @@ int libbde_utf16_recovery_password_calculate_hash(
 	}
 	if( libfvalue_utf16_string_split(
 	     utf16_string,
-	     utf16_string_length + 1,
+	     utf16_string_size,
 	     (uint16_t) '-',
  	     &split_string,
  	     error ) != 1 )

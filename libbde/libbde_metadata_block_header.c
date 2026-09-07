@@ -340,7 +340,7 @@ int libbde_metadata_block_header_read_data(
 		if( metadata_block_header->version == 1 )
 		{
 			libcnotify_printf(
-			 "%s: MFT mirror cluster block\t\t: 0x%08" PRIx64 "\n",
+			 "%s: MFT mirror cluster block\t: 0x%08" PRIx64 "\n",
 			 function,
 			 metadata_block_header->mft_mirror_cluster_block_number );
 		}

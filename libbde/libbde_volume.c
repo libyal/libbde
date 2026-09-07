@@ -1434,7 +1434,7 @@ int libbde_internal_volume_open_read(
 	     internal_volume->secondary_metadata,
 	     internal_volume->io_handle,
 	     file_io_handle,
-	     internal_volume->volume_header->second_metadata_offset,
+	     internal_volume->io_handle->second_metadata_offset,
 	     startup_key_identifier,
 	     startup_key_identifier_size,
 	     error ) != 1 )
@@ -1472,7 +1472,7 @@ int libbde_internal_volume_open_read(
 	     internal_volume->tertiary_metadata,
 	     internal_volume->io_handle,
 	     file_io_handle,
-	     internal_volume->volume_header->third_metadata_offset,
+	     internal_volume->io_handle->third_metadata_offset,
 	     startup_key_identifier,
 	     startup_key_identifier_size,
 	     error ) != 1 )
@@ -4133,7 +4133,7 @@ int libbde_volume_set_utf8_recovery_password(
 #endif
 	if( libbde_utf8_recovery_password_calculate_hash(
 	     utf8_string,
-	     utf8_string_length,
+	     utf8_string_length + 1,
 	     internal_volume->password_keep->recovery_password_hash,
 	     32,
 	     error ) != 1 )
@@ -4224,7 +4224,7 @@ int libbde_volume_set_utf16_recovery_password(
 #endif
 	if( libbde_utf16_recovery_password_calculate_hash(
 	     utf16_string,
-	     utf16_string_length,
+	     utf16_string_length + 1,
 	     internal_volume->password_keep->recovery_password_hash,
 	     32,
 	     error ) != 1 )

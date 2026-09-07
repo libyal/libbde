@@ -33,22 +33,25 @@
 #include "bde_test_macros.h"
 #include "bde_test_unused.h"
 
-#include "../libbde/libbde_password.h"
+#include "../libbde/libbde_recovery.h"
 
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
-/* Tests the libbde_utf8_password_calculate_hash function
+/* Tests the libbde_utf8_recovery_password_calculate_hash function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_utf8_password_calculate_hash(
+int bde_test_utf8_recovery_password_calculate_hash(
      void )
 {
 	uint8_t expected_password_hash[ 32 ] = {
-		0xf8, 0x55, 0x9b, 0x5a, 0xcf, 0xab, 0x54, 0x09, 0xc1, 0x26, 0xe8, 0xac, 0x8a, 0x59, 0x39, 0xbf,
-		0xfa, 0xa8, 0x93, 0xf6, 0x2a, 0xe8, 0x37, 0x3b, 0x68, 0x9c, 0xee, 0xa6, 0x4b, 0xd4, 0x75, 0x69 };
+		0xa4, 0xc9, 0x24, 0x44, 0x78, 0x11, 0x08, 0x05, 0x01, 0x5c, 0x94, 0xd1, 0xb0, 0x01, 0xa9, 0x33,
+		0xad, 0xa2, 0xab, 0x0b, 0x71, 0x6b, 0xac, 0x34, 0x2b, 0xb8, 0x6c, 0x84, 0x4b, 0x63, 0x49, 0x1f };
 
-	uint8_t password[ 5 ] = {
-		'T', 'e', 'S', 't', 0 };
+	uint8_t password[ 56 ] = {
+		0x34, 0x37, 0x31, 0x32, 0x30, 0x37, 0x2d, 0x32, 0x37, 0x38, 0x34, 0x39, 0x38, 0x2d, 0x34, 0x32,
+		0x32, 0x31, 0x32, 0x35, 0x2d, 0x31, 0x37, 0x37, 0x31, 0x37, 0x37, 0x2d, 0x35, 0x36, 0x31, 0x39,
+		0x30, 0x32, 0x2d, 0x35, 0x33, 0x37, 0x34, 0x30, 0x35, 0x2d, 0x34, 0x36, 0x38, 0x30, 0x30, 0x36,
+		0x2d, 0x36, 0x39, 0x33, 0x34, 0x35, 0x31, 0x00 };
 
 	uint8_t password_hash[ 32 ] = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -59,9 +62,9 @@ int bde_test_utf8_password_calculate_hash(
 
 	/* Test regular cases
 	 */
-	result = libbde_utf8_password_calculate_hash(
+	result = libbde_utf8_recovery_password_calculate_hash(
 	          password,
-	          5,
+	          56,
 	          password_hash,
 	          32,
 	          &error );
@@ -87,7 +90,7 @@ int bde_test_utf8_password_calculate_hash(
 
 	/* Test error cases
 	 */
-	result = libbde_utf8_password_calculate_hash(
+	result = libbde_utf8_recovery_password_calculate_hash(
 	          NULL,
 	          4,
 	          password_hash,
@@ -106,7 +109,7 @@ int bde_test_utf8_password_calculate_hash(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_utf8_password_calculate_hash(
+	result = libbde_utf8_recovery_password_calculate_hash(
 	          password,
 	          (size_t) SSIZE_MAX + 1,
 	          password_hash,
@@ -125,7 +128,7 @@ int bde_test_utf8_password_calculate_hash(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_utf8_password_calculate_hash(
+	result = libbde_utf8_recovery_password_calculate_hash(
 	          password,
 	          4,
 	          NULL,
@@ -144,7 +147,7 @@ int bde_test_utf8_password_calculate_hash(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_utf8_password_calculate_hash(
+	result = libbde_utf8_recovery_password_calculate_hash(
 	          password,
 	          4,
 	          password_hash,
@@ -174,18 +177,21 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libbde_utf16_password_calculate_hash function
+/* Tests the libbde_utf16_recovery_password_calculate_hash function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_utf16_password_calculate_hash(
+int bde_test_utf16_recovery_password_calculate_hash(
      void )
 {
 	uint8_t expected_password_hash[ 32 ] = {
-		0xf8, 0x55, 0x9b, 0x5a, 0xcf, 0xab, 0x54, 0x09, 0xc1, 0x26, 0xe8, 0xac, 0x8a, 0x59, 0x39, 0xbf,
-		0xfa, 0xa8, 0x93, 0xf6, 0x2a, 0xe8, 0x37, 0x3b, 0x68, 0x9c, 0xee, 0xa6, 0x4b, 0xd4, 0x75, 0x69 };
+		0xa4, 0xc9, 0x24, 0x44, 0x78, 0x11, 0x08, 0x05, 0x01, 0x5c, 0x94, 0xd1, 0xb0, 0x01, 0xa9, 0x33,
+		0xad, 0xa2, 0xab, 0x0b, 0x71, 0x6b, 0xac, 0x34, 0x2b, 0xb8, 0x6c, 0x84, 0x4b, 0x63, 0x49, 0x1f };
 
-	uint16_t password[ 5 ] = {
-		'T', 'e', 'S', 't', 0 };
+	uint16_t password[ 56 ] = {
+		0x34, 0x37, 0x31, 0x32, 0x30, 0x37, 0x2d, 0x32, 0x37, 0x38, 0x34, 0x39, 0x38, 0x2d, 0x34, 0x32,
+		0x32, 0x31, 0x32, 0x35, 0x2d, 0x31, 0x37, 0x37, 0x31, 0x37, 0x37, 0x2d, 0x35, 0x36, 0x31, 0x39,
+		0x30, 0x32, 0x2d, 0x35, 0x33, 0x37, 0x34, 0x30, 0x35, 0x2d, 0x34, 0x36, 0x38, 0x30, 0x30, 0x36,
+		0x2d, 0x36, 0x39, 0x33, 0x34, 0x35, 0x31, 0x00 };
 
 	uint8_t password_hash[ 32 ] = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -196,9 +202,9 @@ int bde_test_utf16_password_calculate_hash(
 
 	/* Test regular cases
 	 */
-	result = libbde_utf16_password_calculate_hash(
+	result = libbde_utf16_recovery_password_calculate_hash(
 	          password,
-	          5,
+	          56,
 	          password_hash,
 	          32,
 	          &error );
@@ -224,7 +230,7 @@ int bde_test_utf16_password_calculate_hash(
 
 	/* Test error cases
 	 */
-	result = libbde_utf16_password_calculate_hash(
+	result = libbde_utf16_recovery_password_calculate_hash(
 	          NULL,
 	          4,
 	          password_hash,
@@ -243,7 +249,7 @@ int bde_test_utf16_password_calculate_hash(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_utf16_password_calculate_hash(
+	result = libbde_utf16_recovery_password_calculate_hash(
 	          password,
 	          (size_t) SSIZE_MAX + 1,
 	          password_hash,
@@ -262,7 +268,7 @@ int bde_test_utf16_password_calculate_hash(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_utf16_password_calculate_hash(
+	result = libbde_utf16_recovery_password_calculate_hash(
 	          password,
 	          4,
 	          NULL,
@@ -281,7 +287,7 @@ int bde_test_utf16_password_calculate_hash(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_utf16_password_calculate_hash(
+	result = libbde_utf16_recovery_password_calculate_hash(
 	          password,
 	          4,
 	          password_hash,
@@ -331,14 +337,12 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	BDE_TEST_RUN(
-	 "libbde_utf8_password_calculate_hash",
-	 bde_test_utf8_password_calculate_hash );
+	 "libbde_utf8_recovery_password_calculate_hash",
+	 bde_test_utf8_recovery_password_calculate_hash );
 
 	BDE_TEST_RUN(
-	 "libbde_utf16_password_calculate_hash",
-	 bde_test_utf16_password_calculate_hash );
-
-	/* TODO add tests for libbde_password_calculate_key */
+	 "libbde_utf16_recovery_password_calculate_hash",
+	 bde_test_utf16_recovery_password_calculate_hash );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 

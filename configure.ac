@@ -2,7 +2,7 @@ AC_PREREQ([2.71])
 
 AC_INIT(
   [libbde],
-  [20260903],
+  [20260907],
   [https://github.com/libyal/libbde/issues])
 
 AC_CONFIG_SRCDIR(
