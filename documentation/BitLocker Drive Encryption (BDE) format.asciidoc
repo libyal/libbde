@@ -113,11 +113,11 @@ EnCase (at least version 6.18) does not zero out these metadata areas.
 In Windows 7 the System Volume Information folder of the unencrypted volume
 contain several file entries for the BitLocker metadata blocks:
 
-* "FVE2.{09cf57b8-9e6c-43d4-ae1f-0408882a397d}.[1-6]", maps an Encrypt-on-Write (EOW) block map, used by "Used Disk Space Only encryption".
+* "FVE2.{09cf57b8-9e6c-43d4-ae1f-0408882a397d}.[1-6]", maps an Encrypt-on-Write (EOW) block map area, used by "Used Disk Space Only encryption".
 * "FVE2.{24e6f0ae-6a00-4f73-984b-75ce9942852d}" maps the block that contains the encrypted boot record; typically 8192 bytes in size.
-* "FVE2.{93de4bce-e958-48b6-9fac-602d0294e5ef}.[12]", maps Encrypt-on-Write (EOW) data, used by "Used Disk Space Only encryption".
+* "FVE2.{93de4bce-e958-48b6-9fac-602d0294e5ef}.[12]", maps Encrypt-on-Write (EOW) descriptor, used by "Used Disk Space Only encryption".
 * "FVE2.{aff97bac-a69b-45da-aba1-2cfbce434750}.[12]", introduced in Windows 8, typically 512 bytes in size (possibly 1 sector in size?).
-* "FVE2.{c9ca54a3-6983-46b7-8684-a7e5e23499e3}.[1-6]", an Encrypt-on-Write (EOW) "OLRDHEVF2 block", used by "Used Disk Space Only encryption".
+* "FVE2.{c9ca54a3-6983-46b7-8684-a7e5e23499e3}.[1-6]", an Encrypt-on-Write (EOW) relocation log area, used by "Used Disk Space Only encryption".
 * "FVE2.{da392a22-cae0-4f0f-9a30-b8830385d046}", introduced in Windows 10, typically 65536 bytes in size.
 * "FVE2.{e40ad34d-dae9-4bc7-95bd-b16218c10f72}.[1-3]" maps a metadata block, typically 65536 bytes in size.
 
@@ -498,12 +498,6 @@ Contains an offset relative to the start of the volume
 | 510 | 2 | 0x55 0xaa | Sector signature
 |===
 
-[NOTE]
-The number of sectors can be 1 less then the value indicated in the partition
-table.
-
-[yellow-background]*TODO check highlighted values*
-
 === BitLocker To Go
 
 BitLocker To Go on an NTFS volume is similar to BitLocker Windows 7. The
@@ -557,7 +551,61 @@ Contains an offset relative to the start of the volume
 | 510 | 2 | 0x55 0xaa | Sector signature
 |===
 
-[yellow-background]*TODO check highlighted values*
+=== BitLocker Used Disk Space Only encryption
+
+The BitLocker Used Disk Space Only encryption volume header for a NTFS volume is
+similar to a BitLocker Windows 7 and later volume header. The differences have
+been emphasized in bold. The volume header is 512 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 3 | "\xeb\x58\x90" | *Boot entry point*
+| 3 | 8 | "-FVE-FS-" | File system signature
+4+| _DOS version 2.0 BIOS parameter block (BPB)_
+| 11 | 2 | | Bytes per sector
+| 13 | 1 | | Sectors per cluster block
+| 14 | 2 | 0x00 | Reserved Sectors
+| 16 | 1 | 0x00 | Number of File Allocation Tables (FATs)
+| 17 | 2 | 0 | Root directory entries
+| 19 | 2 | | Total number of sectors (16-bit)
+| 21 | 1 | | Media descriptor
+| 22 | 2 | 0x00 | Sectors Per File Allocation Table (FAT)
+4+| _DOS version 3.4 BIOS parameter block (BPB)_
+| 24 | 2 | 0x3f | Sectors per track
+| 26 | 2 | | Number of heads
+| 28 | 4 | | Number of hidden sectors +
+Contains the volume start sector number
+| 32 | 4 | 0x00 | Total number of sectors (32-bit)
+4+| _Unknown_
+| 36 | 4 | 0x1fe0 | Sectors per file allocation table
+| 40 | 2 | | FAT Flags (Only used during a conversion from a FAT12/16 volume)
+| 42 | 2 | | Version (Defined as 0)
+| 44 | 4 | | Cluster number of root directory start
+| 48 | 2 | 0x0001 | Sector number of FS Information Sector
+| 50 | 2 | 0x0006 | Sector number of a copy of this boot sector (0 if no backup copy exists)
+| 52 | 12 | | Unknown (Reserved)
+| 64 | 1 | 0x80 | Physical Drive Number (see FAT12/16 BPB at offset 0x24)
+| 65 | 1 | | Unknown (Reserved) (see FAT12/16 BPB at offset 0x25)
+| 66 | 1 | 0x29 | Extended boot signature (see FAT12/16 BPB at offset 0x26)
+| 67 | 4 | | Volume serial number
+| 71 | 11 | "NO NAME\x20\x20\x20\x20" | Volume label
+| 82 | 8 | "FAT32\x20\x20\x20" | File system signature
+| 90 | 70 | | Bootcode
+| *160* | *16* | | *BitLocker Used Disk Space Only identifier* +
+contains a GUID
+| 176 | 8 | | FVE metadata block 1 offset +
+Contains an offset relative to the start of the volume
+| 184 | 8 | | FVE metadata block 2 offset +
+Contains an offset relative to the start of the volume
+| 192 | 8 | | FVE metadata block 3 offset +
+Contains an offset relative to the start of the volume
+| *200* | *8* | | *Encrypt-on-Write descriptor 1 offset*, which is relative to the start of the volume |
+| *208* | *8* | | *Encrypt-on-Write descriptor 2 offset*, which is relative to the start of the volume |
+| *216* | *294* | | *Unknown (part of bootcode)* |
+| 507 | 3 | | Unknown
+| 510 | 2 | 0x55 0xaa | Sector signature
+|===
 
 == FVE metadata block
 
@@ -914,7 +962,7 @@ size and consists of:
 | 16 | 2 | 3, 4 or 5 | Unknown (format version?)
 | 18 | 2 | 36, 60 or 76 | Unknown (size of additional data?)
 | 20 | 4 | | Unknown
-| 24 | 8 | 0x09, 0x0a, 0xca | Unknown (flags?)
+| 24 | 8 | | Unknown (flags?)
 | 32 | 8 | | Unknown (convert log offset?)
 | 40 | 4 | | Unknown (convert log size?)
 | 44 | 4 | 512 | Logical sector size, corresponds to value in underlying VHDX
@@ -935,6 +983,21 @@ stored, such as the unencrypted boot record.
 
 The unencrypted volume header is commonly 8192 bytes in size for Windows 7 and
 5365760 bytes for a BitLocker To Go.
+
+==== Unknown flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x01 | |
+| 0x02 | |
+| 0x04 | |
+| 0x08 | |
+| 0x10 | |
+| 0x20 | |
+| 0x40 | | Unknown (related to pause? seen: 0x4b while paused of used disk space only)
+| 0x80 | | Unknown (related to pause? seen: 0xcb after initialization of used disk space only)
+|===
 
 == BitLocker External Key (BEK) file
 
@@ -981,9 +1044,9 @@ The identifier of the VMK should match the identifier in the BEK file header.
 
 == Encrypt-on-Write (EOW)
 
-=== Encrypt-on-Write data (FVE-EOW)
+=== Encrypt-on-Write descriptor (FVE-EOW)
 
-The Encrypt-on-Write data (FVE-EOW) is variable of size and consists of:
+The Encrypt-on-Write descriptor (FVE-EOW) is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -994,29 +1057,29 @@ The Encrypt-on-Write data (FVE-EOW) is variable of size and consists of:
 | 10 | 2 | | Data size
 | 12 | 4 | | Logical sector size (or EOW data sector size?)
 | 16 | 4 | | Physical sector size (or block record size?)
-| 20 | 4 | | Unknown (Block size?)
-| 24 | 4 | | OLRDHEVF2 area size
-| 28 | 4 | | Unknown (Flags?)
+| 20 | 4 | | Relocation block size
+| 24 | 4 | | Encrypt-on-Write relocation log area size
+| 28 | 4 | | Encrypt-on-Write relocation log entry size
 | 32 | 4 | | Number of block map offsets
 | 36 | 4 | | Checksum
-| 40 | 8 | | Encrypt-on-Write data 1 offset
-| 48 | 8 | | Encrypt-on-Write data 2 offset
+| 40 | 8 | | Encrypt-on-Write descriptor 1 offset
+| 48 | 8 | | Encrypt-on-Write descriptor 2 offset
 4+|
-| 56 | number x 8 | | Array of 64-bit block map offsets
+| 56 | number x 8 | | Array of 64-bit block map area offsets
 | ... | ... | | Unknown (empty values)
 |===
 
-=== Encrypt-on-Write block map (FVE-EOWBM)
+=== Encrypt-on-Write block map area
 
-The Encrypt-on-Write block map (FVE-EOWBM) is variable of size and consists of:
+The Encrypt-on-Write block map area is variable of size and consists of:
 
-* Encrypt-on-Write block map (FVE-EOWBM) header
+* Encrypt-on-Write block map (FVE-EOWBM)
 * One or more Encrypt-on-Write block (map) records
 
-==== Encrypt-on-Write block map header
+==== Encrypt-on-Write block map (FVE-EOWBM)
 
-The Encrypt-on-Write block map header is variable of size, and stored as a
-sector, and consists of:
+The Encrypt-on-Write block map (FVE-EOWBM) is variable of size, and stored as a
+(physical) sector, and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1026,19 +1089,21 @@ sector, and consists of:
 | 10 | 2 | 60 | Header size
 | 12 | 4 | | Block map size, including the size of the block records
 | 16 | 4 | | Block map index, corresponds to the index in the offset array of the EOW data
-| 20 | 8 | | Volume logical offset, region (or area) of the volume this block map represents
-| 28 | 8 | | Volume logical size
-| 36 | 8 | | OLRDHEVF2 area offset
+| 20 | 8 | | Volume region offset, region (or area) of the volume this block map represents
+| 28 | 8 | | Volume region size
+| 36 | 8 | | Encrypt-on-Write relocation log area offset
 | 44 | 4 | | Block record offset 1, relative to start of the block map
 | 48 | 4 | | Block record offset 2, relative to start of the block map
-| 52 | 4 | | Block record size (or physical sector size?)
-| 56 | 4 | | Checksum
+| 52 | 4 | | Block record size
+| 56 | 4 | | Checksum, of the (physical) sector data with the checksum value set to 0
+4+|
+| 60 | ... | | Unknown (empty values)
 |===
 
 ==== Encrypt-on-Write block (map) record (FVE-EOWBR)
 
-The Encrypt-on-Write block (map) record (FVE-EOWBR) is variable of size, and stored as a sector, and
-consists of:
+The Encrypt-on-Write block (map) record (FVE-EOWBR) is variable of size, and
+stored as one more (physical) sectors, and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1046,30 +1111,64 @@ consists of:
 4+| _Header_
 | 0 | 10 | "FVE-EOWBR\x00" | Signature
 | 10 | 2 | 36 | Header size
-| 12 | 4 | | Block record size (or physical sector size?)
-| 16 | 4 | | Unknown
-| 20 | 8 | | Unknown
+| 12 | 4 | | Physical sector size
+| 16 | 4 | | Unknown (bitmap size, in number of bits?)
+| 20 | 8 | | Sequence number
 | 28 | 4 | | Unknown
-| 32 | 4 | | Checksum
+| 32 | 4 | | Checksum, of the (physical) sectors data with the checksum value set to 0
 4+|
 | 36 | ... | | Bitmap
+| ... | ... | | Unknown (empty values)
 |===
 
-=== OLRDHEVF2 block
+=== Encrypt-on-Write relocation log area
 
-The OLRDHEVF2 block has ...
+The Encrypt-on-Write relocation log area is variable of size and consists of:
+
+* Encrypt-on-Write relocation log area (OLRDHEVF2) header
+* Encrypt-on-Write relocation log entries
+** Encrypt-on-Write relocation log entry descriptor
+** encrypted sector data or 0-byte values
+** backup of Encrypt-on-Write relocation log entry descriptor
+* backup of Encrypt-on-Write relocation log area (OLRDHEVF2) header
+* Unknown (empty values)
+
+==== Encrypt-on-Write relocation log area (OLRDHEVF2) header
+
+The Encrypt-on-Write relocation log area (OLRDHEVF2) header is variable of
+size, and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 10 | "OLRDHEVF2\x00" | Signature
-| 10 | 2 | | [yellow-background]*Unknown*
+| 0 | 10 | "OLRDHEVF2\x00" | Signature |
+| 10 | 2 | 1 | Unknown |
+| 12 | 2 | 2 | Unknown (Number of entries?) |
+| 14 | 4 | | Unknown (Logical sector or entry descriptor size?) |
+| 18 | 8 | | (Encrypted) volume size |
+| 26 | 4 | | Relocation block size |
+| 30 | 4 | | Encrypt-on-Write relocation log entry size |
+| 34 | 4 | 32 | Unknown |
+| 38 | 4 | 2 | Unknown |
+| 42 | 8 | | Volume region offset, region (or area) of the volume this relocation log represents |
 |===
 
-== Notes
+==== Encrypt-on-Write relocation log entry descriptor
 
-Seen on an unencrypted BDE volume (password was set shorted then 8 chars to
-bdetest).
+The Encrypt-on-Write relocation log entry descriptor is variable of size,
+stored as a (logical) sector, and consists of:
+
+| Offset | Size | Value | Description |
+| --- | --- | --- | --- |
+| 0 | 2 | 32 | Unknown
+| 2 | 2 | 1 | Unknown
+| 4 | 2 | 1 | Unknown
+| 6 | 2 | 0 | Unknown
+| 8 | 4 | 0 | Unknown
+| 12 | 8 | | Volume region offset, region (or area) of the volume this relocation log entry represents, or 0 if the region is not represented by the relocation log
+| 20 | 4 | | (Used) encrypted sectors data size
+| 24 | 4 | | Checksum of the (used) encrypted sectors data
+| 28 | 4 | | Unknown (checksum of the unencrypted sector data?)
 
 :numbered!:
 [appendix]
