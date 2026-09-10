@@ -1,5 +1,5 @@
 /*
- * Metadata header functions
+ * Encrypt-on-Write (EOW) block map functions
  *
  * Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_METADATA_HEADER_H )
-#define _LIBBDE_METADATA_HEADER_H
+#if !defined( _LIBBDE_EOW_BLOCK_MAP_H )
+#define _LIBBDE_EOW_BLOCK_MAP_H
 
 #include <common.h>
 #include <types.h>
@@ -32,51 +32,63 @@
 extern "C" {
 #endif
 
-typedef struct libbde_metadata_header libbde_metadata_header_t;
+typedef struct libbde_eow_block_map libbde_eow_block_map_t;
 
-struct libbde_metadata_header
+struct libbde_eow_block_map
 {
-	/* The metadata size
+	/* The block map size
 	 */
-	uint32_t metadata_size;
+	uint32_t block_map_size;
 
-	/* The volume identifier
-	 * Contains a GUID
+	/* The volume region offset
 	 */
-	uint8_t volume_identifier[ 16 ];
+	uint64_t volume_region_offset;
 
-	/* The encryption method
+	/* The volume region size
 	 */
-	uint16_t encryption_method;
+	uint64_t volume_region_size;
 
-	/* The creation date and time
+	/* The relocation log area offset
 	 */
-	uint64_t creation_time;
+	uint64_t relocation_log_area_offset;
+
+	/* The first block record offset
+	 */
+	uint32_t first_block_record_offset;
+
+	/* The second block record offset
+	 */
+	uint32_t second_block_record_offset;
+
+	/* The block record size
+	 */
+	uint32_t block_record_size;
 };
 
-int libbde_metadata_header_initialize(
-     libbde_metadata_header_t **metadata_header,
+int libbde_eow_block_map_initialize(
+     libbde_eow_block_map_t **eow_block_map,
      libcerror_error_t **error );
 
-int libbde_metadata_header_free(
-     libbde_metadata_header_t **metadata_header,
+int libbde_eow_block_map_free(
+     libbde_eow_block_map_t **eow_block_map,
      libcerror_error_t **error );
 
-int libbde_metadata_header_read_data(
-     libbde_metadata_header_t *metadata_header,
+int libbde_eow_block_map_read_data(
+     libbde_eow_block_map_t *eow_block_map,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libbde_metadata_header_read_file_io_handle(
-     libbde_metadata_header_t *metadata_header,
+int libbde_eow_block_map_read_file_io_handle(
+     libbde_eow_block_map_t *eow_block_map,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     uint32_t block_map_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBBDE_METADATA_HEADER_H ) */
+#endif /* !defined( _LIBBDE_EOW_BLOCK_MAP_H ) */
 

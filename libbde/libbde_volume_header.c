@@ -34,12 +34,6 @@
 
 #include "bde_volume.h"
 
-const uint8_t bde_boot_entry_point_vista[ 3 ] = {
-	0xeb, 0x52, 0x90 };
-
-const uint8_t bde_boot_entry_point_windows7[ 3 ] = {
-	0xeb, 0x58, 0x90 };
-
 const uint8_t bde_identifier[ 16 ] = {
 	0x3b, 0xd6, 0x67, 0x49, 0x29, 0x2e, 0xd8, 0x4a, 0x83, 0x99, 0xf6, 0xa3, 0x39, 0xe3, 0xd0, 0x01 };
 
@@ -163,6 +157,7 @@ int libbde_volume_header_read_data(
 	static char *function                = "libbde_volume_header_read_data";
 	uint64_t safe_first_metadata_offset  = 0;
 	uint64_t safe_second_metadata_offset = 0;
+	uint64_t safe_offset                 = 0;
 	uint64_t safe_third_metadata_offset  = 0;
 	uint64_t total_number_of_sectors     = 0;
 	uint32_t cluster_block_size          = 0;
@@ -220,51 +215,32 @@ int libbde_volume_header_read_data(
 	}
 #endif
 	if( memory_compare(
-	     data,
-	     bde_boot_entry_point_vista,
-	     3 ) == 0 )
+	     ( (bde_volume_header_windows_7_t *) data )->identifier,
+	     bde_identifier,
+	     16 ) == 0 )
 	{
-		volume_header->version = LIBBDE_VERSION_WINDOWS_VISTA;
+		volume_header->version = LIBBDE_VERSION_WINDOWS_7;
 	}
 	else if( memory_compare(
-	          data,
-	          bde_boot_entry_point_windows7,
-	          3 ) == 0 )
+	          ( (bde_volume_header_windows_7_t *) data )->identifier,
+	          bde_identifier_used_disk_space_only,
+	          16 ) == 0 )
 	{
-		if( memory_compare(
-		     ( (bde_volume_header_windows_7_t *) data )->identifier,
-		     bde_identifier,
-		     16 ) == 0 )
-		{
-			volume_header->version = LIBBDE_VERSION_WINDOWS_7;
-		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		else if( memory_compare(
-		          ( (bde_volume_header_windows_7_t *) data )->identifier,
-		          bde_identifier_used_disk_space_only,
-		          16 ) == 0 )
-		{
-			volume_header->version = LIBBDE_VERSION_WINDOWS_7;
-		}
-#endif
-		else if( memory_compare(
-		          ( (bde_volume_header_to_go_t *) data )->identifier,
-		          bde_identifier,
-		          16 ) == 0 )
-		{
-			volume_header->version = LIBBDE_VERSION_TO_GO;
-		}
-		else
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported identifier.",
-			 function );
-
-			return( -1 );
-		}
+		volume_header->version = LIBBDE_VERSION_USED_DISK_SPACE_ONLY;
+	}
+	else if( memory_compare(
+	          ( (bde_volume_header_to_go_t *) data )->identifier,
+	          bde_identifier,
+	          16 ) == 0 )
+	{
+		volume_header->version = LIBBDE_VERSION_TO_GO;
+	}
+	else if( memory_compare(
+	          &( data[ 3 ] ),
+	          bde_signature,
+	          8 ) == 0 )
+	{
+		volume_header->version = LIBBDE_VERSION_WINDOWS_VISTA;
 	}
 	else
 	{
@@ -272,28 +248,10 @@ int libbde_volume_header_read_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported volume boot entry point.",
+		 "%s: unsupported format - no BDE identifier or volume signature found.",
 		 function );
 
 		return( -1 );
-	}
-	if( ( volume_header->version == LIBBDE_VERSION_WINDOWS_VISTA )
-	 || ( volume_header->version == LIBBDE_VERSION_WINDOWS_7 ) )
-	{
-		if( memory_compare(
-		     &( data[ 3 ] ),
-		     bde_signature,
-		     8 ) != 0 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: invalid volume signature.",
-			 function );
-
-			return( -1 );
-		}
 	}
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (bde_volume_header_windows_vista_t *) data )->bytes_per_sector,
@@ -327,7 +285,8 @@ int libbde_volume_header_read_data(
 		 */
 		total_number_of_sectors += 1;
 	}
-	else if( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
+	else if( ( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
+	      || ( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 	{
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_windows_7_t *) data )->first_metadata_offset,
@@ -354,6 +313,20 @@ int libbde_volume_header_read_data(
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (bde_volume_header_to_go_t *) data )->third_metadata_offset,
 		 safe_third_metadata_offset );
+	}
+	if( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY )
+	{
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_volume_header_used_space_only_t *) data )->first_eow_descriptor_offset,
+		 safe_offset );
+
+		volume_header->first_eow_descriptor_offset = (off64_t) safe_offset;
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (bde_volume_header_used_space_only_t *) data )->second_eow_descriptor_offset,
+		 safe_offset );
+
+		volume_header->second_eow_descriptor_offset = (off64_t) safe_offset;
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -522,7 +495,8 @@ int libbde_volume_header_read_data(
 			 0 );
 		}
 		else if( ( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
-		      || ( volume_header->version == LIBBDE_VERSION_TO_GO ) )
+		      || ( volume_header->version == LIBBDE_VERSION_TO_GO )
+		      || ( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 		{
 			libcnotify_printf(
 			 "%s: unknown4:\n",
@@ -639,7 +613,8 @@ int libbde_volume_header_read_data(
 			 ( (bde_volume_header_windows_7_t *) data )->file_system_signature[ 6 ],
 			 ( (bde_volume_header_windows_7_t *) data )->file_system_signature[ 7 ] );
 		}
-		if( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
+		if( ( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
+		 || ( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 		{
 			libcnotify_printf(
 			 "%s: bootcode\n",
@@ -698,7 +673,8 @@ int libbde_volume_header_read_data(
 			}
 		}
 		if( ( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
-		 || ( volume_header->version == LIBBDE_VERSION_TO_GO ) )
+		 || ( volume_header->version == LIBBDE_VERSION_TO_GO )
+		 || ( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 		{
 			libcnotify_printf(
 			 "%s: first metadata offset\t\t\t: 0x%08" PRIx64 "\n",
@@ -733,6 +709,26 @@ int libbde_volume_header_read_data(
 			libcnotify_print_data(
 			 ( (bde_volume_header_to_go_t *) data )->unknown5,
 			 46,
+			 0 );
+		}
+		else if( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY )
+		{
+			libcnotify_printf(
+			 "%s: first EOW descriptor offset\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 volume_header->first_eow_descriptor_offset );
+
+			libcnotify_printf(
+			 "%s: second EOW descriptor offset\t\t: 0x%08" PRIx64 "\n",
+			 function,
+			 volume_header->second_eow_descriptor_offset );
+
+			libcnotify_printf(
+			 "%s: unknown5:\n",
+			 function );
+			libcnotify_print_data(
+			 ( (bde_volume_header_used_space_only_t *) data )->unknown5,
+			 294,
 			 0 );
 		}
 		byte_stream_copy_to_uint16_little_endian(
@@ -807,7 +803,8 @@ int libbde_volume_header_read_data(
 		volume_header->metadata_size         = 16384;
 	}
 	else if( ( volume_header->version == LIBBDE_VERSION_WINDOWS_7 )
-	      || ( volume_header->version == LIBBDE_VERSION_TO_GO ) )
+	      || ( volume_header->version == LIBBDE_VERSION_TO_GO )
+	      || ( volume_header->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 	{
 		if( safe_first_metadata_offset > (uint64_t) INT64_MAX )
 		{

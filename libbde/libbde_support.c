@@ -329,7 +329,6 @@ int libbde_check_volume_signature_file_io_handle(
 	static char *function      = "libbde_check_volume_signature_file_io_handle";
 	ssize_t read_count         = 0;
 	int file_io_handle_is_open = 0;
-	int found_boot_entry_point = 0;
 	int result                 = 0;
 
 	if( file_io_handle == NULL )
@@ -410,54 +409,36 @@ int libbde_check_volume_signature_file_io_handle(
 		}
 	}
 	if( memory_compare(
-	     signature,
-	     bde_boot_entry_point_vista,
-	     3 ) == 0 )
+	     &( signature[ 160 ] ),
+	     bde_identifier,
+	     16 ) == 0 )
 	{
-		found_boot_entry_point = 1;
+		result = 1;
 	}
 	else if( memory_compare(
-	          signature,
-	          bde_boot_entry_point_windows7,
-	          3 ) == 0 )
+		  &( signature[ 160 ] ),
+		  bde_identifier_used_disk_space_only,
+		  16 ) == 0 )
 	{
-		if( memory_compare(
-		     &( signature[ 160 ] ),
-		     bde_identifier,
-		     16 ) == 0 )
-		{
-			found_boot_entry_point = 1;
-		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		else if( memory_compare(
-		          &( signature[ 160 ] ),
-		          bde_identifier_used_disk_space_only,
-		          16 ) == 0 )
-		{
-			found_boot_entry_point = 1;
-		}
-#endif
-		else if( memory_compare(
-		          &( signature[ 424 ] ),
-		          bde_identifier,
-		          16 ) == 0 )
-		{
-			result = 1;
-		}
+		result = 1;
 	}
-	if( found_boot_entry_point == 1 )
+	else if( memory_compare(
+		  &( signature[ 424 ] ),
+		  bde_identifier,
+		  16 ) == 0 )
 	{
-		if( memory_compare(
-		     bde_signature,
-		     &( signature[ 3 ] ),
-		     8 ) == 0 )
-		{
-			result = 1;
-		}
-		else
-		{
-			result = 0;
-		}
+		result = 1;
+	}
+	else if( memory_compare(
+	          bde_signature,
+	          &( signature[ 3 ] ),
+	          8 ) == 0 )
+	{
+		result = 1;
+	}
+	else
+	{
+		result = 0;
 	}
 	return( result );
 

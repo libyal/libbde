@@ -1060,7 +1060,7 @@ The Encrypt-on-Write descriptor (FVE-EOW) is variable of size and consists of:
 | 20 | 4 | | Relocation block size
 | 24 | 4 | | Encrypt-on-Write relocation log area size
 | 28 | 4 | | Encrypt-on-Write relocation log entry size
-| 32 | 4 | | Number of block map offsets
+| 32 | 4 | | Number of block map area offsets
 | 36 | 4 | | Checksum
 | 40 | 8 | | Encrypt-on-Write descriptor 1 offset
 | 48 | 8 | | Encrypt-on-Write descriptor 2 offset
@@ -1112,14 +1112,24 @@ stored as one more (physical) sectors, and consists of:
 | 0 | 10 | "FVE-EOWBR\x00" | Signature
 | 10 | 2 | 36 | Header size
 | 12 | 4 | | Physical sector size
-| 16 | 4 | | Unknown (bitmap size, in number of bits?)
+| 16 | 4 | | Number of bits, in the bitmap
 | 20 | 8 | | Sequence number
-| 28 | 4 | | Unknown
+| 28 | 4 | | Unknown (part of sequence number?)
 | 32 | 4 | | Checksum, of the (physical) sectors data with the checksum value set to 0
 4+|
 | 36 | ... | | Bitmap
 | ... | ... | | Unknown (empty values)
 |===
+
+The bitmap is stored on a per-byte basis with the LSB represents the first bit in the bitmap. Each
+bit represents a "reallocation block", where a set bit (1) indicates the block has been encrypted.
+
+[NOTE]
+The volume region size in the block map can be smaller than
+`number_of_bits * relocation_block_size`.
+
+Since a block map contains multiple records, the block (map) record with the largest sequence
+number is authoritative.
 
 === Encrypt-on-Write relocation log area
 
@@ -1162,10 +1172,9 @@ stored as a (logical) sector, and consists of:
 | --- | --- | --- | --- |
 | 0 | 2 | 32 | Unknown
 | 2 | 2 | 1 | Unknown
-| 4 | 2 | 1 | Unknown
-| 6 | 2 | 0 | Unknown
-| 8 | 4 | 0 | Unknown
-| 12 | 8 | | Volume region offset, region (or area) of the volume this relocation log entry represents, or 0 if the region is not represented by the relocation log
+| 4 | 4 | | Sequence number
+| 8 | 4 | 0 | Unknown (part of sequence number?)
+| 12 | 8 | | Encrypted sector data sector offset, used for the encryption as the block key
 | 20 | 4 | | (Used) encrypted sectors data size
 | 24 | 4 | | Checksum of the (used) encrypted sectors data
 | 28 | 4 | | Unknown (checksum of the unencrypted sector data?)

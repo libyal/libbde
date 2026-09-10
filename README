@@ -9,15 +9,15 @@ Project information:
 
 Supported BDE formats:
 
-* BitLocker Windows Vista
-* BitLocker Windows 7
-* BitLocker Windows 8
-* BitLocker Windows 10
+* BitLocker Windows Vista (version 1)
+* BitLocker Windows 7 and later (version 2)
 * BitLocker To Go
+* Bitlocker Used Disk Space Only encryption
 
 Supported encryption methods:
 
 * AES-CBC
+* AES-CBC with Elephant diffuser
 * AES-XTS
 
 Supported protection methods:
@@ -27,10 +27,6 @@ Supported protection methods:
 * recovery password
 * start-up key
 * FKEV and/or TWEAK key data
-
-Unsupported BDE formats:
-
-* Bitlocker Used Disk Space Only encryption
 
 Unsupported protection methods:
 

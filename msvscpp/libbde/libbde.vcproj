@@ -190,6 +190,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_eow_block_map.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_eow_block_record.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_eow_descriptor.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_error.c"
 				>
 			</File>
@@ -254,6 +266,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbde\libbde_sector_range.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbde\libbde_stretch_key.c"
 				>
 			</File>
@@ -279,6 +295,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\libbde\bde_eow.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\libbde\bde_metadata.h"
 				>
@@ -309,6 +329,18 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_encryption_context.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_eow_block_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_eow_block_record.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_eow_descriptor.h"
 				>
 			</File>
 			<File
@@ -429,6 +461,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbde\libbde_sector_data_vector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbde\libbde_sector_range.h"
 				>
 			</File>
 			<File

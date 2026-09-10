@@ -204,6 +204,7 @@ int libbde_sector_data_read_file_io_handle(
 	static char *function   = "libbde_sector_data_read_file_io_handle";
 	ssize_t read_count      = 0;
 	uint64_t block_key      = 0;
+	int result              = 0;
 
 	if( sector_data == NULL )
 	{
@@ -273,6 +274,7 @@ int libbde_sector_data_read_file_io_handle(
 	if( zero_metadata != 0 )
 	{
 		/* The BitLocker metadata areas are represented as zero byte blocks
+		 * TODO refactor to use io_handle->metadata_range_list
 		 */
 		if( ( ( sector_data_offset >= io_handle->first_metadata_offset )
 		  &&  ( sector_data_offset < ( io_handle->first_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
@@ -280,6 +282,30 @@ int libbde_sector_data_read_file_io_handle(
 		  &&  ( sector_data_offset < ( io_handle->second_metadata_offset + (off64_t) io_handle->metadata_size ) ) )
 		 || ( ( sector_data_offset >= io_handle->third_metadata_offset )
 		  &&  ( sector_data_offset < ( io_handle->third_metadata_offset + (off64_t) io_handle->metadata_size ) ) ) )
+		{
+			result = 1;
+		}
+		else if( io_handle->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY )
+		{
+			result = libcdata_range_list_range_is_present(
+				  io_handle->metadata_range_list,
+				  (uint64_t) sector_data_offset,
+				  (uint64_t) sector_data->data_size,
+				  error );
+
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine if sector is in metadata range list.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		if( result != 0 )
 		{
 			if( memory_set(
 			     sector_data->data,
@@ -299,7 +325,8 @@ int libbde_sector_data_read_file_io_handle(
 		}
 	}
 	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
-	 || ( io_handle->version == LIBBDE_VERSION_TO_GO ) )
+	 || ( io_handle->version == LIBBDE_VERSION_TO_GO )
+	 || ( io_handle->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 	{
 		if( zero_metadata != 0 )
 		{
@@ -357,16 +384,41 @@ int libbde_sector_data_read_file_io_handle(
 	if( ( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	 && ( (size64_t) sector_data_offset < 8192 ) )
 	{
-		read_buffer = sector_data->data;
+		result = 1;
 	}
 	else if( encryption_context->method == LIBBDE_ENCRYPTION_METHOD_NONE )
 	{
-		read_buffer = sector_data->data;
+		result = 1;
 	}
 	/* Check if the offset is outside the encrypted part of the volume
+	 * TODO refactor to use io_handle->unencrypted_range_list
 	 */
 	else if( ( io_handle->encrypted_volume_size != 0 )
 	      && ( sector_data_offset >= (off64_t) io_handle->encrypted_volume_size ) )
+	{
+		result = 1;
+	}
+	else
+	{
+		result = libcdata_range_list_range_is_present(
+			  io_handle->unencrypted_range_list,
+			  (uint64_t) sector_data_offset,
+			  (uint64_t) sector_data->data_size,
+			  error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine if sector is in unencrypted range list.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( result != 0 )
 	{
 		read_buffer = sector_data->data;
 	}

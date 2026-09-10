@@ -28,6 +28,9 @@
 #include "libbde_debug.h"
 #include "libbde_definitions.h"
 #include "libbde_encryption_context.h"
+#include "libbde_eow_block_map.h"
+#include "libbde_eow_block_record.h"
+#include "libbde_eow_descriptor.h"
 #include "libbde_io_handle.h"
 #include "libbde_libbfio.h"
 #include "libbde_libcerror.h"
@@ -40,6 +43,7 @@
 #include "libbde_recovery.h"
 #include "libbde_sector_data.h"
 #include "libbde_sector_data_vector.h"
+#include "libbde_sector_range.h"
 #include "libbde_volume.h"
 #include "libbde_volume_header.h"
 
@@ -1498,6 +1502,24 @@ int libbde_internal_volume_open_read(
 
 		goto on_error;
 	}
+	if( ( internal_volume->io_handle->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY )
+	 && ( internal_volume->volume_header->first_eow_descriptor_offset > 0 ) )
+	{
+		if( libbde_internal_volume_open_read_encrypt_on_write_data(
+		     internal_volume,
+		     file_io_handle,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read Encrypt-on-Write data.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	internal_volume->io_handle->encrypted_volume_size           = internal_volume->primary_metadata->encrypted_volume_size;
 	internal_volume->io_handle->mft_mirror_cluster_block_number = internal_volume->primary_metadata->mft_mirror_cluster_block_number;
 	internal_volume->io_handle->volume_header_offset            = internal_volume->primary_metadata->volume_header_offset;
@@ -1581,6 +1603,483 @@ on_error:
 	{
 		libbde_volume_header_free(
 		 &( internal_volume->volume_header ),
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Reads the Encrypt-on-Write data
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libbde_internal_volume_open_read_encrypt_on_write_data(
+     libbde_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error )
+{
+	libbde_eow_block_map_t *eow_block_map              = NULL;
+	libbde_eow_block_record_t *first_eow_block_record  = NULL;
+	libbde_eow_block_record_t *last_eow_block_record   = NULL;
+	libbde_eow_block_record_t *second_eow_block_record = NULL;
+	libbde_eow_descriptor_t *eow_descriptor            = NULL;
+	libbde_sector_range_t *sector_range                = NULL;
+	static char *function                              = "libbde_internal_volume_open_read_encrypt_on_write_data";
+	off64_t block_map_area_offset                      = 0;
+	off64_t unencrypted_range_offset                   = 0;
+	size64_t unencrypted_range_size                    = 0;
+	uint32_t block_map_area_size                       = 0;
+	uint32_t offset_index                              = 0;
+	uint32_t relocation_log_area_size                  = 0;
+	int bitmap_range_index                             = 0;
+	int number_of_bitmap_ranges                        = 0;
+
+	if( internal_volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->volume_header == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing volume header.",
+		 function );
+
+		return( -1 );
+	}
+	if( libbde_eow_descriptor_initialize(
+	     &eow_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create Encrypt-on-Write descriptor.",
+		 function );
+
+		goto on_error;
+	}
+	if( libbde_eow_descriptor_read_file_io_handle(
+	     eow_descriptor,
+	     file_io_handle,
+	     internal_volume->volume_header->first_eow_descriptor_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read Encrypt-on-Write descriptor at offset: %" PRIu64 " (0x%08" PRIx64 ").",
+		 function,
+		 internal_volume->volume_header->first_eow_descriptor_offset,
+		 internal_volume->volume_header->first_eow_descriptor_offset );
+
+		goto on_error;
+	}
+	if( libcdata_range_list_insert_range(
+	     internal_volume->io_handle->metadata_range_list,
+	     (uint64_t) internal_volume->volume_header->first_eow_descriptor_offset,
+	     (uint64_t) 4096,
+	     NULL,
+	     NULL,
+	     NULL,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+		 "%s: unable to insert first EOW descriptor range into metadata range list.",
+		 function );
+
+		goto on_error;
+	}
+	if( internal_volume->volume_header->second_eow_descriptor_offset > 0 )
+	{
+		if( libcdata_range_list_insert_range(
+		     internal_volume->io_handle->metadata_range_list,
+		     (uint64_t) internal_volume->volume_header->second_eow_descriptor_offset,
+		     (uint64_t) 4096,
+		     NULL,
+		     NULL,
+		     NULL,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to insert second EOW descriptor range into metadata range list.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	for( offset_index = 0;
+	     offset_index < eow_descriptor->number_of_offsets;
+	     offset_index++ )
+	{
+		block_map_area_offset = eow_descriptor->offsets[ offset_index ];
+
+		if( libbde_eow_block_map_initialize(
+		     &eow_block_map,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create Encrypt-on-Write block map: %" PRIu32 ".",
+			 function,
+			 offset_index );
+
+			goto on_error;
+		}
+		if( libbde_eow_block_map_read_file_io_handle(
+		     eow_block_map,
+		     file_io_handle,
+		     block_map_area_offset,
+		     eow_descriptor->physical_sector_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read Encrypt-on-Write block map: %" PRIu32 " at offset: %" PRIu64 " (0x%08" PRIx64 ").",
+			 function,
+			 offset_index,
+			 block_map_area_offset,
+			 block_map_area_offset );
+
+			goto on_error;
+		}
+		block_map_area_size = eow_block_map->block_map_size / 4096;
+
+		if( ( eow_block_map->block_map_size % 4096 ) != 0 )
+		{
+			block_map_area_size += 1;
+		}
+		block_map_area_size *= 4096;
+
+		if( libcdata_range_list_insert_range(
+		     internal_volume->io_handle->metadata_range_list,
+		     (uint64_t) block_map_area_offset,
+		     (uint64_t) block_map_area_size,
+		     NULL,
+		     NULL,
+		     NULL,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to insert EOW block map area: %" PRIu32 " range into metadata range list.",
+			 function,
+			 offset_index );
+
+			goto on_error;
+		}
+		if( eow_block_map->relocation_log_area_offset > 0 )
+		{
+			relocation_log_area_size = eow_descriptor->relocation_log_area_size / 4096;
+
+			if( ( eow_descriptor->relocation_log_area_size % 4096 ) != 0 )
+			{
+				relocation_log_area_size += 1;
+			}
+			relocation_log_area_size *= 4096;
+
+			if( libcdata_range_list_insert_range(
+			     internal_volume->io_handle->metadata_range_list,
+			     (uint64_t) eow_block_map->relocation_log_area_offset,
+			     (uint64_t) relocation_log_area_size,
+			     NULL,
+			     NULL,
+			     NULL,
+			     error ) == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+				 "%s: unable to insert EOW relocation log area: %" PRIu32 " range into metadata range list.",
+				 function,
+				 offset_index );
+
+				goto on_error;
+			}
+		}
+		block_map_area_offset += eow_descriptor->physical_sector_size;
+
+		if( libbde_eow_block_record_initialize(
+		     &first_eow_block_record,
+		     eow_descriptor->relocation_block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create first Encrypt-on-Write block record.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_eow_block_record_initialize(
+		     &second_eow_block_record,
+		     eow_descriptor->relocation_block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create second Encrypt-on-Write block record.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_eow_block_record_read_file_io_handle(
+		     first_eow_block_record,
+		     file_io_handle,
+		     block_map_area_offset,
+		     eow_block_map->block_record_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read first Encrypt-on-Write block record at offset: %" PRIu64 " (0x%08" PRIx64 ").",
+			 function,
+			 block_map_area_offset,
+			 block_map_area_offset );
+
+			goto on_error;
+		}
+		block_map_area_offset += eow_block_map->block_record_size;
+
+		if( libbde_eow_block_record_read_file_io_handle(
+		     second_eow_block_record,
+		     file_io_handle,
+		     block_map_area_offset,
+		     eow_block_map->block_record_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read second Encrypt-on-Write block record at offset: %" PRIu64 " (0x%08" PRIx64 ").",
+			 function,
+			 block_map_area_offset,
+			 block_map_area_offset );
+
+			goto on_error;
+		}
+		if( first_eow_block_record->sequence_number > second_eow_block_record->sequence_number )
+		{
+			last_eow_block_record = first_eow_block_record;
+		}
+		else if( first_eow_block_record->sequence_number < second_eow_block_record->sequence_number )
+		{
+			last_eow_block_record = second_eow_block_record;
+		}
+		else
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine most recent Encrypt-on-Write (EOW) block record.",
+			 function );
+
+			goto on_error;
+		}
+		if( libcdata_array_get_number_of_entries(
+		     last_eow_block_record->ranges_array,
+		     &number_of_bitmap_ranges,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of ranges.",
+			 function );
+
+			goto on_error;
+		}
+		for( bitmap_range_index = 0;
+		     bitmap_range_index < number_of_bitmap_ranges;
+		     bitmap_range_index++ )
+		{
+			if( libcdata_array_get_entry_by_index(
+			     last_eow_block_record->ranges_array,
+			     bitmap_range_index,
+			     (intptr_t **) &sector_range,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve bitmap range: %d.",
+				 function,
+				 bitmap_range_index );
+
+				return( -1 );
+			}
+			if( sector_range == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing bitmap range: %d.",
+				 function,
+				 bitmap_range_index );
+
+				return( -1 );
+			}
+			if( (uint64_t) sector_range->start_offset >= eow_block_map->volume_region_size )
+			{
+				break;
+			}
+			/* Note that the bitmap ranges are relative to eow_block_map->volume_region_offset
+			 */
+			if( sector_range->value == 0 )
+			{
+				unencrypted_range_offset = eow_block_map->volume_region_offset + sector_range->start_offset;
+
+				if( (uint64_t) sector_range->end_offset > eow_block_map->volume_region_size )
+				{
+					unencrypted_range_size = eow_block_map->volume_region_size - sector_range->start_offset;
+				}
+				else
+				{
+					unencrypted_range_size = sector_range->end_offset - sector_range->start_offset;
+				}
+				if( libcdata_range_list_insert_range(
+				     internal_volume->io_handle->unencrypted_range_list,
+				     (uint64_t) unencrypted_range_offset,
+				     (uint64_t) unencrypted_range_size,
+				     NULL,
+				     NULL,
+				     NULL,
+				     error ) == -1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+					 "%s: unable to insert range into unencrypted range list.",
+					 function );
+
+					goto on_error;
+				}
+			}
+		}
+		if( libbde_eow_block_record_free(
+		     &second_eow_block_record,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free second Encrypt-on-Write block record.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_eow_block_record_free(
+		     &first_eow_block_record,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free first Encrypt-on-Write block record.",
+			 function );
+
+			goto on_error;
+		}
+		if( libbde_eow_block_map_free(
+		     &eow_block_map,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free Encrypt-on-Write block map: %" PRIu32 ".",
+			 function,
+			 offset_index );
+
+			goto on_error;
+		}
+	}
+	if( libbde_eow_descriptor_free(
+	     &eow_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free Encrypt-on-Write descriptor.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( second_eow_block_record != NULL )
+	{
+		libbde_eow_block_record_free(
+		 &second_eow_block_record,
+		 NULL );
+	}
+	if( first_eow_block_record != NULL )
+	{
+		libbde_eow_block_record_free(
+		 &first_eow_block_record,
+		 NULL );
+	}
+	if( eow_block_map != NULL )
+	{
+		libbde_eow_block_map_free(
+		 &eow_block_map,
+		 NULL );
+	}
+	if( eow_descriptor != NULL )
+	{
+		libbde_eow_descriptor_free(
+		 &eow_descriptor,
 		 NULL );
 	}
 	return( -1 );
@@ -2029,7 +2528,8 @@ int libbde_internal_volume_unlock(
 		}
 #endif
 		if( ( internal_volume->io_handle->version == LIBBDE_VERSION_WINDOWS_7 )
-		 || ( internal_volume->io_handle->version == LIBBDE_VERSION_TO_GO ) )
+		 || ( internal_volume->io_handle->version == LIBBDE_VERSION_TO_GO )
+		 || ( internal_volume->io_handle->version == LIBBDE_VERSION_USED_DISK_SPACE_ONLY ) )
 		{
 			volume_header_offset = internal_volume->io_handle->volume_header_offset;
 		}

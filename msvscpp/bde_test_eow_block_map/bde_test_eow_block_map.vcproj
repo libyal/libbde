@@ -2,9 +2,10 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="pybde"
-	ProjectGUID="{E221DB4C-B254-47CB-993D-DC7FED580DA1}"
-	RootNamespace="pybde"
+	Name="bde_test_eow_block_map"
+	ProjectGUID="{A64EFCF8-C109-4A68-B957-EEEFFD56C4F0}"
+	RootNamespace="bde_test_eow_block_map"
+	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,8 +20,9 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -39,8 +41,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfguid;C:\Python310\include"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_PYCONFIG_H;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFGUID;LIBBDE_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdatetime;..\..\libfguid;..\..\libfvalue;..\..\libhmac;..\..\libcaes"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBFVALUE;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;LIBBDE_DLL_IMPORT"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -56,12 +58,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).pyd"
-				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;;C:\Python310\libs"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="2"
 				DataExecutionPrevention="2"
 				TargetMachine="1"
-				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -89,7 +93,7 @@
 			Name="VSDebug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			>
 			<Tool
@@ -110,8 +114,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfguid;C:\Python310\include"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_PYCONFIG_H;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFGUID;LIBBDE_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdatetime;..\..\libfguid;..\..\libfvalue;..\..\libhmac;..\..\libcaes"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBFVALUE;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;LIBBDE_DLL_IMPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -130,13 +134,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName).pyd"
-				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;;C:\Python310\libs"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
 				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="1"
 				TargetMachine="1"
-				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -170,47 +176,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\pybde\pybde.c"
+				RelativePath="..\..\tests\bde_test_eow_block_map.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_datetime.c"
+				RelativePath="..\..\tests\bde_test_functions.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_encryption_methods.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_error.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_file_object_io_handle.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_guid.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_integer.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_key_protection_types.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_key_protector.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_key_protectors.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_volume.c"
+				RelativePath="..\..\tests\bde_test_memory.c"
 				>
 			</File>
 		</Filter>
@@ -220,75 +194,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\pybde\pybde.h"
+				RelativePath="..\..\tests\bde_test_functions.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_datetime.h"
+				RelativePath="..\..\tests\bde_test_libbde.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_encryption_methods.h"
+				RelativePath="..\..\tests\bde_test_libbfio.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_error.h"
+				RelativePath="..\..\tests\bde_test_libcerror.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_file_object_io_handle.h"
+				RelativePath="..\..\tests\bde_test_macros.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_guid.h"
+				RelativePath="..\..\tests\bde_test_memory.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\pybde\pybde_integer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_key_protection_types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_key_protector.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_key_protectors.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libbde.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libbfio.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libcerror.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libclocale.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_libfguid.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_python.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_unused.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\pybde\pybde_volume.h"
+				RelativePath="..\..\tests\bde_test_unused.h"
 				>
 			</File>
 		</Filter>

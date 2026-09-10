@@ -2,6 +2,9 @@ MSVSCPP_FILES = \
 	bde_test_aes_ccm_encrypted_key/bde_test_aes_ccm_encrypted_key.vcproj \
 	bde_test_diffuser/bde_test_diffuser.vcproj \
 	bde_test_encryption_context/bde_test_encryption_context.vcproj \
+	bde_test_eow_block_map/bde_test_eow_block_map.vcproj \
+	bde_test_eow_block_record/bde_test_eow_block_record.vcproj \
+	bde_test_eow_descriptor/bde_test_eow_descriptor.vcproj \
 	bde_test_error/bde_test_error.vcproj \
 	bde_test_external_key/bde_test_external_key.vcproj \
 	bde_test_io_handle/bde_test_io_handle.vcproj \
@@ -17,6 +20,7 @@ MSVSCPP_FILES = \
 	bde_test_recovery/bde_test_recovery.vcproj \
 	bde_test_sector_data/bde_test_sector_data.vcproj \
 	bde_test_sector_data_vector/bde_test_sector_data_vector.vcproj \
+	bde_test_sector_range/bde_test_sector_range.vcproj \
 	bde_test_stretch_key/bde_test_stretch_key.vcproj \
 	bde_test_support/bde_test_support.vcproj \
 	bde_test_tools_info_handle/bde_test_tools_info_handle.vcproj \

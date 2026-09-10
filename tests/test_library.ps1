@@ -1,6 +1,6 @@
 # Tests library functions and types.
 
-$LibraryTests = "aes_ccm_encrypted_key diffuser encryption_context error external_key io_handle key key_protector metadata metadata_block_header metadata_entry metadata_header notify password password_keep recovery sector_data sector_data_vector stretch_key volume_header volume_master_key"
+$LibraryTests = "aes_ccm_encrypted_key diffuser encryption_context error eow_block_map eow_block_record eow_descriptor external_key io_handle key key_protector metadata metadata_block_header metadata_entry metadata_header notify password password_keep recovery sector_data sector_data_vector sector_range stretch_key volume_header volume_master_key"
 $LibraryTestsWithInput = "support volume"
 $OptionSets = "keys password recovery_password startup_key" -split " "
 

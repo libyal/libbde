@@ -96,6 +96,32 @@ int libbde_io_handle_initialize(
 
 		goto on_error;
 	}
+	if( libcdata_range_list_initialize(
+	     &( ( *io_handle )->metadata_range_list ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create metadata range list.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcdata_range_list_initialize(
+	     &( ( *io_handle )->unencrypted_range_list ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create unencrypted range list.",
+		 function );
+
+		goto on_error;
+	}
 	( *io_handle )->bytes_per_sector = 512;
 
 	return( 1 );
@@ -103,6 +129,13 @@ int libbde_io_handle_initialize(
 on_error:
 	if( *io_handle != NULL )
 	{
+		if( ( *io_handle )->metadata_range_list != NULL )
+		{
+			libcdata_range_list_free(
+			 &( ( *io_handle )->metadata_range_list ),
+			 NULL,
+			 NULL );
+		}
 		memory_free(
 		 *io_handle );
 
@@ -147,6 +180,34 @@ int libbde_io_handle_free(
 
 			result = -1;
 		}
+		if( libcdata_range_list_free(
+		     &( ( *io_handle )->metadata_range_list ),
+		     NULL,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free metadata range list.",
+			 function );
+
+			result = -1;
+		}
+		if( libcdata_range_list_free(
+		     &( ( *io_handle )->unencrypted_range_list ),
+		     NULL,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free unencrypted range list.",
+			 function );
+
+			result = -1;
+		}
 		memory_free(
 		 *io_handle );
 
@@ -163,6 +224,7 @@ int libbde_io_handle_clear(
      libcerror_error_t **error )
 {
 	static char *function = "libbde_io_handle_clear";
+	int result            = 1;
 
 	if( io_handle == NULL )
 	{
@@ -175,9 +237,37 @@ int libbde_io_handle_clear(
 
 		return( -1 );
 	}
+	if( libcdata_range_list_empty(
+	     io_handle->metadata_range_list,
+	     NULL,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to empty metadata range list.",
+		 function );
+
+		result = -1;
+	}
+	if( libcdata_range_list_empty(
+	     io_handle->unencrypted_range_list,
+	     NULL,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to empty unencrypted range list.",
+		 function );
+
+		result = -1;
+	}
 	io_handle->bytes_per_sector = 512;
 
-	return( 1 );
+	return( result );
 }
 
 /* Reads the unencrypted volume header

@@ -141,6 +141,9 @@ stamp-h[1-9]
 /tests/bde_test_diffuser
 /tests/bde_test_encryption_context
 /tests/bde_test_error
+/tests/bde_test_eow_block_map
+/tests/bde_test_eow_block_record
+/tests/bde_test_eow_descriptor
 /tests/bde_test_external_key
 /tests/bde_test_io_handle
 /tests/bde_test_key
@@ -155,6 +158,7 @@ stamp-h[1-9]
 /tests/bde_test_recovery
 /tests/bde_test_sector_data
 /tests/bde_test_sector_data_vector
+/tests/bde_test_sector_range
 /tests/bde_test_stretch_key
 /tests/bde_test_support
 /tests/bde_test_tools_info_handle

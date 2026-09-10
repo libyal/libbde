@@ -41,6 +41,9 @@ check_PROGRAMS = \
 	bde_test_aes_ccm_encrypted_key \
 	bde_test_diffuser \
 	bde_test_encryption_context \
+	bde_test_eow_block_map \
+	bde_test_eow_block_record \
+	bde_test_eow_descriptor \
 	bde_test_error \
 	bde_test_external_key \
 	bde_test_io_handle \
@@ -56,6 +59,7 @@ check_PROGRAMS = \
 	bde_test_recovery \
 	bde_test_sector_data \
 	bde_test_sector_data_vector \
+	bde_test_sector_range \
 	bde_test_stretch_key \
 	bde_test_support \
 	bde_test_tools_info_handle \
@@ -97,6 +101,72 @@ bde_test_encryption_context_SOURCES = \
 	bde_test_unused.h
 
 bde_test_encryption_context_LDADD = \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_eow_block_map_SOURCES = \
+	bde_test_eow_block_map.c \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_eow_block_map_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_eow_block_record_SOURCES = \
+	bde_test_eow_block_record.c \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_eow_block_record_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_eow_descriptor_SOURCES = \
+	bde_test_eow_descriptor.c \
+	bde_test_functions.c bde_test_functions.h \
+	bde_test_libbde.h \
+	bde_test_libbfio.h \
+	bde_test_libcerror.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_unused.h
+
+bde_test_eow_descriptor_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 
@@ -311,6 +381,18 @@ bde_test_sector_data_vector_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libbde/libbde.la \
+	@LIBCERROR_LIBADD@
+
+bde_test_sector_range_SOURCES = \
+	bde_test_libcerror.h \
+	bde_test_libbde.h \
+	bde_test_macros.h \
+	bde_test_memory.c bde_test_memory.h \
+	bde_test_sector_range.c \
+	bde_test_unused.h
+
+bde_test_sector_range_LDADD = \
 	../libbde/libbde.la \
 	@LIBCERROR_LIBADD@
 

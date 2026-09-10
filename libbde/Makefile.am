@@ -23,6 +23,9 @@ AM_CPPFLAGS = \
 lib_LTLIBRARIES = libbde.la
 
 libbde_la_SOURCES = \
+	bde_eow.h \
+	bde_metadata.h \
+	bde_volume.h \
 	libbde.c \
 	libbde_aes_ccm_encrypted_key.c libbde_aes_ccm_encrypted_key.h \
 	libbde_codepage.h \
@@ -30,6 +33,9 @@ libbde_la_SOURCES = \
 	libbde_definitions.h \
 	libbde_diffuser.c libbde_diffuser.h \
 	libbde_encryption_context.c libbde_encryption_context.h \
+	libbde_eow_block_map.c libbde_eow_block_map.h \
+	libbde_eow_block_record.c libbde_eow_block_record.h \
+	libbde_eow_descriptor.c libbde_eow_descriptor.h \
 	libbde_error.c libbde_error.h \
 	libbde_extern.h \
 	libbde_external_key.c libbde_external_key.h \
@@ -60,15 +66,14 @@ libbde_la_SOURCES = \
 	libbde_recovery.c libbde_recovery.h \
 	libbde_sector_data.c libbde_sector_data.h \
 	libbde_sector_data_vector.c libbde_sector_data_vector.h \
+	libbde_sector_range.c libbde_sector_range.h \
 	libbde_stretch_key.c libbde_stretch_key.h \
 	libbde_support.c libbde_support.h \
 	libbde_types.h \
 	libbde_unused.h \
 	libbde_volume.c libbde_volume.h \
 	libbde_volume_header.c libbde_volume_header.h \
-	libbde_volume_master_key.c libbde_volume_master_key.h \
-	bde_metadata.h \
-	bde_volume.h
+	libbde_volume_master_key.c libbde_volume_master_key.h
 
 libbde_la_LIBADD = \
 	@LIBCERROR_LIBADD@ \

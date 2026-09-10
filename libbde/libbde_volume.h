@@ -182,6 +182,11 @@ int libbde_internal_volume_open_read(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
+int libbde_internal_volume_open_read_encrypt_on_write_data(
+     libbde_internal_volume_t *internal_volume,
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
+
 int libbde_internal_volume_open_read_keys(
      libbde_internal_volume_t *internal_volume,
      libcerror_error_t **error );

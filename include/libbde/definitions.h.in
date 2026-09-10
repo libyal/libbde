@@ -56,7 +56,8 @@ enum LIBBDE_VERSIONS
 {
 	LIBBDE_VERSION_WINDOWS_VISTA			= 6,
 	LIBBDE_VERSION_WINDOWS_7			= 7,
-	LIBBDE_VERSION_TO_GO				= (int) 'T'
+	LIBBDE_VERSION_TO_GO				= (int) 'T',
+	LIBBDE_VERSION_USED_DISK_SPACE_ONLY		= (int) 'U'
 };
 
 /* The encryption methods

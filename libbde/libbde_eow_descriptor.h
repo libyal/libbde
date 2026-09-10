@@ -1,5 +1,5 @@
 /*
- * Metadata header functions
+ * Encrypt-on-Write (EOW) descriptor functions
  *
  * Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_METADATA_HEADER_H )
-#define _LIBBDE_METADATA_HEADER_H
+#if !defined( _LIBBDE_EOW_DESCRIPTOR_H )
+#define _LIBBDE_EOW_DESCRIPTOR_H
 
 #include <common.h>
 #include <types.h>
@@ -32,44 +32,47 @@
 extern "C" {
 #endif
 
-typedef struct libbde_metadata_header libbde_metadata_header_t;
+typedef struct libbde_eow_descriptor libbde_eow_descriptor_t;
 
-struct libbde_metadata_header
+struct libbde_eow_descriptor
 {
-	/* The metadata size
+	/* The physical sector size
 	 */
-	uint32_t metadata_size;
+	uint32_t physical_sector_size;
 
-	/* The volume identifier
-	 * Contains a GUID
+	/* The relocation block size
 	 */
-	uint8_t volume_identifier[ 16 ];
+	uint32_t relocation_block_size;
 
-	/* The encryption method
+	/* The relocation log area size
 	 */
-	uint16_t encryption_method;
+	uint32_t relocation_log_area_size;
 
-	/* The creation date and time
+	/* The number of offsets
 	 */
-	uint64_t creation_time;
+	uint32_t number_of_offsets;
+
+	/* The block map area offsets
+	 */
+	off64_t offsets[ 64 ];
 };
 
-int libbde_metadata_header_initialize(
-     libbde_metadata_header_t **metadata_header,
+int libbde_eow_descriptor_initialize(
+     libbde_eow_descriptor_t **eow_descriptor,
      libcerror_error_t **error );
 
-int libbde_metadata_header_free(
-     libbde_metadata_header_t **metadata_header,
+int libbde_eow_descriptor_free(
+     libbde_eow_descriptor_t **eow_descriptor,
      libcerror_error_t **error );
 
-int libbde_metadata_header_read_data(
-     libbde_metadata_header_t *metadata_header,
+int libbde_eow_descriptor_read_data(
+     libbde_eow_descriptor_t *eow_descriptor,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libbde_metadata_header_read_file_io_handle(
-     libbde_metadata_header_t *metadata_header,
+int libbde_eow_descriptor_read_file_io_handle(
+     libbde_eow_descriptor_t *eow_descriptor,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error );
@@ -78,5 +81,5 @@ int libbde_metadata_header_read_file_io_handle(
 }
 #endif
 
-#endif /* !defined( _LIBBDE_METADATA_HEADER_H ) */
+#endif /* !defined( _LIBBDE_EOW_DESCRIPTOR_H ) */
 

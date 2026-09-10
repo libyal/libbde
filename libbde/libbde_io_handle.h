@@ -27,6 +27,7 @@
 
 #include "libbde_encryption_context.h"
 #include "libbde_libbfio.h"
+#include "libbde_libcdata.h"
 #include "libbde_libcerror.h"
 
 #if defined( __cplusplus )
@@ -91,6 +92,14 @@ struct libbde_io_handle
 	 * Used by Windows 7 (version 2)
 	 */
 	size64_t volume_header_size;
+
+	/* The metadata range list
+	 */
+	libcdata_range_list_t *metadata_range_list;
+
+	/* The unencrypted range list
+	 */
+	libcdata_range_list_t *unencrypted_range_list;
 
 	/* Value to indicate if abort was signalled
 	 */

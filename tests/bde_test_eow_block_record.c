@@ -1,5 +1,5 @@
 /*
- * Library metadata_block_header type test program
+ * Library eow_block_record type test program
  *
  * Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -36,36 +36,70 @@
 #include "bde_test_memory.h"
 #include "bde_test_unused.h"
 
-#include "../libbde/libbde_metadata_block_header.h"
+#include "../libbde/libbde_eow_block_record.h"
 
-uint8_t bde_test_metadata_block_header_data1[ 64 ] = {
-	0x2d, 0x46, 0x56, 0x45, 0x2d, 0x46, 0x53, 0x2d, 0x2f, 0x00, 0x02, 0x00, 0x04, 0x00, 0x04, 0x00,
-	0x00, 0x00, 0xa0, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x28, 0x00, 0x00,
-	0x00, 0x00, 0x50, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0xd5, 0x06, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0xa8, 0x5a, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa0, 0x2b, 0x0d, 0x00, 0x00, 0x00, 0x00 };
+uint8_t bde_test_eow_block_record_data1[ 512 ] = {
+	0x46, 0x56, 0x45, 0x2d, 0x45, 0x4f, 0x57, 0x42, 0x52, 0x00, 0x24, 0x00, 0x00, 0x02,
+	0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x01, 0x00, 0x00, 0x00, 0x8b, 0x52, 0x85, 0x70, 0xff, 0x01, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
-/* Tests the libbde_metadata_block_header_initialize function
+/* Tests the libbde_eow_block_record_initialize function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_metadata_block_header_initialize(
+int bde_test_eow_block_record_initialize(
      void )
 {
-	libbde_metadata_block_header_t *metadata_block_header = NULL;
-	libcerror_error_t *error                              = NULL;
-	int result                                            = 0;
+	libbde_eow_block_record_t *eow_block_record = NULL;
+	libcerror_error_t *error                    = NULL;
+	int result                                  = 0;
 
 #if defined( HAVE_BDE_TEST_MEMORY )
-	int number_of_malloc_fail_tests                       = 1;
-	int number_of_memset_fail_tests                       = 1;
-	int test_number                                       = 0;
+	int number_of_malloc_fail_tests             = 1;
+	int number_of_memset_fail_tests             = 1;
+	int test_number                             = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libbde_metadata_block_header_initialize(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_initialize(
+	          &eow_block_record,
+		  512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -74,15 +108,15 @@ int bde_test_metadata_block_header_initialize(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NOT_NULL(
-	 "metadata_block_header",
-	 metadata_block_header );
+	 "eow_block_record",
+	 eow_block_record );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libbde_metadata_block_header_free(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_free(
+	          &eow_block_record,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -91,8 +125,8 @@ int bde_test_metadata_block_header_initialize(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
-	 "metadata_block_header",
-	 metadata_block_header );
+	 "eow_block_record",
+	 eow_block_record );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -100,8 +134,9 @@ int bde_test_metadata_block_header_initialize(
 
 	/* Test error cases
 	 */
-	result = libbde_metadata_block_header_initialize(
+	result = libbde_eow_block_record_initialize(
 	          NULL,
+		  512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -116,13 +151,14 @@ int bde_test_metadata_block_header_initialize(
 	libcerror_error_free(
 	 &error );
 
-	metadata_block_header = (libbde_metadata_block_header_t *) 0x12345678UL;
+	eow_block_record = (libbde_eow_block_record_t *) 0x12345678UL;
 
-	result = libbde_metadata_block_header_initialize(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_initialize(
+	          &eow_block_record,
+		  512,
 	          &error );
 
-	metadata_block_header = NULL;
+	eow_block_record = NULL;
 
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -142,22 +178,23 @@ int bde_test_metadata_block_header_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libbde_metadata_block_header_initialize with malloc failing
+		/* Test libbde_eow_block_record_initialize with malloc failing
 		 */
 		bde_test_malloc_attempts_before_fail = test_number;
 
-		result = libbde_metadata_block_header_initialize(
-		          &metadata_block_header,
+		result = libbde_eow_block_record_initialize(
+		          &eow_block_record,
+		          512,
 		          &error );
 
 		if( bde_test_malloc_attempts_before_fail != -1 )
 		{
 			bde_test_malloc_attempts_before_fail = -1;
 
-			if( metadata_block_header != NULL )
+			if( eow_block_record != NULL )
 			{
-				libbde_metadata_block_header_free(
-				 &metadata_block_header,
+				libbde_eow_block_record_free(
+				 &eow_block_record,
 				 NULL );
 			}
 		}
@@ -169,8 +206,8 @@ int bde_test_metadata_block_header_initialize(
 			 -1 );
 
 			BDE_TEST_ASSERT_IS_NULL(
-			 "metadata_block_header",
-			 metadata_block_header );
+			 "eow_block_record",
+			 eow_block_record );
 
 			BDE_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -184,22 +221,23 @@ int bde_test_metadata_block_header_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libbde_metadata_block_header_initialize with memset failing
+		/* Test libbde_eow_block_record_initialize with memset failing
 		 */
 		bde_test_memset_attempts_before_fail = test_number;
 
-		result = libbde_metadata_block_header_initialize(
-		          &metadata_block_header,
+		result = libbde_eow_block_record_initialize(
+		          &eow_block_record,
+		          512,
 		          &error );
 
 		if( bde_test_memset_attempts_before_fail != -1 )
 		{
 			bde_test_memset_attempts_before_fail = -1;
 
-			if( metadata_block_header != NULL )
+			if( eow_block_record != NULL )
 			{
-				libbde_metadata_block_header_free(
-				 &metadata_block_header,
+				libbde_eow_block_record_free(
+				 &eow_block_record,
 				 NULL );
 			}
 		}
@@ -211,8 +249,8 @@ int bde_test_metadata_block_header_initialize(
 			 -1 );
 
 			BDE_TEST_ASSERT_IS_NULL(
-			 "metadata_block_header",
-			 metadata_block_header );
+			 "eow_block_record",
+			 eow_block_record );
 
 			BDE_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -232,19 +270,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( metadata_block_header != NULL )
+	if( eow_block_record != NULL )
 	{
-		libbde_metadata_block_header_free(
-		 &metadata_block_header,
+		libbde_eow_block_record_free(
+		 &eow_block_record,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libbde_metadata_block_header_free function
+/* Tests the libbde_eow_block_record_free function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_metadata_block_header_free(
+int bde_test_eow_block_record_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -252,7 +290,7 @@ int bde_test_metadata_block_header_free(
 
 	/* Test error cases
 	 */
-	result = libbde_metadata_block_header_free(
+	result = libbde_eow_block_record_free(
 	          NULL,
 	          &error );
 
@@ -279,20 +317,21 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libbde_metadata_block_header_read_data function
+/* Tests the libbde_eow_block_record_read_data function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_metadata_block_header_read_data(
+int bde_test_eow_block_record_read_data(
      void )
 {
-	libbde_metadata_block_header_t *metadata_block_header = NULL;
-	libcerror_error_t *error                              = NULL;
-	int result                                            = 0;
+	libbde_eow_block_record_t *eow_block_record = NULL;
+	libcerror_error_t *error                    = NULL;
+	int result                                  = 0;
 
 	/* Initialize test
 	 */
-	result = libbde_metadata_block_header_initialize(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_initialize(
+	          &eow_block_record,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -301,8 +340,8 @@ int bde_test_metadata_block_header_read_data(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NOT_NULL(
-	 "metadata_block_header",
-	 metadata_block_header );
+	 "eow_block_record",
+	 eow_block_record );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -310,10 +349,10 @@ int bde_test_metadata_block_header_read_data(
 
 	/* Test regular cases
 	 */
-	result = libbde_metadata_block_header_read_data(
-	          metadata_block_header,
-	          bde_test_metadata_block_header_data1,
-	          64,
+	result = libbde_eow_block_record_read_data(
+	          eow_block_record,
+	          bde_test_eow_block_record_data1,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -327,10 +366,10 @@ int bde_test_metadata_block_header_read_data(
 
 	/* Test error cases
 	 */
-	result = libbde_metadata_block_header_read_data(
+	result = libbde_eow_block_record_read_data(
 	          NULL,
-	          bde_test_metadata_block_header_data1,
-	          64,
+	          bde_test_eow_block_record_data1,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -345,10 +384,10 @@ int bde_test_metadata_block_header_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_metadata_block_header_read_data(
-	          metadata_block_header,
+	result = libbde_eow_block_record_read_data(
+	          eow_block_record,
 	          NULL,
-	          64,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -363,9 +402,9 @@ int bde_test_metadata_block_header_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_metadata_block_header_read_data(
-	          metadata_block_header,
-	          bde_test_metadata_block_header_data1,
+	result = libbde_eow_block_record_read_data(
+	          eow_block_record,
+	          bde_test_eow_block_record_data1,
 	          0,
 	          &error );
 
@@ -381,9 +420,9 @@ int bde_test_metadata_block_header_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_metadata_block_header_read_data(
-	          metadata_block_header,
-	          bde_test_metadata_block_header_data1,
+	result = libbde_eow_block_record_read_data(
+	          eow_block_record,
+	          bde_test_eow_block_record_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -401,14 +440,14 @@ int bde_test_metadata_block_header_read_data(
 
 #if defined( HAVE_BDE_TEST_MEMORY )
 
-	/* Test bde_test_metadata_block_header_read_data with memcpy failing
+	/* Test bde_test_eow_block_record_read_data with memcpy failing
 	 */
 	bde_test_memcpy_attempts_before_fail = 0;
 
-	result = libbde_metadata_block_header_read_data(
-	          metadata_block_header,
-	          bde_test_metadata_block_header_data1,
-	          64,
+	result = libbde_eow_block_record_read_data(
+	          eow_block_record,
+	          bde_test_eow_block_record_data1,
+	          512,
 	          &error );
 
 	if( bde_test_memcpy_attempts_before_fail != -1 )
@@ -431,21 +470,17 @@ int bde_test_metadata_block_header_read_data(
 	}
 #endif /* defined( HAVE_BDE_TEST_MEMORY ) */
 
-	/* Test invalid format version
+	/* Test invalid signature
 	 */
-	byte_stream_copy_from_uint16_little_endian(
-	 &( bde_test_metadata_block_header_data1[ 10 ] ),
-	 0xffff );
+	bde_test_eow_block_record_data1[ 0 ] = 0xff;
 
-	result = libbde_metadata_block_header_read_data(
-	          metadata_block_header,
-	          bde_test_metadata_block_header_data1,
-	          64,
+	result = libbde_eow_block_record_read_data(
+	          eow_block_record,
+	          bde_test_eow_block_record_data1,
+	          512,
 	          &error );
 
-	byte_stream_copy_from_uint16_little_endian(
-	 &( bde_test_metadata_block_header_data1[ 10 ] ),
-	 0x0002 );
+	bde_test_eow_block_record_data1[ 0 ] = 0x46;
 
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -461,8 +496,8 @@ int bde_test_metadata_block_header_read_data(
 
 	/* Clean up
 	 */
-	result = libbde_metadata_block_header_free(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_free(
+	          &eow_block_record,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -471,8 +506,8 @@ int bde_test_metadata_block_header_read_data(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
-	 "metadata_block_header",
-	 metadata_block_header );
+	 "eow_block_record",
+	 eow_block_record );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -486,30 +521,31 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( metadata_block_header != NULL )
+	if( eow_block_record != NULL )
 	{
-		libbde_metadata_block_header_free(
-		 &metadata_block_header,
+		libbde_eow_block_record_free(
+		 &eow_block_record,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libbde_metadata_block_header_read_file_io_handle function
+/* Tests the libbde_eow_block_record_read_file_io_handle function
  * Returns 1 if successful or 0 if not
  */
-int bde_test_metadata_block_header_read_file_io_handle(
+int bde_test_eow_block_record_read_file_io_handle(
      void )
 {
-	libbde_metadata_block_header_t *metadata_block_header = NULL;
-	libbfio_handle_t *file_io_handle                      = NULL;
-	libcerror_error_t *error                              = NULL;
-	int result                                            = 0;
+	libbde_eow_block_record_t *eow_block_record = NULL;
+	libbfio_handle_t *file_io_handle            = NULL;
+	libcerror_error_t *error                    = NULL;
+	int result                                  = 0;
 
 	/* Initialize test
 	 */
-	result = libbde_metadata_block_header_initialize(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_initialize(
+	          &eow_block_record,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -518,8 +554,8 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NOT_NULL(
-	 "metadata_block_header",
-	 metadata_block_header );
+	 "eow_block_record",
+	 eow_block_record );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -529,8 +565,8 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 */
 	result = bde_test_open_file_io_handle(
 	          &file_io_handle,
-	          bde_test_metadata_block_header_data1,
-	          64,
+	          bde_test_eow_block_record_data1,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -548,10 +584,11 @@ int bde_test_metadata_block_header_read_file_io_handle(
 
 	/* Test regular cases
 	 */
-	result = libbde_metadata_block_header_read_file_io_handle(
-	          metadata_block_header,
+	result = libbde_eow_block_record_read_file_io_handle(
+	          eow_block_record,
 	          file_io_handle,
 	          0,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -565,10 +602,11 @@ int bde_test_metadata_block_header_read_file_io_handle(
 
 	/* Test error cases
 	 */
-	result = libbde_metadata_block_header_read_file_io_handle(
+	result = libbde_eow_block_record_read_file_io_handle(
 	          NULL,
 	          file_io_handle,
 	          0,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -583,10 +621,11 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = libbde_metadata_block_header_read_file_io_handle(
-	          metadata_block_header,
+	result = libbde_eow_block_record_read_file_io_handle(
+	          eow_block_record,
 	          NULL,
 	          0,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -620,7 +659,7 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 */
 	result = bde_test_open_file_io_handle(
 	          &file_io_handle,
-	          bde_test_metadata_block_header_data1,
+	          bde_test_eow_block_record_data1,
 	          8,
 	          &error );
 
@@ -637,10 +676,11 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 "error",
 	 error );
 
-	result = libbde_metadata_block_header_read_file_io_handle(
-	          metadata_block_header,
+	result = libbde_eow_block_record_read_file_io_handle(
+	          eow_block_record,
 	          file_io_handle,
 	          0,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -668,12 +708,12 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 "error",
 	 error );
 
-	/* Test invalid format version
+	/* Test invalid signature
 	 */
 	result = bde_test_open_file_io_handle(
 	          &file_io_handle,
-	          bde_test_metadata_block_header_data1,
-	          64,
+	          bde_test_eow_block_record_data1,
+	          512,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -689,19 +729,16 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 "error",
 	 error );
 
-	byte_stream_copy_from_uint16_little_endian(
-	 &( bde_test_metadata_block_header_data1[ 10 ] ),
-	 0xffff );
+	bde_test_eow_block_record_data1[ 0 ] = 0xff;
 
-	result = libbde_metadata_block_header_read_file_io_handle(
-	          metadata_block_header,
+	result = libbde_eow_block_record_read_file_io_handle(
+	          eow_block_record,
 	          file_io_handle,
 	          0,
+	          512,
 	          &error );
 
-	byte_stream_copy_from_uint16_little_endian(
-	 &( bde_test_metadata_block_header_data1[ 10 ] ),
-	 0x0002 );
+	bde_test_eow_block_record_data1[ 0 ] = 0x46;
 
 	BDE_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -730,8 +767,8 @@ int bde_test_metadata_block_header_read_file_io_handle(
 
 	/* Clean up
 	 */
-	result = libbde_metadata_block_header_free(
-	          &metadata_block_header,
+	result = libbde_eow_block_record_free(
+	          &eow_block_record,
 	          &error );
 
 	BDE_TEST_ASSERT_EQUAL_INT(
@@ -740,8 +777,8 @@ int bde_test_metadata_block_header_read_file_io_handle(
 	 1 );
 
 	BDE_TEST_ASSERT_IS_NULL(
-	 "metadata_block_header",
-	 metadata_block_header );
+	 "eow_block_record",
+	 eow_block_record );
 
 	BDE_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -761,10 +798,10 @@ on_error:
 		 &file_io_handle,
 		 NULL );
 	}
-	if( metadata_block_header != NULL )
+	if( eow_block_record != NULL )
 	{
-		libbde_metadata_block_header_free(
-		 &metadata_block_header,
+		libbde_eow_block_record_free(
+		 &eow_block_record,
 		 NULL );
 	}
 	return( 0 );
@@ -790,20 +827,20 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT )
 
 	BDE_TEST_RUN(
-	 "libbde_metadata_block_header_initialize",
-	 bde_test_metadata_block_header_initialize );
+	 "libbde_eow_block_record_initialize",
+	 bde_test_eow_block_record_initialize );
 
 	BDE_TEST_RUN(
-	 "libbde_metadata_block_header_free",
-	 bde_test_metadata_block_header_free );
+	 "libbde_eow_block_record_free",
+	 bde_test_eow_block_record_free );
 
 	BDE_TEST_RUN(
-	 "libbde_metadata_block_header_read_data",
-	 bde_test_metadata_block_header_read_data );
+	 "libbde_eow_block_record_read_data",
+	 bde_test_eow_block_record_read_data );
 
 	BDE_TEST_RUN(
-	 "libbde_metadata_block_header_read_file_io_handle",
-	 bde_test_metadata_block_header_read_file_io_handle );
+	 "libbde_eow_block_record_read_file_io_handle",
+	 bde_test_eow_block_record_read_file_io_handle );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBBDE_DLL_IMPORT ) */
 

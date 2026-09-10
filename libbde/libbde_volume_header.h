@@ -67,6 +67,14 @@ struct libbde_volume_header
 	/* The volume size
 	 */
 	size64_t volume_size;
+
+	/* The first Encrypt-on-Write descriptor offset
+	 */
+	off64_t first_eow_descriptor_offset;
+
+	/* The second Encrypt-on-Write descriptor offset
+	 */
+	off64_t second_eow_descriptor_offset;
 };
 
 int libbde_volume_header_initialize(
