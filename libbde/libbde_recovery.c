@@ -1,5 +1,5 @@
 /*
- * Recovery functions
+ * Recovery password functions
  *
  * Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>
  *

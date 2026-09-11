@@ -744,19 +744,23 @@ int libbde_volume_header_read_data(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( ( volume_header->bytes_per_sector != 512 )
-	 && ( volume_header->bytes_per_sector != 1024 )
-	 && ( volume_header->bytes_per_sector != 2048 )
-	 && ( volume_header->bytes_per_sector != 4096 ) )
+	if( volume_header->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid bytes per sector value out of bounds.",
-		 function );
+		if( ( volume_header->bytes_per_sector != 256 )
+		 && ( volume_header->bytes_per_sector != 512 )
+		 && ( volume_header->bytes_per_sector != 1024 )
+		 && ( volume_header->bytes_per_sector != 2048 )
+		 && ( volume_header->bytes_per_sector != 4096 ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid bytes per sector value out of bounds.",
+			 function );
 
-		return( -1 );
+			return( -1 );
+		}
 	}
 	if( total_number_of_sectors != 0 )
 	{

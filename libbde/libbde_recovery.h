@@ -1,5 +1,5 @@
 /*
- * Recovery functions
+ * Recovery password functions
  *
  * Copyright (C) 2011-2026, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBBDE_RECOVERY_H )
-#define _LIBBDE_RECOVERY_H
+#if !defined( _LIBBDE_RECOVERY_PASSWORD_H )
+#define _LIBBDE_RECOVERY_PASSWORD_H
 
 #include <common.h>
 #include <types.h>
@@ -50,5 +50,5 @@ int libbde_utf16_recovery_password_calculate_hash(
 }
 #endif
 
-#endif /* !defined( _LIBBDE_RECOVERY_H ) */
+#endif /* !defined( _LIBBDE_RECOVERY_PASSWORD_H ) */
 

@@ -64,6 +64,11 @@ struct libbde_metadata
 	 */
 	size64_t volume_header_size;
 
+	/* The number of volume header sectors
+	 * Used by Windows 7 (version 2)
+	 */
+	uint32_t number_of_volume_header_sectors;
+
 	/* The volume identifier
 	 * Contains a GUID
 	 */

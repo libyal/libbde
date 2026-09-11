@@ -1234,6 +1234,8 @@ int libbde_internal_volume_open_read(
 	static char *function              = "libbde_internal_volume_open_read";
 	size64_t file_size                 = 0;
 	size_t startup_key_identifier_size = 0;
+	uint64_t bytes_per_sector          = 0;
+	uint64_t volume_header_size        = 0;
 	int result                         = 0;
 
 	if( internal_volume == NULL )
@@ -1489,6 +1491,58 @@ int libbde_internal_volume_open_read(
 		 function );
 
 		goto on_error;
+	}
+	volume_header_size = internal_volume->primary_metadata->volume_header_size;
+
+	if( internal_volume->io_handle->bytes_per_sector == 0 )
+	{
+		if( volume_header_size != 0 && internal_volume->primary_metadata->number_of_volume_header_sectors != 0 )
+		{
+			bytes_per_sector = volume_header_size / internal_volume->primary_metadata->number_of_volume_header_sectors;
+		}
+		if( bytes_per_sector != 512 && bytes_per_sector != 4096 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+			 "%s: unsupported bytes per sector.",
+			 function );
+
+			goto on_error;
+		}
+		internal_volume->io_handle->bytes_per_sector = (uint16_t) bytes_per_sector;
+	}
+	if( volume_header_size == 0 )
+	{
+		volume_header_size = internal_volume->primary_metadata->number_of_volume_header_sectors * internal_volume->io_handle->bytes_per_sector;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: calculated volume header size\t\t: %" PRIu64 "\n",
+			 function,
+			 volume_header_size );
+		}
+#endif
+		if( internal_volume->primary_metadata->volume_header_size == 0 )
+		{
+			internal_volume->primary_metadata->volume_header_size = volume_header_size;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		else if( libcnotify_verbose != 0 )
+		{
+			if( internal_volume->primary_metadata->volume_header_size != volume_header_size )
+			{
+				libcnotify_printf(
+				 "%s: volume header size in FVE Volume header block does not match number of volume header sectors.\n",
+				 function );
+
+				goto on_error;
+			}
+		}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 	}
 	if( ( internal_volume->primary_metadata->volume_header_offset != 0 )
 	 && ( internal_volume->primary_metadata->volume_header_size == 0 ) )

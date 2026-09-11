@@ -270,7 +270,6 @@ int libbde_metadata_read_block(
 	libbde_metadata_block_header_t *block_header = NULL;
 	libbde_metadata_header_t *header             = NULL;
 	static char *function                        = "libbde_metadata_read_block";
-	uint64_t volume_header_size                  = 0;
 	uint32_t entries_data_size                   = 0;
 
 	if( metadata == NULL )
@@ -333,11 +332,10 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-	metadata->version               = block_header->version;
-	metadata->encrypted_volume_size = block_header->encrypted_volume_size;
-	metadata->volume_header_offset  = block_header->volume_header_offset;
-
-	volume_header_size = block_header->number_of_volume_header_sectors * io_handle->bytes_per_sector;
+	metadata->version                         = block_header->version;
+	metadata->encrypted_volume_size           = block_header->encrypted_volume_size;
+	metadata->volume_header_offset            = block_header->volume_header_offset;
+	metadata->number_of_volume_header_sectors = block_header->number_of_volume_header_sectors;
 
 	if( io_handle->version == LIBBDE_VERSION_WINDOWS_VISTA )
 	{
@@ -472,33 +470,6 @@ int libbde_metadata_read_block(
 
 		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: calculated volume header size\t\t: %" PRIu64 "\n",
-		 function,
-		 volume_header_size );
-	}
-#endif
-	if( metadata->volume_header_size == 0 )
-	{
-		metadata->volume_header_size = volume_header_size;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	else if( libcnotify_verbose != 0 )
-	{
-		if( metadata->volume_header_size != volume_header_size )
-		{
-			libcnotify_printf(
-			 "%s: volume header size in FVE Volume header block does not match number of volume header sectors.\n",
-			 function );
-
-			goto on_error;
-		}
-	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
 	if( libbde_metadata_header_free(
 	     &header,
 	     error ) != 1 )
@@ -664,7 +635,6 @@ int libbde_metadata_read_entries_data(
 	size_t entries_data_offset                            = 0;
 	ssize_t read_count                                    = 0;
 	uint64_t volume_header_offset                         = 0;
-	uint64_t volume_header_size                           = 0;
 	int entry_index                                       = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1053,7 +1023,7 @@ int libbde_metadata_read_entries_data(
 
 					byte_stream_copy_to_uint64_little_endian(
 					 &( metadata_entry->value_data[ 8 ] ),
-					 volume_header_size );
+					 metadata->volume_header_size );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 					if( libcnotify_verbose != 0 )
@@ -1066,7 +1036,7 @@ int libbde_metadata_read_entries_data(
 						libcnotify_printf(
 						 "%s: size\t\t\t\t\t: %" PRIu64 "\n",
 						 function,
-						 volume_header_size );
+						 metadata->volume_header_size );
 
 						value_data_offset = 16;
 
@@ -1119,7 +1089,6 @@ int libbde_metadata_read_entries_data(
 
 						goto on_error;
 					}
-					metadata->volume_header_size = (size64_t) volume_header_size;
 				}
 				break;
 

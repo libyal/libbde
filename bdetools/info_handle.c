@@ -1124,7 +1124,7 @@ int info_handle_open(
 
 		if( bdetools_prompt_for_password(
 		     stdout,
-		     "Password",
+		     _SYSTEM_STRING( "Password" ),
 		     password,
 		     64,
 		     error ) != 1 )
