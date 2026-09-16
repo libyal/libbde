@@ -23,6 +23,11 @@ Documentation = "https://github.com/libyal/libbde/wiki/Home"
 Homepage = "https://github.com/libyal/libbde"
 Repository = "https://github.com/libyal/libbde"
 
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = "\\.pyi?$"
+
 [tool.setuptools]
 py-modules = ["_build"]
 

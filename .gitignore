@@ -140,10 +140,10 @@ stamp-h[1-9]
 /tests/bde_test_aes_ccm_encrypted_key
 /tests/bde_test_diffuser
 /tests/bde_test_encryption_context
-/tests/bde_test_error
 /tests/bde_test_eow_block_map
 /tests/bde_test_eow_block_record
 /tests/bde_test_eow_descriptor
+/tests/bde_test_error
 /tests/bde_test_external_key
 /tests/bde_test_io_handle
 /tests/bde_test_key
