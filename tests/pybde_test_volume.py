@@ -29,855 +29,885 @@ import pybde
 
 
 class DataRangeFileObject(object):
-  """File-like object that maps an in-file data range."""
+    """File-like object that maps an in-file data range."""
 
-  def __init__(self, path, range_offset, range_size):
-    """Initializes a file-like object.
+    def __init__(self, path, range_offset, range_size):
+        """Initializes a file-like object.
 
-    Args:
-      path (str): path of the file that contains the data range.
-      range_offset (int): offset where the data range starts.
-      range_size (int): size of the data range starts, or None to indicate
-          the range should continue to the end of the parent file-like object.
-    """
-    super(DataRangeFileObject, self).__init__()
-    self._current_offset = 0
-    self._file_object = open(path, "rb")
-    self._range_offset = range_offset
-    self._range_size = range_size
+        Args:
+          path (str): path of the file that contains the data range.
+          range_offset (int): offset where the data range starts.
+          range_size (int): size of the data range starts, or None to indicate
+              the range should continue to the end of the parent file-like object.
+        """
+        super(DataRangeFileObject, self).__init__()
+        self._current_offset = 0
+        self._file_object = open(path, "rb")
+        self._range_offset = range_offset
+        self._range_size = range_size
 
-  def __enter__(self):
-    """Enters a with statement."""
-    return self
+    def __enter__(self):
+        """Enters a with statement."""
+        return self
 
-  def __exit__(self, unused_type, unused_value, unused_traceback):
-    """Exits a with statement."""
-    return
+    def __exit__(self, unused_type, unused_value, unused_traceback):
+        """Exits a with statement."""
+        return
 
-  def close(self):
-    """Closes the file-like object."""
-    if self._file_object:
-      self._file_object.close()
-      self._file_object = None
+    def close(self):
+        """Closes the file-like object."""
+        if self._file_object:
+            self._file_object.close()
+            self._file_object = None
 
-  def get_offset(self):
-    """Retrieves the current offset into the file-like object.
+    def get_offset(self):
+        """Retrieves the current offset into the file-like object.
 
-    Returns:
-      int: current offset in the data range.
-    """
-    return self._current_offset
+        Returns:
+          int: current offset in the data range.
+        """
+        return self._current_offset
 
-  def get_size(self):
-    """Retrieves the size of the file-like object.
+    def get_size(self):
+        """Retrieves the size of the file-like object.
 
-    Returns:
-      int: size of the data range.
-    """
-    return self._range_size
+        Returns:
+          int: size of the data range.
+        """
+        return self._range_size
 
-  def read(self, size=None):
-    """Reads a byte string from the file-like object at the current offset.
+    def read(self, size=None):
+        """Reads a byte string from the file-like object at the current offset.
 
-    The function will read a byte string of the specified size or
-    all of the remaining data if no size was specified.
+        The function will read a byte string of the specified size or
+        all of the remaining data if no size was specified.
 
-    Args:
-      size (Optional[int]): number of bytes to read, where None is all
-          remaining data.
+        Args:
+          size (Optional[int]): number of bytes to read, where None is all
+              remaining data.
 
-    Returns:
-      bytes: data read.
+        Returns:
+          bytes: data read.
 
-    Raises:
-      IOError: if the read failed.
-    """
-    if (self._range_offset < 0 or
-        (self._range_size is not None and self._range_size < 0)):
-      raise IOError("Invalid data range.")
+        Raises:
+          IOError: if the read failed.
+        """
+        if self._range_offset < 0 or (
+            self._range_size is not None and self._range_size < 0
+        ):
+            raise IOError("Invalid data range.")
 
-    if self._current_offset < 0:
-      raise IOError(
-          "Invalid current offset: {0:d} value less than zero.".format(
-              self._current_offset))
+        if self._current_offset < 0:
+            raise IOError(
+                "Invalid current offset: {0:d} value less than zero.".format(
+                    self._current_offset
+                )
+            )
 
-    if (self._range_size is not None and
-        self._current_offset >= self._range_size):
-      return b""
+        if self._range_size is not None and self._current_offset >= self._range_size:
+            return b""
 
-    if size is None:
-      size = self._range_size
-    if self._range_size is not None and self._current_offset + size > self._range_size:
-      size = self._range_size - self._current_offset
+        if size is None:
+            size = self._range_size
+        if (
+            self._range_size is not None
+            and self._current_offset + size > self._range_size
+        ):
+            size = self._range_size - self._current_offset
 
-    self._file_object.seek(
-        self._range_offset + self._current_offset, os.SEEK_SET)
+        self._file_object.seek(self._range_offset + self._current_offset, os.SEEK_SET)
 
-    data = self._file_object.read(size)
+        data = self._file_object.read(size)
 
-    self._current_offset += len(data)
+        self._current_offset += len(data)
 
-    return data
+        return data
 
-  def seek(self, offset, whence=os.SEEK_SET):
-    """Seeks to an offset within the file-like object.
+    def seek(self, offset, whence=os.SEEK_SET):
+        """Seeks to an offset within the file-like object.
 
-    Args:
-      offset (int): offset to seek to.
-      whence (Optional(int)): value that indicates whether offset is an absolute
-          or relative position within the file.
+        Args:
+          offset (int): offset to seek to.
+          whence (Optional(int)): value that indicates whether offset is an absolute
+              or relative position within the file.
 
-    Raises:
-      IOError: if the seek failed.
-    """
-    if self._current_offset < 0:
-      raise IOError(
-          "Invalid current offset: {0:d} value less than zero.".format(
-              self._current_offset))
+        Raises:
+          IOError: if the seek failed.
+        """
+        if self._current_offset < 0:
+            raise IOError(
+                "Invalid current offset: {0:d} value less than zero.".format(
+                    self._current_offset
+                )
+            )
 
-    if whence == os.SEEK_CUR:
-      offset += self._current_offset
-    elif whence == os.SEEK_END:
-      offset += self._range_size
-    elif whence != os.SEEK_SET:
-      raise IOError("Unsupported whence.")
-    if offset < 0:
-      raise IOError("Invalid offset value less than zero.")
+        if whence == os.SEEK_CUR:
+            offset += self._current_offset
+        elif whence == os.SEEK_END:
+            offset += self._range_size
+        elif whence != os.SEEK_SET:
+            raise IOError("Unsupported whence.")
+        if offset < 0:
+            raise IOError("Invalid offset value less than zero.")
 
-    self._current_offset = offset
+        self._current_offset = offset
 
 
 class VolumeTypeTests(unittest.TestCase):
-  """Tests the volume type."""
+    """Tests the volume type."""
 
-  def test_signal_abort(self):
-    """Tests the signal_abort function."""
-    bde_volume = pybde.volume()
+    def test_signal_abort(self):
+        """Tests the signal_abort function."""
+        bde_volume = pybde.volume()
 
-    bde_volume.signal_abort()
+        bde_volume.signal_abort()
 
-  def test_open(self):
-    """Tests the open function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+    def test_open(self):
+        """Tests the open function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-    test_offset = getattr(unittest, "offset", None)
-    if test_offset:
-      raise unittest.SkipTest("source defines offset")
+        test_offset = getattr(unittest, "offset", None)
+        if test_offset:
+            raise unittest.SkipTest("source defines offset")
 
-    bde_volume = pybde.volume()
+        bde_volume = pybde.volume()
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    bde_volume.open(test_source)
+        bde_volume.open(test_source)
 
-    with self.assertRaises(IOError):
-      bde_volume.open(test_source)
+        with self.assertRaises(IOError):
+            bde_volume.open(test_source)
 
-    bde_volume.close()
-
-    with self.assertRaises(TypeError):
-      bde_volume.open(None)
-
-    with self.assertRaises(ValueError):
-      bde_volume.open(test_source, mode="w")
-
-  def test_open_file_object(self):
-    """Tests the open_file_object function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
-
-    if not os.path.isfile(test_source):
-      raise unittest.SkipTest("source not a regular file")
-
-    bde_volume = pybde.volume()
-
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
-
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
-
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
-
-    test_offset = getattr(unittest, "offset", None)
-
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
-
-      bde_volume.open_file_object(file_object)
-
-      with self.assertRaises(IOError):
-        bde_volume.open_file_object(file_object)
-
-      bde_volume.close()
-
-      with self.assertRaises(TypeError):
-        bde_volume.open_file_object(None)
-
-      with self.assertRaises(ValueError):
-        bde_volume.open_file_object(file_object, mode="w")
-
-  def test_close(self):
-    """Tests the close function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
-
-    bde_volume = pybde.volume()
-
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
-
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
-
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
-
-    with self.assertRaises(IOError):
-      bde_volume.close()
-
-  def test_open_close(self):
-    """Tests the open and close functions."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      return
-
-    test_offset = getattr(unittest, "offset", None)
-    if test_offset:
-      raise unittest.SkipTest("source defines offset")
-
-    bde_volume = pybde.volume()
-
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
-
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
-
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
-
-    # Test open and close.
-    bde_volume.open(test_source)
-    bde_volume.close()
-
-    # Test open and close a second time to validate clean up on close.
-    bde_volume.open(test_source)
-    bde_volume.close()
-
-    if os.path.isfile(test_source):
-      with open(test_source, "rb") as file_object:
-
-        # Test open_file_object and close.
-        bde_volume.open_file_object(file_object)
         bde_volume.close()
 
-        # Test open_file_object and close a second time to validate clean up on close.
-        bde_volume.open_file_object(file_object)
+        with self.assertRaises(TypeError):
+            bde_volume.open(None)
+
+        with self.assertRaises(ValueError):
+            bde_volume.open(test_source, mode="w")
+
+    def test_open_file_object(self):
+        """Tests the open_file_object function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
+
+        if not os.path.isfile(test_source):
+            raise unittest.SkipTest("source not a regular file")
+
+        bde_volume = pybde.volume()
+
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
+
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
+
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
+
+        test_offset = getattr(unittest, "offset", None)
+
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
+
+            bde_volume.open_file_object(file_object)
+
+            with self.assertRaises(IOError):
+                bde_volume.open_file_object(file_object)
+
+            bde_volume.close()
+
+            with self.assertRaises(TypeError):
+                bde_volume.open_file_object(None)
+
+            with self.assertRaises(ValueError):
+                bde_volume.open_file_object(file_object, mode="w")
+
+    def test_close(self):
+        """Tests the close function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
+
+        bde_volume = pybde.volume()
+
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
+
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
+
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
+
+        with self.assertRaises(IOError):
+            bde_volume.close()
+
+    def test_open_close(self):
+        """Tests the open and close functions."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            return
+
+        test_offset = getattr(unittest, "offset", None)
+        if test_offset:
+            raise unittest.SkipTest("source defines offset")
+
+        bde_volume = pybde.volume()
+
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
+
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
+
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
+
+        # Test open and close.
+        bde_volume.open(test_source)
         bde_volume.close()
 
-        # Test open_file_object and close and dereferencing file_object.
-        bde_volume.open_file_object(file_object)
-        del file_object
+        # Test open and close a second time to validate clean up on close.
+        bde_volume.open(test_source)
         bde_volume.close()
 
-  def test_is_locked(self):
-    """Tests the is_locked function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        if os.path.isfile(test_source):
+            with open(test_source, "rb") as file_object:
 
-    test_offset = getattr(unittest, "offset", None)
-    if test_offset:
-      raise unittest.SkipTest("source defines offset")
+                # Test open_file_object and close.
+                bde_volume.open_file_object(file_object)
+                bde_volume.close()
 
-    bde_volume = pybde.volume()
+                # Test open_file_object and close a second time to validate clean up on close.
+                bde_volume.open_file_object(file_object)
+                bde_volume.close()
 
-    bde_volume.open(test_source)
+                # Test open_file_object and close and dereferencing file_object.
+                bde_volume.open_file_object(file_object)
+                del file_object
+                bde_volume.close()
 
-    result = bde_volume.is_locked()
-    self.assertTrue(result)
+    def test_is_locked(self):
+        """Tests the is_locked function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-    bde_volume.close()
+        test_offset = getattr(unittest, "offset", None)
+        if test_offset:
+            raise unittest.SkipTest("source defines offset")
 
-    password = getattr(unittest, "password", None)
-    recovery_password = getattr(unittest, "recovery_password", None)
-    startup_key = getattr(unittest, "startup_key", None)
+        bde_volume = pybde.volume()
 
-    if password or recovery_password or startup_key:
-      bde_volume = pybde.volume()
+        bde_volume.open(test_source)
 
-      if password:
-        bde_volume.set_password(password)
+        result = bde_volume.is_locked()
+        self.assertTrue(result)
 
-      if recovery_password:
-        bde_volume.set_recovery_password(recovery_password)
+        bde_volume.close()
 
-      if startup_key:
-        bde_volume.read_startup_key(startup_key)
+        password = getattr(unittest, "password", None)
+        recovery_password = getattr(unittest, "recovery_password", None)
+        startup_key = getattr(unittest, "startup_key", None)
 
-      bde_volume.open(test_source)
+        if password or recovery_password or startup_key:
+            bde_volume = pybde.volume()
 
-      result = bde_volume.is_locked()
-      self.assertFalse(result)
+            if password:
+                bde_volume.set_password(password)
 
-      bde_volume.close()
+            if recovery_password:
+                bde_volume.set_recovery_password(recovery_password)
 
-  def test_read_buffer(self):
-    """Tests the read_buffer function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+            if startup_key:
+                bde_volume.read_startup_key(startup_key)
 
-    test_offset = getattr(unittest, "offset", None)
-    if test_offset:
-      raise unittest.SkipTest("source defines offset")
+            bde_volume.open(test_source)
 
-    bde_volume = pybde.volume()
+            result = bde_volume.is_locked()
+            self.assertFalse(result)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+            bde_volume.close()
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+    def test_read_buffer(self):
+        """Tests the read_buffer function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        test_offset = getattr(unittest, "offset", None)
+        if test_offset:
+            raise unittest.SkipTest("source defines offset")
 
-    bde_volume.open(test_source)
+        bde_volume = pybde.volume()
 
-    size = bde_volume.get_size()
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    if size < 4096:
-      # Test read without maximum size.
-      bde_volume.seek_offset(0, os.SEEK_SET)
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-      data = bde_volume.read_buffer()
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), size)
+        bde_volume.open(test_source)
 
-    # Test read with maximum size.
-    bde_volume.seek_offset(0, os.SEEK_SET)
+        size = bde_volume.get_size()
 
-    data = bde_volume.read_buffer(size=4096)
+        if size < 4096:
+            # Test read without maximum size.
+            bde_volume.seek_offset(0, os.SEEK_SET)
 
-    self.assertIsNotNone(data)
-    self.assertEqual(len(data), min(size, 4096))
+            data = bde_volume.read_buffer()
 
-    if size > 8:
-      bde_volume.seek_offset(-8, os.SEEK_END)
+            self.assertIsNotNone(data)
+            self.assertEqual(len(data), size)
 
-      # Read buffer on size boundary.
-      data = bde_volume.read_buffer(size=4096)
+        # Test read with maximum size.
+        bde_volume.seek_offset(0, os.SEEK_SET)
 
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), 8)
+        data = bde_volume.read_buffer(size=4096)
 
-      # Read buffer beyond size boundary.
-      data = bde_volume.read_buffer(size=4096)
+        self.assertIsNotNone(data)
+        self.assertEqual(len(data), min(size, 4096))
 
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), 0)
+        if size > 8:
+            bde_volume.seek_offset(-8, os.SEEK_END)
 
-    # Stress test read buffer.
-    bde_volume.seek_offset(0, os.SEEK_SET)
+            # Read buffer on size boundary.
+            data = bde_volume.read_buffer(size=4096)
 
-    remaining_size = size
+            self.assertIsNotNone(data)
+            self.assertEqual(len(data), 8)
 
-    for _ in range(1024):
-      read_size = int(random.random() * 4096)
+            # Read buffer beyond size boundary.
+            data = bde_volume.read_buffer(size=4096)
 
-      data = bde_volume.read_buffer(size=read_size)
+            self.assertIsNotNone(data)
+            self.assertEqual(len(data), 0)
 
-      self.assertIsNotNone(data)
-
-      data_size = len(data)
-
-      if read_size > remaining_size:
-        read_size = remaining_size
-
-      self.assertEqual(data_size, read_size)
-
-      remaining_size -= data_size
-
-      if not remaining_size:
+        # Stress test read buffer.
         bde_volume.seek_offset(0, os.SEEK_SET)
 
         remaining_size = size
 
-    with self.assertRaises(ValueError):
-      bde_volume.read_buffer(size=-1)
+        for _ in range(1024):
+            read_size = int(random.random() * 4096)
 
-    bde_volume.close()
+            data = bde_volume.read_buffer(size=read_size)
 
-    # Test the read without open.
-    with self.assertRaises(IOError):
-      bde_volume.read_buffer(size=4096)
+            self.assertIsNotNone(data)
 
-  def test_read_buffer_file_object(self):
-    """Tests the read_buffer function on a file-like object."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+            data_size = len(data)
 
-    if not os.path.isfile(test_source):
-      raise unittest.SkipTest("source not a regular file")
+            if read_size > remaining_size:
+                read_size = remaining_size
 
-    bde_volume = pybde.volume()
+            self.assertEqual(data_size, read_size)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+            remaining_size -= data_size
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+            if not remaining_size:
+                bde_volume.seek_offset(0, os.SEEK_SET)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+                remaining_size = size
 
-    test_offset = getattr(unittest, "offset", None)
+        with self.assertRaises(ValueError):
+            bde_volume.read_buffer(size=-1)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
-      bde_volume.open_file_object(file_object)
+        bde_volume.close()
 
-      size = bde_volume.get_size()
+        # Test the read without open.
+        with self.assertRaises(IOError):
+            bde_volume.read_buffer(size=4096)
 
-      # Test normal read.
-      data = bde_volume.read_buffer(size=4096)
+    def test_read_buffer_file_object(self):
+        """Tests the read_buffer function on a file-like object."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), min(size, 4096))
+        if not os.path.isfile(test_source):
+            raise unittest.SkipTest("source not a regular file")
 
-      bde_volume.close()
+        bde_volume = pybde.volume()
 
-  def test_read_buffer_at_offset(self):
-    """Tests the read_buffer_at_offset function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    test_offset = getattr(unittest, "offset", None)
-    if test_offset:
-      raise unittest.SkipTest("source defines offset")
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    bde_volume = pybde.volume()
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        test_offset = getattr(unittest, "offset", None)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
+            bde_volume.open_file_object(file_object)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+            size = bde_volume.get_size()
 
-    bde_volume.open(test_source)
+            # Test normal read.
+            data = bde_volume.read_buffer(size=4096)
 
-    size = bde_volume.get_size()
+            self.assertIsNotNone(data)
+            self.assertEqual(len(data), min(size, 4096))
 
-    # Test normal read.
-    data = bde_volume.read_buffer_at_offset(4096, 0)
+            bde_volume.close()
 
-    self.assertIsNotNone(data)
-    self.assertEqual(len(data), min(size, 4096))
+    def test_read_buffer_at_offset(self):
+        """Tests the read_buffer_at_offset function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-    if size > 8:
-      # Read buffer on size boundary.
-      data = bde_volume.read_buffer_at_offset(4096, size - 8)
+        test_offset = getattr(unittest, "offset", None)
+        if test_offset:
+            raise unittest.SkipTest("source defines offset")
 
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), 8)
+        bde_volume = pybde.volume()
 
-      # Read buffer beyond size boundary.
-      data = bde_volume.read_buffer_at_offset(4096, size + 8)
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-      self.assertIsNotNone(data)
-      self.assertEqual(len(data), 0)
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    # Stress test read buffer.
-    for _ in range(1024):
-      random_number = random.random()
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-      media_offset = int(random_number * size)
-      read_size = int(random_number * 4096)
+        bde_volume.open(test_source)
 
-      data = bde_volume.read_buffer_at_offset(read_size, media_offset)
+        size = bde_volume.get_size()
 
-      self.assertIsNotNone(data)
+        # Test normal read.
+        data = bde_volume.read_buffer_at_offset(4096, 0)
 
-      remaining_size = size - media_offset
+        self.assertIsNotNone(data)
+        self.assertEqual(len(data), min(size, 4096))
 
-      data_size = len(data)
+        if size > 8:
+            # Read buffer on size boundary.
+            data = bde_volume.read_buffer_at_offset(4096, size - 8)
 
-      if read_size > remaining_size:
-        read_size = remaining_size
+            self.assertIsNotNone(data)
+            self.assertEqual(len(data), 8)
 
-      self.assertEqual(data_size, read_size)
+            # Read buffer beyond size boundary.
+            data = bde_volume.read_buffer_at_offset(4096, size + 8)
 
-      remaining_size -= data_size
+            self.assertIsNotNone(data)
+            self.assertEqual(len(data), 0)
 
-      if not remaining_size:
-        bde_volume.seek_offset(0, os.SEEK_SET)
+        # Stress test read buffer.
+        for _ in range(1024):
+            random_number = random.random()
 
-    with self.assertRaises(ValueError):
-      bde_volume.read_buffer_at_offset(-1, 0)
+            media_offset = int(random_number * size)
+            read_size = int(random_number * 4096)
 
-    with self.assertRaises(ValueError):
-      bde_volume.read_buffer_at_offset(4096, -1)
+            data = bde_volume.read_buffer_at_offset(read_size, media_offset)
 
-    bde_volume.close()
+            self.assertIsNotNone(data)
 
-    # Test the read without open.
-    with self.assertRaises(IOError):
-      bde_volume.read_buffer_at_offset(4096, 0)
+            remaining_size = size - media_offset
 
-  def test_seek_offset(self):
-    """Tests the seek_offset function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+            data_size = len(data)
 
-    test_offset = getattr(unittest, "offset", None)
-    if test_offset:
-      raise unittest.SkipTest("source defines offset")
+            if read_size > remaining_size:
+                read_size = remaining_size
 
-    bde_volume = pybde.volume()
+            self.assertEqual(data_size, read_size)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+            remaining_size -= data_size
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+            if not remaining_size:
+                bde_volume.seek_offset(0, os.SEEK_SET)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        with self.assertRaises(ValueError):
+            bde_volume.read_buffer_at_offset(-1, 0)
 
-    bde_volume.open(test_source)
+        with self.assertRaises(ValueError):
+            bde_volume.read_buffer_at_offset(4096, -1)
 
-    size = bde_volume.get_size()
+        bde_volume.close()
 
-    bde_volume.seek_offset(16, os.SEEK_SET)
+        # Test the read without open.
+        with self.assertRaises(IOError):
+            bde_volume.read_buffer_at_offset(4096, 0)
 
-    offset = bde_volume.get_offset()
-    self.assertEqual(offset, 16)
+    def test_seek_offset(self):
+        """Tests the seek_offset function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-    bde_volume.seek_offset(16, os.SEEK_CUR)
+        test_offset = getattr(unittest, "offset", None)
+        if test_offset:
+            raise unittest.SkipTest("source defines offset")
 
-    offset = bde_volume.get_offset()
-    self.assertEqual(offset, 32)
+        bde_volume = pybde.volume()
 
-    bde_volume.seek_offset(-16, os.SEEK_CUR)
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    offset = bde_volume.get_offset()
-    self.assertEqual(offset, 16)
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    if size > 16:
-      bde_volume.seek_offset(-16, os.SEEK_END)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-      offset = bde_volume.get_offset()
-      self.assertEqual(offset, size - 16)
+        bde_volume.open(test_source)
 
-    bde_volume.seek_offset(16, os.SEEK_END)
+        size = bde_volume.get_size()
 
-    offset = bde_volume.get_offset()
-    self.assertEqual(offset, size + 16)
+        bde_volume.seek_offset(16, os.SEEK_SET)
 
-    # TODO: change IOError into ValueError
-    with self.assertRaises(IOError):
-      bde_volume.seek_offset(-1, os.SEEK_SET)
+        offset = bde_volume.get_offset()
+        self.assertEqual(offset, 16)
 
-    # TODO: change IOError into ValueError
-    with self.assertRaises(IOError):
-      bde_volume.seek_offset(-32 - size, os.SEEK_CUR)
+        bde_volume.seek_offset(16, os.SEEK_CUR)
 
-    # TODO: change IOError into ValueError
-    with self.assertRaises(IOError):
-      bde_volume.seek_offset(-32 - size, os.SEEK_END)
+        offset = bde_volume.get_offset()
+        self.assertEqual(offset, 32)
 
-    # TODO: change IOError into ValueError
-    with self.assertRaises(IOError):
-      bde_volume.seek_offset(0, -1)
+        bde_volume.seek_offset(-16, os.SEEK_CUR)
 
-    bde_volume.close()
+        offset = bde_volume.get_offset()
+        self.assertEqual(offset, 16)
 
-    # Test the seek without open.
-    with self.assertRaises(IOError):
-      bde_volume.seek_offset(16, os.SEEK_SET)
+        if size > 16:
+            bde_volume.seek_offset(-16, os.SEEK_END)
 
-  def test_get_offset(self):
-    """Tests the get_offset function."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+            offset = bde_volume.get_offset()
+            self.assertEqual(offset, size - 16)
 
-    bde_volume = pybde.volume()
+        bde_volume.seek_offset(16, os.SEEK_END)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        offset = bde_volume.get_offset()
+        self.assertEqual(offset, size + 16)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        # TODO: change IOError into ValueError
+        with self.assertRaises(IOError):
+            bde_volume.seek_offset(-1, os.SEEK_SET)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        # TODO: change IOError into ValueError
+        with self.assertRaises(IOError):
+            bde_volume.seek_offset(-32 - size, os.SEEK_CUR)
 
-    test_offset = getattr(unittest, "offset", None)
+        # TODO: change IOError into ValueError
+        with self.assertRaises(IOError):
+            bde_volume.seek_offset(-32 - size, os.SEEK_END)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+        # TODO: change IOError into ValueError
+        with self.assertRaises(IOError):
+            bde_volume.seek_offset(0, -1)
 
-      bde_volume.open_file_object(file_object)
+        bde_volume.close()
 
-      offset = bde_volume.get_offset()
-      self.assertIsNotNone(offset)
+        # Test the seek without open.
+        with self.assertRaises(IOError):
+            bde_volume.seek_offset(16, os.SEEK_SET)
 
-      bde_volume.close()
+    def test_get_offset(self):
+        """Tests the get_offset function."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-  def test_get_size(self):
-    """Tests the get_size function and size property."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        bde_volume = pybde.volume()
 
-    bde_volume = pybde.volume()
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        test_offset = getattr(unittest, "offset", None)
 
-    test_offset = getattr(unittest, "offset", None)
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+            bde_volume.open_file_object(file_object)
 
-      bde_volume.open_file_object(file_object)
+            offset = bde_volume.get_offset()
+            self.assertIsNotNone(offset)
 
-      size = bde_volume.get_size()
-      self.assertIsNotNone(size)
+            bde_volume.close()
 
-      self.assertIsNotNone(bde_volume.size)
+    def test_get_size(self):
+        """Tests the get_size function and size property."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-      bde_volume.close()
+        bde_volume = pybde.volume()
 
-  def test_get_encryption_method(self):
-    """Tests the get_encryption_method function and encryption_method property."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    bde_volume = pybde.volume()
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        test_offset = getattr(unittest, "offset", None)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
 
-    test_offset = getattr(unittest, "offset", None)
+            bde_volume.open_file_object(file_object)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+            size = bde_volume.get_size()
+            self.assertIsNotNone(size)
 
-      bde_volume.open_file_object(file_object)
+            self.assertIsNotNone(bde_volume.size)
 
-      encryption_method = bde_volume.get_encryption_method()
-      self.assertIsNotNone(encryption_method)
+            bde_volume.close()
 
-      self.assertIsNotNone(bde_volume.encryption_method)
+    def test_get_encryption_method(self):
+        """Tests the get_encryption_method function and encryption_method property."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-      bde_volume.close()
+        bde_volume = pybde.volume()
 
-  def test_get_creation_time(self):
-    """Tests the get_creation_time function and creation_time property."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    bde_volume = pybde.volume()
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        test_offset = getattr(unittest, "offset", None)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
 
-    test_offset = getattr(unittest, "offset", None)
+            bde_volume.open_file_object(file_object)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+            encryption_method = bde_volume.get_encryption_method()
+            self.assertIsNotNone(encryption_method)
 
-      bde_volume.open_file_object(file_object)
+            self.assertIsNotNone(bde_volume.encryption_method)
 
-      creation_time = bde_volume.get_creation_time()
-      self.assertIsNotNone(creation_time)
+            bde_volume.close()
 
-      self.assertIsNotNone(bde_volume.creation_time)
+    def test_get_creation_time(self):
+        """Tests the get_creation_time function and creation_time property."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-      bde_volume.close()
+        bde_volume = pybde.volume()
 
-  def test_get_description(self):
-    """Tests the get_description function and description property."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    bde_volume = pybde.volume()
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        test_offset = getattr(unittest, "offset", None)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
 
-    test_offset = getattr(unittest, "offset", None)
+            bde_volume.open_file_object(file_object)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+            creation_time = bde_volume.get_creation_time()
+            self.assertIsNotNone(creation_time)
 
-      bde_volume.open_file_object(file_object)
+            self.assertIsNotNone(bde_volume.creation_time)
 
-      description = bde_volume.get_description()
-      self.assertIsNotNone(description)
+            bde_volume.close()
 
-      self.assertIsNotNone(bde_volume.description)
+    def test_get_description(self):
+        """Tests the get_description function and description property."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-      bde_volume.close()
+        bde_volume = pybde.volume()
 
-  def test_get_number_of_key_protectors(self):
-    """Tests the get_number_of_key_protectors function and number_of_key_protectors property."""
-    test_source = getattr(unittest, "source", None)
-    if not test_source:
-      raise unittest.SkipTest("missing source")
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
 
-    bde_volume = pybde.volume()
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
 
-    password = getattr(unittest, "password", None)
-    if password:
-      bde_volume.set_password(password)
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
 
-    recovery_password = getattr(unittest, "recovery_password", None)
-    if recovery_password:
-      bde_volume.set_recovery_password(recovery_password)
+        test_offset = getattr(unittest, "offset", None)
 
-    startup_key = getattr(unittest, "startup_key", None)
-    if startup_key:
-      bde_volume.read_startup_key(startup_key)
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
 
-    test_offset = getattr(unittest, "offset", None)
+            bde_volume.open_file_object(file_object)
 
-    with DataRangeFileObject(
-        test_source, test_offset or 0, None) as file_object:
+            description = bde_volume.get_description()
+            self.assertIsNotNone(description)
 
-      bde_volume.open_file_object(file_object)
+            self.assertIsNotNone(bde_volume.description)
 
-      number_of_key_protectors = bde_volume.get_number_of_key_protectors()
-      self.assertIsNotNone(number_of_key_protectors)
+            bde_volume.close()
 
-      self.assertIsNotNone(bde_volume.number_of_key_protectors)
+    def test_get_number_of_key_protectors(self):
+        """Tests the get_number_of_key_protectors function and number_of_key_protectors property."""
+        test_source = getattr(unittest, "source", None)
+        if not test_source:
+            raise unittest.SkipTest("missing source")
 
-      bde_volume.close()
+        bde_volume = pybde.volume()
+
+        password = getattr(unittest, "password", None)
+        if password:
+            bde_volume.set_password(password)
+
+        recovery_password = getattr(unittest, "recovery_password", None)
+        if recovery_password:
+            bde_volume.set_recovery_password(recovery_password)
+
+        startup_key = getattr(unittest, "startup_key", None)
+        if startup_key:
+            bde_volume.read_startup_key(startup_key)
+
+        test_offset = getattr(unittest, "offset", None)
+
+        with DataRangeFileObject(test_source, test_offset or 0, None) as file_object:
+
+            bde_volume.open_file_object(file_object)
+
+            number_of_key_protectors = bde_volume.get_number_of_key_protectors()
+            self.assertIsNotNone(number_of_key_protectors)
+
+            self.assertIsNotNone(bde_volume.number_of_key_protectors)
+
+            bde_volume.close()
 
 
 if __name__ == "__main__":
-  argument_parser = argparse.ArgumentParser()
+    argument_parser = argparse.ArgumentParser()
 
-  argument_parser.add_argument(
-      "-o", "--offset", dest="offset", action="store", default=None,
-      type=int, help="offset of the source file.")
+    argument_parser.add_argument(
+        "-o",
+        "--offset",
+        dest="offset",
+        action="store",
+        default=None,
+        type=int,
+        help="offset of the source file.",
+    )
 
-  argument_parser.add_argument(
-      "-p", "--password", dest="password", action="store", metavar="PASSWORD",
-      default=None, type=str, help="password to unlock the source file.")
+    argument_parser.add_argument(
+        "-p",
+        "--password",
+        dest="password",
+        action="store",
+        metavar="PASSWORD",
+        default=None,
+        type=str,
+        help="password to unlock the source file.",
+    )
 
-  argument_parser.add_argument(
-      "-r", "--recovery-password", "--recovery_password",
-      dest="recovery_password", action="store", metavar="PASSWORD",
-      default=None, type=str, help=(
-          "recovery password to unlock the source file."))
+    argument_parser.add_argument(
+        "-r",
+        "--recovery-password",
+        "--recovery_password",
+        dest="recovery_password",
+        action="store",
+        metavar="PASSWORD",
+        default=None,
+        type=str,
+        help=("recovery password to unlock the source file."),
+    )
 
-  argument_parser.add_argument(
-      "-s", "--startup-key", "--startup_key", dest="startup_key",
-      action="store", metavar="PATH", default=None, type=str, help=(
-          "path of the file containing the startup key to unlock the source "
-          "file."))
+    argument_parser.add_argument(
+        "-s",
+        "--startup-key",
+        "--startup_key",
+        dest="startup_key",
+        action="store",
+        metavar="PATH",
+        default=None,
+        type=str,
+        help=(
+            "path of the file containing the startup key to unlock the source " "file."
+        ),
+    )
 
-  argument_parser.add_argument(
-      "source", nargs="?", action="store", metavar="PATH",
-      default=None, help="path of the source file.")
+    argument_parser.add_argument(
+        "source",
+        nargs="?",
+        action="store",
+        metavar="PATH",
+        default=None,
+        help="path of the source file.",
+    )
 
-  options, unknown_options = argument_parser.parse_known_args()
-  unknown_options.insert(0, sys.argv[0])
+    options, unknown_options = argument_parser.parse_known_args()
+    unknown_options.insert(0, sys.argv[0])
 
-  setattr(unittest, "offset", options.offset)
-  setattr(unittest, "password", options.password)
-  setattr(unittest, "recovery_password", options.recovery_password)
-  setattr(unittest, "startup_key", options.startup_key)
-  setattr(unittest, "source", options.source)
+    setattr(unittest, "offset", options.offset)
+    setattr(unittest, "password", options.password)
+    setattr(unittest, "recovery_password", options.recovery_password)
+    setattr(unittest, "startup_key", options.startup_key)
+    setattr(unittest, "source", options.source)
 
-  unittest.main(argv=unknown_options, verbosity=2)
+    unittest.main(argv=unknown_options, verbosity=2)
