@@ -153,6 +153,7 @@ int libbde_eow_descriptor_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit           = 0;
 	uint32_t value_32bit           = 0;
+	uint16_t value_16bit           = 0;
 #endif
 
 	if( eow_descriptor == NULL )
@@ -255,13 +256,13 @@ int libbde_eow_descriptor_read_data(
 		 function,
 		 header_size );
 
-		byte_stream_copy_to_uint32_little_endian(
+		byte_stream_copy_to_uint16_little_endian(
 		 ( (bde_eow_descriptor_t *) data )->data_size,
-		 value_32bit );
+		 value_16bit );
 		libcnotify_printf(
-		 "%s: data size\t\t\t\t: %" PRIu32 "\n",
+		 "%s: data size\t\t\t\t: %" PRIu16 "\n",
 		 function,
-		 value_32bit );
+		 value_16bit );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (bde_eow_descriptor_t *) data )->logical_sector_size,

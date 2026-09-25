@@ -762,7 +762,8 @@ int libbde_volume_header_read_data(
 			return( -1 );
 		}
 	}
-	if( total_number_of_sectors != 0 )
+	if( ( total_number_of_sectors != 0 )
+	 && ( volume_header->bytes_per_sector != 0 ) )
 	{
 		if( total_number_of_sectors > ( (uint64_t) INT64_MAX / volume_header->bytes_per_sector ) )
 		{
