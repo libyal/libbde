@@ -10,34 +10,34 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'clang'
           configure_options: ''
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
-        - os: ubuntu-24.04-arm
+        - os: ubuntu-26.04-arm
           compiler: 'clang'
           configure_options: ''
-        - os: ubuntu-24.04-arm
+        - os: ubuntu-26.04-arm
           compiler: 'gcc'
           configure_options: ''
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--with-pthread=no'
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-wide-character-type'
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--with-openssl=no'
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--disable-openssl-evp-cipher --disable-openssl-evp-md'
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-openssl-evp-cipher --enable-openssl-evp-md'
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--disable-multi-threading-support --enable-static-executables'
     steps:
@@ -65,7 +65,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
     steps:
@@ -93,7 +93,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
     steps:
@@ -121,7 +121,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
     steps:
@@ -149,7 +149,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-python'
           python_version: ''
@@ -180,7 +180,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
     steps:
@@ -205,10 +205,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: ''
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-wide-character-type'
     steps:
